@@ -1,0 +1,27 @@
+@import "tailwindcss";
+
+@theme{
+  --color-yellow: #FFE300;
+  --color-orange: #FC8A06;
+  --color-dark-orange: #F27A1A;
+  --color-light-orange: #FF6000;
+  --color-dark-blue: #0D1A4C;
+  --color-white: #FFFFFF;
+  --color-light-gray: #F5F5F5;
+  --color-dark: #03081F;
+  --color-light: #FAFAFA;
+  --color-gray : #D9D9D9;
+ 
+}
+
+:root {
+  --font-display: 'Poppins', sans-serif;
+}
+
+.custom-font {
+  font-family: var(--font-display);
+}
+.yellow-icon{
+  color: var(--color-yellow);
+  
+}
