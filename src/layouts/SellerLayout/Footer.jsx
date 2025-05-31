@@ -1,3 +1,4 @@
+
 import {Link} from 'react-router-dom';
 import Logo from '../../assets/png/Logo2.png';
 import GooglePlay from '../../assets/svg/playstore.svg';
@@ -10,9 +11,9 @@ import { FaLinkedin } from "react-icons/fa6";
 const Footer = () => {
   return (
     <footer className="bg-[var(--color-gray)] pt-8 text-sm custom-font">
-
+     
       {/* Üst Bölüm */}
-      <div className="min-w-8xl mx-auto px-10 grid grid-cols-2 md:grid-cols-4 gap-14">
+      <div className="max-w-8xl px-6 grid grid-cols-1 md:grid-cols-4 gap-14">
 
         {/* Sol - Logo ve Uygulama Linkleri */}
         <div>
@@ -68,7 +69,7 @@ const Footer = () => {
 
       {/* Alt Çizgi ve Alt Bilgi */}
       <div className="bg-[#0e1229] w-full text-white mt-10 py-4 text-sm">
-        <div className="min-w-6xl mx-auto px-10 flex flex-col md:flex-row justify-between items-center">
+        <div className="max-w-8xl px-6 flex flex-col md:flex-row justify-between items-center text-center md:text-left">
           <p> @2025 Sanayice. Tüm hakları saklıdır</p>
           <div className="flex space-x-8 mt-2 md:mt-0">
             <Link to="#">Gizlilik Politikası</Link>
@@ -79,9 +80,6 @@ const Footer = () => {
         </div>
       </div>
     </footer>
-
-
   )
 }
-
 export default Footer;

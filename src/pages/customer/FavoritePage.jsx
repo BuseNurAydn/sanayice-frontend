@@ -1,6 +1,3 @@
-import React from "react";
-import Header from "../../components/Header";
-import Footer from "./../../layouts/SellerLayout/Footer";
 
 const FAVORITE_PRODUCTS = [
   {
@@ -65,9 +62,7 @@ const renderStars = (rating) => {
 
 const FavoritePage = () => {
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-br from-gray-50 to-gray-100">
-      <Header />
-      
+    <div className="bg-gradient-to-br from-gray-50 to-gray-100">
       <main className="flex-1 container mx-auto px-6 py-12">
         {/* Başlık Bölümü */}
         <div className="text-center mb-12">
@@ -190,8 +185,6 @@ const FavoritePage = () => {
           </div>
         )}
       </main>
-      
-      <Footer />
     </div>
   );
 };

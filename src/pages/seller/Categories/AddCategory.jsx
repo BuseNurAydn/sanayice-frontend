@@ -1,16 +1,17 @@
-import React, { useState } from 'react';
+import {useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AdminText from '../../../shared/Text/AdminText';
 
 const AddCategory = () => {
-  const [categoryName, setCategoryName] = useState('');
-  const [description, setDescription] = useState('');
-  const [image, setImage] = useState(null);
-  const [previewImage, setImagePreview] = useState(null);
-  const [imageFile, setImageFile] = useState(null);
-  const [fileName, setFileName] = useState('');
+//const [image, setImage] = useState(null);
+//const [previewImage, setImagePreview] = useState(null);
+//const [imageFile, setImageFile] = useState(null);
+//const [fileName, setFileName] = useState('');
   const navigate = useNavigate();
-
+  const [name, setName] = useState('');
+  const [description, setDescription] = useState('');
+  const [imageUrl, setImageUrl] = useState('');
+{/*
   const handleImageChange = (e) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -30,31 +31,42 @@ const AddCategory = () => {
     setImagePreview('');
     setImage(null);
   };
-
-  const handleSubmit = (e) => {
+ */}
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const formData = new FormData();
-    formData.append('name', categoryName);
-    formData.append('description', description);
-    formData.append('image', image);
+     const newCategory = {
+      name: name,
+      description: description,
+      imageUrl: imageUrl,
+    };
 
-    console.log('Kategori eklendi:', { categoryName, description, image });
+   try {
+      const token = localStorage.getItem('token');  // veya sessionStorage
 
-    // Form alanlarını temizle
-    setCategoryName('');
-    setDescription('');
-    setImage(null);
-    setImagePreview(null);
-    setFileName('');
+      const response = await fetch('/api/managers/categories', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(newCategory),
+      });
 
-    navigate('/seller/categories');
+      if (!response.ok) {
+        throw new Error('Kategori eklenemedi');
+      }
+
+      navigate('/seller/categories');
+    } catch (error) {
+      console.error('Kategori eklenirken hata oluştu:', error);
+    }
   };
 
   return (
     <div className="min-h-screen md:w-2/3">
       <AdminText>Kategori Ekle</AdminText>
-
+{/** 
       {previewImage && (
         <div className="relative w-40 h-40 my-4">
           <img src={previewImage} alt="Ürün Görseli" className="w-full h-full object-cover rounded border"/>
@@ -71,14 +83,11 @@ const AddCategory = () => {
           {fileName && <span className="text-gray-600 text-sm italic truncate max-w-xs">{fileName}</span>}
         </div>
       </div>
-
-      <form onSubmit={handleSubmit} className="space-y-4">
+*/}
+      <form onSubmit={handleSubmit}  className="space-y-4">
         <div>
           <label className="block mb-1 font-medium">Kategori Adı</label>
-          <input
-            type="text"
-            value={categoryName}
-            onChange={(e) => setCategoryName(e.target.value)}
+          <input type="text" id='name' value={name} onChange={(e) => setName(e.target.value)}
             className="w-full border border-gray-300 rounded px-3 py-2 outline-none"
             required
           />
@@ -86,18 +95,18 @@ const AddCategory = () => {
 
         <div>
           <label className="block mb-1 font-medium">Kategori Açıklaması</label>
-          <textarea
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            rows="4"
-            className="w-full border border-gray-300 rounded px-3 py-2 outline-none"
+          <textarea id='description' value={description} onChange={(e) => setDescription(e.target.value)}
+            rows="4" className="w-full border border-gray-300 rounded px-3 py-2 outline-none"/>
+        </div>
+         <div>
+          <label className="block mb-1 font-medium">Resim Ekle</label>
+          <input id='imageUrl' value={imageUrl} onChange={(e) => setImageUrl(e.target.value)} 
+          placeholder="https://example.com/resim.jpg" className="w-full border border-gray-300 rounded px-3 py-2 outline-none"
           />
         </div>
 
         <div className="text-right">
-          <button
-            type="submit"
-            className="bg-[var(--color-dark-orange)] text-white px-4 py-2 rounded transition"
+          <button type="submit" className="bg-[var(--color-dark-orange)] text-white px-4 py-2 rounded transition"
           >
             Kaydet
           </button>
@@ -106,5 +115,4 @@ const AddCategory = () => {
     </div>
   );
 };
-
 export default AddCategory;

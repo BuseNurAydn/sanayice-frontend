@@ -28,6 +28,8 @@ const SignUp = () => {
         acceptTerms: false,
         allowMarketing: false,
     });
+    const [message, setMessage] = useState("");
+    const [messageType, setMessageType] = useState("info"); // "success" | "error"
 
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
@@ -52,7 +54,14 @@ const SignUp = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setMessage('');
+        setMessageType('info');
 
+        if (formData.password !== formData.confirmPassword) {
+            setMessage("Şifreler eşleşmiyor.");
+            setMessageType("error");
+            return;
+        };
         const payload = {
             name: formData.name,
             lastname: formData.lastname,
@@ -77,32 +86,44 @@ const SignUp = () => {
                 body: JSON.stringify(payload),
             });
             const data = await response.json();
-
             if (!response.ok) {
-                console.error("Kayıt hatası:", data);
-                alert(data.message || 'Kayıt sırasında hata oluştu.');
+                setMessage(data.message || 'Kayıt sırasında hata oluştu.');
+                setMessageType('error');
                 return;
             }
 
-            alert('Kayıt başarılı!');
-            navigate('/auth/login');
+            setMessage('Kayıt başarılı! Giriş sayfasına yönlendiriliyorsunuz...');
+            setMessageType('success');
 
-            console.log("Kayıt olunan rol:", formData.role);
+            // 1500 saniye sonra yönlendirme
+            setTimeout(() => {
+                navigate('/auth/login');
+            }, 1500);
 
-            // Redux Toolkit'e token ve kullanıcıyı kaydet
+            // Redux Toolkit'e token ve kullanıcıyı kaydettim
             dispatch(setCredentials({ token: data.token, user: data.user }));
 
         } catch (error) {
-            console.error('Kayıt hatası:', error);
-            alert('İstek gönderilirken hata oluştu.');
+            console.error('Fetch error:', error);
+            setMessage('İstek gönderilirken bir hata oluştu.');
+            setMessageType('error')
         }
+    };
+    const messageStyles = {
+        success: "text-green-800",
+        error: "text-red-800",
+        info: "text-yellow-800"
     };
 
     return (
         <AuthLayout>
-
             <form onSubmit={handleSubmit} className="space-y-6 flex flex-col p-6">
-
+                {/* mesaj kutusu */}
+                {message && (
+                    <div className={`text-sm mb-2 ${messageStyles[messageType]}`}>
+                        {message}
+                    </div>
+                )}
                 <div className="flex space-x-8">
                     <Input type="text" name="name" placeholder="Ad" value={formData.name} onChange={handleChange} className="w-1/2" />
                     <Input type="text" name="lastname" placeholder="Soyad" value={formData.lastname} onChange={handleChange} className="w-1/2" />
@@ -118,7 +139,7 @@ const SignUp = () => {
                 </div>
                 <Input type="password" name="password" placeholder="Şifre" value={formData.password} onChange={handleChange} />
                 <Input type="password" name="confirmPassword" placeholder="Şifreyi Tekrar Girin"
-                 value={formData.confirmPassword} onChange={handleChange}
+                    value={formData.confirmPassword} onChange={handleChange}
                 />
                 <div className="flex space-x-8">
                     <Input type="text" name="companyName" placeholder="Firma Adı" value={formData.companyName} onChange={handleChange} className="w-1/2" />

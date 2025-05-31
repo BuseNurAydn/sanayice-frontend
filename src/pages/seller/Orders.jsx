@@ -152,8 +152,8 @@ const Orders = () => {
   };
 
   return (
-    <div className="min-h-screen py-8 px-4 bg-[var(--color-light)]">
-      <div className="max-w-7xl mx-auto">
+    <div className="min-h-screen">
+      <div>
         <AdminText>Siparişler</AdminText>
 
         {/* İstatistik Kartları */}

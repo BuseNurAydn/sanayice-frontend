@@ -12,8 +12,6 @@ import { useDispatch } from 'react-redux';
 import { setCredentials } from '../../../store/authSlice';
 
 const Login = () => {
-
-
     const [loginData, setLoginData] = useState({
         email: '',
         password: '',
@@ -21,6 +19,9 @@ const Login = () => {
 
     const navigate = useNavigate();
     const dispatch = useDispatch();
+    const [errors, setErrors] = useState({});
+    const [successMessage, setSuccessMessage] = useState('');
+    const [isPhoneLogin, setIsPhoneLogin] = useState(false);
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
@@ -28,12 +29,11 @@ const Login = () => {
             ...prev,
             [name]: value,
         }));
+        setErrors((prev) => ({ ...prev, [name]: '' })); // Hata temizle
+        setSuccessMessage('');
     };
 
-    const [isPhoneLogin, setIsPhoneLogin] = useState(false);
-
     const toggleLoginMethod = () => setIsPhoneLogin((prev) => !prev);
-
 
     const handleLogin = async (e) => {
         e.preventDefault();
@@ -47,15 +47,22 @@ const Login = () => {
                 body: JSON.stringify(loginData)
             });
 
-            if (!response.ok) {
-                const errorData = await response.json();
-                alert(errorData.message || 'Giriş başarısız!');
-                return;
-            }
             const data = await response.json();
             console.log(data);
 
-            // Kullanıcı ve token bilgilerini redux store'a gönder
+            if (!response.ok) {
+                if (data.errors) {
+                    setErrors(data.errors);
+                } else {
+                    setErrors({ general: data.message || 'Giriş başarısız!' });
+                }
+                return;
+            }
+            // Giriş başarılı mesajı
+            setSuccessMessage('Giriş başarılı! Yönlendiriliyorsunuz...');
+            setErrors({});
+
+            // Kullanıcı ve token bilgilerini redux toolkite'e kaydettim
             dispatch(setCredentials({
                 user: {
                     id: data.id,
@@ -69,28 +76,47 @@ const Login = () => {
             localStorage.setItem('token', data.token);
             console.log(data.roles[0]);
 
-            //Role göre yönlendirme
-            if (data.roles[0] == 'ROLE_SELLER') {
-                navigate('/seller/dashboard');
-                console.log('seller')
-            } else if (data.roles[0] == 'ROLE_CUSTOMER') {
-                navigate('/');
-            }
-            else {
-                navigate('/seller/categories')
-            }
-            alert('Giriş başarılı!');
+            setTimeout(() => {
+                //Role göre yönlendirme
+                if (data.roles[0] == 'ROLE_SELLER') {
+                    navigate('/seller/dashboard');
+                } else if (data.roles[0] == 'ROLE_CUSTOMER') {
+                    navigate('/');
+                }
+                else {
+                    navigate('/seller/categories')
+                }
+            }, 1500); // 1.5 saniye bekleyip yönlendir
+
         } catch (error) {
             console.error('Login error:', error);
-            alert('Sunucu hatası. Giriş yapılamadı.');
+            setErrors({ general: 'Sunucu hatası. Giriş yapılamadı.' });
         }
     };
     const renderEmailLogin = () => (
         <>
+
+            {/* Genel Hata Mesajı */}
+            {errors.general && (
+                <div className="text-red-500 text-sm mb-2">{errors.general}</div>
+            )}
+
+            {/* Başarı mesajı */}
+            {successMessage && (
+                <div className="text-green-600 text-sm mb-2">{successMessage}</div>
+            )}
+
             {/* E-Posta Girişi */}
             <Input type="email" placeholder="E-posta adresi" name="email" value={loginData.email} onChange={handleInputChange} />
+            {errors.email && (
+                <p className="text-red-500 text-sm mt-1">{errors.email}</p>
+            )}
+
             <Input type="password" placeholder="Şifre" className="mt-4" name="password" value={loginData.password}
                 onChange={handleInputChange} />
+            {errors.password && (
+                <p className="text-red-500 text-sm mt-1">{errors.password}</p>
+            )}
 
             <a href="/forgot-password" className="custom-font font-medium text-[var(--color-light-orange)]">
                 Şifremi Unuttum

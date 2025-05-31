@@ -1,12 +1,22 @@
-import React from "react";
 import { useNavigate } from "react-router-dom";
+import { useSelector } from 'react-redux';
 import Logo from "../../src/assets/png/Logo2.png";
+import { FaShoppingCart } from "react-icons/fa";
+import AccountMenu from "../pages/customer/AccountPage/AccountMenu";
 
 const Header = ({ searchQuery, setSearchQuery }) => {
   const navigate = useNavigate();
 
+   const cartItems = useSelector((state) => state.cart.items);
+   const totalQuantity = cartItems.reduce(
+    (total, item) => total + item.quantity,
+    0
+  );
+
   return (
-    <header className="bg-white shadow-sm px-6 py-4 flex items-center justify-between sticky top-0 z-30">
+    <header className="bg-white shadow-sm py-4 sticky top-0 z-30">
+       <div className="container mx-auto px-0 2xl:px-30 flex items-center justify-between">
+      
         <div className="flex items-center gap-3">
         <img
             src={Logo}
@@ -57,16 +67,17 @@ const Header = ({ searchQuery, setSearchQuery }) => {
           <span className="absolute -top-1 -right-1 bg-pink-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">2</span>
         </button>
 
-        <button className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-xl font-semibold transition-colors duration-200 transform hover:scale-105">
-          Sepetim
+        <button onClick={() => navigate('/cart')} className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-xl font-semibold transition-colors duration-200 transform hover:scale-105 relative flex flex-row space-x-2">
+        <FaShoppingCart size={24} className="mr-2" /> Sepetim
+        {totalQuantity > 0 && (
+          <span className="absolute -top-1 -right-2 bg-red-500 text-white text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full">
+            {totalQuantity}
+          </span>
+        )}
         </button>
-        <button
-            className="bg-black hover:bg-gray-800 text-white px-6 py-3 rounded-xl font-semibold transition-colors duration-200"
-            onClick={() => navigate("/auth/login")}
-            >
-            Giriş / Kayıt
-            </button>
+        <div> <AccountMenu /> </div>
       </div>
+    </div>
     </header>
   );
 };
