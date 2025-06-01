@@ -33,6 +33,7 @@ function App() {
 
         {/* Giriş ve kayıt sayfaları */}
         <Route path="/auth/*" element={<AuthRoutes />}/>
+
           
       </Routes>
     </Router>

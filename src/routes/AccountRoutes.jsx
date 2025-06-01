@@ -5,6 +5,7 @@ import Reviews from "../pages/customer/AccountPage/Reviews";
 import Addresses from "../pages/customer/AccountPage/Addresses";
 
 
+
 export const accountRoutes = (
   <Route path="account" element={<Account />}>
     <Route path="orders" element={<Orders />} />

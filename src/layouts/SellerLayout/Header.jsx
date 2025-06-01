@@ -12,7 +12,7 @@ const Header = () => {
       </Link>
       <div className="flex flex-row space-x-1 items-center pr-2">
        <Link to="#" className={iconStyle}><BsBellFill /></Link> 
-       <Link to="/seller/profile" className={iconStyle}><FaUser /></Link>
+       <Link to="/seller/seller_profile" className={iconStyle}><FaUser /></Link>
       </div>
     </header>
   )

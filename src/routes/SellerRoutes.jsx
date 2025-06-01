@@ -6,8 +6,10 @@ import EditProduct from '../pages/seller/Products/EditProduct'
 import Orders from '../pages/seller/Orders';
 import SellerLayout from '../layouts/SellerLayout/SellerLayout';
 import Categories from '../pages/seller/Categories/Categories';
+import Store from '../pages/seller/Store';
 import AddCategory from '../pages/seller/Categories/AddCategory';
 import RoleProtectedRoute from '../components/RoleProtectedRoute';
+import SellerProfile from '../pages/seller/SellerProfile';
 
 const SellerRoutes = () => {
     return (
@@ -26,6 +28,14 @@ const SellerRoutes = () => {
                     element={
                         <RoleProtectedRoute allowedRoles={['ROLE_SELLER']}>
                             <Dashboard />
+                        </RoleProtectedRoute>
+                    }
+                />
+                <Route
+                    path="store"
+                    element={
+                        <RoleProtectedRoute allowedRoles={['ROLE_SELLER']}>
+                            <Store />
                         </RoleProtectedRoute>
                     }
                 />
@@ -58,6 +68,14 @@ const SellerRoutes = () => {
                     element={
                         <RoleProtectedRoute allowedRoles={['ROLE_SELLER']}>
                             <Orders />
+                        </RoleProtectedRoute>
+                    }
+                />
+                <Route
+                    path="seller_profile"
+                    element={
+                        <RoleProtectedRoute allowedRoles={['ROLE_SELLER']}>
+                            <SellerProfile />
                         </RoleProtectedRoute>
                     }
                 />

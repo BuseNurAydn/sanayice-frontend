@@ -8,12 +8,19 @@ import { BiSolidCategory } from "react-icons/bi";
 import { FaPlus } from "react-icons/fa6";
 import { GiHamburgerMenu } from "react-icons/gi";
 import { useSelector } from "react-redux";
+import { MdStorefront } from "react-icons/md";
+
 
 const menuItems = [
   {
     label: "Satış Yönetim Paneli",
     to: "/seller/dashboard",
     icon: <BsFileBarGraphFill className="w-6 h-6" />,
+  },
+  {
+    label: "Mağazam",
+    to: "/seller/store",
+    icon: <MdStorefront className="w-6 h-6" />,
   },
   {
     label: "Siparişler",

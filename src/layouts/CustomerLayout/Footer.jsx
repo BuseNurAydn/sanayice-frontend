@@ -31,10 +31,10 @@ const Footer = () => {
           <div className="flex items-center">
             <input
               type="email"
-              placeholder="youremail@gmail.com"
+              placeholder="keremyilmazky06@gmail.com"
               className="flex-1 py-3 rounded-l-full bg-[var(--color-gray)] outline-none"
             />
-            <button className="bg-orange-500 text-white py-3 px-6 rounded-full">Abone</button>
+            
           </div>
           <p className="text-[10px] mt-1">Spam göndermeyeceğiz, e-posta politikamızı okuyun</p>
           <div className="flex space-x-3 mt-3 text-xl">
@@ -50,19 +50,14 @@ const Footer = () => {
           <h3 className="font-bold mb-2 text-[var(--color-dark)]">Kurumsal</h3>
           <ul className="space-y-4 text-sm underline">
             <li><Link to="#">Hakkımızda</Link></li>
-            <li><Link to="#">Bilgi Güvenliği Politikası</Link></li>
-            <li><Link to="#">Kişisel verilerin Korunması</Link></li>
-            <li><Link to="#">İletişim</Link></li>
+            <li><Link to="/contact">İletişim</Link></li>
           </ul>
         </div>
 
         <div>
           <h3 className="font-bold mb-2 text-[var(--color-dark)]">Önemli Linkler</h3>
           <ul className="space-y-4 text-sm underline">
-            <li><Link to="#">Yardım Alın</Link></li>
-            <li><Link to="#">Ödeme Seçenekleri</Link></li>
             <li><Link to="#">Satıcı Olmak İstiyorum</Link></li>
-            <li><Link to="#">İşletme Hesabı Oluşturun</Link></li>
           </ul>
         </div>
       </div>
@@ -74,8 +69,6 @@ const Footer = () => {
           <div className="flex space-x-8 mt-2 md:mt-0">
             <Link to="#">Gizlilik Politikası</Link>
             <Link to="#">Şartlar</Link>
-            <Link to="#">Fiyatlandırma</Link>
-            <Link to="#">Kişisel bilgilerimi paylaşmayın</Link>
           </div>
         </div>
       </div>
