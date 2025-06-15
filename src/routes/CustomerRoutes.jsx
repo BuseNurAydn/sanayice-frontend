@@ -6,8 +6,10 @@ import ElectronicPage from '../pages/customer/ElectronicProductsPage';
 import FavoritePage from '../pages/customer/FavoritePage'; 
 import CartPage from '../pages/customer/CartPage';
 import Contact from '../pages/public/Contact';
+import AboutUs from '../pages/public/AboutUs';
 import { accountRoutes } from "../routes/AccountRoutes";
 import CheckoutPage from '../pages/customer/CheckoutPage';
+import Profile from '../pages/customer/AccountPage/Profile';
 
 const CustomerRoutes = () => {
     return (
@@ -20,6 +22,8 @@ const CustomerRoutes = () => {
                 <Route path="cart" element={<CartPage />} />
                 <Route path="contact" element={<Contact />}></Route>
                 <Route path="checkout" element={<CheckoutPage />}></Route>
+                <Route path="profile" element={<Profile />} />
+                <Route path="about_us" element={<AboutUs />} />
             {accountRoutes}
             </Route> 
             

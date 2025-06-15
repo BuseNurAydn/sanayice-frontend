@@ -49,7 +49,7 @@ const Footer = () => {
         <div>
           <h3 className="font-bold mb-2 text-[var(--color-dark)]">Kurumsal</h3>
           <ul className="space-y-4 text-sm underline">
-            <li><Link to="#">Hakkımızda</Link></li>
+            <li><Link to="/about_us">Hakkımızda</Link></li>
             <li><Link to="/contact">İletişim</Link></li>
           </ul>
         </div>
