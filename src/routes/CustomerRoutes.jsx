@@ -7,6 +7,7 @@ import FavoritePage from '../pages/customer/FavoritePage';
 import CartPage from '../pages/customer/CartPage';
 import Contact from '../pages/public/Contact';
 import { accountRoutes } from "../routes/AccountRoutes";
+import CheckoutPage from '../pages/customer/CheckoutPage';
 
 const CustomerRoutes = () => {
     return (
@@ -18,6 +19,7 @@ const CustomerRoutes = () => {
                 <Route path="electronic" element={<ElectronicPage />} />
                 <Route path="cart" element={<CartPage />} />
                 <Route path="contact" element={<Contact />}></Route>
+                <Route path="checkout" element={<CheckoutPage />}></Route>
             {accountRoutes}
             </Route> 
             

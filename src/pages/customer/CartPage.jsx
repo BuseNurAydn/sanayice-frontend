@@ -13,7 +13,8 @@ const CartPage = () => {
     cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
 
   const handleCheckout = () => {
-    //ödeme sayfasına yönlendirme
+    // Checkout sayfasına yönlendirme
+    navigate("/checkout");
   };
 
   const handleContinueShopping = () => {
@@ -124,4 +125,3 @@ const CartPage = () => {
 };
 
 export default CartPage;
-
