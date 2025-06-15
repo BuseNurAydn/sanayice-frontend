@@ -1,60 +1,74 @@
 import { createSlice } from '@reduxjs/toolkit';
-
-const initialState = {
-  items: [], // her item: { id, name, price, quantity, image }
-};
+import { addToCart, fetchCart, removeCart, clearCart,changeQuantity } from '../services/cartService';
 
 const cartSlice = createSlice({
   name: 'cart',
-  initialState,
+  initialState: {
+    items: [], // [{ productId, name, price, quantity }]
+    status: 'idle',
+    error: null,
+  },
   reducers: {
-    addToCart(state, action) {
-      const product = action.payload;
-      const existingItem = state.items.find(item => item.id === product.id);
-      if (existingItem) {
-        existingItem.quantity += 1;
-      } else {
-        state.items.push({ ...product, quantity: 1 });
-      }
-    },
-    incrementQuantity(state, action) {
-      const id = action.payload;
-      const item = state.items.find(item => item.id === id);
-      if (item) {
-        item.quantity += 1;
-      }
-    },
-    changeQuantity(state, action) {
-      const { id, delta } = action.payload;
-      const product = state.items.find(item => item.id === id);
-      if (product) {
-        product.quantity += delta;
-        if (product.quantity < 1) {
-          state.items = state.items.filter(item => item.id !== id);
-        }
-      }
-    },
-    decrementQuantity(state, action) {
-      const id = action.payload;
-      const item = state.items.find(item => item.id === id);
-      if (item && item.quantity > 1) {
-        item.quantity -= 1;
-      } else if (item && item.quantity === 1) {
-        // Adet 1 ise ürün tamamen silinir
-        state.items = state.items.filter(item => item.id !== id);
-      }
-    },
-    removeFromCart(state, action) {
-      const id = action.payload;
-      state.items = state.items.filter(item => item.id !== id);
-    },
-    clearCart(state) {
+    clear: (state) => {
       state.items = [];
-    }
-  }
+    },
+  },
+  extraReducers: (builder) => {
+    builder
+      .addCase(fetchCart.pending, (state) => {
+        state.status = 'loading';
+      })
+      .addCase(fetchCart.fulfilled, (state, action) => {
+        state.status = 'succeeded';
+        state.items = action.payload.items; // backend'den gelen ürünlerle doldur
+        const itemsArray = Array.isArray(action.payload)
+          ? action.payload
+          : action.payload.items || [];
+
+        state.items = itemsArray.sort((a, b) => a.id - b.id);
+      })
+      .addCase(fetchCart.rejected, (state, action) => {
+        state.status = 'failed';
+        state.error = action.payload;
+      })
+      .addCase(addToCart.pending, (state) => {
+        state.status = 'loading';
+      })
+      .addCase(addToCart.fulfilled, (state, action) => {
+        state.status = 'succeeded';
+
+        const incoming = action.payload;
+        const existingItem = state.items.find(item => item.productId === incoming.productId);
+
+        if (existingItem) {
+          existingItem.quantity = incoming.quantity;
+        } else {
+          state.items.push({ ...incoming });
+        }
+      })
+      .addCase(addToCart.rejected, (state, action) => {
+        state.status = 'failed';
+        state.error = action.payload?.message || 'Sepete eklenirken hata oluştu';
+      })
+      .addCase(removeCart.fulfilled, (state, action) => {
+        const id = action.payload;
+        state.items = state.items.filter(item => item.id !== id);
+
+      })
+      .addCase(changeQuantity.pending, (state) => {
+       state.status = 'loading';
+      })
+      .addCase(changeQuantity.fulfilled, (state) => {
+        state.status = 'succeeded';
+      })
+      .addCase(changeQuantity.rejected, (state, action) => {
+        state.status = 'failed';
+        state.error = action.payload || "Adet güncelleme hatası";
+      })
+      .addCase(clearCart.fulfilled, (state) => {
+        state.items = [];
+      })
+  },
 });
-
-export const { addToCart, incrementQuantity, changeQuantity, decrementQuantity, removeFromCart, clearCart } = cartSlice.actions;
+export const { clear } = cartSlice.actions;
 export default cartSlice.reducer;
-
-

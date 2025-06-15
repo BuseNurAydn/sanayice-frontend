@@ -1,81 +1,38 @@
-// src/components/Orders.jsx
-import { useState } from "react";
-import { Link } from "react-router-dom";
-import { FaBoxOpen, FaShippingFast, FaTimesCircle, FaUndo } from 'react-icons/fa'; // Yeni ikonlar
+import { useState, useEffect } from "react";
+import { getOrders } from "../../../services/ordersService"; // siparişleri getiren fonksiyon
 
 const Orders = () => {
+  const [orders, setOrders] = useState([]);
   const [activeTab, setActiveTab] = useState("all");
 
   const tabs = [
-    { key: "all", label: "Tüm Siparişler", icon: <FaBoxOpen /> },
-    { key: "ongoing", label: "Devam Edenler", icon: <FaShippingFast /> },
-    { key: "cancelled", label: "İptaller", icon: <FaTimesCircle /> },
-    { key: "returned", label: "İadeler", icon: <FaUndo /> },
+    { key: "all", label: "Tüm Siparişler" },
+    { key: "pending", label: "Beklemede" },
+    { key: "shipped", label: "Kargoya Verildi" },
+    { key: "delivered", label: "Teslim Edildi" },
+    { key: "cancelled", label: "İptal Edildi" },
   ];
 
-  // Sahte sipariş verileri (gerçek uygulamada API'den gelecek)
-  const fakeOrders = [
-    {
-      id: "123456789",
-      date: "2024-05-10",
-      status: "Teslim Edildi",
-      type: "all",
-      product: {
-        name: "Kadın Siyah Sneaker Ayakkabı - Rahat ve Şık",
-        image: "https://via.placeholder.com/100x100?text=Sneaker",
-        price: "749.99 TL"
-      },
-    },
-    {
-      id: "987654321",
-      date: "2024-05-28",
-      status: "Kargoya Verildi",
-      type: "ongoing",
-      product: {
-        name: "Erkek Mavi Polo Yaka T-Shirt - %100 Pamuk",
-        image: "https://via.placeholder.com/100x100?text=T-Shirt",
-        price: "299.00 TL"
-      },
-    },
-    {
-      id: "112233445",
-      date: "2024-05-01",
-      status: "İptal Edildi",
-      type: "cancelled",
-      product: {
-        name: "Bluetooth 5.0 Kablosuz Kulaklık - Gürültü Engelleme",
-        image: "https://via.placeholder.com/100x100?text=Kulaklık",
-        price: "1250.00 TL"
-      },
-    },
-    {
-      id: "667788990",
-      date: "2024-04-15",
-      status: "İade Edildi",
-      type: "returned",
-      product: {
-        name: "15.6 İnç Laptop Çantası - Su Geçirmez Kumaş",
-        image: "https://via.placeholder.com/100x100?text=Laptop+Çantası",
-        price: "450.00 TL"
-      },
-    },
-    {
-      id: "554433221",
-      date: "2024-06-01",
-      status: "Sipariş Onaylandı",
-      type: "ongoing",
-      product: {
-        name: "Akıllı Saat - Kalp Atış Hızı Ölçerli",
-        image: "https://via.placeholder.com/100x100?text=Akıllı+Saat",
-        price: "2499.00 TL"
-      },
-    },
-  ];
+  useEffect(() => {
+    const fetchOrders = async () => {
+      try {
+        const data = await getOrders();
+        setOrders(data);
+      } catch (error) {
+        console.error("Siparişler alınamadı", error);
+      }
+    };
 
+    fetchOrders();
+  }, []);
+
+  // Duruma göre filtrele
   const filteredOrders =
     activeTab === "all"
-      ? fakeOrders
-      : fakeOrders.filter((order) => order.type === activeTab);
+      ? orders
+      : orders.filter((order) =>
+        order.status.toLowerCase() === activeTab.toLowerCase()
+      );
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -103,8 +60,7 @@ const Orders = () => {
           <button
             key={tab.key}
             onClick={() => setActiveTab(tab.key)}
-            className={`flex items-center gap-2 pb-2 text-sm md:text-base font-semibold transition-colors duration-300
-              ${activeTab === tab.key
+            className={`pb-2 text-sm font-semibold transition-colors duration-200 ${activeTab === tab.key
                 ? "text-orange-600 border-b-2 border-orange-600"
                 : "text-gray-500 hover:text-orange-600"
               }`}
@@ -115,52 +71,89 @@ const Orders = () => {
         ))}
       </div>
 
-      {/* Siparişler Listesi */}
-      <div className="space-y-4">
-        {filteredOrders.length > 0 ? (
-          filteredOrders.map((order) => (
-            <div
-              key={order.id}
-              className="border border-gray-200 rounded-lg p-4 flex flex-col md:flex-row justify-between items-start md:items-center bg-white shadow-sm hover:shadow-md transition-shadow duration-200"
-            >
-              <div className="flex flex-col md:flex-row gap-4 items-start md:items-center w-full md:w-3/4">
-                <img
-                  src={order.product.image}
-                  alt={order.product.name}
-                  className="w-24 h-24 object-cover rounded-md border border-gray-100"
-                />
-                <div className="flex-1">
-                  <p className="text-base text-gray-800 font-medium mb-1 break-words">
-                    {order.product.name}
-                  </p>
-                  <p className="text-sm text-gray-500">
-                    Sipariş No: <span className="font-semibold">{order.id}</span>
-                  </p>
-                  <p className="text-sm text-gray-500">
-                    Tarih: {order.date}
-                  </p>
-                  <p className={`text-sm font-bold mt-1 ${getStatusColor(order.status)}`}>
-                    {order.status}
-                  </p>
-                </div>
-              </div>
-              <div className="flex flex-col items-start md:items-end mt-4 md:mt-0 w-full md:w-1/4">
-                <p className="text-lg font-bold text-gray-900 mb-2">{order.product.price}</p>
-                <Link
-                to={`/orders/${order.id}`}
-                className="text-sm text-orange-600 hover:text-orange-800 font-semibold py-2 px-4 rounded-md border border-orange-600 hover:bg-orange-50 transition-colors duration-200"
-                >
-                Detayları Gör
-                </Link>
-
-              </div>
-            </div>
-          ))
-        ) : (
-          <p className="text-base text-gray-500 italic mt-6 p-4 bg-gray-50 rounded-md">
+      {/* Siparişler */}
+      <div className="space-y-6">
+        {filteredOrders.length === 0 && (
+          <p className="text-sm text-gray-500 italic mt-4">
             Bu kategoriye ait sipariş bulunmamaktadır.
           </p>
         )}
+
+        {filteredOrders.map((order) => (
+          <div
+            key={order.id}
+            className="border border-gray-200 rounded-lg p-6 bg-white shadow-sm"
+          >
+            <div className="mb-4">
+              <p className="text-sm text-gray-700 font-semibold">
+                Sipariş No: {order.orderNumber}
+              </p>
+              <p className="text-xs text-gray-500">
+                Sipariş Tarihi: {new Date(order.createdAt).toLocaleDateString()}
+              </p>
+              <p className="text-xs text-gray-500">
+                Durum:{" "}
+                <span className="font-semibold text-green-600">
+                  {order.statusDisplayName}
+                </span>
+              </p>
+              <p className="text-xs text-gray-500">
+                Toplam Tutar: {order.totalAmount.toLocaleString("tr-TR", { style: "currency", currency: "TRY" })}
+              </p>
+              <p className="text-xs text-gray-500">Teslimat Adresi: {order.shippingAddress}</p>
+              <p className="text-xs text-gray-500">Fatura Adresi: {order.billingAddress}</p>
+              {order.customerNotes && (
+                <p className="text-xs text-gray-500">Notlar: {order.customerNotes}</p>
+              )}
+            </div>
+
+            <div className="space-y-3">
+              {order.orderItems.map((item) => (
+                <div
+                  key={item.id}
+                  className="flex items-center justify-between gap-4 border border-gray-100 p-4 rounded-md"
+                >
+                  {/* Ürün görseli + bilgiler */}
+                  <div className="flex items-center gap-4">
+                    <img
+                     src={item.additionalImages?.[0] || "https://via.placeholder.com/80"}
+                      alt={item.productName}
+                      className="w-20 h-20 object-cover rounded"
+                    />
+                    <div>
+                      <p className="font-medium">{item.productName}</p>
+                      <p className="text-xs text-gray-600">
+                        Marka: {item.productBrand} | Model: {item.productModel}
+                      </p>
+                      <p className="text-xs text-gray-600">
+                        Adet: {item.quantity} | Birim Fiyat:{" "}
+                        {item.unitPrice.toLocaleString("tr-TR", {
+                          style: "currency",
+                          currency: "TRY",
+                        })}
+                      </p>
+                      <p className="text-xs text-gray-600 font-semibold">
+                        Toplam:{" "}
+                        {item.totalPrice.toLocaleString("tr-TR", {
+                          style: "currency",
+                          currency: "TRY",
+                        })}
+                      </p>
+                      <p className="text-xs text-gray-600">
+                        Durum: {item.statusDisplayName || item.status}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Sağdaki Detay butonu */}
+                  <button className="text-sm text-orange-600 hover:underline font-semibold">
+                    Detayları Gör
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );

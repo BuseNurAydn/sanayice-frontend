@@ -56,7 +56,7 @@ const SellerRoutes = () => {
                     }
                 />
                 <Route
-                    path="products/edit"
+                    path="products/edit/:id"
                     element={
                         <RoleProtectedRoute allowedRoles={['ROLE_SELLER']}>
                             <EditProduct />

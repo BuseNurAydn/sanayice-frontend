@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Modal from "./Modal";
-import ConfirmDialog from "./ConfirmDialog";
+import ConfirmDialog from "../../../components/ConfirmDialog";
 import { FaChevronDown, FaChevronUp, FaTrash, FaEdit } from "react-icons/fa";
 import { FcPlus } from "react-icons/fc";
 import AdminText from "../../../shared/Text/AdminText";
 import AddButton from "../../../shared/Button/AddButton";
 import SubModal from "./SubModal";
+import {fetchCategories,fetchSubcategories,deleteCategory,updateCategory,saveSubcategory,} from "../../../services/categoryService";
 
 const Categories = () => {
   const [categories, setCategories] = useState([]);
@@ -14,6 +15,12 @@ const Categories = () => {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [deleteId, setDeleteId] = useState(null);
   const [openCategoryId, setOpenCategoryId] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingId, setEditingId] = useState(null);
+  const [isSubModalOpen, setIsSubModalOpen] = useState(false);
+  const [selectedCategoryId, setSelectedCategoryId] = useState(null);
+  const [deleteType, setDeleteType] = useState("category");
+
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
@@ -21,106 +28,52 @@ const Categories = () => {
     description: "",
     imageUrl: "",
   });
-
   const [subFormData, setSubFormData] = useState({
     name: "",
     description: "",
     imageUrl: "",
   });
 
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingId, setEditingId] = useState(null);
-  const [isSubModalOpen, setIsSubModalOpen] = useState(false);
-  const [selectedCategoryId, setSelectedCategoryId] = useState(null);
-  const [deleteType, setDeleteType] = useState("category");
-
-  //Kategorileri listeleme
-  const fetchCategories = async () => {
-    const token = localStorage.getItem("token");
-
+ useEffect(() => {
+  const load = async () => {
     try {
-      const response = await fetch("/api/managers/categories", {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`, // Token'ı burada kullandık
-        },
-      });
+      const cats = await fetchCategories();
+      setCategories(cats);
 
-      if (!response.ok) {
-        throw new Error("Kategoriler alınamadı");
-      }
-
-      const data = await response.json();
-      setCategories(data);
+      const subs = await fetchSubcategories();
+      setSubcategories(subs);
     } catch (error) {
-      console.error("Kategoriler alınırken hata oluştu:", error);
+      console.error(error);
     }
   };
-
-  //Alt kategorileri listeleme
-  const fetchSubcategories = async () => {
-    const token = localStorage.getItem("token");
-
-    try {
-      const response = await fetch("/api/managers/subcategories", {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error("Alt kategoriler alınamadı");
-      }
-
-      const data = await response.json();
-      setSubcategories(data);
-    } catch (error) {
-      console.error("Alt kategoriler alınırken hata oluştu:", error);
-    }
-  };
-  useEffect(() => {
-    fetchCategories();
-    fetchSubcategories();
-  }, []);
+  load();
+}, []);
 
   //Ekleme sayfasına yönlendirme
   const handleAdd = () => {
     navigate("/seller/categories/add"); // Kategori ekleme sayfama yönlendirme
   };
 
-  //Ana kategori ve alt kategoriyi silme
-  const handleDelete = async () => {
-    const token = localStorage.getItem("token");
+  //Silme
+const handleDelete = async () => {
+  try {
+    await deleteCategory(deleteId, deleteType);
+    setConfirmOpen(false);
+    setDeleteId(null);
 
-    const endpoint =
-      deleteType === "subcategory"
-        ? `/api/managers/subcategories/${deleteId}`
-        : `/api/managers/categories/${deleteId}`;
-
-    try {
-      const response = await fetch(endpoint, {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error("Silme işlemi başarısız");
-      }
-
-      deleteType === "subcategory" ? fetchSubcategories() : fetchCategories();
-      setConfirmOpen(false);
-      setDeleteId(null);
-    } catch (error) {
-      console.error("Silme işlemi sırasında hata oluştu:", error);
+    if (deleteType === "subcategory") {
+      const subs = await fetchSubcategories();
+      setSubcategories(subs);
+    } else {
+      const cats = await fetchCategories();
+      setCategories(cats);
     }
-  };
+  } catch (error) {
+    console.error(error);
+  }
+};
 
-  //Kategori Düzenleme İşlemi
+  //Düzenleme
   const handleEdit = (category) => {
     setFormData({
       name: category.name,
@@ -140,33 +93,16 @@ const Categories = () => {
   };
 
   const handleSave = async () => {
-    console.log("Kaydedilen Kategori:", formData, "ID:", editingId);
-    const token = localStorage.getItem("token");
-
-    try {
-      const response = await fetch(`/api/managers/categories/${editingId}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(formData),
-      });
-
-      if (response.ok) {
-        console.log("Güncelleme başarılı");
-        setIsModalOpen(false);
-        setEditingId(null);
-        fetchCategories(); // listeyi yenile
-      } else {
-        const errorData = await response.json();
-        console.error("Güncelleme başarısız:", errorData);
-      }
-    } catch (error) {
-      console.error("Hata oluştu:", error);
-    }
-  };
-
+  try {
+    await updateCategory(editingId, formData);
+    setIsModalOpen(false);
+    setEditingId(null);
+    const cats = await fetchCategories();
+    setCategories(cats);
+  } catch (error) {
+    console.error(error);
+  }
+};
   // Sub Kategori - İnput değişikliklerini dinleme
   const handleSubChange = (e) => {
     const { name, value } = e.target;
@@ -178,50 +114,22 @@ const Categories = () => {
 
   //Ana ve alt kategori ekleme
   const handleSubSave = async () => {
-    const token = localStorage.getItem("token");
-
-    const newSubcategory = {
-      name: subFormData.name,
-      description: subFormData.description,
-      imageUrl: subFormData.imageUrl,
+  try {
+    await saveSubcategory(editingId, {
+      ...subFormData,
       categoryId: selectedCategoryId,
-    };
-
-    console.log("Seçilen Kategori ID:", selectedCategoryId);
-    console.log("Gönderilen Alt Kategori:", newSubcategory);
-
-     try {
-    const url = editingId
-      ? `/api/managers/subcategories/${editingId}`
-      : "/api/managers/subcategories";
-
-    const method = editingId ? "PUT" : "POST";
-
-    const response = await fetch(url, {
-      method,
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify(newSubcategory),
     });
-
-    if (!response.ok) {
-      throw new Error("Alt kategori kaydedilemedi");
-    }
-
-    await fetchSubcategories();
-    await fetchCategories();
-
     setIsSubModalOpen(false);
     setSubFormData({ name: "", description: "", imageUrl: "" });
-    setEditingId(null); // resetle
-
+    setEditingId(null);
+    const subs = await fetchSubcategories();
+    setSubcategories(subs);
+    const cats = await fetchCategories();
+    setCategories(cats);
   } catch (error) {
-    console.error("Alt kategori işlemi hatası:", error);
+    console.error(error);
   }
- };
-
+};
   // Alt kategoriyi düzenleme
   const handleEditSub = (sub) => {
   setSubFormData({
@@ -265,10 +173,7 @@ const Categories = () => {
                 >
                   <FcPlus size={18} />
                 </button>
-                <button
-                  onClick={(e) => { e.stopPropagation(); handleEdit(category); }}
-                  className="text-blue-600 hover:text-blue-800"
-                >
+                <button onClick={(e) => { e.stopPropagation(); handleEdit(category); }} className="text-blue-600 hover:text-blue-800">
                   <FaEdit size={18} />
                 </button>
                 {isModalOpen && (
@@ -322,14 +227,12 @@ const Categories = () => {
                         </div>
                       </li>
                     ))}
-
                 </ul>
               </div>
             )}
           </div>
         ))}
       </div>
-
       {confirmOpen && (
         <ConfirmDialog
           message={`Bu ${deleteType === "subcategory" ? "alt kategoriyi" : "kategoriyi"} silmek istediğinize emin misiniz?`}

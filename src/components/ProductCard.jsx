@@ -2,8 +2,8 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaRegHeart } from "react-icons/fa";
 import { toast } from "react-toastify";
-import { useDispatch } from 'react-redux';
-import { addToCart } from '../store/cartSlice';
+import { useDispatch, useSelector } from 'react-redux';
+import { addToCart } from '../services/cartService';
 
 const ProductCard = ({ product, showDiscount = false }) => {
   const [isFavorited, setIsFavorited] = useState(false);
@@ -11,6 +11,12 @@ const ProductCard = ({ product, showDiscount = false }) => {
   const navigate = useNavigate();
 
   const dispatch = useDispatch();
+  const [quantity, setQuantity] = useState(1);
+  const { loading, error } = useSelector(state => state.cart);
+
+  // Sepete ekleme sırasında butonu disable etmek için state
+  const [adding, setAdding] = useState(false);
+
 
   //detay sayfasına gitme
   const handleClick = () => {
@@ -18,11 +24,19 @@ const ProductCard = ({ product, showDiscount = false }) => {
   };
 
   //sepete ekleme sayfasına
-  const handleAdd = (e) => {
-    e.stopPropagation();          // karta tıklama tetiklenmesin
-    dispatch(addToCart(product)); // redux
-    toast.success("Ürün sepete eklendi! 🎉");
+  const handleAddToCart = async (e) => {
+    e.stopPropagation();
+    setAdding(true);
+    try {
+      dispatch(addToCart({ productId: product.id,quantity: 1 }));
+      toast.success("Ürün sepete eklendi");
+    } catch (err) {
+      toast.error(err || "Ürün eklenemedi");
+    } finally {
+      setAdding(false);
+    }
   };
+
   return (
     <div
       onClick={handleClick}
@@ -40,8 +54,8 @@ const ProductCard = ({ product, showDiscount = false }) => {
 
       <div className="relative mb-3">
         <div className="h-32 w-full rounded-lg mb-3 flex items-center justify-center group-hover:scale-105 transition-transform duration-300">
-          {product.image ? (
-            <img src={product.image} alt={product.name} className="h-full object-contain" />
+          {product.additionalImages  ? (
+            <img  src={product.additionalImages [0]} alt={product.name} className="h-full object-contain" />
           ) : (
             <span className="text-gray-400 text-sm">Ürün Görseli</span>
           )}
@@ -57,10 +71,15 @@ const ProductCard = ({ product, showDiscount = false }) => {
         <span className="text-orange-600 font-bold text-lg">₺{product.price.toLocaleString()}</span>
       </div>
       <button
-        className="mt-3 w-full bg-orange-500 hover:bg-orange-500 text-white py-2 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300 cursor-pointer"
-        onClick={handleAdd}>
-        Sepete Ekle
+        disabled={adding}
+        className="mt-3 w-full bg-orange-500 hover:bg-orange-600 text-white py-2 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300 cursor-pointer"
+        onClick={handleAddToCart}
+      >
+        {adding ? "Ekleniyor..." : "Sepete Ekle"}
       </button>
+
+
+      {error && <p className="text-red-500 mt-2">{error}</p>}
     </div>
   );
 };

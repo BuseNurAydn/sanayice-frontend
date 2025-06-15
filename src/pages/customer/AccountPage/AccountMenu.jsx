@@ -1,11 +1,13 @@
 import { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { logout } from '../../../store/authSlice'
+import { logout } from '../../../store/authSlice';
+import {clearCart} from '../../../services/cartService';
 import { Link, useNavigate } from 'react-router-dom';
 import { FaUser,FaRegUser  } from "react-icons/fa";
 import { BsBasket3, BsChatSquareDots } from "react-icons/bs";
 import { RiCoupon3Line } from "react-icons/ri";
 import { LuLogOut } from "react-icons/lu";
+
 const AccountMenu = () => {
   const user = useSelector((state) => state.auth.user);
   const dispatch = useDispatch();
@@ -16,6 +18,7 @@ const AccountMenu = () => {
   const toggleMenu = () => setOpen(!open);
 
   const handleLogout = () => {
+    dispatch(clearCart());  // Sepeti temizle
     dispatch(logout());
     setOpen(false);
     navigate('/'); // çıkış sonrası anasayfaya yönlendir

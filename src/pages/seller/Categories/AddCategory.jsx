@@ -1,6 +1,7 @@
 import {useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AdminText from '../../../shared/Text/AdminText';
+import { addCategory } from '../../../services/categoryService';
 
 const AddCategory = () => {
 //const [image, setImage] = useState(null);
@@ -42,21 +43,7 @@ const AddCategory = () => {
     };
 
    try {
-      const token = localStorage.getItem('token');  // veya sessionStorage
-
-      const response = await fetch('/api/managers/categories', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(newCategory),
-      });
-
-      if (!response.ok) {
-        throw new Error('Kategori eklenemedi');
-      }
-
+      await addCategory(newCategory);
       navigate('/seller/categories');
     } catch (error) {
       console.error('Kategori eklenirken hata oluştu:', error);

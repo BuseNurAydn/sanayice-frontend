@@ -6,6 +6,7 @@ import OrangeButton from '../../../shared/Button/OrangeButton';
 import { BsExclamationLg } from "react-icons/bs";
 import { BiSolidCoupon } from "react-icons/bi";
 import { useNavigate } from 'react-router-dom';
+import { registerCustomer } from '../../../services/authService';
 
 const SignUp = () => {
   const navigate = useNavigate();
@@ -25,6 +26,7 @@ const SignUp = () => {
 
   const [message, setMessage] = useState("");
   const [messageType, setMessageType] = useState("info"); // "success" | "error"
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const info = 'text-center font-medium custom-font text-[10px] text-black bg-[var(--color-orange)] opacity-80 rounded-lg flex items-center px-1';
 
@@ -49,16 +51,57 @@ const SignUp = () => {
     return '+90' + cleaned;
   };
 
+  const validateEmail = (email) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setMessage('');
     setMessageType('info');
+
+    // Zorunlu alan kontrolü
+    if (
+      !formData.name ||
+      !formData.lastname ||
+      !formData.email ||
+      !formData.phoneNumber ||
+      !formData.password ||
+      !formData.confirmPassword ||
+      !formData.companyName ||
+      !formData.taxId
+    ) {
+      setMessage("Lütfen tüm alanları doldurun.");
+      setMessageType("error");
+      return;
+    }
+    // E-posta doğrulama
+    if (!validateEmail(formData.email)) {
+      setMessage("Geçerli bir e-posta adresi girin.");
+      setMessageType("error");
+      return;
+    }
+    // Telefon numarası uzunluğu kontrolü
+    const formattedPhone = formatPhoneNumber(formData.phoneNumber);
+    if (formattedPhone.length !== 13) {
+      setMessage("Geçerli bir telefon numarası girin.");
+      setMessageType("error");
+      return;
+    }
 
     if (formData.password !== formData.confirmPassword) {
       setMessage("Şifreler eşleşmiyor.");
       setMessageType("error");
       return;
     }
+
+    if (formData.password.length < 6) {
+      setMessage("Şifre en az 6 karakter olmalı.");
+      setMessageType("error");
+      return;
+    }
+    setIsSubmitting(true);
 
     const payload = {
       name: formData.name,
@@ -73,33 +116,24 @@ const SignUp = () => {
     console.log(payload);
 
     try {
-      const response = await fetch('/api/auth/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(payload),
-      });
-      const result = await response.json();
-
-      if (!response.ok) {
-        setMessage(result.message || 'Kayıt sırasında hata oluştu.');
-        setMessageType('error');
-        return;
-      }
+      const data = await registerCustomer(payload);
 
       setMessage('Kayıt başarılı! Giriş sayfasına yönlendiriliyorsunuz..');
       setMessageType('success');
 
-      // 1500 saniye sonra yönlendirme
       setTimeout(() => {
         navigate('/auth/login');
       }, 1500);
 
+      // Redux Toolkit'e token ve kullanıcıyı kaydettim
+      dispatch(setCredentials({ token: data.token, user: data.user }));
+
     } catch (error) {
-      console.error('Fetch error:', error);
-      setMessage('İstek gönderilirken bir hata oluştu.');
+      setMessage(error.message || 'İstek gönderilirken bir hata oluştu.');
       setMessageType('error');
+      setIsSubmitting(false);
+    }finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -156,7 +190,9 @@ const SignUp = () => {
             <span>Kampanyalardan haberdar olmak istiyorum.</span>
           </label>
         </div>
-        <OrangeButton type="submit" className="w-3/4 mx-auto"> Üye Ol </OrangeButton>
+        <OrangeButton type="submit" className="w-3/4 mx-auto" disabled={isSubmitting}>
+         {isSubmitting ? 'Gönderiliyor...' : 'Üye Ol'}
+         </OrangeButton>
       </form>
       <div onClick={handleClick} className="w-full text-center text-base text-white bg-[var(--color-dark-orange)] font-bold p-3 custom-font rounded-b-[2rem] mt-6 cursor-pointer">
         Ürünlerini pazarlamaya ne dersin?<br />
@@ -165,5 +201,4 @@ const SignUp = () => {
     </AuthLayout>
   );
 };
-
 export default SignUp;

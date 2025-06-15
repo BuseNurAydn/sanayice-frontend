@@ -7,11 +7,11 @@ import AccountMenu from "../pages/customer/AccountPage/AccountMenu";
 const Header = ({ searchQuery, setSearchQuery }) => {
   const navigate = useNavigate();
 
+
    const cartItems = useSelector((state) => state.cart.items);
-   const totalQuantity = cartItems.reduce(
-    (total, item) => total + item.quantity,
-    0
-  );
+   const totalQuantity = Array.isArray(cartItems)
+  ? cartItems.reduce((total, item) => total + item.quantity, 0)
+  : 0;
 
   return (
     <header className="bg-white shadow-sm py-4 sticky top-0 z-30">

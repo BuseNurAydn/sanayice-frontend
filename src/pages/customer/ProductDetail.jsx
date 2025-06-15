@@ -1,111 +1,53 @@
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { featuredProducts, discountedProducts, newProducts } from './data/products';
 
-{/**
-const similarProducts = [
-  { name: "Dyson V15", price: 8500, oldPrice: 12000, discount: 30, image: "/products/dyson.png" },
-  { name: "PlayStation Portal", price: 8500, image: "/products/psportal.png", badge: "YENİ" },
-  { name: "Steam Deck OLED", price: 18000, image: "/products/steamdeck.png", badge: "POPÜLER" },
-  { name: "Braun Epilator", price: 800, oldPrice: 1200, discount: 33, image: "/products/braun.png" },
-  { name: "Apple Watch S9", price: 15000, oldPrice: 18000, badge: "YENİ", image: "/products/applewatch.png" },
-  { name: "Karcher Basınçlı Yıkama", price: 2800, oldPrice: 4000, discount: 30, image: "/products/karcher.png" },
-  { name: "Tefal Cookware Set", price: 1200, oldPrice: 1800, discount: 33, image: "/products/tefal.png" },
-];
-
-const DUMMY_PRODUCTS = [
-  {
-    id: "1",
-    name: "iPhone 15 Pro Max",
-    images: [
-      "/products/iphone15pro.png",
-      "/products/iphone15pro2.png",
-      "/products/iphone15pro3.png",
-    ],
-    price: 65000,
-    oldPrice: 75000,
-    badge: "YENİ",
-    discount: 13,
-    stock: 8,
-    brand: "Apple",
-    category: "Akıllı Telefon",
-    sku: "IP15PM-256-BLU",
-    rating: 4.8,
-    reviewCount: 127,
-    description: "Apple'ın en yeni amiral gemisi iPhone 15 Pro Max, gelişmiş A17 Pro çip, profesyonel kamera sistemi ve premium titanium tasarımı ile teknolojinin zirvesini temsil ediyor.",
-    features: [
-      "6.7 inç Super Retina XDR OLED ekran (2796 × 1290)",
-      "A17 Pro çip, 6 çekirdekli CPU ve 6 çekirdekli GPU",
-      "Pro kamera sistemi: 48MP Ana + 12MP Ultra Geniş + 12MP Telefoto",
-      "256GB, 512GB ve 1TB depolama seçenekleri",
-      "USB-C konektör, Face ID, Dynamic Island",
-      "Titanium çerçeve, IP68 su geçirmezlik",
-      "5G bağlantı, MagSafe kablosuz şarj"
-    ],
-    specifications: {
-      "Ekran": "6.7 inç Super Retina XDR OLED",
-      "İşlemci": "Apple A17 Pro",
-      "RAM": "8GB",
-      "Depolama": "256GB",
-      "Kamera": "48MP + 12MP + 12MP",
-      "Batarya": "4441 mAh",
-      "İşletim Sistemi": "iOS 17"
-    },
-    reviews: [
-      { 
-        user: "Mehmet Demir", 
-        rating: 5, 
-        comment: "Gerçekten harika bir telefon! Kamera kalitesi ve performans mükemmel.",
-        date: "15 Mart 2024"
-      },
-      { 
-        user: "Ayşe Kaya", 
-        rating: 4, 
-        comment: "Fiyatı yüksek ama kalite buna değer. Özellikle fotoğraf çekme deneyimi çok iyi.",
-        date: "8 Mart 2024"
-      },
-      { 
-        user: "Can Özkan", 
-        rating: 5, 
-        comment: "A17 Pro çip gerçekten çok hızlı. Oyun performansı ve günlük kullanımda hiç sorun yok.",
-        date: "2 Mart 2024"
-      }
-    ],
-    shipping: {
-      free: true,
-      fastDelivery: true,
-      estimatedDays: "1-2 iş günü"
-    },
-    warranty: "2 yıl Apple garantisi",
-    returnPolicy: "14 gün ücretsiz iade"
-  }
-];
- */}
 const ProductDetail = () => {
   const { id } = useParams();
-  //const product = DUMMY_PRODUCTS.find(p => p.id === id) || DUMMY_PRODUCTS[0];
   const [sliderIndex, setSliderIndex] = useState(0);
   const [favorite, setFavorite] = useState(false);
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState("description");
   const [product, setProduct] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+
+  // imageUrl ve additionalImages birleştirdim
+  const images = [
+    ...(product?.imageUrl ? [product.imageUrl] : []),
+    ...(product?.additionalImages || []),
+  ];
 
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
 
   useEffect(() => {
-    const allProducts = [
-      ...featuredProducts,
-      ...discountedProducts,
-      ...newProducts,
-    ];
+    const fetchProduct = async () => {
+      setLoading(true);
+      try {
+        const token = localStorage.getItem("token");
+        const response = await fetch(`/api/products/${id}`, {
+          headers: {
+            "Authorization": `Bearer ${token}`
+          }
+        });
+        if (!response.ok) throw new Error("Ürün bulunamadı");
+        const data = await response.json();
+        setProduct(data);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-    // id string olabilir, bu yüzden karşılaştırma yaparken string'e çevir
-    const foundProduct = allProducts.find(p => p.id.toString() === id);
-
-    setProduct(foundProduct);
+    fetchProduct();
   }, [id]);
+
+  if (loading) return <p>Yükleniyor...</p>;
+  if (error) return <p>Hata: {error}</p>;
+  if (!product) return <p>Ürün bulunamadı.</p>;
 
   const handleAddToCart = () => {
     alert(`${quantity} adet ${product.name} sepete eklendi!`);
@@ -148,23 +90,22 @@ const ProductDetail = () => {
           <nav className="text-sm text-gray-600">
             <span className="hover:text-orange-600 cursor-pointer">Ana Sayfa</span>
             <span className="mx-2">/</span>
-            <span className="hover:text-orange-600 cursor-pointer">{product?.category}</span>
+            <span className="hover:text-orange-600 cursor-pointer">{product.category}</span>
             <span className="mx-2">/</span>
-            <span className="text-gray-900 font-medium">{product?.name}</span>
+            <span className="text-gray-900 font-medium">{product.name}</span>
           </nav>
         </div>
       </div>
-
       <main className="max-w-7xl mx-auto px-4 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-12">
           {/* Sol: Görseller */}
           <div className="space-y-4">
-            {/* Ana görsel */}
+            {/* Ana görsel + slider */}
             <div className="relative bg-white rounded-2xl p-8 shadow-sm border">
               <div className="aspect-square flex items-center justify-center">
-                {product && product.images && product.images.length > 0 ? (
+                {images.length > 0 ? (
                   <img
-                    src={product?.images?.[sliderIndex]}
+                    src={images[sliderIndex]}
                     alt={product?.name || "Ürün resmi"}
                     className="max-w-full max-h-full object-contain transition-all duration-300"
                   />
@@ -174,64 +115,50 @@ const ProductDetail = () => {
               </div>
 
               {/* Slider okları */}
-              {product?.images?.length > 1 && (
+              {images.length > 1 && (
                 <>
-                  <button
-                    className="absolute left-4 top-1/2 -translate-y-1/2 bg-white bg-opacity-90 hover:bg-opacity-100 rounded-full p-3 shadow-lg transition-all duration-200 hover:scale-110"
-                    onClick={() =>
-                      setSliderIndex((prev) =>
-                        prev === 0 ? product.images.length - 1 : prev - 1
-                      )
-                    }
+                  <button className="absolute left-4 top-1/2 -translate-y-1/2 bg-white bg-opacity-90 hover:bg-opacity-100 rounded-full p-3 shadow-lg transition-all duration-200 hover:scale-110"
+                    onClick={() => setSliderIndex((prev) => prev === 0 ? images.length - 1 : prev - 1 )}
                   >
-                    <svg className="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                    <svg className="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24" >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7"/>
                     </svg>
                   </button>
                   <button
                     className="absolute right-4 top-1/2 -translate-y-1/2 bg-white bg-opacity-90 hover:bg-opacity-100 rounded-full p-3 shadow-lg transition-all duration-200 hover:scale-110"
-                    onClick={() =>
-                      setSliderIndex((prev) =>
-                        prev === product.images.length - 1 ? 0 : prev + 1
-                      )
-                    }
+                    onClick={() => setSliderIndex((prev) => prev === images.length - 1 ? 0 : prev + 1 )}
                   >
                     <svg className="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7"/>
                     </svg>
                   </button>
                 </>
               )}
             </div>
 
-            {/* Küçük görseller */}
+            {/* Alt küçük görseller */}
             <div className="flex gap-3 overflow-x-auto pb-2">
-              {product?.images?.map((img, idx) => (
+              {images.map((img, idx) => (
                 <button
                   key={idx}
                   onClick={() => setSliderIndex(idx)}
                   className={`flex-shrink-0 w-20 h-20 bg-white rounded-xl border-2 overflow-hidden transition-all duration-200 ${sliderIndex === idx
-                    ? "border-orange-500 shadow-md"
-                    : "border-gray-200 hover:border-gray-300"
+                      ? "border-orange-500 shadow-md"
+                      : "border-gray-200 hover:border-gray-300"
                     }`}
                 >
-                  <img
-                    src={img}
-                    alt={`${product.name} ${idx + 1}`}
-                    className="w-full h-full object-contain p-2"
-                  />
+                  <img src={img} alt={`${product.name} ${idx + 1}`} className="w-full h-full object-contain p-2"/>
                 </button>
               ))}
             </div>
           </div>
-
           {/* Sağ: Ürün Bilgileri */}
           <div className="space-y-6">
             {/* Başlık ve Favori */}
             <div className="flex items-start justify-between">
               <div>
-                <p className="text-sm text-gray-500 font-medium mb-1">{product?.brand}</p>
-                <h1 className="text-3xl font-bold text-gray-900 leading-tight">{product?.name}</h1>
+                <p className="text-sm text-gray-500 font-medium mb-1">{product.brand}</p>
+                <h1 className="text-3xl font-bold text-gray-900 leading-tight">{product.name}</h1>
                 <p className="text-sm text-gray-500 mt-1">SKU: {product?.sku}</p>
               </div>
               <button
@@ -264,9 +191,7 @@ const ProductDetail = () => {
                     ₺{product?.oldPrice.toLocaleString()}
                   </span>
                 )}
-                <span className="text-3xl font-bold text-orange-600">
-                  ₺{product?.price.toLocaleString()}
-                </span>
+                <span className="text-3xl font-bold text-orange-600"> ₺{product?.price.toLocaleString()} </span>
               </div>
               <div className="flex items-center gap-3">
                 {product?.discount && (
@@ -284,9 +209,9 @@ const ProductDetail = () => {
 
             {/* Stok Durumu */}
             <div className="flex items-center gap-2">
-              <div className={`w-3 h-3 rounded-full ${product?.stock > 0 ? 'bg-green-500' : 'bg-red-500'}`}></div>
-              <span className={`font-medium ${product?.stock > 0 ? 'text-green-600' : 'text-red-600'}`}>
-                {product?.stock > 0 ? `Stokta (${product?.stock} adet)` : 'Stokta yok'}
+              <div className={`w-3 h-3 rounded-full ${product?.stockQuantity > 0 ? 'bg-green-500' : 'bg-red-500'}`}></div>
+              <span className={`font-medium ${product?.stockQuantity > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                {product?.stockQuantity > 0 ? `Stokta (${product?.stockQuantity} adet)` : 'Stokta yok'}
               </span>
             </div>
 
@@ -298,30 +223,26 @@ const ProductDetail = () => {
                   <button
                     onClick={() => setQuantity(Math.max(1, quantity - 1))}
                     className="px-3 py-2 hover:bg-gray-100 transition-colors"
-                  >
-                    -
-                  </button>
+                  > - </button>
                   <span className="px-4 py-2 min-w-12 text-center">{quantity}</span>
                   <button
                     onClick={() => setQuantity(Math.min(product.stock, quantity + 1))}
                     className="px-3 py-2 hover:bg-gray-100 transition-colors"
-                  >
-                    +
-                  </button>
+                  > + </button>
                 </div>
               </div>
 
               <div className="flex gap-4">
                 <button
                   onClick={handleAddToCart}
-                  disabled={product?.stock === 0}
+                  disabled={product.stockQuantity === 0}
                   className="flex-1 bg-orange-500 hover:bg-orange-600 disabled:bg-gray-400 text-white py-4 px-6 rounded-xl font-semibold text-lg transition-all duration-200 transform hover:scale-105 disabled:transform-none disabled:cursor-not-allowed"
                 >
                   Sepete Ekle
                 </button>
                 <button
                   onClick={handleBuyNow}
-                  disabled={product?.stock === 0}
+                  disabled={product.stockQuantity === 0}
                   className="flex-1 bg-gray-900 hover:bg-gray-800 disabled:bg-gray-400 text-white py-4 px-6 rounded-xl font-semibold text-lg transition-all duration-200 transform hover:scale-105 disabled:transform-none disabled:cursor-not-allowed"
                 >
                   Hemen Al
@@ -381,12 +302,12 @@ const ProductDetail = () => {
               <div className="space-y-6">
                 <div>
                   <h3 className="text-xl font-bold mb-4">Ürün Açıklaması</h3>
-                  <p className="text-gray-700 leading-relaxed mb-6">{product?.description}</p>
+                  <p className="text-gray-700 leading-relaxed mb-6">{product.description}</p>
                 </div>
                 <div>
                   <h4 className="text-lg font-semibold mb-3">Öne Çıkan Özellikler</h4>
                   <ul className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    {product?.features?.map((feature, idx) => (
+                    {product.highlightedFeatures.map((feature, idx) => (
                       <li key={idx} className="flex items-start gap-3">
                         <svg className="w-5 h-5 text-orange-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
@@ -403,7 +324,7 @@ const ProductDetail = () => {
               <div>
                 <h3 className="text-xl font-bold mb-4">Teknik Özellikler</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {Object.entries(product.specifications).map(([key, value]) => (
+                  {Object.entries(product.technicalSpecifications).map(([key, value]) => (
                     <div key={key} className="border-b border-gray-200 pb-3">
                       <dt className="font-semibold text-gray-900 mb-1">{key}</dt>
                       <dd className="text-gray-600">{value}</dd>
@@ -448,5 +369,4 @@ const ProductDetail = () => {
     </div>
   );
 };
-
 export default ProductDetail;

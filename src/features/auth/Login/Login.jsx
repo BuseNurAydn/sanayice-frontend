@@ -10,6 +10,7 @@ import GrayButton from '../../../shared/Button/GrayButton';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { setCredentials } from '../../../store/authSlice';
+import { login } from '../../../services/authService';
 
 const Login = () => {
     const [loginData, setLoginData] = useState({
@@ -39,25 +40,9 @@ const Login = () => {
         e.preventDefault();
 
         try {
-            const response = await fetch('/api/auth/login', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(loginData)
-            });
-
-            const data = await response.json();
+            const data = await login(loginData);
             console.log(data);
 
-            if (!response.ok) {
-                if (data.errors) {
-                    setErrors(data.errors);
-                } else {
-                    setErrors({ general: data.message || 'Giriş başarısız!' });
-                }
-                return;
-            }
             // Giriş başarılı mesajı
             setSuccessMessage('Giriş başarılı! Yönlendiriliyorsunuz...');
             setErrors({});
@@ -89,8 +74,11 @@ const Login = () => {
             }, 1500); // 1.5 saniye bekleyip yönlendir
 
         } catch (error) {
-            console.error('Login error:', error);
-            setErrors({ general: 'Sunucu hatası. Giriş yapılamadı.' });
+            if (error.errors) {
+                setErrors(error.errors);
+            } else {
+                setErrors({ general: error.message || 'Giriş başarısız!' });
+            }
         }
     };
     const renderEmailLogin = () => (

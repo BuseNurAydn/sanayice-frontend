@@ -1,12 +1,10 @@
 import { NavLink } from "react-router-dom";
-import { useSelector, useDispatch } from "react-redux";
-import { FaShoppingBag, FaMapMarkerAlt, FaStar, FaUserCircle, FaSignOutAlt } from "react-icons/fa";
-import { useState } from "react"; 
+import { useSelector} from "react-redux";
+import { FaShoppingBag, FaMapMarkerAlt, FaStar } from "react-icons/fa";
 
 // Sidebar Component
 const Sidebar = () => {
-    const user = useSelector((state) => state.auth.user); 
-    const dispatch = useDispatch(); 
+    const user = useSelector((state) => state.auth.user); //user bilgisini alıyoruz
 
     const menuItems = [
         { to: "orders", label: "Siparişlerim", icon: <FaShoppingBag /> },

@@ -6,6 +6,7 @@ import OrangeButton from '../../../shared/Button/OrangeButton';
 import { BsExclamationLg } from "react-icons/bs";
 import { useDispatch } from 'react-redux';
 import { setCredentials } from '../../../store/authSlice';
+import { registerSeller } from '../../../services/authService';
 
 const SignUp = () => {
     const navigate = useNavigate();
@@ -30,6 +31,7 @@ const SignUp = () => {
     });
     const [message, setMessage] = useState("");
     const [messageType, setMessageType] = useState("info"); // "success" | "error"
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
@@ -52,16 +54,61 @@ const SignUp = () => {
         return '+90' + cleaned;
     };
 
+     const validateEmail = (email) => {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return emailRegex.test(email);
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setMessage('');
         setMessageType('info');
 
+        // Zorunlu alan kontrolü
+        if (
+            !formData.name ||
+            !formData.lastname ||
+            !formData.email ||
+            !formData.phoneNumber ||
+            !formData.password ||
+            !formData.confirmPassword ||
+            !formData.companyName ||
+            !formData.taxId
+        ) {
+            setMessage("Lütfen tüm alanları doldurun.");
+            setMessageType("error");
+            return;
+        }
+        // E-posta doğrulama
+        if (!validateEmail(formData.email)) {
+            setMessage("Geçerli bir e-posta adresi girin.");
+            setMessageType("error");
+            return;
+        }
+
+        // Telefon numarası uzunluğu kontrolü
+        const formattedPhone = formatPhoneNumber(formData.phoneNumber);
+        if (formattedPhone.length !== 13) {
+            setMessage("Geçerli bir telefon numarası girin.");
+            setMessageType("error");
+            return;
+        }
+
+         // Şifre eşleşme kontrolü
         if (formData.password !== formData.confirmPassword) {
             setMessage("Şifreler eşleşmiyor.");
             setMessageType("error");
             return;
         };
+
+         // Şifre uzunluğu kontrolü (6 karakter)
+        if (formData.password.length < 6) {
+            setMessage("Şifre en az 6 karakter olmalı.");
+            setMessageType("error");
+            return;
+        }
+
+        setIsSubmitting(true);
         const payload = {
             name: formData.name,
             lastname: formData.lastname,
@@ -77,21 +124,9 @@ const SignUp = () => {
         };
         console.log(payload)
 
-        try {
-            const response = await fetch('/api/auth/register', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(payload),
-            });
-            const data = await response.json();
-            if (!response.ok) {
-                setMessage(data.message || 'Kayıt sırasında hata oluştu.');
-                setMessageType('error');
-                return;
-            }
-
+        try {  
+            const data = await registerSeller(payload);  //servisi kullandık
+            
             setMessage('Kayıt başarılı! Giriş sayfasına yönlendiriliyorsunuz...');
             setMessageType('success');
 
@@ -104,9 +139,11 @@ const SignUp = () => {
             dispatch(setCredentials({ token: data.token, user: data.user }));
 
         } catch (error) {
-            console.error('Fetch error:', error);
-            setMessage('İstek gönderilirken bir hata oluştu.');
-            setMessageType('error')
+            setMessage(error.message || 'İstek gönderilirken bir hata oluştu.');
+            setMessageType('error');
+            setIsSubmitting(false);
+        } finally {
+            setIsSubmitting(false);
         }
     };
     const messageStyles = {
@@ -146,7 +183,9 @@ const SignUp = () => {
                     <Input type="text" name="taxId" placeholder="Vergi Numarası" value={formData.taxId} onChange={handleChange} className="w-1/2" />
                 </div>
 
-                <OrangeButton type="submit" className="w-3/4 mx-auto"> Satıcı olmak için başvur </OrangeButton>
+                 <OrangeButton type="submit" className="w-3/4 mx-auto" disabled={isSubmitting}>
+                    {isSubmitting ? 'Gönderiliyor...' : 'Satıcı olmak için başvur'}
+                </OrangeButton>
             </form>
             <div className="w-full text-center text-base text-white bg-[var(--color-dark-orange)] font-bold p-3 custom-font rounded-b-[2rem] mt-6">
                 Ürünlerini pazarlamaya ne dersin?<br />
@@ -155,5 +194,4 @@ const SignUp = () => {
         </AuthLayout>
     );
 };
-
 export default SignUp;

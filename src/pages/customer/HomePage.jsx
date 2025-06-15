@@ -1,8 +1,9 @@
-import { useState, useRef } from "react";
+import { useState, useRef ,useEffect} from "react";
 import {Link} from 'react-router-dom'
 import Slider from "react-slick";
 import ProductCard from "../../components/ProductCard";
-import {brands,categories,cards1,cards2,featuredProducts,discountedProducts,newProducts,categoryCards} from './data/products';
+import { getProducts } from "../../services/productsService";
+import {brands,categories,cards1,cards2,categoryCards} from './data/products';
 
 const  settings = {
   dots: true,
@@ -21,7 +22,17 @@ const HomePage = () => {
   const featuredScrollRef = useRef(null);
   const discountedScrollRef = useRef(null);
   const newProductsScrollRef = useRef(null);
+  const [products, setProducts] = useState([]);
 
+  useEffect(() => {
+    getProducts()
+      .then(data => {
+        setProducts(data);
+      })
+      .catch(error => {
+        console.error("Hata:", error);
+      });
+  }, []);
 
   const scroll = (ref, direction) => {
     if (ref.current) {
@@ -144,9 +155,9 @@ const HomePage = () => {
             <button className="text-orange-600 hover:text-orange-700 font-semibold">Tümünü Gör →</button>
           </div>
           <ScrollSection scrollRef={featuredScrollRef}>
-            {featuredProducts.map((product, i) => (
-              <ProductCard key={i} product={product} />
-            ))}
+             {products.map(product => (
+               <ProductCard key={product.id} product={product} />
+             ))}
           </ScrollSection>
         </section>
 
@@ -160,9 +171,9 @@ const HomePage = () => {
             <button className="text-red-600 hover:text-red-700 font-semibold">Tümünü Gör →</button>
           </div>
           <ScrollSection scrollRef={discountedScrollRef}>
-            {discountedProducts.map((product, i) => (
-              <ProductCard key={i} product={product} showDiscount={true} />
-            ))}
+             {products.map(product => (
+               <ProductCard key={product.id} product={product} />
+             ))}
           </ScrollSection>
         </section>
 
@@ -176,9 +187,9 @@ const HomePage = () => {
             <button className="text-purple-600 hover:text-purple-700 font-semibold">Tümünü Gör →</button>
           </div>
           <ScrollSection scrollRef={newProductsScrollRef}>
-            {newProducts.map((product, i) => (
-              <ProductCard key={i} product={product} />
-            ))}
+             {products.map(product => (
+               <ProductCard key={product.id} product={product} />
+             ))}
           </ScrollSection>
         </section>
 
