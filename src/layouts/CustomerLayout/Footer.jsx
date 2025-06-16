@@ -1,4 +1,3 @@
-
 import {Link} from 'react-router-dom';
 import Logo from '../../assets/png/Logo2.png';
 import GooglePlay from '../../assets/svg/playstore.svg';
@@ -7,6 +6,7 @@ import { FaFacebook } from "react-icons/fa";
 import { AiFillInstagram } from "react-icons/ai";
 import { IoLogoYoutube } from "react-icons/io";
 import { FaLinkedin } from "react-icons/fa6";
+import { FaXTwitter } from "react-icons/fa6"; // X (Twitter) ikonu için
 
 const Footer = () => {
   return (
@@ -38,10 +38,21 @@ const Footer = () => {
           </div>
           <p className="text-[10px] mt-1">Spam göndermeyeceğiz, e-posta politikamızı okuyun</p>
           <div className="flex space-x-3 mt-3 text-xl">
-            <Link to="#"><FaFacebook className='w-8 h-8' /></Link>
-            <Link to="#"><AiFillInstagram className='w-8 h-8'/></Link>
-            <Link to="#"><IoLogoYoutube className='w-8 h-8'/></Link>
-            <Link to="#"><FaLinkedin className='w-8 h-8'/></Link>
+            <a href="https://www.facebook.com/sanayice/" target="_blank" rel="noopener noreferrer">
+              <FaFacebook className='w-8 h-8' />
+            </a>
+            <a href="https://www.instagram.com/sanayice" target="_blank" rel="noopener noreferrer">
+              <AiFillInstagram className='w-8 h-8'/>
+            </a>
+            <a href="https://www.youtube.com/@sanayicecom" target="_blank" rel="noopener noreferrer">
+              <IoLogoYoutube className='w-8 h-8'/>
+            </a>
+            <a href="https://www.linkedin.com/company/sanayice/" target="_blank" rel="noopener noreferrer">
+              <FaLinkedin className='w-8 h-8'/>
+            </a>
+            <a href="https://x.com/sanayice" target="_blank" rel="noopener noreferrer">
+              <FaXTwitter className='w-8 h-8'/>
+            </a>
           </div>
         </div>
 
@@ -57,7 +68,7 @@ const Footer = () => {
         <div>
           <h3 className="font-bold mb-2 text-[var(--color-dark)]">Önemli Linkler</h3>
           <ul className="space-y-4 text-sm underline">
-            <li><Link to="#">Satıcı Olmak İstiyorum</Link></li>
+            <li><Link to="/auth/signUp/seller">Satıcı Olmak İstiyorum</Link></li>
           </ul>
         </div>
       </div>

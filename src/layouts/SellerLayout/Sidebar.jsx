@@ -10,47 +10,60 @@ import { GiHamburgerMenu } from "react-icons/gi";
 import { useSelector } from "react-redux";
 import { MdStorefront } from "react-icons/md";
 
-
 const menuItems = [
   {
     label: "Satış Yönetim Paneli",
     to: "/seller/dashboard",
-    icon: <BsFileBarGraphFill className="w-6 h-6" />,
+    icon: <BsFileBarGraphFill className="w-5 h-5" />,
   },
   {
     label: "Mağazam",
     to: "/seller/store",
-    icon: <MdStorefront className="w-6 h-6" />,
+    icon: <MdStorefront className="w-5 h-5" />,
   },
   {
     label: "Siparişler",
     to: "/seller/orders",
-    icon: <BsHandbagFill className="w-6 h-6" />,
+    icon: <BsHandbagFill className="w-5 h-5" />,
   },
   {
     label: "Ürünler",
     to: "/seller/products",
-    icon: <AiFillProduct className="w-6 h-6" />,
+    icon: <AiFillProduct className="w-5 h-5" />,
     subMenu: [
       {
         label: "Ürün Ekleme",
         to: "/seller/products/add",
-        icon: <FaPlus className="w-5 h-5" />,
+        icon: <FaPlus className="w-4 h-4" />,
       }   
     ],
   },
   {
+    label: "Satıcı Doğrulama",
+    to: "/seller/seller-verification",
+    icon: <BsFileBarGraphFill className="w-5 h-5" />,
+  },
+  {
     label: "Kategoriler",
     to: "/seller/categories",
-    icon: <BiSolidCategory className="w-6 h-6" />,
+    icon: <BiSolidCategory className="w-5 h-5" />,
     subMenu: [
       {
         label: "Kategori Ekleme",
         to: "/seller/categories/add",
-        icon: <FaPlus className="w-5 h-5" />,
-        
+        icon: <FaPlus className="w-4 h-4" />,
       }   
     ],
+  },
+  {
+    label: "Banner Yönetimi",
+    to: "/seller/banner_management",
+    icon: <BsFileBarGraphFill className="w-5 h-5" />,
+  },
+  {
+    label: "Kupon Ve Kampanya Yönetimi",
+    to: "/seller/coupon_campaign_management",
+    icon: <BsFileBarGraphFill className="w-5 h-5" />,
   },
 ];
 
@@ -71,56 +84,83 @@ const Sidebar = () => {
   // Role göre filtreleme
   const filteredMenuItems = menuItems.filter((item) => {
     if (role === "ROLE_SELLER") {
-      return item.label !== "Kategoriler";
+      return item.label !== "Kategoriler" && item.label !== "Satıcı Doğrulama" && 
+             item.label !== "Banner Yönetimi" && item.label !== "Kupon Ve Kampanya Yönetimi";
     } else if (role === "ROLE_MANAGER") {
-      return item.label === "Kategoriler";
+      return item.label === "Satıcı Doğrulama" || item.label === "Kategoriler" || 
+             item.label === "Banner Yönetimi" || item.label === "Kupon Ve Kampanya Yönetimi";
     } else {
-      // Diğer roller için hepsi görsün
       return true;
     }
   });
 
   return (
     <>
-      {/* Mobil Buton */}
+      {/* Mobile Overlay */}
+      {isMobileOpen && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 z-30 md:hidden"
+          onClick={() => setIsMobileOpen(false)}
+        />
+      )}
+
+      {/* Mobile Menu Button */}
       <button
-        className="md:hidden absolute top-4 left-6 z-50 text-2xl text-gray-700"
+        className="md:hidden fixed top-4 left-4 z-50 p-2 bg-white rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-200"
         onClick={() => setIsMobileOpen(true)}
       >
-        <GiHamburgerMenu />
+        <GiHamburgerMenu className="w-5 h-5 text-gray-700" />
       </button>
 
       {/* Sidebar */}
       <aside
-        className={`${collapsed ? "w-[80px]" : "w-[240px]"
-          } bg-gray-200 p-4 min-h-screen overflow-y-auto fixed top-0 left-0 z-40 transition-transform duration-300
+        className={`${
+          collapsed ? "w-20" : "w-64"
+        } bg-gradient-to-b from-slate-50 to-slate-100 border-r border-slate-200 min-h-screen 
+        overflow-y-auto fixed top-0 left-0 z-40 transition-all duration-300 ease-in-out shadow-lg
         ${isMobileOpen ? "translate-x-0" : "-translate-x-full"} md:translate-x-0 md:static md:block`}
       >
-        {/* Kapatma X butonu sadece mobilde */}
-        <div className="flex justify-between items-center mb-4">
+        {/* Header */}
+        <div className="flex items-center justify-between p-4 border-b border-slate-200 bg-white/50">
+          {!collapsed && (
+            <h2 className="text-lg font-semibold text-slate-800 truncate">
+              Yönetim Paneli
+            </h2>
+          )}
+          
+          {/* Toggle Button */}
           <button
             onClick={() => setCollapsed(!collapsed)}
-            className="hidden md:block text-gray-600 text-xl ml-auto"
+            className="hidden md:flex items-center justify-center w-8 h-8 rounded-lg 
+            bg-slate-200 hover:bg-slate-300 text-slate-600 transition-colors duration-200"
             aria-label={collapsed ? "Sidebar aç" : "Sidebar kapat"}
           >
-            {collapsed ? <BsChevronDoubleRight /> : <BsChevronDoubleLeft />}
+            {collapsed ? (
+              <BsChevronDoubleRight className="w-4 h-4" />
+            ) : (
+              <BsChevronDoubleLeft className="w-4 h-4" />
+            )}
           </button>
-          {!collapsed && (
-            <button
-              className="md:hidden text-gray-600 text-lg absolute top-4 right-4 z-50"
-              onClick={() => setIsMobileOpen(false)}
-            >
-              X
-            </button>
-          )}
+
+          {/* Mobile Close Button */}
+          <button
+            className="md:hidden flex items-center justify-center w-8 h-8 rounded-lg 
+            bg-slate-200 hover:bg-slate-300 text-slate-600 transition-colors duration-200"
+            onClick={() => setIsMobileOpen(false)}
+          >
+            ✕
+          </button>
         </div>
-       <nav className="flex flex-col space-y-4 pt-8 md:pt-0">
+
+        {/* Navigation */}
+        <nav className="p-3 space-y-1">
           {filteredMenuItems.map(({ label, to, icon, subMenu }) => {
             const isOpen = openSubMenus[label];
             const hasSubMenu = !!subMenu;
 
             return (
-              <div key={label} className="flex flex-col">
+              <div key={label} className="space-y-1">
+                {/* Main Menu Item */}
                 <Link
                   to={to}
                   onClick={(e) => {
@@ -128,50 +168,68 @@ const Sidebar = () => {
                       e.preventDefault();
                       toggleSubMenu(label);
                       navigate(to);
-                      if (window.innerWidth < 768) {
-                        setIsMobileOpen(false); // mobilde menüyü kapat
-                      }
-                    } else {
-                      if (window.innerWidth < 768) {
-                        setIsMobileOpen(false); // mobilde menüyü kapat
-                      }
+                    }
+                    if (window.innerWidth < 768) {
+                      setIsMobileOpen(false);
                     }
                   }}
-                  className="hover:bg-gray-300 p-2 rounded flex items-center gap-2 w-full"
+                  className="group flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-700 
+                  hover:bg-blue-50 hover:text-blue-700 transition-all duration-200 
+                  hover:shadow-sm active:scale-[0.98]"
                   title={collapsed ? label : ""}
                 >
-                  {icon}
+                  <div className="flex-shrink-0 text-slate-500 group-hover:text-blue-600 transition-colors duration-200">
+                    {icon}
+                  </div>
+                  
                   {!collapsed && (
                     <>
-                      <span className="flex-1 text-left">{label}</span>
-                      {hasSubMenu &&
-                        (isOpen ? <IoIosArrowUp /> : <IoIosArrowDown />)}
+                      <span className="flex-1 font-medium text-sm truncate">
+                        {label}
+                      </span>
+                      {hasSubMenu && (
+                        <div className="flex-shrink-0 text-slate-400 group-hover:text-blue-500 transition-colors duration-200">
+                          {isOpen ? (
+                            <IoIosArrowUp className="w-4 h-4" />
+                          ) : (
+                            <IoIosArrowDown className="w-4 h-4" />
+                          )}
+                        </div>
+                      )}
                     </>
                   )}
                 </Link>
 
-                {/* Alt Menü */}
-                {hasSubMenu && isOpen && (
-                  <div
-                    className={`flex flex-col space-y-2 mt-2 ${collapsed ? "ml-2" : "ml-6"
-                      }`}
-                  >
+                {/* Sub Menu */}
+                {hasSubMenu && isOpen && !collapsed && (
+                  <div className="ml-8 space-y-1 animate-fadeIn">
                     {subMenu.map(({ label: subLabel, to: subTo, icon: subIcon }) => (
                       <Link
                         key={subLabel}
                         to={subTo}
                         onClick={() => {
                           if (window.innerWidth < 768) {
-                            setIsMobileOpen(false); // mobilde menüyü kapat
+                            setIsMobileOpen(false);
                           }
                         }}
-                        className={`hover:bg-gray-300 p-2 rounded text-sm ${collapsed ? "text-[10px]" : ""
-                          }`}
-                        title={collapsed ? subLabel : ""}
+                        className="group flex items-center gap-2 px-3 py-2 rounded-lg text-slate-600 
+                        hover:bg-emerald-50 hover:text-emerald-700 transition-all duration-200 
+                        text-sm active:scale-[0.98]"
+                        title={subLabel}
                       >
-                        {!collapsed ? subLabel : subIcon}
+                        <div className="flex-shrink-0 text-slate-400 group-hover:text-emerald-600 transition-colors duration-200">
+                          {subIcon}
+                        </div>
+                        <span className="font-medium truncate">{subLabel}</span>
                       </Link>
                     ))}
+                  </div>
+                )}
+
+                {/* Collapsed Sub Menu Indicator */}
+                {hasSubMenu && collapsed && (
+                  <div className="flex justify-center">
+                    <div className="w-1 h-1 bg-blue-400 rounded-full"></div>
                   </div>
                 )}
               </div>
@@ -179,7 +237,26 @@ const Sidebar = () => {
           })}
         </nav>
       </aside>
+
+      {/* Custom Styles */}
+      <style jsx>{`
+        @keyframes fadeIn {
+          from {
+            opacity: 0;
+            transform: translateY(-4px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+        
+        .animate-fadeIn {
+          animation: fadeIn 0.2s ease-out;
+        }
+      `}</style>
     </>
   );
 };
+
 export default Sidebar;

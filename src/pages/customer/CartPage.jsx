@@ -1,5 +1,5 @@
 import { useSelector, useDispatch } from "react-redux";
-import { changeQuantity, removeFromCart } from "../../store/cartSlice";
+import { changeQuantity } from "../../services/cartService";
 import { useNavigate } from "react-router-dom";
 import { FaRegTrashCan } from "react-icons/fa6";
 import { toast } from "react-toastify";

@@ -1,6 +1,7 @@
 import { NavLink } from "react-router-dom";
 import { useSelector} from "react-redux";
-import { FaShoppingBag, FaMapMarkerAlt, FaStar } from "react-icons/fa";
+import { FaShoppingBag, FaMapMarkerAlt, FaStar, FaUserCircle, FaSignOutAlt } from "react-icons/fa";
+
 
 // Sidebar Component
 const Sidebar = () => {
