@@ -8,64 +8,70 @@ import { BiSolidCategory } from "react-icons/bi";
 import { FaPlus } from "react-icons/fa6";
 import { GiHamburgerMenu } from "react-icons/gi";
 import { useSelector } from "react-redux";
-import { MdStorefront } from "react-icons/md";
+import { MdStorefront, MdVerifiedUser, MdViewCarousel, MdLocalOffer, MdSupport } from "react-icons/md";
 
 const menuItems = [
   {
     label: "Satış Yönetim Paneli",
     to: "/seller/dashboard",
-    icon: <BsFileBarGraphFill className="w-5 h-5" />,
+    icon: <BsFileBarGraphFill />,
   },
   {
     label: "Mağazam",
     to: "/seller/store",
-    icon: <MdStorefront className="w-5 h-5" />,
+    icon: <MdStorefront />,
   },
   {
     label: "Siparişler",
     to: "/seller/orders",
-    icon: <BsHandbagFill className="w-5 h-5" />,
+    icon: <BsHandbagFill />,
   },
   {
     label: "Ürünler",
     to: "/seller/products",
-    icon: <AiFillProduct className="w-5 h-5" />,
+    icon: <AiFillProduct />,
     subMenu: [
       {
         label: "Ürün Ekleme",
         to: "/seller/products/add",
-        icon: <FaPlus className="w-4 h-4" />,
-      }   
+        icon: <FaPlus />,
+      }
     ],
   },
   {
     label: "Satıcı Doğrulama",
     to: "/seller/seller-verification",
-    icon: <BsFileBarGraphFill className="w-5 h-5" />,
+    icon: <MdVerifiedUser />,
   },
   {
     label: "Kategoriler",
     to: "/seller/categories",
-    icon: <BiSolidCategory className="w-5 h-5" />,
+    icon: <BiSolidCategory />,
     subMenu: [
       {
         label: "Kategori Ekleme",
         to: "/seller/categories/add",
-        icon: <FaPlus className="w-4 h-4" />,
-      }   
+        icon: <FaPlus />,
+      }
     ],
   },
   {
     label: "Banner Yönetimi",
     to: "/seller/banner_management",
-    icon: <BsFileBarGraphFill className="w-5 h-5" />,
+    icon: <MdViewCarousel />,
   },
   {
     label: "Kupon Ve Kampanya Yönetimi",
     to: "/seller/coupon_campaign_management",
-    icon: <BsFileBarGraphFill className="w-5 h-5" />,
+    icon: <MdLocalOffer />,
+  },
+  {
+    label: "Destek Ve Geri Bildirim Yönetimi",
+    to: "/seller/support_management",
+    icon: <MdSupport />,
   },
 ];
+
 
 const Sidebar = () => {
   const [collapsed, setCollapsed] = useState(false);
@@ -85,10 +91,10 @@ const Sidebar = () => {
   const filteredMenuItems = menuItems.filter((item) => {
     if (role === "ROLE_SELLER") {
       return item.label !== "Kategoriler" && item.label !== "Satıcı Doğrulama" && 
-             item.label !== "Banner Yönetimi" && item.label !== "Kupon Ve Kampanya Yönetimi";
+             item.label !== "Banner Yönetimi" && item.label !== "Kupon Ve Kampanya Yönetimi" && item.label !== "Destek Ve Geri Bildirim Yönetimi";
     } else if (role === "ROLE_MANAGER") {
       return item.label === "Satıcı Doğrulama" || item.label === "Kategoriler" || 
-             item.label === "Banner Yönetimi" || item.label === "Kupon Ve Kampanya Yönetimi";
+             item.label === "Banner Yönetimi" || item.label === "Kupon Ve Kampanya Yönetimi" || item.label === "Destek Ve Geri Bildirim Yönetimi";
     } else {
       return true;
     }

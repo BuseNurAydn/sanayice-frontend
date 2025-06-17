@@ -10,6 +10,7 @@ const Sidebar = () => {
         { to: "orders", label: "Siparişlerim", icon: <FaShoppingBag /> },
         { to: "addresses", label: "Adres Bilgilerim", icon: <FaMapMarkerAlt /> },
         { to: "reviews", label: "Değerlendirmelerim", icon: <FaStar /> },
+        { to: "support_and_complaint", label: "Destek ve Şikayet", icon: <FaStar /> },
     ];
 
     const handleLogout = () => {
