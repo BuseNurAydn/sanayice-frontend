@@ -1,11 +1,55 @@
-// src/pages/seller/Dashboard.jsx (veya nerede saklamak istiyorsanız)
 import AdminText from "../../shared/Text/AdminText";
 import { useState, useEffect } from "react";
-import { FaBoxes, FaChartLine, FaDollarSign, FaShoppingCart, FaStore, FaEye } from "react-icons/fa"; // İkonlar için
+import { FaBoxes, FaChartLine, FaDollarSign, FaShoppingCart, FaStore, FaEye } from "react-icons/fa";
 import { Link } from 'react-router-dom';
+import { fetchDashboardStats, fetchRecentOrders, fetchPopulerProducts } from "../../services/dashboardService";
 
 const Dashboard = () => {
-  // Demo veri (gerçek uygulamada API'den çekilir)
+  const [stats, setStats] = useState([]);
+  const [recentOrders, setRecentOrders] = useState([]);
+  const [popular, setPopular] = useState([]);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    const getStats = async () => {
+      try {
+        const data = await fetchDashboardStats();
+        setStats(data);
+        console.log("Dashboard API verisi:", data);
+      } catch (err) {
+        setError(err.message);
+        console.error("Dashboard istatistik hatası:", err);
+      }
+    };
+    getStats();
+  }, []);
+
+  useEffect(() => {
+    const getRecentOrders = async () => {
+      try {
+        const data = await fetchRecentOrders();
+        setRecentOrders(data);
+        console.log("Son 3 sipariş:", data);
+      } catch (err) {
+        setError(err.message);
+      }
+    };
+    getRecentOrders();
+  }, []);
+
+  useEffect(() => {
+    const getPopularProducts = async () => {
+      try {
+        const data = await fetchPopulerProducts();
+        setPopular(data);
+        console.log("Popular:", data);
+      } catch (err) {
+        setError(err.message);
+      }
+    };
+    getPopularProducts();
+  }, []);
+
   const [dashboardData, setDashboardData] = useState({
     totalSales: 750000, // Toplam Ciro
     totalOrders: 120,   // Toplam Sipariş Sayısı
@@ -25,6 +69,7 @@ const Dashboard = () => {
     ]
   });
 
+
   // Stil değişkenleri (Orders bileşeninizle uyumlu)
   const boxStyle = 'border border-gray-200 p-6 rounded-lg shadow bg-white';
   const buttonStyle = "bg-[var(--color-orange)] text-white px-4 py-2 rounded-lg font-semibold hover:opacity-90 transition-opacity";
@@ -32,34 +77,15 @@ const Dashboard = () => {
   // Durum renkleri (Orders bileşeninizden alınmıştır)
   const getStatusColor = (status) => {
     const colors = {
-      pending: "bg-yellow-100 text-yellow-800",
-      confirmed: "bg-blue-100 text-blue-800",
-      shipped: "bg-purple-100 text-purple-800",
-      delivered: "bg-green-100 text-green-800",
-      cancelled: "bg-red-100 text-red-800"
+      "Beklemede": "bg-yellow-100 text-yellow-800",
+      "Onaylandı": "bg-blue-100 text-blue-800",
+      "Kargoya Verildi": "bg-purple-100 text-purple-800",
+      "Teslim Edildi": "bg-green-100 text-green-800",
+      "İptal Edildi": "bg-red-100 text-red-800",
+      "İade Edildi": "bg-pink-100 text-pink-800"
     };
     return colors[status] || "bg-gray-100 text-gray-800";
   };
-
-  const getStatusText = (status) => {
-    const statusTexts = {
-      pending: "Beklemede",
-      confirmed: "Onaylandı",
-      shipped: "Kargoya Verildi",
-      delivered: "Teslim Edildi",
-      cancelled: "İptal Edildi"
-    };
-    return statusTexts[status] || status;
-  };
-
-  // Gerçek uygulamada, bu useEffect içinde API çağrıları yapardınız.
-  useEffect(() => {
-    // Örneğin:
-    // fetch('/api/dashboard-stats')
-    //   .then(res => res.json())
-    //   .then(data => setDashboardData(data));
-  }, []);
-
   return (
     <div className="min-h-screen p-6 bg-gray-50"> {/* Arka plan rengi eklendi */}
       <AdminText>Yönetim Paneli</AdminText>
@@ -68,28 +94,28 @@ const Dashboard = () => {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-6">
         <div className={`${boxStyle} flex items-center justify-between`}>
           <div>
-            <div className="text-xl font-bold text-[var(--color-orange)]">₺{dashboardData.totalSales.toLocaleString()}</div>
+            <div className="text-xl font-bold text-[var(--color-orange)]">₺{stats.totalRevenue?.toLocaleString()}</div>
             <div className="text-sm text-gray-600">Toplam Ciro</div>
           </div>
           <FaDollarSign className="text-4xl text-green-500 opacity-70" />
         </div>
         <div className={`${boxStyle} flex items-center justify-between`}>
           <div>
-            <div className="text-xl font-bold text-blue-600">{dashboardData.totalOrders}</div>
+            <div className="text-xl font-bold text-blue-600">{stats.totalOrders}</div>
             <div className="text-sm text-gray-600">Toplam Sipariş</div>
           </div>
           <FaShoppingCart className="text-4xl text-blue-500 opacity-70" />
         </div>
         <div className={`${boxStyle} flex items-center justify-between`}>
           <div>
-            <div className="text-xl font-bold text-purple-600">{dashboardData.totalProducts}</div>
+            <div className="text-xl font-bold text-purple-600">{stats.totalProducts}</div>
             <div className="text-sm text-gray-600">Toplam Ürün</div>
           </div>
           <FaBoxes className="text-4xl text-purple-500 opacity-70" />
         </div>
         <div className={`${boxStyle} flex items-center justify-between`}>
           <div>
-            <div className="text-xl font-bold text-yellow-600">{dashboardData.pendingOrders}</div>
+            <div className="text-xl font-bold text-yellow-600">{stats.pendingOrders}</div>
             <div className="text-sm text-gray-600">Bekleyen Sipariş</div>
           </div>
           <FaChartLine className="text-4xl text-yellow-500 opacity-70" />
@@ -101,7 +127,7 @@ const Dashboard = () => {
         {/* Son Siparişler Kartı */}
         <div className={`${boxStyle} lg:col-span-2`}>
           <h3 className="text-lg font-semibold text-gray-800 mb-4">Son Siparişler</h3>
-          {dashboardData.recentOrders.length > 0 ? (
+          {recentOrders.length > 0 ? (
             <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
@@ -115,17 +141,17 @@ const Dashboard = () => {
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {dashboardData.recentOrders.map((order) => (
+                  {recentOrders.map((order) => (
                     <tr key={order.id}>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">#{order.id}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">#{order.orderId}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{order.customerName}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">₺{order.amount.toLocaleString()}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">₺{order.totalAmount.toLocaleString()}</td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(order.status)}`}>
-                          {getStatusText(order.status)}
+                          {order.status}
                         </span>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{order.date}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{order.orderDate}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                         <a href="#" className="text-[var(--color-orange)] hover:text-orange-900">Detay</a>
                       </td>
@@ -137,13 +163,13 @@ const Dashboard = () => {
           ) : (
             <p className="text-gray-500 text-center py-4">Henüz yeni sipariş bulunmamaktadır.</p>
           )}
-        <div className="mt-4 text-right">
-          <Link to="/seller/orders">
-            <button className={buttonStyle + " px-6 py-2"}>
-              Tüm Siparişleri Görüntüle
-            </button>
-          </Link>
-        </div>
+          <div className="mt-4 text-right">
+            <Link to="/seller/orders">
+              <button className={buttonStyle + " px-6 py-2"}>
+                Tüm Siparişleri Görüntüle
+              </button>
+            </Link>
+          </div>
         </div>
 
         {/* Uyarılar ve Hızlı Eylemler */}
@@ -162,32 +188,37 @@ const Dashboard = () => {
                 <button className="text-red-700 hover:text-red-900 text-sm font-medium">Git</button>
               </div>
             )}
-            {dashboardData.pendingOrders > 0 && (
+            {stats.pendingOrders > 0 && (
               <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-md flex items-center justify-between">
                 <div>
                   <div className="flex items-center text-yellow-700">
                     <FaShoppingCart className="mr-2" />
-                    <span className="font-medium">{dashboardData.pendingOrders} Bekleyen Sipariş!</span>
+                    <span className="font-medium">{stats.pendingOrders} Bekleyen Sipariş!</span>
                   </div>
                   <p className="text-sm text-yellow-600">Hemen onaylamanız gerekiyor.</p>
                 </div>
-                <button className="text-yellow-700 hover:text-yellow-900 text-sm font-medium">Git</button>
+                <Link
+                  to="/seller/orders"
+                  className="text-yellow-700 hover:text-yellow-900 text-sm font-medium"
+                >
+                  Git
+                </Link>
               </div>
             )}
 
             {/* Hızlı Eylem Butonları */}
             <div className="grid grid-cols-1 gap-3 pt-4 border-t border-gray-200">
-            <Link to={`/seller/products`}>
-              <button className={`${buttonStyle} w-full bg-indigo-600 hover:bg-indigo-700 flex items-center justify-center`}>
-                <FaBoxes className="mr-2" /> Yeni Ürün Ekle
-              </button>
-            </Link>
-            <Link to={`/seller/store`}>
-              <button className={`${buttonStyle} w-full bg-gray-600 hover:bg-gray-700 flex items-center justify-center`}>
-                <FaStore className="mr-2" /> Mağazamı Görüntüle
-              </button>
-            </Link>
-          </div>
+              <Link to={`/seller/products/add`}>
+                <button className={`${buttonStyle} w-full bg-indigo-600 hover:bg-indigo-700 flex items-center justify-center`}>
+                  <FaBoxes className="mr-2" /> Yeni Ürün Ekle
+                </button>
+              </Link>
+              <Link to={`/seller/store`}>
+                <button className={`${buttonStyle} w-full bg-gray-600 hover:bg-gray-700 flex items-center justify-center`}>
+                  <FaStore className="mr-2" /> Mağazamı Görüntüle
+                </button>
+              </Link>
+            </div>
 
           </div>
         </div>
@@ -198,13 +229,13 @@ const Dashboard = () => {
         {/* Popüler Ürünler */}
         <div className={boxStyle}>
           <h3 className="text-lg font-semibold text-gray-800 mb-4">Popüler Ürünler</h3>
-          {dashboardData.popularProducts.length > 0 ? (
+          {popular.length > 0 ? (
             <div className="space-y-3">
-              {dashboardData.popularProducts.map((product) => (
+              {popular.map((product) => (
                 <div key={product.id} className="flex justify-between items-center border-b pb-3 last:border-b-0 last:pb-0">
                   <div>
-                    <p className="font-medium text-gray-900">{product.name}</p>
-                    <p className="text-sm text-gray-600">Satış: {product.sales} | Görüntüleme: {product.views}</p>
+                    <p className="font-medium text-gray-900">{product.productName}</p>
+                    <p className="text-sm text-gray-600">Satış: {product.totalSales} | Stok: {product.stockQuantity}</p>
                   </div>
                   <span className="font-semibold text-[var(--color-orange)]">₺{product.price.toLocaleString()}</span>
                 </div>
@@ -214,23 +245,8 @@ const Dashboard = () => {
             <p className="text-gray-500 text-center py-4">Henüz popüler ürün bulunmamaktadır.</p>
           )}
         </div>
-
-        {/* Günlük Ziyaretçiler (Basit Metin) */}
-        <div className={boxStyle}>
-          <h3 className="text-lg font-semibold text-gray-800 mb-4">Günlük Ziyaretçi</h3>
-          <div className="flex items-center justify-center h-full min-h-[150px] bg-gray-50 rounded-lg">
-            <div className="text-center">
-              <FaEye className="text-6xl text-blue-400 mx-auto mb-2" />
-              <div className="text-4xl font-bold text-gray-800">{dashboardData.dailyVisitors.toLocaleString()}</div>
-              <div className="text-gray-600">Bugünlük Ziyaretçi</div>
-            </div>
-          </div>
-          {/* Buraya daha sonra bir grafik kütüphanesi (örn. Chart.js, Recharts) ile gerçek bir grafik eklenebilir */}
-        </div>
       </div>
-
     </div>
   );
 };
-
 export default Dashboard;

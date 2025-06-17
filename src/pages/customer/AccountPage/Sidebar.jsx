@@ -1,7 +1,6 @@
 import { NavLink } from "react-router-dom";
 import { useSelector} from "react-redux";
-import { FaShoppingBag, FaMapMarkerAlt, FaStar, FaUserCircle, FaSignOutAlt } from "react-icons/fa";
-
+import { FaShoppingBag, FaMapMarkerAlt, FaStar,FaUserCircle, FaSignOutAlt } from "react-icons/fa";
 
 // Sidebar Component
 const Sidebar = () => {
@@ -18,7 +17,7 @@ const Sidebar = () => {
     };
 
     return (
-        <div className="w-64 bg-white shadow-lg rounded-lg p-6 flex flex-col h-full">
+        <div className="w-64 min-h-screen bg-white shadow-lg rounded-lg p-6 flex flex-col h-full">
             <div className="flex items-center gap-3 mb-6">
                 <FaUserCircle className="text-orange-600 text-3xl" />
                 <p className="text-gray-800 font-bold text-lg break-words">{user?.name || "Kullanıcı Adı"}</p>

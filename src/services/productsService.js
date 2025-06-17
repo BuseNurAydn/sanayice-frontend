@@ -1,9 +1,7 @@
 //ANASAYFA İÇİN
 export const getProducts = async () => {
  
-
   const response = await fetch("/api/products", {
-   
   });
 
   if (!response.ok) {
@@ -14,4 +12,5 @@ export const getProducts = async () => {
 };
 
 //id
+
 

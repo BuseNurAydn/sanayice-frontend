@@ -24,6 +24,7 @@ const HomePage = () => {
   const newProductsScrollRef = useRef(null);
   const [products, setProducts] = useState([]);
 
+
   useEffect(() => {
     getProducts()
       .then(data => {
@@ -33,6 +34,7 @@ const HomePage = () => {
         console.error("Hata:", error);
       });
   }, []);
+
 
   const scroll = (ref, direction) => {
     if (ref.current) {

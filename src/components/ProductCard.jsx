@@ -24,14 +24,31 @@ const ProductCard = ({ product, showDiscount = false }) => {
   };
 
   //sepete ekleme sayfasına
+  console.log("Token:", localStorage.getItem("token"));
+
   const handleAddToCart = async (e) => {
     e.stopPropagation();
+
+    const token = localStorage.getItem("token");
+
+    // Eğer kullanıcı giriş yapmamışsa
+    if (!token) {
+      // Ürünü localStorage'a geçici olarak kaydet
+      localStorage.setItem(
+        "pendingCartItem",
+        JSON.stringify({ productId: product.id, quantity: 1 })
+      );
+
+      toast.info("Lütfen giriş yapın!");
+      navigate("/auth/login"); // Giriş sayfasına yönlendir
+      return;
+    }
     setAdding(true);
     try {
-      dispatch(addToCart({ productId: product.id,quantity: 1 }));
+      await dispatch(addToCart({ productId: product.id, quantity: 1 })).unwrap();
       toast.success("Ürün sepete eklendi");
     } catch (err) {
-      toast.error(err || "Ürün eklenemedi");
+      toast.error(err?.message || "Bir hata oluştu.");
     } finally {
       setAdding(false);
     }
@@ -54,8 +71,8 @@ const ProductCard = ({ product, showDiscount = false }) => {
 
       <div className="relative mb-3">
         <div className="h-32 w-full rounded-lg mb-3 flex items-center justify-center group-hover:scale-105 transition-transform duration-300">
-          {product.additionalImages  ? (
-            <img  src={product.additionalImages [0]} alt={product.name} className="h-full object-contain" />
+          {product.additionalImages ? (
+            <img src={product.additionalImages[0]} alt={product.name} className="h-full object-contain" />
           ) : (
             <span className="text-gray-400 text-sm">Ürün Görseli</span>
           )}
@@ -77,9 +94,6 @@ const ProductCard = ({ product, showDiscount = false }) => {
       >
         {adding ? "Ekleniyor..." : "Sepete Ekle"}
       </button>
-
-
-      {error && <p className="text-red-500 mt-2">{error}</p>}
     </div>
   );
 };

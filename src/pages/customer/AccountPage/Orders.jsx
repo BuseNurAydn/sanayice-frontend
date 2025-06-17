@@ -25,6 +25,7 @@ const Orders = () => {
 
     fetchOrders();
   }, []);
+  console.log(orders)
 
   // Duruma göre filtrele
   const filteredOrders =
@@ -39,6 +40,7 @@ const Orders = () => {
       case "Teslim Edildi":
         return "text-green-600";
       case "Kargoya Verildi":
+        return "text-purple-300";
       case "Sipariş Onaylandı":
         return "text-blue-600";
       case "İptal Edildi":
@@ -46,12 +48,12 @@ const Orders = () => {
       case "İade Edildi":
         return "text-purple-600";
       default:
-        return "text-gray-600";
+        return "text-yellow-400";
     }
   };
 
   return (
-    <div className="bg-white p-6 rounded-lg shadow-md"> {/* Ana konteyner için gölge ve padding */}
+    <div className="bg-white min-h-screen p-6 rounded-lg shadow-md"> {/* Ana konteyner için gölge ve padding */}
       <h2 className="text-2xl font-bold text-gray-800 mb-6">Siparişlerim</h2> {/* Başlık eklendi */}
 
       {/* Sekmeler */}
@@ -61,8 +63,8 @@ const Orders = () => {
             key={tab.key}
             onClick={() => setActiveTab(tab.key)}
             className={`pb-2 text-sm font-semibold transition-colors duration-200 ${activeTab === tab.key
-                ? "text-orange-600 border-b-2 border-orange-600"
-                : "text-gray-500 hover:text-orange-600"
+              ? "text-orange-600 border-b-2 border-orange-600"
+              : "text-gray-500 hover:text-orange-600"
               }`}
           >
             {tab.icon}
@@ -91,12 +93,13 @@ const Orders = () => {
               <p className="text-xs text-gray-500">
                 Sipariş Tarihi: {new Date(order.createdAt).toLocaleDateString()}
               </p>
-              <p className="text-xs text-gray-500">
+              <p className="text-xs">
                 Durum:{" "}
-                <span className="font-semibold text-green-600">
+                <span className={`font-semibold ${getStatusColor(order.statusDisplayName)}`}>
                   {order.statusDisplayName}
                 </span>
               </p>
+
               <p className="text-xs text-gray-500">
                 Toplam Tutar: {order.totalAmount.toLocaleString("tr-TR", { style: "currency", currency: "TRY" })}
               </p>
@@ -116,7 +119,7 @@ const Orders = () => {
                   {/* Ürün görseli + bilgiler */}
                   <div className="flex items-center gap-4">
                     <img
-                     src={item.additionalImages?.[0] || "https://via.placeholder.com/80"}
+                      src={item.additionalImages?.[0] || "https://via.placeholder.com/80"}
                       alt={item.productName}
                       className="w-20 h-20 object-cover rounded"
                     />

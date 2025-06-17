@@ -1,7 +1,20 @@
 import { useState, useEffect } from "react";
-import { FaCreditCard, FaMapMarkerAlt, FaCheckCircle, FaPlus, FaEdit, FaTrash, FaTruck, FaClock, FaShieldAlt } from "react-icons/fa";
+import { FaCreditCard, FaMapMarkerAlt, FaCheckCircle, FaPlus, FaTruck, FaClock, FaShieldAlt } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+import { createAddress, fetchAddresses } from "../../services/addressService";
+import { fetchCart, clearCart } from "../../services/cartService";
+import { useDispatch, useSelector } from 'react-redux';
 
 const CheckoutPage = () => {
+   const dispatch = useDispatch();
+   const cartItems = useSelector(state => state.cart.items);
+   const navigate = useNavigate();
+  
+  useEffect(() => {
+    dispatch(fetchCart());
+  }, [dispatch]);
+
   // Mock kargo firmaları ve fiyatları
   const [shippingOptions, setShippingOptions] = useState([
     {
@@ -50,69 +63,134 @@ const CheckoutPage = () => {
       features: ['Kapıda ödeme', 'SMS bilgilendirme', 'Online takip']
     }
   ]);
-
-  // Mock kayıtlı adresler
-  const [savedAddresses] = useState([
-    {
-      id: 1,
-      title: "Ev Adresim",
-      firstName: "Ahmet",
-      lastName: "Yılmaz",
-      address: "Atatürk Mahallesi, Cumhuriyet Caddesi No: 15 Daire: 3",
-      city: "İstanbul",
-      district: "Kadıköy",
-      postalCode: "34710",
-      phone: "0532 123 45 67",
-      isDefault: true
-    },
-    {
-      id: 2,
-      title: "İş Adresim",
-      firstName: "Ahmet",
-      lastName: "Yılmaz",
-      address: "Levent Mahallesi, İş Merkezi Sokak No: 23 Kat: 5",
-      city: "İstanbul",
-      district: "Beşiktaş",
-      postalCode: "34330",
-      phone: "0532 123 45 67",
-      isDefault: false
-    }
-  ]);
-
-  // Mock cart items
-  const cartItems = [
-    { id: 1, name: "iPhone 14", brand: "Apple", price: 25000, quantity: 1, image: "https://via.placeholder.com/100", weight: 0.5, dimensions: { width: 15, height: 20, depth: 3 } },
-    { id: 2, name: "MacBook Air", brand: "Apple", price: 35000, quantity: 1, image: "https://via.placeholder.com/100", weight: 1.2, dimensions: { width: 30, height: 40, depth: 5 } }
-  ];
-
   const [formData, setFormData] = useState({
     // Adres bilgileri
-    firstName: "",
-    lastName: "",
-    address: "",
+    addressTitle: "",
+    recipientName: "",
+    phoneNumber: "",
+    country: "Türkiye",
     city: "",
     district: "",
     postalCode: "",
-    phone: "",
+    fullAddress: "",
+    isDefault: false,
+
     // Kart bilgileri
     cardNumber: "",
     cardHolder: "",
     expiryDate: "",
     cvv: "",
+    paymentToken: "",
     // Diğer
     paymentMethod: "credit-card",
     saveAddress: false,
-    // Kargo seçimi
-    selectedShipping: 'aras'
+
+    // Seçimler
+    selectedAddressId: null,
+    billingAddress: "",
+    customerNotes: "",
+    shippingMethod: "STANDARD",
+    shippingCost: 0,
+    selectedShipping: "",
   });
 
+  const [addresses, setAddresses] = useState([]);
+
+  //GET ADRESSES
+  useEffect(() => {
+    const getAddresses = async () => {
+      try {
+        const data = await fetchAddresses();
+        setAddresses(data);
+      } catch (error) {
+        toast.error(error.message);
+      }
+    };
+
+    getAddresses();
+  }, []);
+
+  ///////////////////777
+  //POST ADRESS
+  //address formu input değişikliği
+  const handleInputChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: type === 'checkbox' ? checked : value
+    }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    try {
+      await createAddress(formData);
+      toast.success("Adres başarıyla kaydedildi");
+
+      // Formu temizle
+      setFormData({
+        addressTitle: "",
+        recipientName: "",
+        phoneNumber: "",
+        country: "",
+        city: "",
+        district: "",
+        postalCode: "",
+        fullAddress: "",
+        isDefault: false
+      });
+      await fetchAddresses(); // adresleri yeniden çektim
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
+  ///////////////////////777
+  // Siparişi tamamla
+  const handleConfirmOrder = async () => {
+    try {
+      const orderRequest = {
+        selectedAddressId: selectedAddressId,
+        billingAddress: formData.billingAddress,
+        customerNotes: formData.customerNotes,
+        shippingMethod: formData.shippingMethod,
+        shippingCost: parseFloat(formData.shippingCost),
+        paymentMethod: formData.paymentMethod,
+        paymentToken: formData.paymentMethod === 'credit-card' ? formData.paymentToken : undefined
+      };
+      console.log("Sipariş bilgileri:", orderRequest);  
+
+      const token = localStorage.getItem('token'); //  token
+      const response = await fetch('/api/orders/confirm', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+           Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify(orderRequest)
+      });
+
+      if (!response.ok) throw new Error('Sipariş tamamlanamadı.');
+       // Sepeti temizle
+      dispatch(clearCart());
+      navigate('/');
+
+      const result = await response.json();
+      toast.success("Sipariş başarıyla tamamlandı!");
+      // Yönlendirme veya state temizleme işlemleri
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
+
+  ////////////////////////////////////////
   const [currentStep, setCurrentStep] = useState(1); // 1: Adres, 2: Kargo, 3: Ödeme, 4: Onay
   const [showAddressForm, setShowAddressForm] = useState(false);
-  const [selectedAddressId, setSelectedAddressId] = useState(savedAddresses.find(addr => addr.isDefault)?.id || null);
+  const [selectedAddressId, setSelectedAddressId] = useState(addresses.find(addr => addr.isDefault)?.id || null);
   const [shippingCalculating, setShippingCalculating] = useState(false);
 
   const getTotal = () =>
-    cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
+    cartItems.reduce((acc, item) => acc + item.unitPrice * item.quantity, 0);
 
   const getSelectedShippingPrice = () => {
     const selected = shippingOptions.find(option => option.id === formData.selectedShipping);
@@ -124,32 +202,24 @@ const CheckoutPage = () => {
   // Kargo fiyatlarını hesapla (API simülasyonu)
   const calculateShippingRates = async (address) => {
     setShippingCalculating(true);
-    
+
     // Simulated API delay
     await new Promise(resolve => setTimeout(resolve, 1500));
-    
+
     // Şehir bazlı fiyat hesaplama simülasyonu
     const cityMultiplier = address.city === 'İstanbul' ? 1 : 1.2;
     const totalWeight = cartItems.reduce((acc, item) => acc + (item.weight || 0.5) * item.quantity, 0);
     const weightMultiplier = totalWeight > 2 ? 1.3 : 1;
-    
+
     const updatedOptions = shippingOptions.map(option => ({
       ...option,
       price: Math.round(option.price * cityMultiplier * weightMultiplier * 100) / 100,
-      estimatedDays: address.city === 'İstanbul' ? option.estimatedDays : 
-                    option.estimatedDays.split('-').map(d => parseInt(d) + 1).join('-')
+      estimatedDays: address.city === 'İstanbul' ? option.estimatedDays :
+        option.estimatedDays.split('-').map(d => parseInt(d) + 1).join('-')
     }));
-    
+
     setShippingOptions(updatedOptions);
     setShippingCalculating(false);
-  };
-
-  const handleInputChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: type === 'checkbox' ? checked : value
-    }));
   };
 
   const handleCardNumberChange = (e) => {
@@ -167,23 +237,26 @@ const CheckoutPage = () => {
     setFormData(prev => ({ ...prev, expiryDate: value }));
   };
 
+  //Teslimat adresi seçimi
   const handleAddressSelect = (addressId) => {
-    setSelectedAddressId(addressId);
+    setSelectedAddressId(addressId); //saklıyoruz
     setShowAddressForm(false);
-    
-    const selectedAddress = savedAddresses.find(addr => addr.id === addressId);
+    const selectedAddress = addresses.find(addr => addr.id === addressId);
+
     if (selectedAddress) {
       setFormData(prev => ({
         ...prev,
-        firstName: selectedAddress.firstName,
-        lastName: selectedAddress.lastName,
-        address: selectedAddress.address,
+        selectedAddressId: addressId, //Formdata nın içinde tuttuk
+        addressTitle: selectedAddress.addressTitle,
+        recipientName: selectedAddress.recipientName,
+        phoneNumber: selectedAddress.phoneNumber,
+        country: selectedAddress.country,
         city: selectedAddress.city,
         district: selectedAddress.district,
         postalCode: selectedAddress.postalCode,
-        phone: selectedAddress.phone,
+        fullAddress: selectedAddress.fullAddress,
+        isDefault: selectedAddress.isDefault,
       }));
-      
       // Kargo fiyatlarını yeniden hesapla
       calculateShippingRates(selectedAddress);
     }
@@ -194,13 +267,15 @@ const CheckoutPage = () => {
     setShowAddressForm(true);
     setFormData(prev => ({
       ...prev,
-      firstName: "",
-      lastName: "",
-      address: "",
+      addressTitle: "",
+      recipientName: "",
+      fullAddress: "",
+      country: "",
       city: "",
       district: "",
       postalCode: "",
-      phone: "",
+      phoneNumber: "",
+      isDefault: ""
     }));
   };
 
@@ -209,7 +284,7 @@ const CheckoutPage = () => {
       if (!showAddressForm && selectedAddressId) {
         return true;
       }
-      const required = ['firstName', 'lastName', 'address', 'city', 'district', 'phone'];
+      const required = ['addressTitle', 'recipientName', 'fullAddress', 'country', 'city', 'district', 'postalCode', 'phoneNumber', 'isDefault'];
       return required.every(field => formData[field].trim() !== '');
     }
     if (step === 2) {
@@ -218,9 +293,9 @@ const CheckoutPage = () => {
     if (step === 3) {
       if (formData.paymentMethod === 'credit-card') {
         return formData.cardNumber.replace(/\s/g, '').length === 16 &&
-               formData.cardHolder.trim() !== '' &&
-               formData.expiryDate.length === 5 &&
-               formData.cvv.length === 3;
+          formData.cardHolder.trim() !== '' &&
+          formData.expiryDate.length === 5 &&
+          formData.cvv.length === 3;
       }
       return true;
     }
@@ -255,15 +330,13 @@ const CheckoutPage = () => {
     <div className="flex items-center justify-center mb-8">
       {[1, 2, 3, 4].map((step) => (
         <div key={step} className="flex items-center">
-          <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-            currentStep >= step ? 'bg-orange-500 text-white' : 'bg-gray-200 text-gray-600'
-          }`}>
+          <div className={`w-10 h-10 rounded-full flex items-center justify-center ${currentStep >= step ? 'bg-orange-500 text-white' : 'bg-gray-200 text-gray-600'
+            }`}>
             {step}
           </div>
           {step < 4 && (
-            <div className={`w-20 h-1 ${
-              currentStep > step ? 'bg-orange-500' : 'bg-gray-200'
-            }`}></div>
+            <div className={`w-20 h-1 ${currentStep > step ? 'bg-orange-500' : 'bg-gray-200'
+              }`}></div>
           )}
         </div>
       ))}
@@ -272,14 +345,13 @@ const CheckoutPage = () => {
 
   const renderSavedAddresses = () => (
     <div className="space-y-3 mb-4">
-      {savedAddresses.map((address) => (
+      {addresses.map((address) => (
         <div
           key={address.id}
-          className={`border rounded-lg p-4 cursor-pointer transition-colors ${
-            selectedAddressId === address.id
-              ? 'border-orange-500 bg-orange-50'
-              : 'border-gray-300 hover:border-orange-300'
-          }`}
+          className={`border rounded-lg p-4 cursor-pointer transition-colors ${selectedAddressId === address.id
+            ? 'border-orange-500 bg-orange-50'
+            : 'border-gray-300 hover:border-orange-300'
+            }`}
           onClick={() => handleAddressSelect(address.id)}
         >
           <div className="flex items-center justify-between">
@@ -293,34 +365,16 @@ const CheckoutPage = () => {
               />
               <div>
                 <div className="flex items-center">
-                  <h4 className="font-semibold text-gray-800">{address.title}</h4>
+                  <h4 className="font-semibold text-gray-800">{address.addressTitle}</h4>
                   {address.isDefault && (
-                    <span className="ml-2 px-2 py-1 text-xs bg-green-100 text-green-800 rounded">
-                      Varsayılan
-                    </span>
+                    <span className="ml-2 px-2 py-1 text-xs bg-green-100 text-green-800 rounded">Varsayılan</span>
                   )}
                 </div>
-                <p className="text-gray-600 text-sm mt-1">
-                  {address.firstName} {address.lastName}
-                </p>
-                <p className="text-gray-600 text-sm">
-                  {address.address}
-                </p>
-                <p className="text-gray-600 text-sm">
-                  {address.district}, {address.city} {address.postalCode}
-                </p>
-                <p className="text-gray-600 text-sm">
-                  {address.phone}
-                </p>
+                <p className="text-gray-600 text-sm mt-1"> {address.recipientName}</p>
+                <p className="text-gray-600 text-sm">{address.fullAddress}</p>
+                <p className="text-gray-600 text-sm">{address.district}, {address.city}, {address.postalCode}</p>
+                <p className="text-gray-600 text-sm">{address.phoneNumber}</p>
               </div>
-            </div>
-            <div className="flex space-x-2">
-              <button className="text-gray-400 hover:text-orange-500">
-                <FaEdit />
-              </button>
-              <button className="text-gray-400 hover:text-red-500">
-                <FaTrash />
-              </button>
             </div>
           </div>
         </div>
@@ -328,33 +382,34 @@ const CheckoutPage = () => {
     </div>
   );
 
+  //YENİ ADRESS EKLEME FORMU
   const renderAddressForm = () => (
-    <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+    <form onSubmit={handleSubmit} className="bg-gray-50 rounded-lg p-4 border border-gray-200">
       <h4 className="font-semibold mb-3">Yeni Adres Ekle</h4>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <input
           type="text"
-          name="firstName"
-          placeholder="Ad"
-          value={formData.firstName}
+          name="addressTitle"
+          placeholder="Adres Başlığı"
+          value={formData.addressTitle}
           onChange={handleInputChange}
           className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-orange-500"
           required
         />
         <input
           type="text"
-          name="lastName"
-          placeholder="Soyad"
-          value={formData.lastName}
+          name="recipientName"
+          placeholder="Ad Soyad"
+          value={formData.recipientName}
           onChange={handleInputChange}
           className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-orange-500"
           required
         />
         <input
           type="tel"
-          name="phone"
+          name="phoneNumber"
           placeholder="Telefon"
-          value={formData.phone}
+          value={formData.phoneNumber}
           onChange={handleInputChange}
           className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-orange-500"
           required
@@ -366,6 +421,15 @@ const CheckoutPage = () => {
           value={formData.postalCode}
           onChange={handleInputChange}
           className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-orange-500"
+        />
+        <input
+          type="text"
+          name="country"
+          placeholder="Ülke"
+          value={formData.country}
+          onChange={handleInputChange}
+          className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-orange-500"
+          required
         />
         <input
           type="text"
@@ -386,27 +450,28 @@ const CheckoutPage = () => {
           required
         />
         <textarea
-          name="address"
+          name="fullAddress"
           placeholder="Adres"
-          value={formData.address}
+          value={formData.fullAddress}
           onChange={handleInputChange}
           className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-orange-500 md:col-span-2"
           rows="3"
           required
         />
       </div>
-      
+
       <label className="flex items-center mt-4">
         <input
           type="checkbox"
-          name="saveAddress"
-          checked={formData.saveAddress}
+          name="isDefault"
+          checked={formData.isDefault}
           onChange={handleInputChange}
           className="mr-2"
         />
-        <span className="text-sm text-gray-600">Bu adresi kaydet</span>
+        <span className="text-sm text-gray-600">Varsayılan adres</span>
       </label>
-    </div>
+      <button type="submit" className="my-2 text-orange-500">Kaydet</button>
+    </form>
   );
 
   const renderAddressStep = () => (
@@ -415,12 +480,12 @@ const CheckoutPage = () => {
         <FaMapMarkerAlt className="text-orange-500 mr-2" />
         <h2 className="text-xl font-semibold">Teslimat Adresi</h2>
       </div>
-      
-      {savedAddresses.length > 0 && !showAddressForm && (
+
+      {addresses.length > 0 && !showAddressForm && (
         <div>
           <h3 className="font-semibold mb-3">Kayıtlı Adreslerim</h3>
           {renderSavedAddresses()}
-          
+
           <button
             onClick={handleNewAddress}
             className="flex items-center text-orange-500 hover:text-orange-700 font-medium"
@@ -430,10 +495,10 @@ const CheckoutPage = () => {
           </button>
         </div>
       )}
-      
-      {(showAddressForm || savedAddresses.length === 0) && renderAddressForm()}
-      
-      {showAddressForm && savedAddresses.length > 0 && (
+
+      {(showAddressForm || addresses.length === 0) && renderAddressForm()}
+
+      {showAddressForm && addresses.length > 0 && (
         <button
           onClick={() => setShowAddressForm(false)}
           className="mt-3 text-gray-500 hover:text-gray-700"
@@ -450,7 +515,7 @@ const CheckoutPage = () => {
         <FaTruck className="text-orange-500 mr-2" />
         <h2 className="text-xl font-semibold">Kargo Seçimi</h2>
       </div>
-      
+
       {shippingCalculating ? (
         <div className="text-center py-8">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mx-auto mb-4"></div>
@@ -461,12 +526,11 @@ const CheckoutPage = () => {
           {shippingOptions.map((option) => (
             <div
               key={option.id}
-              className={`border rounded-lg p-4 cursor-pointer transition-colors ${
-                formData.selectedShipping === option.id
-                  ? 'border-orange-500 bg-orange-50'
-                  : 'border-gray-300 hover:border-orange-300'
-              }`}
-              onClick={() => setFormData(prev => ({ ...prev, selectedShipping: option.id }))}
+              className={`border rounded-lg p-4 cursor-pointer transition-colors ${formData.selectedShipping === option.id
+                ? 'border-orange-500 bg-orange-50'
+                : 'border-gray-300 hover:border-orange-300'
+                }`}
+              onClick={() => setFormData(prev => ({ ...prev, selectedShipping: option.id }))} //seçilen kargo bilgisini saklama
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center">
@@ -496,7 +560,7 @@ const CheckoutPage = () => {
                   </div>
                 </div>
               </div>
-              
+
               <div className="mt-3 ml-8">
                 <div className="flex flex-wrap gap-2">
                   {option.features.map((feature, index) => (
@@ -511,7 +575,7 @@ const CheckoutPage = () => {
               </div>
             </div>
           ))}
-          
+
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-4">
             <div className="flex items-center">
               <FaShieldAlt className="text-blue-500 mr-2" />
@@ -534,7 +598,7 @@ const CheckoutPage = () => {
         <FaCreditCard className="text-orange-500 mr-2" />
         <h2 className="text-xl font-semibold">Ödeme Bilgileri</h2>
       </div>
-      
+
       <div className="mb-4">
         <label className="flex items-center mb-2">
           <input
@@ -614,18 +678,18 @@ const CheckoutPage = () => {
   );
 
   const renderConfirmationStep = () => {
-    const selectedAddress = selectedAddressId 
-      ? savedAddresses.find(addr => addr.id === selectedAddressId)
+    const selectedAddress = selectedAddressId
+      ? addresses.find(addr => addr.id === selectedAddressId)
       : null;
 
     const addressInfo = selectedAddress || {
-      firstName: formData.firstName,
-      lastName: formData.lastName,
-      address: formData.address,
+      recipientName: formData.recipientName,
+      fullAddress: formData.fullAddress,
       district: formData.district,
       city: formData.city,
-      phone: formData.phone
+      phoneNumber: formData.phoneNumber
     };
+    console.log("addressInfo:", addressInfo);
 
     const selectedShipping = shippingOptions.find(option => option.id === formData.selectedShipping);
 
@@ -635,24 +699,27 @@ const CheckoutPage = () => {
           <FaCheckCircle className="text-orange-500 mr-2" />
           <h2 className="text-xl font-semibold">Sipariş Özeti</h2>
         </div>
-        
+
         <div className="mb-4">
           <h3 className="font-semibold mb-2">Teslimat Adresi:</h3>
           <div className="bg-gray-50 p-3 rounded">
             {selectedAddress && (
               <p className="text-sm text-orange-600 font-medium mb-1">
-                {selectedAddress.title}
+                {selectedAddress.addressTitle}
               </p>
             )}
-            <p className="text-gray-600">
-              {addressInfo.firstName} {addressInfo.lastName}<br />
-              {addressInfo.address}<br />
+            {/* DOĞRU */}
+            <div>
+              {addressInfo.recipientName}<br />
+              {addressInfo.fullAddress}<br />
               {addressInfo.district}, {addressInfo.city}<br />
-              {addressInfo.phone}
-            </p>
+              {addressInfo.phoneNumber}
+            </div>
+
+
           </div>
         </div>
-        
+
         <div className="mb-4">
           <h3 className="font-semibold mb-2">Kargo Seçimi:</h3>
           <div className="bg-gray-50 p-3 rounded">
@@ -672,7 +739,7 @@ const CheckoutPage = () => {
             </div>
           </div>
         </div>
-        
+
         <div className="mb-4">
           <h3 className="font-semibold mb-2">Ödeme Yöntemi:</h3>
           <p className="text-gray-600">
@@ -687,20 +754,20 @@ const CheckoutPage = () => {
 
   const renderOrderSummary = () => {
     const selectedShipping = shippingOptions.find(option => option.id === formData.selectedShipping);
-    
+
     return (
       <div className="bg-gray-50 rounded-lg p-6 sticky top-4">
         <h3 className="text-lg font-semibold mb-4">Sipariş Özeti</h3>
-        
+
         <div className="space-y-2 mb-4">
           {cartItems.map((item) => (
             <div key={item.id} className="flex justify-between text-sm">
-              <span>{item.name} x{item.quantity}</span>
-              <span>₺{(item.price * item.quantity).toLocaleString()}</span>
+              <span>{item.productName} x{item.quantity}</span>
+              <span>₺{(item.unitPrice * item.quantity).toLocaleString()}</span>
             </div>
           ))}
         </div>
-        
+
         <div className="border-t pt-4 space-y-2">
           <div className="flex justify-between">
             <span>Ara Toplam:</span>
@@ -749,7 +816,7 @@ const CheckoutPage = () => {
                 Geri
               </button>
             )}
-            
+
             {currentStep < 4 ? (
               <button
                 onClick={handleNextStep}
@@ -759,9 +826,7 @@ const CheckoutPage = () => {
                 {shippingCalculating ? 'Hesaplanıyor...' : 'Devam Et'}
               </button>
             ) : (
-              <button
-                onClick={handleCompleteOrder}
-                className="px-6 py-2 bg-green-500 text-white rounded hover:bg-green-600 ml-auto"
+              <button onClick={handleConfirmOrder} className="px-6 py-2 bg-green-500 text-white rounded hover:bg-green-600 ml-auto"
               >
                 Siparişi Tamamla
               </button>
@@ -776,5 +841,4 @@ const CheckoutPage = () => {
     </div>
   );
 };
-
 export default CheckoutPage;

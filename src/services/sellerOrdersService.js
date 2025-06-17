@@ -2,7 +2,6 @@ const API_BASE = "/api/seller/orders";
 
 const getToken = () => localStorage.getItem("token");
 
-
 export const fetchSellerOrders = async () => {
   const token = getToken();
 
@@ -10,7 +9,7 @@ export const fetchSellerOrders = async () => {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
-       Authorization: `Bearer ${token}`, // token varsa
+       Authorization: `Bearer ${token}`, 
     },
   });
 
@@ -35,8 +34,8 @@ export const updateOrderStatus = async (orderId, action) => {
     });
 
     if (!response.ok) {
-      const errorText = await response.text(); // Backend hatasını oku
-      console.error("API Hatası Detayı:", errorText); // Konsola yazdır
+      const errorText = await response.text(); // Backend hatası
+      console.error("API Hatası Detayı:", errorText);
       throw new Error("İşlem başarısız");
     }
 

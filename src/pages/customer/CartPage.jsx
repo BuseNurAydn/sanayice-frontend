@@ -1,5 +1,5 @@
 import { useSelector, useDispatch } from "react-redux";
-import { changeQuantity } from "../../services/cartService";
+import { changeQuantity, removeCart, clearCart} from "../../services/cartService";
 import { useNavigate } from "react-router-dom";
 import { FaRegTrashCan } from "react-icons/fa6";
 import { toast } from "react-toastify";
@@ -10,7 +10,7 @@ const CartPage = () => {
   const navigate = useNavigate();
 
   const getTotal = () =>
-    cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
+    cartItems.reduce((acc, item) => acc + item.unitPrice * item.quantity, 0);
 
   const handleCheckout = () => {
     // Checkout sayfasına yönlendirme
@@ -35,8 +35,12 @@ const CartPage = () => {
             {/* Sol: Görsel */}
             <div className="w-24 h-24 flex items-center justify-center mr-4">
               <img
-                src={item.image}
-                alt={item.name}
+                src={
+                  item.additionalImages?.[0]
+                    ? `/${item.additionalImages[0]}`
+                    : "/no-image.png"
+                }
+                alt={item.productName}
                 className="h-full border border-gray-300 object-contain"
               />
             </div>
@@ -44,16 +48,16 @@ const CartPage = () => {
             {/* Orta: Bilgiler */}
             <div className="flex-1">
               <h2 className="text-lg font-semibold text-gray-800">
-                {item.name}
+                {item.productName}
               </h2>
-              <p className="text-sm text-gray-500">{item.brand}</p>
+              <p className="text-sm text-gray-500">{item.productBrand}</p>
 
               {/* Adet Kontrol */}
               <div className="flex items-center gap-4 mt-4 border border-[var(--color-dark-orange)] rounded-lg w-max px-2 py-1 shadow">
                 <button
                   onClick={() => {
                     if (item.quantity > 1) {
-                      dispatch(changeQuantity({ id: item.id, delta: -1 }));
+                      dispatch(changeQuantity({ itemId: item.id, quantity: item.quantity - 1 }));
                     }
                   }}
                   className="flex items-center justify-center"
@@ -67,7 +71,9 @@ const CartPage = () => {
                 </span>
 
                 <button
-                  onClick={() => dispatch(changeQuantity({ id: item.id, delta: 1 }))}
+                  onClick={() => {
+                    dispatch(changeQuantity({ itemId: item.id, quantity: item.quantity + 1 }));
+                  }}
                   className=" flex items-center justify-center"
                   aria-label="Arttır"
                 >
@@ -80,12 +86,12 @@ const CartPage = () => {
             {/* Sağ: Fiyat ve Sil */}
             <div className="flex flex-col items-end space-y-2">
               <p className="text-orange-600 font-bold text-md">
-                ₺{(item.price * item.quantity).toLocaleString()}
+                ₺{(item.unitPrice * item.quantity).toLocaleString()}
               </p>
               <button
                 onClick={() => {
-                  dispatch(removeFromCart(item.id)),
-                  toast.info("Ürün silindi");
+                  dispatch(removeCart(item.id)),
+                    toast.info("Ürün silindi");
                 }}
                 className="text-red-500 hover:text-red-700 underline"
               >
@@ -116,6 +122,15 @@ const CartPage = () => {
               className="px-4 py-2 bg-orange-500 text-white rounded hover:bg-orange-600"
             >
               Alışverişi Tamamla
+            </button>
+            <button
+              onClick={() => {
+                dispatch(clearCart());
+                toast.success("Sepet temizlendi");
+              }}
+              className="px-4 py-2 border bg-red-600 text-white rounded"
+            >
+              Sepeti Sil
             </button>
           </div>
         </>

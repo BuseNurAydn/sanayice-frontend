@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState} from 'react';
 import { FaApple, FaFacebook } from 'react-icons/fa';
 import { FcGoogle } from 'react-icons/fc';
 import AuthLayout from '../AuthLayout';
@@ -11,6 +11,7 @@ import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { setCredentials } from '../../../store/authSlice';
 import { login } from '../../../services/authService';
+
 
 const Login = () => {
     const [loginData, setLoginData] = useState({

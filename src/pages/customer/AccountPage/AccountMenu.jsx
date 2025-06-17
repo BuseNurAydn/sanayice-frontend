@@ -20,6 +20,7 @@ const AccountMenu = () => {
   const handleLogout = () => {
     dispatch(clearCart());  // Sepeti temizle
     dispatch(logout());
+    localStorage.removeItem("token");
     setOpen(false);
     navigate('/'); // çıkış sonrası anasayfaya yönlendir
   };

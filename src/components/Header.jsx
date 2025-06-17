@@ -1,29 +1,50 @@
 import { useNavigate } from "react-router-dom";
 import { useSelector } from 'react-redux';
+import { useDispatch } from "react-redux";
 import Logo from "../../src/assets/png/Logo2.png";
 import { FaShoppingCart } from "react-icons/fa";
 import AccountMenu from "../pages/customer/AccountPage/AccountMenu";
+import {useEffect} from 'react'
+import {fetchCart,addToCart } from "../services/cartService";
+import {toast} from "react-toastify"
 
 const Header = ({ searchQuery, setSearchQuery }) => {
   const navigate = useNavigate();
-
+  const dispatch = useDispatch();
 
    const cartItems = useSelector((state) => state.cart.items);
    const totalQuantity = Array.isArray(cartItems)
   ? cartItems.reduce((total, item) => total + item.quantity, 0)
   : 0;
 
+  //bekleyen ürünü çektim
+  useEffect(() => {
+  const pendingItem = localStorage.getItem("pendingCartItem");
+
+  if (pendingItem) {
+    const item = JSON.parse(pendingItem);
+
+    dispatch(addToCart(item))
+      .unwrap()
+      .then(() => {
+        toast.success("Ürün sepete eklendi");
+        localStorage.removeItem("pendingCartItem");
+
+        dispatch(fetchCart()); //Sepet bilgisi güncellensin
+      })
+      .catch(() => {
+        toast.error("Bekleyen ürün sepete eklenemedi");
+      });
+  }
+}, []);
+
   return (
     <header className="bg-white shadow-sm py-4 sticky top-0 z-30">
        <div className="container mx-auto px-0 2xl:px-30 flex items-center justify-between">
       
         <div className="flex items-center gap-3">
-        <img
-            src={Logo}
-            alt="Logo"
-            className="rounded-lg object-contain cursor-pointer"
-            onClick={() => navigate('/')}
-        />
+        <img src={Logo} alt="Logo" className="rounded-lg object-contain cursor-pointer" 
+        onClick={() => navigate('/')}/>
         </div>
 
       <div className="flex-1 max-w-2xl mx-6">

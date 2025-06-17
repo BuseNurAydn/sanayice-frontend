@@ -1,8 +1,7 @@
 import AdminText from "../../shared/Text/AdminText";
 import { useState, useEffect } from "react";
 import { toast } from "react-toastify";
-import { updateOrderStatus } from "../../services/sellerOrdersService";
-
+import { updateOrderStatus, fetchSellerOrders } from "../../services/sellerOrdersService";
 
 const Orders = () => {
   const [orders, setOrders] = useState([]);
@@ -13,34 +12,19 @@ const Orders = () => {
   const buttonStyle = "bg-[var(--color-orange)] text-white px-4 py-2 rounded-lg font-semibold hover:opacity-90 transition-opacity";
   const inputStyle = 'border-gray-200 outline-none border px-3 py-2 rounded-lg bg-gray-50';
 
-  const getToken = () => localStorage.getItem("token");
-  const fetchSellerOrders = async () => {
-    const token = getToken();
-
-    const response = await fetch("/api/seller/orders/summary", {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error("Siparişler alınamadı");
-    }
-
-    const data = await response.json();
-    return data;
-  };
-
   useEffect(() => {
-    fetchSellerOrders()
-      .then(data => setOrders(data))
-
-      .catch(error => {
-        console.error(error);
-      });
-  }, []);
+    const getOrders = async () => {
+      try {
+        const data = await fetchSellerOrders();
+        setOrders(data);
+        console.log("Satıcı siparişleri:", data);
+      } catch (err) {
+        console.error("Siparişler alınamadı:", err);
+        setError(err.message);
+      }
+    };
+    getOrders();
+  }, [])
 
   console.log(orders)
 
@@ -73,35 +57,35 @@ const Orders = () => {
     ? orders
     : orders.filter(order => order.overallStatus?.toUpperCase() === selectedStatus?.toUpperCase());
 
-const handleOrderUpdate = async (orderId, action) => {
-  const newStatusMap = {
-    confirm: "CONFIRMED",
-    cancel: "CANCELED",
-    ship: "SHIPPED",
-    deliver: "DELIVERED",
-  };
+  const handleOrderUpdate = async (orderId, action) => {
+    const newStatusMap = {
+      confirm: "CONFIRMED",
+      cancel: "CANCELED",
+      ship: "SHIPPED",
+      deliver: "DELIVERED",
+    };
 
-  const newStatus = newStatusMap[action];
-
-  try {
-    await updateOrderStatus(orderId, action);
-    toast.success("Durum güncellendi!");
-
-    // Güncel siparişleri yeniden çek
-   // Sipariş listesini güncelle
-    const updatedOrders = await fetchSellerOrders();
-    setOrders(updatedOrders);
-
-    // Seçili sipariş detay sayfası açık ise güncelle
     const newStatus = newStatusMap[action];
-    if (selectedOrder?.id === orderId && newStatus) {
-      setSelectedOrder(prev => ({ ...prev, overallStatus: newStatus }));
-    }
 
-  } catch (err) {
-    toast.error("Sipariş durumu güncellenemedi.");
-  }
-};
+    try {
+      await updateOrderStatus(orderId, action);
+      toast.success("Durum güncellendi!");
+
+      // Güncel siparişleri yeniden çek
+      // Sipariş listesini güncelle
+      const updatedOrders = await fetchSellerOrders();
+      setOrders(updatedOrders);
+
+      // Seçili sipariş detay sayfası açık ise güncelle
+      const newStatus = newStatusMap[action];
+      if (selectedOrder?.id === orderId && newStatus) {
+        setSelectedOrder(prev => ({ ...prev, overallStatus: newStatus }));
+      }
+
+    } catch (err) {
+      toast.error("Sipariş durumu güncellenemedi.");
+    }
+  };
 
   const stats = {
     total: orders.length,
@@ -109,22 +93,22 @@ const handleOrderUpdate = async (orderId, action) => {
     confirmed: orders.filter(o => o.overallStatus === 'CONFIRMED').length,
     shipped: orders.filter(o => o.overallStatus === 'SHIPPED').length,
     delivered: orders.filter(o => o.overallStatus === 'DELIVERED').length,
-   totalRevenue: orders
-    .filter(o => o.overallStatus === 'DELIVERED')
-    .reduce((sum, order) => {
-      const orderTotal = order.orderItems?.reduce(
-        (orderSum, item) => orderSum + item.unitPrice * item.quantity,
-        0
-      );
-      return sum + orderTotal;
-    }, 0),
+    totalRevenue: orders
+      .filter(o => o.overallStatus === 'DELIVERED')
+      .reduce((sum, order) => {
+        const orderTotal = order.orderItems?.reduce(
+          (orderSum, item) => orderSum + item.unitPrice * item.quantity,
+          0
+        );
+        return sum + orderTotal;
+      }, 0),
 
   };
 
-console.log(stats)
+  console.log(stats)
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen p-6 bg-gray-50">
       <div>
         <AdminText>Siparişler</AdminText>
 
@@ -308,7 +292,7 @@ console.log(stats)
 
       {/* Sipariş Detay Modal */}
       {selectedOrder && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+        <div className="fixed inset-0 bg-opacity-40 backdrop-blur-lg flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6">
               <div className="flex justify-between items-center mb-6">
@@ -404,19 +388,19 @@ console.log(stats)
                 )}
                 {selectedOrder.overallStatus === 'SHIPPED' && (
                   <>
-                  <button
-                    className={buttonStyle + " bg-green-600 hover:bg-green-700"}
-                    onClick={() => handleOrderUpdate(selectedOrder.orderId, 'deliver')}
-                  >
-                    Teslim Edildi İşaretle
-                  </button>
-                   <button
+                    <button
+                      className={buttonStyle + " bg-green-600 hover:bg-green-700"}
+                      onClick={() => handleOrderUpdate(selectedOrder.orderId, 'deliver')}
+                    >
+                      Teslim Edildi İşaretle
+                    </button>
+                    <button
                       className={buttonStyle + " bg-red-600 hover:bg-red-700"}
                       onClick={() => handleOrderUpdate(selectedOrder.orderId, 'cancel')}
                     >
                       İptal Et
                     </button>
-                    </>
+                  </>
                 )}
                 <button
                   onClick={() => setSelectedOrder(null)}
