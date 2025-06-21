@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { logout } from '../../../store/authSlice';
-import {clearCart} from '../../../services/cartService';
+import {clear} from '../../../store/cartSlice';
+import { clearFavorites } from '../../../store/favoritesSlice';
 import { Link, useNavigate } from 'react-router-dom';
 import { FaUser,FaRegUser  } from "react-icons/fa";
 import { BsBasket3, BsChatSquareDots } from "react-icons/bs";
@@ -18,9 +19,12 @@ const AccountMenu = () => {
   const toggleMenu = () => setOpen(!open);
 
   const handleLogout = () => {
-    dispatch(clearCart());  // Sepeti temizle
-    dispatch(logout());
     localStorage.removeItem("token");
+    localStorage.removeItem("pendingFavoriteItem"); // Geçici favori silinsin
+    localStorage.removeItem("pendingCartItem");   // geçici sepet silinsin
+    dispatch(clear());  // Sepeti temizle
+    dispatch(clearFavorites()); //Favorileri temizle
+    dispatch(logout());
     setOpen(false);
     navigate('/'); // çıkış sonrası anasayfaya yönlendir
   };
@@ -36,17 +40,20 @@ const AccountMenu = () => {
   }
 
   return (
-    <div className="relative">
-      <Link to="/account" onClick={toggleMenu} navigate="/account" className="bg-[var(--color-dark-blue)] rounded-xl px-6 py-3 text-white cursor-pointer flex flex-row gap-x-2 items-center">
+    <div className="relative z-20"
+      onMouseEnter={() => setOpen(true)}
+      onMouseLeave={() => setOpen(false)}
+      >
+      <Link to="/account" onClick={toggleMenu}  className="bg-[var(--color-dark-blue)] rounded-xl px-6 py-3 text-white cursor-pointer flex flex-row gap-x-2 items-center">
        <FaUser/> Hesabım
       </Link>
 
       {open && (
-        <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-200 shadow-lg rounded p-4 z-50">
+        <div className="absolute right-0 top-full w-48 bg-white border border-gray-200 shadow-lg rounded p-4 z-50">
           <p className="text-md text-[var(--color-dark-orange)] break-words text-center">{user.name}</p>
           <hr className="my-2" />
           <div className='text-sm '>
-          <Link to="/orders" className="py-1 hover:text-orange-600 flex flex-row gap-x-4 items-center" onClick={() => setOpen(false)}>
+          <Link to="/account/orders" className="py-1 hover:text-orange-600 flex flex-row gap-x-4 items-center" onClick={() => setOpen(false)}>
             <BsBasket3/>
             Tüm Siparişlerim
           </Link>

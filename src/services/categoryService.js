@@ -36,6 +36,22 @@ export const fetchSubcategories = async () => {
   return response.json();
 };
 
+//Tıklanan kategori ve alt kategorilerini getirmek için
+export const getCategoryById = async (id) => {
+  const token = localStorage.getItem("token");
+
+  const response = await fetch(`/api/categories/${id}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) throw new Error("Kategori verisi alınamadı");
+
+  return await response.json();
+};
+
+
 //KATEGORİ - ALT KATEGORİLERİ SİLME
 export const deleteCategory = async (id, type = "category") => {
   const token = getToken();

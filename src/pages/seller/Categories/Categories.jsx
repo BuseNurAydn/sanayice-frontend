@@ -170,10 +170,11 @@ const handleDelete = async () => {
                     setSelectedCategoryId(category.id);
                     setIsSubModalOpen(true);
                   }}
+                  title="Alt Kategori Ekle"
                 >
                   <FcPlus size={18} />
                 </button>
-                <button onClick={(e) => { e.stopPropagation(); handleEdit(category); }} className="text-blue-600 hover:text-blue-800">
+                <button onClick={(e) => { e.stopPropagation(); handleEdit(category); }} title="Kategori Düzenle" className="text-blue-600 hover:text-blue-800">
                   <FaEdit size={18} />
                 </button>
                 {isModalOpen && (
@@ -192,6 +193,7 @@ const handleDelete = async () => {
                     setDeleteType("category");
                     setConfirmOpen(true);
                   }}
+                  title="Kategori Sil"
                   className="text-red-600 hover:text-red-800"
                   >
                   <FaTrash size={18} />

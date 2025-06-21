@@ -1,4 +1,4 @@
-import { useState} from 'react';
+import { useState } from 'react';
 import { FaApple, FaFacebook } from 'react-icons/fa';
 import { FcGoogle } from 'react-icons/fc';
 import AuthLayout from '../AuthLayout';
@@ -60,6 +60,12 @@ const Login = () => {
             }));
 
             localStorage.setItem('token', data.token);
+            localStorage.setItem('user', JSON.stringify({
+                id: data.id,
+                email: data.email,
+                name: data.name,
+                role: data.roles[0],
+            }));
             console.log(data.roles[0]);
 
             setTimeout(() => {

@@ -42,3 +42,59 @@ export const fetchAddresses = async () => {
   return await response.json();
 };
 
+//DELETE ADDRESS
+export const deleteAddress = async (id) => {
+  const token = localStorage.getItem("token");
+
+  const response = await fetch(`${API_BASE}/${id}`, {
+    method: "DELETE",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error("Adres silinemedi");
+  }
+
+  return true;
+};
+
+//GET ID
+export const getAddressById = async (id) => {
+  const token = localStorage.getItem("token");
+
+  const response = await fetch(`${API_BASE}/${id}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error("Adres getirilemedi");
+  }
+
+  return await response.json();
+};
+
+//PUT ADDRESS
+export const updateAddress = async (id, formData) => {
+  const token = localStorage.getItem("token");
+
+  const response = await fetch(`${API_BASE}/${id}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+       Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(formData),
+  });
+
+  if (!response.ok) {
+    throw new Error("Adres güncellenemedi");
+  }
+  return true;
+};
+
+
+

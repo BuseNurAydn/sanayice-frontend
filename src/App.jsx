@@ -6,10 +6,34 @@ import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { useEffect } from 'react';
+import { useDispatch } from 'react-redux';
+import { setCredentials, logout } from './store/authSlice'; 
+import ScrollToTop from "./components/ScrollToTop";
 
 function App() {
+//Sayfa yenilendiğinde Redux state sıfırlanır. Bunun önüne geçmek için useEffect kullanarak localStorage’dan bilgiyi Redux’a tekrar yükledim
+
+ const dispatch = useDispatch();
+
+ useEffect(() => {
+  const token = localStorage.getItem("token");
+  const user = localStorage.getItem("user");
+
+  if (token && user) {
+    dispatch(setCredentials({
+      token,
+      user: JSON.parse(user)
+    }));
+  } else {
+    dispatch(logout());
+  }
+}, [dispatch]);
+
   return (
+     
      <>
+     
       {/* Diğer bileşenlerin */}
       <ToastContainer
         position="top-right"
@@ -23,6 +47,7 @@ function App() {
         pauseOnHover
       />
     <Router>
+      <ScrollToTop />
       <Routes>
 
         {/* Müşteri panelleri */}

@@ -1,31 +1,52 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { FaRegHeart } from "react-icons/fa";
+import { FaHeart, FaRegHeart } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { useDispatch, useSelector } from 'react-redux';
 import { addToCart } from '../services/cartService';
+import { addToFavorites, removeFavorites, fetchFavorites } from "../services/favoritesService";
 
-const ProductCard = ({ product, showDiscount = false }) => {
-  const [isFavorited, setIsFavorited] = useState(false);
-  const toggleFavorite = () => setIsFavorited(!isFavorited);
+const ProductCard = ({ product }) => {
   const navigate = useNavigate();
-
   const dispatch = useDispatch();
-  const [quantity, setQuantity] = useState(1);
   const { loading, error } = useSelector(state => state.cart);
-
   // Sepete ekleme sırasında butonu disable etmek için state
   const [adding, setAdding] = useState(false);
 
+  const favorites = useSelector(state => state.favorites.items);
+  const isFavorite = favorites.some(fav => fav.productId === product.id);
 
-  //detay sayfasına gitme
-  const handleClick = () => {
-    navigate(`/product/${product.id}`);
+
+  // Add Favorites
+  const handleFavoriteClick = async (e) => {
+    e.stopPropagation();
+    const token = localStorage.getItem('token');
+
+    if (!token) {
+      // Giriş yoksa, sadece ürün id'sini string olarak sakla
+      localStorage.setItem("pendingFavoriteItem", product.id.toString());
+      toast.info("Lütfen giriş yapın!");
+      navigate("/auth/login");
+      return;
+    }
+    setAdding(true);
+    try {
+      if (isFavorite) {
+        await dispatch(removeFavorites(product.id)).unwrap();
+        toast.success('Favorilerden çıkarıldı');
+      } else {
+        await dispatch(addToFavorites(product.id)).unwrap();
+        toast.success('Favorilere eklendi!');
+      }
+      await dispatch(fetchFavorites()).unwrap();
+    } catch {
+      toast.error('Bir hata oluştu');
+    } finally {
+      setAdding(false);
+    }
   };
 
   //sepete ekleme sayfasına
-  console.log("Token:", localStorage.getItem("token"));
-
   const handleAddToCart = async (e) => {
     e.stopPropagation();
 
@@ -38,9 +59,8 @@ const ProductCard = ({ product, showDiscount = false }) => {
         "pendingCartItem",
         JSON.stringify({ productId: product.id, quantity: 1 })
       );
-
       toast.info("Lütfen giriş yapın!");
-      navigate("/auth/login"); // Giriş sayfasına yönlendir
+      navigate("/auth/login");
       return;
     }
     setAdding(true);
@@ -54,6 +74,11 @@ const ProductCard = ({ product, showDiscount = false }) => {
     }
   };
 
+  //detay sayfasına gitme
+  const handleClick = () => {
+    navigate(`/product/${product.id}`);
+  };
+
   return (
     <div
       onClick={handleClick}
@@ -64,9 +89,13 @@ const ProductCard = ({ product, showDiscount = false }) => {
       {/* Favori ikonu */}
       <button
         className="bg-gray-50 p-2 rounded-full z-10 absolute top-2 right-2 text-gray-400 hover:text-orange-500"
-        onClick={toggleFavorite}
+        onClick={handleFavoriteClick}
       >
-        <FaRegHeart className={`h-5 w-5 ${isFavorited ? " text-orange-500" : ""}`} />
+        {isFavorite ? (
+          <FaHeart className="text-orange-500" />
+        ) : (
+          <FaRegHeart className="text-gray-400 hover:text-orange-500" />
+        )}
       </button>
 
       <div className="relative mb-3">

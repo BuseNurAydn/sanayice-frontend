@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react'
 import { FaTrash } from "react-icons/fa";
 import { fetchCategories, fetchSubcategories } from "../../../services/categoryService";
 import {createProduct} from "../../../services/sellerProductService";
+import { toast } from 'react-toastify';
 
 const AddProduct = () => {
 
@@ -146,11 +147,11 @@ const AddProduct = () => {
 
     try {
       await createProduct(productData);  //servisi kullandık
-      alert("Ürün başarıyla eklendi!");
+      toast("Ürün başarıyla eklendi!");
       console.log("Form gönderildi:", formData);
     } catch (error) {
       console.error(error);
-      alert('Sunucu hatası!');
+      toast('Sunucu hatası!');
     }
   };
 

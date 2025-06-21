@@ -114,10 +114,10 @@ const Products = () => {
                   <td className={borderStyle}>{product.brand}</td>
                   <td className={borderStyle}>
                     <div className="flex justify-center gap-3">
-                      <button onClick={() => handleEdit(product)} className="text-blue-600 hover:text-blue-800" title="Düzenle">
+                      <button onClick={() => handleEdit(product)} className="text-blue-600 hover:text-blue-800" title=" Ürünü Düzenle">
                         <FaEdit />
                       </button>
-                      <button onClick={() => handleDeleteClick(product.id)} className="text-red-600 hover:text-red-800" title="Sil">
+                      <button onClick={() => handleDeleteClick(product.id)} className="text-red-600 hover:text-red-800" title="Ürünü Sil">
                         <FaTrash />
                       </button>
                     </div>

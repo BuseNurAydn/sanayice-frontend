@@ -9,8 +9,9 @@ const cartSlice = createSlice({
     error: null,
   },
   reducers: {
-    clear: (state) => {
+    clear(state) {
       state.items = [];
+      state.error = null;
     },
   },
   extraReducers: (builder) => {
