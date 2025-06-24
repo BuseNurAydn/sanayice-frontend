@@ -104,39 +104,63 @@ const HomePage = () => {
   );
 
   return (
-    <div className=" bg-gray-50">
+    <div className="bg-gray-50">
       {/*Header searchQuery={searchQuery} setSearchQuery={setSearchQuery} />*/}
-      <nav className="bg-white shadow border-b relative">
+      <nav className="bg-white shadow-md border-b relative">
         <div className="container mx-auto px-6">
           {/* Menü Satırı */}
-          <div className="flex space-x-8 py-4">
+          <div className="flex justify-center space-x-12 py-5">
             {categories.map((category) => (
               <div
                 key={category.id}
-                className="relative"
+                className="relative group"
                 onMouseEnter={() => setActiveCategory(category.id)}
                 onMouseLeave={() => setActiveCategory(null)}
               >
-                <Link to={`/category/${category.id}`} className="text-sm font-semibold text-gray-800 hover:text-orange-600 transition">
+                <Link 
+                  to={`/category/${category.id}`} 
+                  className="text-sm font-semibold text-gray-700 hover:text-orange-600 transition-all duration-300 py-2 px-4 rounded-lg hover:bg-orange-50 relative flex items-center gap-1"
+                >
                   {category.name}
+                  {category.subcategories?.length > 0 && (
+                    <svg 
+                      className="w-3 h-3 transition-transform duration-300 group-hover:rotate-180" 
+                      fill="none" 
+                      stroke="currentColor" 
+                      viewBox="0 0 24 24"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  )}
+                  <span className="absolute bottom-0 left-1/2 w-0 h-0.5 bg-orange-600 transition-all duration-300 group-hover:w-full group-hover:left-0"></span>
                 </Link>
-
-                {/* Açılan Panel */}
+  
+                {/* Alt Kategoriler Dropdown */}
                 {activeCategory === category.id && category.subcategories?.length > 0 && (
-                  <div className="absolute left-0 top-full mt-4 bg-white shadow-xl border-gray-200 rounded-b-xl w-[800px] px-6 py-5 z-50 animate-fade-in">
-
-                    {/* Alt Kategoriler */}
-                    <div className="grid grid-cols-4 gap-3">
-                      {category.subcategories.map((sub) => (
+                  <div className="absolute left-0 top-full mt-3 bg-white shadow-2xl border border-gray-200 rounded-2xl min-w-[320px] py-5 px-6 z-50 animate-dropdown">
+                    <div className="space-y-1">
+                      {category.subcategories.map((sub, index) => (
                         <Link
                           key={sub.id}
                           to={`/subcategory/${sub.id}`}
-                          className="text-sm text-gray-600 hover:text-orange-500 transition"
+                          className="flex items-center gap-3 text-sm text-gray-700 hover:text-orange-600 hover:bg-gradient-to-r hover:from-orange-50 hover:to-orange-100 px-4 py-3 rounded-xl transition-all duration-300 group"
                         >
-                          {sub.name}
+                          <div className="w-2 h-2 bg-orange-200 rounded-full group-hover:bg-orange-500 transition-colors duration-300"></div>
+                          <span className="font-medium">{sub.name}</span>
+                          <svg 
+                            className="w-4 h-4 ml-auto opacity-0 group-hover:opacity-100 transition-opacity duration-300" 
+                            fill="none" 
+                            stroke="currentColor" 
+                            viewBox="0 0 24 24"
+                          >
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                          </svg>
                         </Link>
                       ))}
                     </div>
+                    
+                    {/* Dropdown Arrow */}
+                    <div className="absolute -top-2 left-8 w-4 h-4 bg-white border-t border-l border-gray-200 rotate-45"></div>
                   </div>
                 )}
               </div>
@@ -144,6 +168,32 @@ const HomePage = () => {
           </div>
         </div>
       </nav>
+  
+      {/* CSS Animasyonları */}
+      <style jsx>{`
+        @keyframes dropdown {
+          0% {
+            opacity: 0;
+            transform: translateY(-10px);
+          }
+          100% {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+        
+        .animate-dropdown {
+          animation: dropdown 0.3s ease-out forwards;
+        }
+        
+        .scrollbar-hide {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+        .scrollbar-hide::-webkit-scrollbar {
+          display: none;
+        }
+      `}</style>
       <main className="max-w-7xl mx-auto py-8 px-4">
         <section className="flex flex-col md:flex-row gap-6 pb-8">
           {/* Sol Slider */}

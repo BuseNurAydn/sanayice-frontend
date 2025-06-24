@@ -44,6 +44,11 @@ const menuItems = [
     icon: <MdVerifiedUser />,
   },
   {
+    label: "Satıcı Kampanya Yönetimi",
+    to: "/seller/seller_campaign",
+    icon: <MdVerifiedUser />,
+  },
+  {
     label: "Kategoriler",
     to: "/seller/categories",
     icon: <BiSolidCategory />,
@@ -63,6 +68,11 @@ const menuItems = [
   {
     label: "Kupon Ve Kampanya Yönetimi",
     to: "/seller/coupon_campaign_management",
+    icon: <MdLocalOffer />,
+  },
+  {
+    label: "Satıcıların Kupon Ve Kampanya Listesi",
+    to: "/seller/seller_coupon_campaign_management",
     icon: <MdLocalOffer />,
   },
   {
@@ -91,10 +101,10 @@ const Sidebar = () => {
   const filteredMenuItems = menuItems.filter((item) => {
     if (role === "ROLE_SELLER") {
       return item.label !== "Kategoriler" && item.label !== "Satıcı Doğrulama" && 
-             item.label !== "Banner Yönetimi" && item.label !== "Kupon Ve Kampanya Yönetimi" && item.label !== "Destek Ve Geri Bildirim Yönetimi";
+             item.label !== "Banner Yönetimi" && item.label !== "Kupon Ve Kampanya Yönetimi" && item.label !== "Satıcıların Kupon Ve Kampanya Listesi" && item.label !== "Destek Ve Geri Bildirim Yönetimi";
     } else if (role === "ROLE_MANAGER") {
       return item.label === "Satıcı Doğrulama" || item.label === "Kategoriler" || 
-             item.label === "Banner Yönetimi" || item.label === "Kupon Ve Kampanya Yönetimi" || item.label === "Destek Ve Geri Bildirim Yönetimi";
+             item.label === "Banner Yönetimi" || item.label === "Kupon Ve Kampanya Yönetimi" || item.label === "Satıcıların Kupon Ve Kampanya Listesi" ||  item.label === "Destek Ve Geri Bildirim Yönetimi";
     } else {
       return true;
     }
