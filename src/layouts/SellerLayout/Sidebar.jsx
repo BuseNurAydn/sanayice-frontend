@@ -12,6 +12,11 @@ import { MdStorefront, MdVerifiedUser, MdViewCarousel, MdLocalOffer, MdSupport }
 
 const menuItems = [
   {
+    label: "Hesabımı Doğrulama",
+    to: "/seller/vertification",
+    icon: <MdVerifiedUser />,
+  },
+  {
     label: "Satış Yönetim Paneli",
     to: "/seller/dashboard",
     icon: <BsFileBarGraphFill />,
@@ -39,13 +44,13 @@ const menuItems = [
     ],
   },
   {
-    label: "Satıcı Doğrulama",
-    to: "/seller/seller-verification",
+    label: "Satıcı Kampanya Yönetimi",
+    to: "/seller/seller_campaign",
     icon: <MdVerifiedUser />,
   },
   {
-    label: "Satıcı Kampanya Yönetimi",
-    to: "/seller/seller_campaign",
+    label: "Satıcı Doğrulama Sayfası",
+    to: "/seller/seller_vertification",
     icon: <MdVerifiedUser />,
   },
   {
@@ -101,10 +106,10 @@ const Sidebar = () => {
   const filteredMenuItems = menuItems.filter((item) => {
     if (role === "ROLE_SELLER") {
       return item.label !== "Kategoriler" && item.label !== "Satıcı Doğrulama" && 
-             item.label !== "Banner Yönetimi" && item.label !== "Kupon Ve Kampanya Yönetimi" && item.label !== "Satıcıların Kupon Ve Kampanya Listesi" && item.label !== "Destek Ve Geri Bildirim Yönetimi";
+             item.label !== "Banner Yönetimi" && item.label !== "Kupon Ve Kampanya Yönetimi" && item.label !== "Satıcıların Kupon Ve Kampanya Listesi" && item.label !== "Destek Ve Geri Bildirim Yönetimi" && item.label !== "Satıcı Doğrulama Sayfası" ;
     } else if (role === "ROLE_MANAGER") {
       return item.label === "Satıcı Doğrulama" || item.label === "Kategoriler" || 
-             item.label === "Banner Yönetimi" || item.label === "Kupon Ve Kampanya Yönetimi" || item.label === "Satıcıların Kupon Ve Kampanya Listesi" ||  item.label === "Destek Ve Geri Bildirim Yönetimi";
+             item.label === "Banner Yönetimi" || item.label === "Kupon Ve Kampanya Yönetimi" || item.label === "Satıcıların Kupon Ve Kampanya Listesi" ||  item.label === "Destek Ve Geri Bildirim Yönetimi" ||  item.label === "Satıcı Doğrulama Sayfası";
     } else {
       return true;
     }

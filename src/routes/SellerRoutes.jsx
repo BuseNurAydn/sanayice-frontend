@@ -16,6 +16,7 @@ import CampaignCouponManagement from '../pages/seller/CampaignCouponManagement';
 import SupportManagerDashboard from '../pages/seller/SupportManagerDashboard';
 import SellerCampaignOverview from '../pages/seller/SellerCampaignOverview';
 import SellerCampaignManagement from '../pages/seller/SellerCampaignManagement';
+import SellerDocumentUpload from '../pages/seller/SellerDocumentUpload';
 
 const SellerRoutes = () => {
     return (
@@ -90,6 +91,14 @@ const SellerRoutes = () => {
                     element={
                         <RoleProtectedRoute allowedRoles={['ROLE_SELLER']}>
                             <SellerCampaignManagement />
+                        </RoleProtectedRoute>
+                    }
+                />
+                <Route
+                    path="vertification"
+                    element={
+                        <RoleProtectedRoute allowedRoles={['ROLE_SELLER']}>
+                            <SellerDocumentUpload />
                         </RoleProtectedRoute>
                     }
                 />
