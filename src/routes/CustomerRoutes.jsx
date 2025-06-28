@@ -12,6 +12,7 @@ import CheckoutPage from '../pages/customer/CheckoutPage';
 import Profile from '../pages/customer/AccountPage/Profile';
 import CategoryProductsPage from '../pages/customer/CategoryProductsPage';
 import CategoriesPage from '../pages/customer/CategoriesPage';
+import PrivacyPolicy from '../pages/public/PrivacyPolicy';
 
 const CustomerRoutes = () => {
     return (
@@ -26,6 +27,7 @@ const CustomerRoutes = () => {
                 <Route path="checkout" element={<CheckoutPage />}></Route>
                 <Route path="profile" element={<Profile />} />
                 <Route path="about_us" element={<AboutUs />} />
+                <Route path="privacy_policy" element={<PrivacyPolicy />} />
                 <Route path="categories" element={<CategoriesPage />} />
 
             {accountRoutes}
