@@ -1,10 +1,11 @@
-// src/pages/customer/Store.jsx
 import { useState, useEffect } from 'react';
 import { FaStore, FaMapMarkerAlt, FaPhone, FaEnvelope, FaSearch, FaFilter } from 'react-icons/fa';
 import { Link } from 'react-router-dom'; // Ürün detayına gitmek için
+import { getProducts } from "../../services/productsService";
+import { useSelector } from "react-redux";
 
 const Store = () => {
-  // Örnek mağaza ve ürün verileri (gerçek uygulamada API'den çekilir)
+
   const [storeInfo, setStoreInfo] = useState({
     id: "seller-123",
     name: "Sanayice Teknoloji Mağazası",
@@ -17,20 +18,34 @@ const Store = () => {
     categories: ["Akıllı Telefonlar", "Bilgisayarlar", "Aksesuarlar", "Ses Sistemleri"]
   });
 
-  const [products, setProducts] = useState([
-    { id: "p1", name: "iPhone 15 Pro", price: 55000, imageUrl: "https://via.placeholder.com/300/FF5733/FFFFFF?text=iPhone15", category: "Akıllı Telefonlar" },
-    { id: "p2", name: "Samsung Galaxy Book", price: 38000, imageUrl: "https://via.placeholder.com/300/33FF57/FFFFFF?text=Laptop", category: "Bilgisayarlar" },
-    { id: "p3", name: "AirPods Max", price: 12000, imageUrl: "https://via.placeholder.com/300/3357FF/FFFFFF?text=Headphones", category: "Aksesuarlar" },
-    { id: "p4", name: "PlayStation 5 Pro", price: 22000, imageUrl: "https://via.placeholder.com/300/FF33A1/FFFFFF?text=PS5", category: "Oyun Konsolları" },
-    { id: "p5", name: "Xiaomi Mi TV 55", price: 15000, imageUrl: "https://via.placeholder.com/300/A133FF/FFFFFF?text=TV", category: "Ses Sistemleri" },
-    { id: "p6", name: "HP Spectre x360", price: 42000, imageUrl: "https://via.placeholder.com/300/33A1FF/FFFFFF?text=Laptop", category: "Bilgisayarlar" },
-    { id: "p7", name: "JBL Flip 6", price: 3000, imageUrl: "https://via.placeholder.com/300/FF8C33/FFFFFF?text=Speaker", category: "Ses Sistemleri" },
-    { id: "p8", name: "Apple Watch Series 9", price: 14000, imageUrl: "https://via.placeholder.com/300/8C33FF/FFFFFF?text=Smartwatch", category: "Aksesuarlar" },
-  ]);
-
+  const [products, setProducts] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('Tüm Kategoriler');
   const [filteredProducts, setFilteredProducts] = useState(products);
+  const { user } = useSelector((state) => state.auth);
+
+  //GET PRODUCTS
+  useEffect(() => {
+    getProducts()
+      .then(data => {
+        setProducts(data);
+
+      })
+      .catch(error => {
+        console.error("Hata:", error);
+      });
+  }, []);
+
+  useEffect(() => {
+    if (user) {
+      setStoreInfo((prev) => ({
+        ...prev,
+        name: user.name,
+        email: user.email,
+        phone: user.phone,
+      }));
+    }
+  }, [user]);
 
   // Ürünleri filtreleme
   useEffect(() => {
@@ -72,8 +87,8 @@ const Store = () => {
         <div className={`${boxStyle} mb-8`}>
           <h2 className="text-2xl font-semibold text-gray-800 mb-4">Mağaza Bilgileri</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-700">
-            <p className="flex items-center gap-2"><FaMapMarkerAlt className="text-[var(--color-orange)]" /> Adres: {storeInfo.address}</p>
-            <p className="flex items-center gap-2"><FaPhone className="text-[var(--color-orange)]" /> Telefon: {storeInfo.phone}</p>
+            {/**  <p className="flex items-center gap-2"><FaMapMarkerAlt className="text-[var(--color-orange)]" /> Adres: {storeInfo.address || "Adres bilgisi bulunamadı."}</p>
+            <p className="flex items-center gap-2"><FaPhone className="text-[var(--color-orange)]" /> Telefon:  {storeInfo.phone || "Telefon bilgisi bulunamadı."}</p>*/}
             <p className="flex items-center gap-2"><FaEnvelope className="text-[var(--color-orange)]" /> E-posta: {storeInfo.email}</p>
           </div>
         </div>
@@ -111,14 +126,14 @@ const Store = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {filteredProducts.map((product) => (
               <Link to={`/seller_product/${product.id}`} key={product.id} className="block group">
-                <div className={`${boxStyle} p-4 flex flex-col items-center text-center hover:shadow-lg transition-shadow duration-300`}>
-                  <img src={product.imageUrl} alt={product.name} className="w-full h-48 object-contain mb-4 rounded-md" />
-                  <h3 className="text-lg font-semibold text-gray-900 group-hover:text-[var(--color-orange)] transition-colors duration-200 line-clamp-2">{product.name}</h3>
+                <div className={`${boxStyle} h-96 p-4 flex flex-col items-center text-center hover:shadow-lg transition-shadow duration-300`}>
+                  <img src={product.additionalImages[0]} alt={product.name} className="w-full h-48 object-contain mb-4 rounded-md" />
+                  <h3 className="text-md font-semibold text-gray-900 transition-colors duration-200 line-clamp-2">{product.name}</h3>
                   <p className="text-gray-500 text-sm mt-1">{product.category}</p>
                   <p className="text-xl font-bold text-[var(--color-orange)] mt-3">₺{product.price.toLocaleString()}</p>
-                  <button className="mt-4 bg-[var(--color-orange)] text-white px-4 py-2 rounded-md hover:bg-orange-700 transition-colors duration-200 text-sm w-full">
+                  {/***  <button className="mt-4 bg-[var(--color-orange)] text-white px-4 py-2 rounded-md hover:bg-orange-500 transition-colors duration-200 text-sm w-full cursor-pointer">
                     Ürünü Görüntüle
-                  </button>
+                  </button>*/}
                 </div>
               </Link>
             ))}
@@ -132,5 +147,4 @@ const Store = () => {
     </div>
   );
 };
-
 export default Store;

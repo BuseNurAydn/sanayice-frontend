@@ -1,30 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  FaHeadset, 
-  FaExclamationTriangle, 
-  FaQuestionCircle, 
-  FaBug, 
-  FaUser, 
-  FaEnvelope, 
-  FaPhone, 
-  FaPaperPlane, 
-  FaHistory, 
-  FaClock, 
-  FaCheckCircle, 
-  FaTimesCircle,
-  FaStar,
-  FaChevronRight,
-  FaTruck,
-  FaCreditCard,
-  FaFilter,
-  FaSearch,
-  FaChartBar,
-  FaReply,
-  FaEye,
-  FaUserTie,
-  FaStore,
-  
-} from 'react-icons/fa';
+import { FaHeadset,FaExclamationTriangle,FaQuestionCircle,FaBug,FaUser,FaEnvelope,FaPhone,FaPaperPlane,FaHistory, 
+  FaClock,FaCheckCircle,FaTimesCircle,FaStar,FaChevronRight,FaTruck,FaCreditCard,FaFilter,FaSearch,FaChartBar,
+  FaReply,FaEye,FaUserTie,FaStore} from 'react-icons/fa';
+import AdminText from '../../shared/Text/AdminText';
 
 const SupportManagerDashboard = () => {
   const [selectedTicket, setSelectedTicket] = useState(null);
@@ -266,7 +244,7 @@ const SupportManagerDashboard = () => {
         {/* Header */}
         <div className="flex flex-col lg:flex-row lg:items-center justify-between mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-gray-800 mb-2">Destek Talepleri Yönetimi</h1>
+            <AdminText className="text-3xl font-bold text-gray-800 mb-2">Destek Talepleri Yönetimi</AdminText>
             <p className="text-gray-600">Müşteri ve satıcı destek taleplerini yönetin</p>
           </div>
           

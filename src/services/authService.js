@@ -59,3 +59,42 @@ export const registerSeller = async (payload) => {
     return result;
 };
 
+//GET PROFİLE
+export const getMyProfile = async () => {
+  const token = localStorage.getItem("token");
+
+  const response = await fetch(`${API_BASE}/profile`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error("Profil bilgisi alınamadı");
+  }
+
+  return response.json();
+};
+
+//SELLER-MANAGER PUT PROFİLE
+export const updateMyProfile = async (profileData) => {
+  const token = localStorage.getItem("token");
+
+  const response = await fetch(`${API_BASE}/update-profile`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+       Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(profileData),
+  });
+
+  if (!response.ok) {
+    throw new Error("Profil güncellenemedi");
+  }
+
+  return response.json();
+};
+
+
+

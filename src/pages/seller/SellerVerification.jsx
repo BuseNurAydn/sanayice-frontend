@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Eye, Check, X, Search, Clock, Building, Phone, Mail, MapPin, FileText, Shield, AlertTriangle, MoreVertical, Filter } from 'lucide-react';
+import AdminText from '../../shared/Text/AdminText';
 
 const SellerVerification = () => {
   const [saticilar, setSaticilar] = useState([]);
@@ -173,7 +174,7 @@ const SellerVerification = () => {
       <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Başlık */}
         <div className="mb-8">
-          <h1 className="text-3xl font-semibold text-gray-900">Satıcı Doğrulama</h1>
+          <AdminText className="text-3xl font-semibold text-gray-900">Satıcı Doğrulama</AdminText>
           <p className="mt-2 text-gray-600">Satıcı başvurularını inceleyin ve onaylayın</p>
         </div>
 

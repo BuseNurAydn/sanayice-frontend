@@ -6,7 +6,6 @@ import {createProduct} from "../../../services/sellerProductService";
 import { toast } from 'react-toastify';
 
 const AddProduct = () => {
-
   const boxStyle = 'border border-gray-200 p-4 rounded-lg shadow';
   const lineStyle = 'w-full h-[1px] bg-gray-300 mb-4'
   const labelStyle = 'block text-sm font-medium text-gray-900 pb-2';
@@ -184,7 +183,7 @@ const AddProduct = () => {
 
 
   return (
-    <div className='min-h-screen'>
+    <div className='min-h-screen bg-gray-50 p-6'>
       <AdminText>Ürün Ekle</AdminText>
 
       {/* Form Alanı */}
@@ -258,7 +257,7 @@ const AddProduct = () => {
                     onChange={(e) =>
                       handleTechSpecChange(key, e.target.value, value, true)
                     }
-                    className='border-gray-200 outline-none border px-3 py-2 rounded-lg mr-2'
+                    className='border-gray-200 outline-none border p-2 rounded-lg mr-2'
                   />
                   <input
                     placeholder="Değeri"
@@ -266,7 +265,7 @@ const AddProduct = () => {
                     onChange={(e) =>
                       handleTechSpecChange(key, key, e.target.value, false)
                     }
-                    className='border-gray-200 outline-none border px-3 py-2 rounded-lg mr-4'
+                    className='border-gray-200 outline-none border p-2 rounded-lg mr-4'
                   />
                   <button
                     type="button"

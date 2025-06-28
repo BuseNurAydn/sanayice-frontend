@@ -2,15 +2,22 @@ import AdminText from "../../shared/Text/AdminText";
 import { useState, useEffect } from "react";
 import { toast } from "react-toastify";
 import { updateOrderStatus, fetchSellerOrders } from "../../services/sellerOrdersService";
+import { useSelector } from "react-redux";
 
 const Orders = () => {
   const [orders, setOrders] = useState([]);
   const [selectedStatus, setSelectedStatus] = useState("all");
   const [selectedOrder, setSelectedOrder] = useState(null);
+  const { user } = useSelector((state) => state.auth);
 
   const boxStyle = 'border border-gray-200 p-6 rounded-lg shadow bg-white';
   const buttonStyle = "bg-[var(--color-orange)] text-white px-4 py-2 rounded-lg font-semibold hover:opacity-90 transition-opacity";
   const inputStyle = 'border-gray-200 outline-none border px-3 py-2 rounded-lg bg-gray-50';
+  const [userInfo, setUserInfo] = useState({
+    name: "",
+    email: "",
+    phone: ""
+  });
 
   useEffect(() => {
     const getOrders = async () => {
@@ -27,6 +34,17 @@ const Orders = () => {
   }, [])
 
   console.log(orders)
+
+  useEffect(() => {
+    if (user) {
+      setUserInfo((prev) => ({
+        ...prev,
+        name: user.name,
+        email: user.email,
+        phone: user.phone,
+      }));
+    }
+  }, [user]);
 
   // Durum renkleri
   const getStatusColor = (overallStatus) => {
@@ -180,8 +198,8 @@ const Orders = () => {
                   <div className="grid md:grid-cols-2 gap-4 text-sm">
                     <div>
                       <p className="text-gray-600">Müşteri: <span className="text-gray-900 font-medium">{order.customerName}</span></p>
-                      <p className="text-gray-600">Email: <span className="text-gray-900">{order.customer?.email}</span></p>
-                      <p className="text-gray-600">Telefon: <span className="text-gray-900">{order.customer?.phone}</span></p>
+                      <p className="text-gray-600">Email: <span className="text-gray-900">{order.customerEmail}</span></p>
+                      <p className="text-gray-600">Telefon: <span className="text-gray-900">{order.customerPhone}</span></p>
                     </div>
                     <div>
                       <p className="text-gray-600">Tarih: <span className="text-gray-900">{order.orderDate}</span></p>

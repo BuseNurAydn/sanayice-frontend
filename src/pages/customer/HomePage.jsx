@@ -3,23 +3,13 @@ import { Link } from 'react-router-dom'
 import Slider from "react-slick";
 import ProductCard from "../../components/ProductCard";
 import { getProducts } from "../../services/productsService";
-import { brands, cards1, cards2} from './data/products';
+import { brands, cards1, cards2 } from './data/products';
 import { fetchCategories } from "../../services/categoryService";
+import { getAllPublicBanners } from "../../services/bannerService";
 import CategoriesSection from '../../components/CategoriesSection';
 
-const settings = {
-  dots: true,
-  arrows: false,
-  infinite: true,
-  speed: 300,
-  slidesToShow: 1,
-  slidesToScroll: 1,
-  autoplay: true,
-  autoplaySpeed: 3000,
-};
 
 const HomePage = () => {
-  const [searchQuery, setSearchQuery] = useState("");
   const brandsScrollRef = useRef(null);
   const featuredScrollRef = useRef(null);
   const discountedScrollRef = useRef(null);
@@ -29,6 +19,18 @@ const HomePage = () => {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [activeCategory, setActiveCategory] = useState(null);
+  const [banners, setBanners] = useState([]);
+
+  const settings = {
+  dots: true,
+  arrows: false,
+  infinite: banners.length > 1, // 1'den fazlaysa döngü yapsın
+  speed: 300,
+  slidesToShow: 1,
+  slidesToScroll: 1,
+  autoplay: true,
+  autoplaySpeed: 3000,
+};
 
   //GET CATEGORİES
   useEffect(() => {
@@ -56,6 +58,20 @@ const HomePage = () => {
       .catch(error => {
         console.error("Hata:", error);
       });
+  }, []);
+
+  //GET BANNERS
+  useEffect(() => {
+    const fetchBanners = async () => {
+      try {
+        const data = await getAllPublicBanners();
+        setBanners(data);
+      } catch (error) {
+        console.error("Bannerlar yüklenemedi:", error.message);
+      }
+    };
+
+    fetchBanners();
   }, []);
 
   const scroll = (ref, direction) => {
@@ -199,15 +215,23 @@ const HomePage = () => {
           {/* Sol Slider */}
           <div className="w-full md:w-1/2">
             <Slider {...settings}>
-              {cards1.map((card, index) => (
+              {banners.map((banner, index) => (
                 <div key={index}>
+                  <a
+                    href={banner.linkUrl || "#"}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block"
+                  >
                   <div className="bg-white shadow rounded-xl overflow-hidden">
-                    <img src={card.image} alt={card.title} className="w-full h-48 object-cover" />
+                    <img src={banner.imageUrl} className="w-full h-48 object-cover" />
+                    {/** 
                     <div className="p-4">
-                      <h4 className="text-md font-bold mb-2">{card.title}</h4>
-                      <p className="text-sm text-gray-600">{card.desc}</p>
-                    </div>
+                      <h4 className="text-md font-bold mb-2">{banner.title}</h4>
+                      <p className="text-sm text-gray-600">{banner.description}</p>
+                    </div>*/}
                   </div>
+                  </a>
                 </div>
               ))}
             </Slider>
@@ -216,15 +240,18 @@ const HomePage = () => {
           {/* Sağ Slider */}
           <div className="w-full md:w-1/2">
             <Slider {...settings}>
-              {cards2.map((card, index) => (
+              {banners.map((banner, index) => (
                 <div key={index}>
+                  <a
+                    href={banner.linkUrl || "#"}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block"
+                  >
                   <div className="bg-white shadow rounded-xl overflow-hidden">
-                    <img src={card.image} alt={card.title} className="w-full h-48 object-cover" />
-                    <div className="p-4">
-                      <h4 className="text-md font-bold mb-2">{card.title}</h4>
-                      <p className="text-sm text-gray-600">{card.desc}</p>
-                    </div>
+                    <img src={banner.imageUrl} className="w-full h-48 object-cover" />
                   </div>
+                  </a>
                 </div>
               ))}
             </Slider>
@@ -294,8 +321,8 @@ const HomePage = () => {
           </ScrollSection>
         </section>
 
-         {/*Kategori Kartları */}
-         <CategoriesSection categories={categories} />
+        {/*Kategori Kartları */}
+        <CategoriesSection categories={categories} />
       </main>
 
       <style jsx>{`

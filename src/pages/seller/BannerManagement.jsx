@@ -1,5 +1,8 @@
 import { useState, useEffect } from "react";
 import { Plus, Edit3, Trash2, Eye, EyeOff, BarChart3, Calendar, Link, FileImage, Type, Mouse } from "lucide-react";
+import { addBanner, updateBanner, getBanners, toggleBannerStatus, updateBannerOrder,deleteBanner } from "../../services/bannerService";
+import { toast } from "react-toastify";
+import AdminText from "../../shared/Text/AdminText";
 
 const BannerManagement = () => {
   const [banners, setBanners] = useState([]);
@@ -8,89 +11,102 @@ const BannerManagement = () => {
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [deleteId, setDeleteId] = useState(null);
   const [activeTab, setActiveTab] = useState('all');
+  const [editingOrder, setEditingOrder] = useState(null);
 
-  const [formData, setFormData] = useState({
-    title: "",
-    description: "",
-    imageUrl: "",
-    linkUrl: "",
-    buttonText: "",
-    isActive: true,
-    order: 1
-  });
-
-  // Mock data
-  useEffect(() => {
-    setBanners([
-      {
-        id: 1,
-        title: "Yaz İndirimleri",
-        description: "Tüm ürünlerde %50'ye varan indirimler",
-        imageUrl: "https://bgcp.bionluk.com/images/portfolio/1400x788/190301b7-78b5-486b-aa03-44623ea93017.jpg",
-        linkUrl: "/sale",
-        buttonText: "Hemen Keşfet",
-        isActive: true,
-        order: 1,
-        createdAt: "2024-06-01"
-      },
-      {
-        id: 2,
-        title: "Yeni Koleksiyon",
-        description: "2024 Sonbahar koleksiyonu artık mağazalarda",
-        imageUrl: "https://imannoor.com/Data/EditorFiles/video/agustos2024/yaz-indirimi.png",
-        linkUrl: "/collection/fall-2024",
-        buttonText: "Koleksiyonu İncele",
-        isActive: true,
-        order: 2,
-        createdAt: "2024-05-15"
-      },
-      {
-        id: 3,
-        title: "Ücretsiz Kargo",
-        description: "150 TL üzeri tüm siparişlerde ücretsiz kargo",
-        imageUrl: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSiMfquKIHRNNy2wGCyq_Lu-y63UgLRhWMHQw&s",
-        linkUrl: "/shipping-info",
-        buttonText: "Detayları Gör",
-        isActive: false,
-        order: 3,
-        createdAt: "2024-04-20"
-      }
-    ]);
-  }, []);
-
-  const showToast = (message, type = 'success') => {
-    // Toast notification placeholder
-    console.log(`${type}: ${message}`);
-  };
-
-  const saveBanner = async (bannerData) => {
-    if (editingId) {
-      setBanners(prev => prev.map(banner => 
-        banner.id === editingId ? { ...banner, ...bannerData } : banner
-      ));
-      showToast("Banner güncellendi!");
-    } else {
-      const newBanner = {
-        ...bannerData,
-        id: Date.now(),
-        createdAt: new Date().toISOString().split('T')[0]
-      };
-      setBanners(prev => [...prev, newBanner]);
-      showToast("Banner eklendi!");
+//GET
+  const fetchBanners = async () => {
+    try {
+      const data = await getBanners();
+      setBanners(data); // bannerları state'e kaydet
+      console.log(data)
+    } catch (err) {
+      console.error("Bannerlar yüklenemedi:", err);
     }
   };
+  useEffect(() => {
+    fetchBanners();
+  }, []);
 
-  const deleteBanner = async (id) => {
-    setBanners(prev => prev.filter(banner => banner.id !== id));
-    showToast("Banner silindi!");
+  const [formData, setFormData] = useState({
+    title: '',
+    description: '',
+    imageUrl: '',
+    linkUrl: '',
+    buttonText: '',
+    active: true,
+    order: 1,
+  });
+
+  //POST - PUT - ORDER CHANGE
+  const handleChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: type === "checkbox" ? checked : value,
+    }));
   };
 
-  const toggleBannerStatus = async (id) => {
-    setBanners(prev => prev.map(banner => 
-      banner.id === id ? { ...banner, isActive: !banner.isActive } : banner
-    ));
-    showToast("Banner durumu güncellendi!");
+// handleEdit fonksiyonunda
+const handleEdit = (banner) => {
+  setEditingId(banner.id);
+  setEditingOrder(banner.order);  // mevcut sırasını tut
+  setFormData({
+    title: banner.title,
+    description: banner.description,
+    imageUrl: banner.imageUrl,
+    linkUrl: banner.linkUrl,
+    buttonText: banner.buttonText,
+    active: banner.active,
+    order: banner.order,
+  });
+  setIsModalOpen(true);
+};
+
+// handleSave fonksiyonu
+const handleSave = async () => {
+  const payload = {
+    title: formData.title,
+    description: formData.description,
+    imageUrl: formData.imageUrl,
+    linkUrl: formData.linkUrl,
+    buttonText: formData.buttonText,
+    active: formData.active,
+    order: parseInt(formData.order),
   };
+
+  try {
+    if (editingId) {
+      await updateBanner(editingId, payload);
+
+      // order değiştiyse, ayrı endpointi çağırdım 
+      if (editingOrder !== payload.order) {
+        await updateBannerOrder(editingId, payload.order);
+      }
+
+      toast.success("Banner başarıyla güncellendi!");
+    } else {
+      await addBanner(payload);
+      toast.success("Banner başarıyla eklendi!");
+    }
+
+    setIsModalOpen(false);
+    setFormData({
+      title: "",
+      description: "",
+      imageUrl: "",
+      linkUrl: "",
+      buttonText: "",
+      active: true,
+      order: 1,
+    });
+    setEditingId(null);
+    setEditingOrder(null);
+    fetchBanners();
+
+  } catch (err) {
+    toast.error(err.message || "Bir hata oluştu.");
+  }
+};
 
   const handleAdd = () => {
     setFormData({
@@ -99,86 +115,49 @@ const BannerManagement = () => {
       imageUrl: "",
       linkUrl: "",
       buttonText: "",
-      isActive: true,
+      active: true,
       order: banners.length + 1
     });
     setEditingId(null);
     setIsModalOpen(true);
   };
 
-  const handleEdit = (banner) => {
-    setFormData({
-      title: banner.title,
-      description: banner.description,
-      imageUrl: banner.imageUrl,
-      linkUrl: banner.linkUrl,
-      buttonText: banner.buttonText,
-      isActive: banner.isActive,
-      order: banner.order
-    });
-    setEditingId(banner.id);
-    setIsModalOpen(true);
-  };
-
-  const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: type === 'checkbox' ? checked : value
-    }));
-  };
-
-  const handleSave = async () => {
-    if (!formData.title.trim() || !formData.imageUrl.trim()) {
-      showToast("Başlık ve görsel URL'i zorunludur!", 'error');
-      return;
-    }
-
-    try {
-      await saveBanner(formData);
-      setIsModalOpen(false);
-      setEditingId(null);
-    } catch (error) {
-      showToast("Banner kaydedilirken hata oluştu!", 'error');
-    }
-  };
-
   const handleDelete = async () => {
-    try {
-      await deleteBanner(deleteId);
-      setShowConfirmDialog(false);
-      setDeleteId(null);
-    } catch (error) {
-      showToast("Banner silinirken hata oluştu!", 'error');
-    }
-  };
-
-  const activeBanners = banners.filter(b => b.isActive);
-  const inactiveBanners = banners.filter(b => !b.isActive);
+  try {
+    await deleteBanner(deleteId);
+    toast.success("Banner başarıyla silindi!");
+    fetchBanners(); // Listeyi güncelle
+    setShowConfirmDialog(false);
+  } catch (err) {
+    toast.error(err.message || "Silme işlemi sırasında bir hata oluştu.");
+  }
+};
+  const activeBanners = banners.filter(b => b.active);
+  const inactiveBanners = banners.filter(b => !b.active);
 
   const getFilteredBanners = () => {
-    switch(activeTab) {
+    switch (activeTab) {
       case 'active': return activeBanners;
       case 'inactive': return inactiveBanners;
       default: return banners;
     }
   };
 
-  const BannerCard = ({ banner, isActive }) => (
-    <div className={`group relative overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition-all duration-300 hover:shadow-xl hover:-translate-y-1 ${!isActive ? 'opacity-60' : ''}`}>
+  const BannerCard = ({ banner, active }) => (
+    <div className={`group relative overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition-all duration-300 hover:shadow-xl hover:-translate-y-1 ${!active ? 'opacity-60' : ''}`}>
       <div className="aspect-video relative overflow-hidden">
-        <img 
-          src={banner.imageUrl} 
+        <img
+          src={banner.imageUrl}
           alt={banner.title}
-          className={`w-full h-full object-cover transition-transform duration-300 group-hover:scale-105 ${!isActive ? 'grayscale' : ''}`}
+          className={`w-full h-full object-cover transition-transform duration-300 group-hover:scale-105 ${!active ? 'grayscale' : ''}`}
           onError={(e) => {
             e.target.src = "https://via.placeholder.com/800x300/e2e8f0/64748b?text=Görsel+Yüklenemedi";
           }}
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
         <div className="absolute top-4 right-4 flex gap-2">
-          <span className={`px-3 py-1 text-xs font-medium rounded-full ${isActive ? 'bg-green-500 text-white' : 'bg-red-500 text-white'}`}>
-            {isActive ? 'Aktif' : 'Pasif'}
+          <span className={`px-3 py-1 text-xs font-medium rounded-full ${active ? 'bg-green-500 text-white' : 'bg-red-500 text-white'}`}>
+            {active ? 'Aktif' : 'Pasif'}
           </span>
           <span className="px-3 py-1 text-xs font-medium rounded-full bg-black/30 text-white backdrop-blur-sm">
             #{banner.order}
@@ -189,8 +168,8 @@ const BannerManagement = () => {
           <p className="text-white/90 text-sm line-clamp-2">{banner.description}</p>
         </div>
       </div>
-      
-      <div className="p-6">
+
+      <div className="p-4">
         <div className="space-y-3 mb-4">
           {banner.linkUrl && (
             <div className="flex items-center gap-2 text-gray-600">
@@ -206,29 +185,37 @@ const BannerManagement = () => {
           )}
           <div className="flex items-center gap-2 text-gray-500">
             <Calendar className="w-4 h-4" />
-            <span className="text-sm">{banner.createdAt}</span>
+            <span className="text-sm">{new Date(banner.createdAt).toLocaleDateString()}</span>
           </div>
         </div>
-        
+
         <div className="flex gap-2">
           <button
             onClick={() => handleEdit(banner)}
-            className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-blue-50 text-blue-600 rounded-xl hover:bg-blue-100 transition-colors font-medium"
+            className="flex-1 flex items-center justify-center gap-1 p-2 bg-blue-50 text-blue-600 rounded-xl hover:bg-blue-100 transition-colors font-medium"
           >
             <Edit3 className="w-4 h-4" />
             Düzenle
           </button>
           <button
-            onClick={() => toggleBannerStatus(banner.id)}
-            className={`flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-xl transition-colors font-medium ${
-              isActive 
-                ? 'bg-orange-50 text-orange-600 hover:bg-orange-100' 
-                : 'bg-green-50 text-green-600 hover:bg-green-100'
-            }`}
+            onClick={async () => {
+              try {
+                await toggleBannerStatus(banner.id);
+                toast.success("Durum güncellendi");
+                fetchBanners(); // durumu güncelle
+              } catch (err) {
+                toast.error(err.message);
+              }
+            }}
+            className={`flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-xl transition-colors font-medium ${banner.active
+              ? 'bg-orange-50 text-orange-600 hover:bg-orange-100'
+              : 'bg-green-50 text-green-600 hover:bg-green-100'
+              }`}
           >
-            {isActive ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-            {isActive ? 'Pasifleştir' : 'Aktifleştir'}
+            {banner.active ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+            {banner.active ? 'Pasifleştir' : 'Aktifleştir'}
           </button>
+
           <button
             onClick={() => {
               setDeleteId(banner.id);
@@ -249,12 +236,12 @@ const BannerManagement = () => {
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">Banner Yönetimi</h1>
+            <AdminText className="text-3xl font-bold text-gray-900 mb-2">Banner Yönetimi</AdminText>
             <p className="text-gray-600">Web sitenizin banner içeriklerini yönetin</p>
           </div>
           <button
             onClick={handleAdd}
-            className="flex items-center gap-2 px-6 py-3 bg-orange-600 text-white rounded-xl hover:bg-blue-700 transition-colors font-medium shadow-lg"
+            className="flex items-center gap-2 px-6 py-3 bg-orange-400 text-white rounded-xl hover:bg-orange-600 transition-colors font-medium shadow-lg cursor-pointer"
           >
             <Plus className="w-5 h-5" />
             Yeni Banner
@@ -274,7 +261,7 @@ const BannerManagement = () => {
               </div>
             </div>
           </div>
-          
+
           <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
             <div className="flex items-center justify-between">
               <div>
@@ -286,7 +273,7 @@ const BannerManagement = () => {
               </div>
             </div>
           </div>
-          
+
           <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
             <div className="flex items-center justify-between">
               <div>
@@ -311,18 +298,16 @@ const BannerManagement = () => {
               <button
                 key={tab.key}
                 onClick={() => setActiveTab(tab.key)}
-                className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-medium transition-colors ${
-                  activeTab === tab.key
-                    ? 'bg-orange-600 text-white shadow-lg'
-                    : 'text-gray-600 hover:bg-gray-50'
-                }`}
+                className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-medium transition-colors ${activeTab === tab.key
+                  ? 'bg-orange-600 text-white shadow-lg'
+                  : 'text-gray-600 hover:bg-gray-50'
+                  }`}
               >
                 {tab.label}
-                <span className={`px-2 py-1 text-xs rounded-full ${
-                  activeTab === tab.key 
-                    ? 'bg-white/20 text-white' 
-                    : 'bg-gray-100 text-gray-600'
-                }`}>
+                <span className={`px-2 py-1 text-xs rounded-full ${activeTab === tab.key
+                  ? 'bg-white/20 text-white'
+                  : 'bg-gray-100 text-gray-600'
+                  }`}>
                   {tab.count}
                 </span>
               </button>
@@ -335,10 +320,10 @@ const BannerManagement = () => {
           {getFilteredBanners()
             .sort((a, b) => a.order - b.order)
             .map((banner) => (
-              <BannerCard 
-                key={banner.id} 
-                banner={banner} 
-                isActive={banner.isActive}
+              <BannerCard
+                key={banner.id}
+                banner={banner}
+                active={banner.active}
               />
             ))}
         </div>
@@ -483,7 +468,7 @@ const BannerManagement = () => {
                       <input
                         type="checkbox"
                         name="isActive"
-                        checked={formData.isActive}
+                        checked={formData.active}
                         onChange={handleChange}
                         className="w-5 h-5 text-blue-600 rounded focus:ring-blue-500"
                       />

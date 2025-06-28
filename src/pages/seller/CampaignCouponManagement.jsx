@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Plus, Edit3, Trash2, Eye, EyeOff, BarChart3, Calendar, Percent, Users, Gift, Copy, Clock, Star, ShoppingCart, CreditCard } from "lucide-react";
+import AdminText from "../../shared/Text/AdminText";
 
 const CampaignCouponManagement = () => {
   const [campaigns, setCampaigns] = useState([]);
@@ -479,7 +480,7 @@ const CampaignCouponManagement = () => {
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">Kampanya ve Kupon Yönetimi</h1>
+            <AdminText className="text-3xl font-bold text-gray-900 mb-2">Kampanya ve Kupon Yönetimi</AdminText>
             <p className="text-gray-600">İndirim kampanyalarınızı ve kuponlarınızı yönetin</p>
           </div>
           <div className="flex gap-3">

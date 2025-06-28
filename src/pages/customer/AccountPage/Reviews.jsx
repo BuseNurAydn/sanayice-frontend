@@ -1,27 +1,30 @@
-// src/components/Reviews.jsx
+import { useState,useEffect } from 'react';
 import { FaStar, FaEdit, FaTrashAlt } from 'react-icons/fa';
 
 const Reviews = () => {
-  // Fake review data (will come from API in a real application)
-  const fakeReviews = [
-    {
-      id: "rev1",
-      productName: "Kadın Siyah Sneaker Ayakkabı - Rahat ve Şık",
-      productImage: "https://via.placeholder.com/100x100?text=Sneaker",
-      rating: 5,
-      comment: "Ayakkabılar çok rahat ve şık. Tam beklediğim gibi geldi. Hızlı kargo için teşekkürler!",
-      date: "2024-05-15",
-    },
-    {
-      id: "rev2",
-      productName: "Erkek Mavi Polo Yaka T-Shirt - %100 Pamuk",
-      productImage: "https://via.placeholder.com/100x100?text=T-Shirt",
-      rating: 4,
-      comment: "Kumaşı kaliteli, rengi canlı. Beden biraz dar geldi ama genel olarak memnunum.",
-      date: "2024-06-01",
-    },
-  ];
+  const [reviews, setReviews] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
+   useEffect(() => {
+    const fetchReviews = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        const response = await fetch("/api/products/reviews/my-reviews", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!response.ok) throw new Error("Değerlendirmeler alınamadı");
+        const data = await response.json();
+        setReviews(data);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchReviews();
+  }, []);
   const handleEditReview = (id) => {
     console.log(`Edit review with ID: ${id}`);
     // Implement logic to edit review
@@ -50,8 +53,8 @@ const Reviews = () => {
       <h2 className="text-2xl font-bold text-gray-800 mb-6">Değerlendirmelerim</h2>
 
       <div className="space-y-4">
-        {fakeReviews.length > 0 ? (
-          fakeReviews.map((review) => (
+        {reviews.length > 0 ? (
+          reviews.map((review) => (
             <div
               key={review.id}
               className="border border-gray-200 rounded-lg p-4 flex flex-col md:flex-row justify-between items-start bg-white shadow-sm hover:shadow-md transition-shadow duration-200"
@@ -71,7 +74,7 @@ const Reviews = () => {
                     <span className="text-sm text-gray-600 ml-1">({review.rating}/5)</span>
                   </div>
                   <p className="text-gray-700 italic mb-2">"{review.comment}"</p>
-                  <p className="text-sm text-gray-500">Tarih: {review.date}</p>
+                  <p className="text-sm text-gray-500">Tarih: {new Date(review.createdAt).toLocaleDateString()}</p>
                 </div>
               </div>
               <div className="flex gap-3 mt-4 md:mt-0">
@@ -101,5 +104,4 @@ const Reviews = () => {
     </div>
   );
 };
-
 export default Reviews;

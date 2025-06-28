@@ -81,7 +81,7 @@ const SellerRoutes = () => {
                 <Route
                     path="seller_profile"
                     element={
-                        <RoleProtectedRoute allowedRoles={['ROLE_SELLER']}>
+                        <RoleProtectedRoute allowedRoles={['ROLE_SELLER','ROLE_MANAGER']}>
                             <SellerProfile />
                         </RoleProtectedRoute>
                     }

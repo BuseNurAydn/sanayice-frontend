@@ -20,13 +20,13 @@ const AccountMenu = () => {
 
   const handleLogout = () => {
     localStorage.removeItem("token");
-    localStorage.removeItem("pendingFavoriteItem"); // Geçici favori silinsin
-    localStorage.removeItem("pendingCartItem");   // geçici sepet silinsin
-    dispatch(clear());  // Sepeti temizle
-    dispatch(clearFavorites()); //Favorileri temizle
+    localStorage.removeItem("pendingFavoriteItem"); 
+    localStorage.removeItem("pendingCartItem");
+    dispatch(clear());
+    dispatch(clearFavorites());
     dispatch(logout());
     setOpen(false);
-    navigate('/'); // çıkış sonrası anasayfaya yönlendir
+    navigate('/');
   };
 
   if (!user) {
@@ -57,17 +57,17 @@ const AccountMenu = () => {
             <BsBasket3/>
             Tüm Siparişlerim
           </Link>
-          <Link to="/coupon" className="py-1 hover:text-orange-600 flex flex-row gap-x-4 items-center" onClick={() => setOpen(false)}>
+          <Link to="/account/addresses" className="py-1 hover:text-orange-600 flex flex-row gap-x-4 items-center" onClick={() => setOpen(false)}>
             <RiCoupon3Line />
-            İndirim Kuponlarım
+            Adres Bilgilerim
           </Link>
-          <Link to="/profile" className=" flex flex-row gap-x-4 items-center py-1 hover:text-orange-600" onClick={() => setOpen(false)}>
+          <Link to="/account/reviews" className=" flex flex-row gap-x-4 items-center py-1 hover:text-orange-600" onClick={() => setOpen(false)}>
             <FaRegUser/>
-            Kullanıcı Bilgilerim
-          </Link>
-          <Link to="/evaluation" className=" flex flex-row gap-x-4 items-center py-1 hover:text-orange-600" onClick={() => setOpen(false)}>
-            <BsChatSquareDots />
             Değerlendirmelerim
+          </Link>
+          <Link to="/account/support_and_complaint" className=" flex flex-row gap-x-4 items-center py-1 hover:text-orange-600" onClick={() => setOpen(false)}>
+            <BsChatSquareDots />
+            Destek ve Şikayet
           </Link> 
           </div>
           <button

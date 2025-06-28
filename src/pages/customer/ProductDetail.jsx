@@ -7,10 +7,10 @@ const ProductDetail = () => {
   const [favorite, setFavorite] = useState(false);
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState("description");
-  const [product, setProduct] = useState(null);
+  const [product, setProduct] = useState({ reviews: [], });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
+  const [reviews, setReviews] = useState([])
 
   // imageUrl ve additionalImages birleştirdim
   const images = [
@@ -35,15 +35,29 @@ const ProductDetail = () => {
         if (!response.ok) throw new Error("Ürün bulunamadı");
         const data = await response.json();
         setProduct(data);
+        console.log(data);
       } catch (err) {
         setError(err.message);
       } finally {
         setLoading(false);
       }
     };
+    const fetchReviews = async () => {
+      try {
+        const res = await fetch(`/api/products/${id}/reviews`);
+        const data = await res.json();
+        setReviews(data);
+        console.log(data)
+      } catch (err) {
+        console.error("Yorumlar alınamadı:", err);
+      }
+    };
 
     fetchProduct();
+    fetchReviews();
   }, [id]);
+
+
 
   if (loading) return <p>Yükleniyor...</p>;
   if (error) return <p>Hata: {error}</p>;
@@ -90,7 +104,7 @@ const ProductDetail = () => {
           <nav className="text-sm text-gray-600">
             <span className="hover:text-orange-600 cursor-pointer">Ana Sayfa</span>
             <span className="mx-2">/</span>
-            <span className="hover:text-orange-600 cursor-pointer">{product.category}</span>
+            <span className="hover:text-orange-600 cursor-pointer">{product.categoryName}</span>
             <span className="mx-2">/</span>
             <span className="text-gray-900 font-medium">{product.name}</span>
           </nav>
@@ -118,18 +132,18 @@ const ProductDetail = () => {
               {images.length > 1 && (
                 <>
                   <button className="absolute left-4 top-1/2 -translate-y-1/2 bg-white bg-opacity-90 hover:bg-opacity-100 rounded-full p-3 shadow-lg transition-all duration-200 hover:scale-110"
-                    onClick={() => setSliderIndex((prev) => prev === 0 ? images.length - 1 : prev - 1 )}
+                    onClick={() => setSliderIndex((prev) => prev === 0 ? images.length - 1 : prev - 1)}
                   >
                     <svg className="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24" >
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7"/>
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                     </svg>
                   </button>
                   <button
                     className="absolute right-4 top-1/2 -translate-y-1/2 bg-white bg-opacity-90 hover:bg-opacity-100 rounded-full p-3 shadow-lg transition-all duration-200 hover:scale-110"
-                    onClick={() => setSliderIndex((prev) => prev === images.length - 1 ? 0 : prev + 1 )}
+                    onClick={() => setSliderIndex((prev) => prev === images.length - 1 ? 0 : prev + 1)}
                   >
                     <svg className="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7"/>
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                     </svg>
                   </button>
                 </>
@@ -143,11 +157,11 @@ const ProductDetail = () => {
                   key={idx}
                   onClick={() => setSliderIndex(idx)}
                   className={`flex-shrink-0 w-20 h-20 bg-white rounded-xl border-2 overflow-hidden transition-all duration-200 ${sliderIndex === idx
-                      ? "border-orange-500 shadow-md"
-                      : "border-gray-200 hover:border-gray-300"
+                    ? "border-orange-500 shadow-md"
+                    : "border-gray-200 hover:border-gray-300"
                     }`}
                 >
-                  <img src={img} alt={`${product.name} ${idx + 1}`} className="w-full h-full object-contain p-2"/>
+                  <img src={img} alt={`${product.name} ${idx + 1}`} className="w-full h-full object-contain p-2" />
                 </button>
               ))}
             </div>
@@ -341,26 +355,30 @@ const ProductDetail = () => {
                   <div className="flex items-center gap-4">
                     <div className="flex items-center gap-2">
                       {renderStars(product.rating)}
-                      <span className="font-semibold">{product.rating}</span>
+                      <span className="font-semibold">{product?.rating}</span>
                     </div>
-                    <span className="text-gray-500">({product.reviewCount} değerlendirme)</span>
+                    <span className="text-gray-500">({reviews.length} değerlendirme)</span>
                   </div>
                 </div>
 
-                <div className="space-y-6">
-                  {product.reviews.map((review, idx) => (
-                    <div key={idx} className="border-b border-gray-200 pb-6 last:border-b-0">
-                      <div className="flex items-start justify-between mb-3">
-                        <div>
-                          <h4 className="font-semibold text-gray-900">{review.user}</h4>
-                          <p className="text-sm text-gray-500">{review.date}</p>
+                {reviews.length === 0 ? (
+                  <p className="text-gray-500 italic">Bu ürüne ait henüz bir değerlendirme yok.</p>
+                ) : (
+                  <div className="space-y-6">
+                    {reviews.map((review, idx) => (
+                      <div key={idx} className="border-b border-gray-200 pb-6 last:border-b-0">
+                        <div className="flex items-start justify-between mb-3">
+                          <div>
+                            <h4 className="font-semibold text-gray-900">{review.userName}</h4>
+                            <p className="text-sm text-gray-500">{new Date(review.createdAt).toLocaleDateString()}</p>
+                          </div>
+                          {renderStars(review.rating)}
                         </div>
-                        {renderStars(review.rating)}
+                        <p className="text-gray-700 leading-relaxed">{review.comment}</p>
                       </div>
-                      <p className="text-gray-700 leading-relaxed">{review.comment}</p>
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
           </div>

@@ -1,9 +1,15 @@
 import { useState, useEffect } from "react";
 import { getOrders } from "../../../services/ordersService"; // siparişleri getiren fonksiyon
-
+import ReviewModal from "../../../components/ReviewModal";
+import { toast } from "react-toastify";
 const Orders = () => {
   const [orders, setOrders] = useState([]);
   const [activeTab, setActiveTab] = useState("all");
+
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [rating, setRating] = useState(0);
+  const [comment, setComment] = useState("");
+
 
   const tabs = [
     { key: "all", label: "Tüm Siparişler" },
@@ -49,6 +55,39 @@ const Orders = () => {
         return "text-purple-600";
       default:
         return "text-yellow-400";
+    }
+  };
+
+
+  const openReviewModal = (product) => {
+    setSelectedProduct(product);
+    setRating(0);
+    setComment("");
+  };
+
+  const handleSubmitReview = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch("/api/products/reviews", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          productId: selectedProduct.productId,
+          rating,
+          comment,
+        }),
+      });
+
+      if (!response.ok) throw new Error("Yorum eklenemedi");
+
+      toast("Yorum başarıyla eklendi!");
+      setSelectedProduct(null);
+    } catch (error) {
+      console.error(error);
+      toast("Yorum eklenirken bir hata oluştu.");
     }
   };
 
@@ -147,17 +186,37 @@ const Orders = () => {
                       </p>
                     </div>
                   </div>
-
-                  {/* Sağdaki Detay butonu */}
-                  <button className="text-sm text-orange-600 hover:underline font-semibold">
-                    Detayları Gör
-                  </button>
+                  <div className="flex flex-row items-end gap-x-2">
+                    <button className="text-sm border border-blue-600 py-2 px-4 text-blue-600 font-semibold">
+                      Ürün Detay
+                    </button>
+                    {order.statusDisplayName === "Teslim Edildi" && (
+                      <button
+                        onClick={() => openReviewModal(item)}
+                        className="text-sm font-semibold border border-orange-600 py-2 px-4 text-orange-600"
+                      >
+                        Ürünü Değerlendir
+                      </button>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
           </div>
         ))}
       </div>
+      {/* MODAL */}
+      {selectedProduct && (
+        <ReviewModal
+          product={selectedProduct}
+          rating={rating}
+          setRating={setRating}
+          comment={comment}
+          setComment={setComment}
+          onClose={() => setSelectedProduct(null)}
+          onSubmit={handleSubmitReview}
+        />
+      )}
     </div>
   );
 };
