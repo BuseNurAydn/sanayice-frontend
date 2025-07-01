@@ -151,7 +151,7 @@ const Dashboard = () => {
                           {order.status}
                         </span>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{order.orderDate}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{new Date(order.orderDate).toLocaleDateString()}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                         <a href="#" className="text-[var(--color-orange)] hover:text-orange-900">Detay</a>
                       </td>

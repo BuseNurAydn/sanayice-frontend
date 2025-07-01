@@ -7,10 +7,10 @@ import { fetchCart, clearCart } from "../../services/cartService";
 import { useDispatch, useSelector } from 'react-redux';
 
 const CheckoutPage = () => {
-   const dispatch = useDispatch();
-   const cartItems = useSelector(state => state.cart.items);
-   const navigate = useNavigate();
-  
+  const dispatch = useDispatch();
+  const cartItems = useSelector(state => state.cart.items);
+  const navigate = useNavigate();
+
   useEffect(() => {
     dispatch(fetchCart());
   }, [dispatch]);
@@ -158,20 +158,20 @@ const CheckoutPage = () => {
         paymentMethod: formData.paymentMethod,
         paymentToken: formData.paymentMethod === 'credit-card' ? formData.paymentToken : undefined
       };
-      console.log("Sipariş bilgileri:", orderRequest);  
+      console.log("Sipariş bilgileri:", orderRequest);
 
       const token = localStorage.getItem('token'); //  token
       const response = await fetch('/api/orders/confirm', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-           Authorization: `Bearer ${token}`
+          Authorization: `Bearer ${token}`
         },
         body: JSON.stringify(orderRequest)
       });
 
       if (!response.ok) throw new Error('Sipariş tamamlanamadı.');
-       // Sepeti temizle
+      // Sepeti temizle
       dispatch(clearCart());
       navigate('/');
 

@@ -143,8 +143,7 @@ const handleDelete = async () => {
 };
 
   return (
-    <div className=" min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-8">
-      <div className="max-w-7xl mx-auto px-6">
+    <div className="min-h-screen p-6 bg-gray-50">
       <div className="flex justify-between items-center mb-6">
         <AdminText>Kategoriler</AdminText>
         <AddButton onClick={handleAdd}>Yeni Kategori Ekle</AddButton>
@@ -248,7 +247,6 @@ const handleDelete = async () => {
           onClose={() => setIsSubModalOpen(false)}/>
       )}
       </div>
-    </div>
   );
 };
 export default Categories;

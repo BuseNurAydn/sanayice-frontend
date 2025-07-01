@@ -1,72 +1,63 @@
-import React, { useState } from 'react';
-import { 
-  FaHeadset, 
-  FaExclamationTriangle, 
-  FaQuestionCircle, 
-  FaBug, 
-  FaUser, 
-  FaEnvelope, 
-  FaPhone, 
-  FaPaperPlane, 
-  FaHistory, 
-  FaClock, 
-  FaCheckCircle, 
-  FaTimesCircle,
-  FaStar,
-  FaChevronRight,
-  FaTruck,
-  FaCreditCard
-} from 'react-icons/fa';
+import { useState, useEffect } from 'react';
+import { FaHeadset, FaExclamationTriangle, FaQuestionCircle, FaBug, FaUser, FaEnvelope, FaPhone, FaPaperPlane, FaHistory, FaClock, FaCheckCircle, FaTimesCircle, FaStar, FaChevronRight, FaTruck, FaCreditCard } from 'react-icons/fa';
+import { createSupportTicket, getSupportTicketsByCustomer } from '../../../services/supportService';
+import { toast } from 'react-toastify';
+import { useSelector } from 'react-redux';
 
 const SupportAndComplaint = () => {
+  const [supportHistory, setSupportHistory] = useState([]);
+  const user = useSelector((state) => state.auth.user);
+  const role = user?.role;
+  const customerId = user?.id;
   const [activeTab, setActiveTab] = useState('new');
+  
   const [formData, setFormData] = useState({
-    category: '',
     subject: '',
     description: '',
-    priority: 'normal',
-    email: '',
-    phone: ''
+    category: 'BILLING',
+    priority: 'MEDIUM',
+    customerId: customerId,
+    userType: role === 'ROLE_SELLER' ? 'seller' : 'customer'
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Kategori tanımları - daha temiz tasarım için revize edildi
   const categories = [
-    { 
-      value: 'delivery', 
-      label: 'Teslimat Sorunu', 
+    {
+      value: 'delivery',
+      label: 'Teslimat Sorunu',
       icon: <FaTruck className="text-2xl" />,
       description: 'Kargo ve teslimat sorunları',
       color: 'border-red-200 hover:border-red-300 hover:bg-red-50',
       iconColor: 'text-red-500'
     },
-    { 
-      value: 'payment', 
-      label: 'Ödeme Sorunu', 
+    {
+      value: 'payment',
+      label: 'Ödeme Sorunu',
       icon: <FaCreditCard className="text-2xl" />,
       description: 'Ödeme ve fatura sorunları',
       color: 'border-blue-200 hover:border-blue-300 hover:bg-blue-50',
       iconColor: 'text-blue-500'
     },
-    { 
-      value: 'technical', 
-      label: 'Teknik Sorun', 
+    {
+      value: 'technical',
+      label: 'Teknik Sorun',
       icon: <FaBug className="text-2xl" />,
       description: 'Uygulama ve website hataları',
       color: 'border-purple-200 hover:border-purple-300 hover:bg-purple-50',
       iconColor: 'text-purple-500'
     },
-    { 
-      value: 'general', 
-      label: 'Genel Destek', 
+    {
+      value: 'general',
+      label: 'Genel Destek',
       icon: <FaHeadset className="text-2xl" />,
       description: 'Diğer sorular ve yardım',
       color: 'border-green-200 hover:border-green-300 hover:bg-green-50',
       iconColor: 'text-green-500'
     },
-    { 
-      value: 'complaint', 
-      label: 'Şikayet', 
+    {
+      value: 'complaint',
+      label: 'Şikayet',
       icon: <FaStar className="text-2xl" />,
       description: 'Hizmet kalitesi ve memnuniyetsizlik',
       color: 'border-orange-200 hover:border-orange-300 hover:bg-orange-50',
@@ -74,91 +65,85 @@ const SupportAndComplaint = () => {
     }
   ];
 
-  // Örnek geçmiş talepler
-  const [supportHistory] = useState([
-    {
-      id: 1,
-      subject: 'Sipariş Teslim Edilmedi',
-      category: 'delivery',
-      status: 'resolved',
-      date: '2024-06-10',
-      priority: 'high',
-      response: 'Siparişiniz teslim edilmiş ve sorun çözülmüştür. Kargo takip numaranız: TK123456789'
-    },
-    {
-      id: 2,
-      subject: 'Ödeme Sorunu',
-      category: 'payment',
-      status: 'pending',
-      date: '2024-06-15',
-      priority: 'normal',
-      response: 'Talebiniz inceleme altındadır. Finans ekibimiz 24 saat içinde geri dönüş yapacaktır.'
-    },
-    {
-      id: 3,
-      subject: 'Uygulama Hatası',
-      category: 'technical',
-      status: 'closed',
-      date: '2024-06-05',
-      priority: 'low',
-      response: 'Teknik sorun giderilmiştir. Lütfen uygulamayı güncelleyip tekrar deneyiniz.'
+  //GET
+  useEffect(() => {
+    if (activeTab === 'history' && user?.id) {
+      const fetchTickets = async () => {
+        try {
+          const data = await getSupportTicketsByCustomer(user.id);
+          setSupportHistory(data);
+          console.log(data)
+        } catch (error) {
+          toast.error(error.message || "Talepler yüklenirken hata oluştu");
+        }
+      };
+      fetchTickets();
     }
-  ]);
+  }, [activeTab, user?.id]);
 
-  // Event handlers
+  //POST
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = async () => {
-    if (!formData.category || !formData.subject || !formData.description || !formData.email) {
-      alert('Lütfen tüm zorunlu alanları doldurun!');
-      return;
-    }
-    setIsSubmitting(true);
-    
-    setTimeout(() => {
-      alert('✅ Destek talebiniz başarıyla gönderildi! Talep numaranız: #DT' + Date.now().toString().slice(-6));
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    const formattedData = {
+      subject: formData.subject.trim(),
+      description: formData.description.trim(),
+      category: formData.category.toUpperCase(),
+      priority: formData.priority.toUpperCase(),
+      customerId: Number(customerId),
+      userType: role === 'ROLE_SELLER' ? 'seller' : 'customer'
+    };
+
+    console.log("Giden veri:", formattedData);
+
+    try {
+      await createSupportTicket(formattedData);
+      toast.success("Destek talebi gönderildi");
       setFormData({
-        category: '',
         subject: '',
         description: '',
-        priority: 'normal',
-        email: '',
-        phone: ''
+        category: 'BILLING',
+        priority: 'MEDIUM',
+        customerId: customerId,
+        userType: role === 'ROLE_SELLER' ? 'seller' : 'customer'
       });
-      setIsSubmitting(false);
-    }, 2000);
+    } catch (err) {
+      toast.error(err.message || "Hata oluştu");
+    }
   };
 
   // Utility functions
   const getStatusConfig = (status) => {
     const configs = {
-      resolved: { icon: <FaCheckCircle />, text: 'Çözüldü', color: 'text-green-600 bg-green-100' },
-      pending: { icon: <FaClock />, text: 'İnceleniyor', color: 'text-yellow-600 bg-yellow-100' },
-      closed: { icon: <FaTimesCircle />, text: 'Kapatıldı', color: 'text-gray-600 bg-gray-100' }
+      RESOLVED: { icon: <FaCheckCircle />, text: 'Çözüldü', color: 'text-green-600 bg-green-100' },
+      PENDING: { icon: <FaClock />, text: 'İnceleniyor', color: 'text-yellow-600 bg-yellow-100' },
+      CLOSED: { icon: <FaTimesCircle />, text: 'Kapatıldı', color: 'text-gray-600 bg-gray-100' }
     };
-    return configs[status] || configs.pending;
+    return configs[status] || configs.PENDING;
   };
 
   const getPriorityConfig = (priority) => {
     const configs = {
-      high: { text: 'Yüksek Öncelik', color: 'text-red-700 bg-red-100 border-red-200' },
-      normal: { text: 'Normal', color: 'text-blue-700 bg-blue-100 border-blue-200' },
-      low: { text: 'Düşük Öncelik', color: 'text-green-700 bg-green-100 border-green-200' }
+      HIGH: { text: 'Yüksek Öncelik', color: 'text-red-700 bg-red-100 border-red-200' },
+      NORMAL: { text: 'Normal', color: 'text-blue-700 bg-blue-100 border-blue-200' },
+      LOW: { text: 'Düşük Öncelik', color: 'text-green-700 bg-green-100 border-green-200' }
     };
-    return configs[priority] || configs.normal;
+    return configs[priority] || configs.NORMAL;
   };
 
   const getCategoryInfo = (categoryValue) => {
-    return categories.find(cat => cat.value === categoryValue) || { label: 'Genel', icon: <FaHeadset /> };
+    return categories.find(cat => cat.value === categoryValue.toLowerCase()) || { label: 'Genel', icon: <FaHeadset /> };
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-8">
       <div className="max-w-5xl mx-auto px-6">
-        
+
         {/* Header */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-orange-500 rounded-full mb-4">
@@ -170,17 +155,16 @@ const SupportAndComplaint = () => {
 
         {/* Main Card */}
         <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
-          
+
           {/* Tab Navigation */}
           <div className="border-b border-gray-200">
             <nav className="flex">
               <button
                 onClick={() => setActiveTab('new')}
-                className={`flex-1 px-6 py-4 text-center font-medium transition-all duration-200 ${
-                  activeTab === 'new' 
-                    ? 'text-orange-600 bg-orange-50 border-b-2 border-orange-600' 
-                    : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
-                }`}
+                className={`flex-1 px-6 py-4 text-center font-medium transition-all duration-200 ${activeTab === 'new'
+                  ? 'text-orange-600 bg-orange-50 border-b-2 border-orange-600'
+                  : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+                  }`}
               >
                 <div className="flex items-center justify-center gap-2">
                   <FaPaperPlane className="text-sm" />
@@ -189,11 +173,10 @@ const SupportAndComplaint = () => {
               </button>
               <button
                 onClick={() => setActiveTab('history')}
-                className={`flex-1 px-6 py-4 text-center font-medium transition-all duration-200 ${
-                  activeTab === 'history' 
-                    ? 'text-orange-600 bg-orange-50 border-b-2 border-orange-600' 
-                    : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
-                }`}
+                className={`flex-1 px-6 py-4 text-center font-medium transition-all duration-200 ${activeTab === 'history'
+                  ? 'text-orange-600 bg-orange-50 border-b-2 border-orange-600'
+                  : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+                  }`}
               >
                 <div className="flex items-center justify-center gap-2">
                   <FaHistory className="text-sm" />
@@ -207,7 +190,7 @@ const SupportAndComplaint = () => {
             {/* New Request Form */}
             {activeTab === 'new' && (
               <div className="space-y-8">
-                
+
                 {/* Category Selection - Yeniden Tasarlandı */}
                 <div>
                   <h3 className="text-xl font-semibold text-gray-800 mb-6 text-center">
@@ -217,11 +200,10 @@ const SupportAndComplaint = () => {
                     {categories.map((category) => (
                       <label
                         key={category.value}
-                        className={`group relative flex flex-col items-center p-6 border-2 rounded-2xl cursor-pointer transition-all duration-300 hover:transform hover:scale-105 ${
-                          formData.category === category.value
-                            ? 'border-orange-500 bg-orange-50 shadow-lg ring-2 ring-orange-200'
-                            : `${category.color} bg-white border-gray-200 shadow-sm hover:shadow-md`
-                        }`}
+                        className={`group relative flex flex-col items-center p-6 border-2 rounded-2xl cursor-pointer transition-all duration-300 hover:transform hover:scale-105 ${formData.category === category.value
+                          ? 'border-orange-500 bg-orange-50 shadow-lg ring-2 ring-orange-200'
+                          : `${category.color} bg-white border-gray-200 shadow-sm hover:shadow-md`
+                          }`}
                       >
                         <input
                           type="radio"
@@ -231,34 +213,31 @@ const SupportAndComplaint = () => {
                           onChange={handleInputChange}
                           className="sr-only"
                         />
-                        
+
                         {/* Icon */}
-                        <div className={`mb-4 p-3 rounded-full transition-all duration-300 ${
-                          formData.category === category.value 
-                            ? 'bg-orange-500 text-white' 
-                            : `bg-gray-100 ${category.iconColor} group-hover:bg-gray-200`
-                        }`}>
+                        <div className={`mb-4 p-3 rounded-full transition-all duration-300 ${formData.category === category.value
+                          ? 'bg-orange-500 text-white'
+                          : `bg-gray-100 ${category.iconColor} group-hover:bg-gray-200`
+                          }`}>
                           {category.icon}
                         </div>
-                        
+
                         {/* Title */}
-                        <h4 className={`font-semibold text-center mb-2 transition-colors duration-300 ${
-                          formData.category === category.value 
-                            ? 'text-orange-700' 
-                            : 'text-gray-800 group-hover:text-gray-900'
-                        }`}>
+                        <h4 className={`font-semibold text-center mb-2 transition-colors duration-300 ${formData.category === category.value
+                          ? 'text-orange-700'
+                          : 'text-gray-800 group-hover:text-gray-900'
+                          }`}>
                           {category.label}
                         </h4>
-                        
+
                         {/* Description */}
-                        <p className={`text-sm text-center leading-relaxed transition-colors duration-300 ${
-                          formData.category === category.value 
-                            ? 'text-orange-600' 
-                            : 'text-gray-500 group-hover:text-gray-600'
-                        }`}>
+                        <p className={`text-sm text-center leading-relaxed transition-colors duration-300 ${formData.category === category.value
+                          ? 'text-orange-600'
+                          : 'text-gray-500 group-hover:text-gray-600'
+                          }`}>
                           {category.description}
                         </p>
-                        
+
                         {/* Selected Indicator */}
                         {formData.category === category.value && (
                           <div className="absolute top-4 right-4 w-6 h-6 bg-orange-500 rounded-full flex items-center justify-center">
@@ -270,26 +249,26 @@ const SupportAndComplaint = () => {
                   </div>
                 </div>
 
-                {/* Form Fields */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  
-                  {/* Subject and Priority */}
-                  <div className="space-y-6">
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-2">
-                        Konu Başlığı
-                      </label>
-                      <input
-                        type="text"
-                        name="subject"
-                        value={formData.subject}
-                        onChange={handleInputChange}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200"
-                        placeholder="Sorununuzu kısaca özetleyin"
-                        required
-                      />
+                <form onSubmit={handleSubmit} className="space-y-8">
+                  {/* Form Fields */}
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    {/* Subject and Priority */}
+                    <div className="space-y-6">
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-700 mb-2">
+                          Konu Başlığı
+                        </label>
+                        <input
+                          type="text"
+                          name="subject"
+                          value={formData.subject}
+                          onChange={handleInputChange}
+                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-1 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200 outline-none"
+                          placeholder="Sorununuzu kısaca özetleyin"
+                          required
+                        />
+                      </div>
                     </div>
-
                     <div>
                       <label className="block text-sm font-semibold text-gray-700 mb-2">
                         Aciliyet Durumu
@@ -298,92 +277,58 @@ const SupportAndComplaint = () => {
                         name="priority"
                         value={formData.priority}
                         onChange={handleInputChange}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200"
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-1 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200 outline-none"
                       >
-                        <option value="low">Düşük - Normal çalışma saatleri içinde</option>
-                        <option value="normal">Normal - 24 saat içinde</option>
-                        <option value="high">Yüksek - Acil müdahale gerekli</option>
+                        <option value="LOW">Düşük - Normal çalışma saatleri içinde</option>
+                        <option value="NORMAL">Normal - 24 saat içinde</option>
+                        <option value="HIGH">Yüksek - Acil müdahale gerekli</option>
                       </select>
                     </div>
                   </div>
 
-                  {/* Contact Information */}
-                  <div className="space-y-6">
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-2">
-                        <FaEnvelope className="inline mr-2 text-orange-500" />
-                        E-posta Adresi
-                      </label>
-                      <input
-                        type="email"
-                        name="email"
-                        value={formData.email}
-                        onChange={handleInputChange}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200"
-                        placeholder="ornek@email.com"
-                        required
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-2">
-                        <FaPhone className="inline mr-2 text-orange-500" />
-                        Telefon (İsteğe bağlı)
-                      </label>
-                      <input
-                        type="tel"
-                        name="phone"
-                        value={formData.phone}
-                        onChange={handleInputChange}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200"
-                        placeholder="05XX XXX XX XX"
-                      />
+                  {/* Description */}
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Detaylı Açıklama
+                    </label>
+                    <textarea
+                      name="description"
+                      value={formData.description}
+                      onChange={handleInputChange}
+                      rows="6"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-1 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200 resize-none outline-none"
+                      placeholder="Sorununuzu detaylı açıklayın..."
+                      required
+                    />
+                    <div className="text-xs text-gray-500 mt-1">
+                      Minimum 20 karakter gerekli
                     </div>
                   </div>
-                </div>
 
-                {/* Description */}
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Detaylı Açıklama
-                  </label>
-                  <textarea
-                    name="description"
-                    value={formData.description}
-                    onChange={handleInputChange}
-                    rows="6"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200 resize-none"
-                    placeholder="Sorununuzu mümkün olduğunca detaylı açıklayın. Bu bilgiler size daha hızlı yardım etmemize yardımcı olacaktır..."
-                    required
-                  />
-                  <div className="text-xs text-gray-500 mt-1">
-                    Minimum 20 karakter gerekli
-                  </div>
-                </div>
-
-                {/* Submit Button */}
-                <div className="pt-4">
-                  <div
-                    onClick={handleSubmit}
-                    className={`w-full py-4 px-6 rounded-lg font-semibold text-white transition-all duration-200 transform cursor-pointer ${
-                      isSubmitting
+                  {/* Submit */}
+                  <div className="pt-4">
+                    <button
+                      type="submit"
+                      disabled={isSubmitting}
+                      className={`w-full py-4 px-6 rounded-lg font-semibold text-white transition-all duration-200 transform ${isSubmitting
                         ? 'bg-gray-400 cursor-not-allowed'
                         : 'bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 hover:scale-105 active:scale-95 shadow-lg hover:shadow-xl'
-                    }`}
-                  >
-                    {isSubmitting ? (
-                      <div className="flex items-center justify-center gap-3">
-                        <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></div>
-                        <span>Gönderiliyor...</span>
-                      </div>
-                    ) : (
-                      <div className="flex items-center justify-center gap-3">
-                        <FaPaperPlane />
-                        <span>Destek Talebini Gönder</span>
-                      </div>
-                    )}
+                        }`}
+                    >
+                      {isSubmitting ? (
+                        <div className="flex items-center justify-center gap-3">
+                          <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></div>
+                          <span>Gönderiliyor...</span>
+                        </div>
+                      ) : (
+                        <div className="flex items-center justify-center gap-3">
+                          <FaPaperPlane />
+                          <span>Destek Talebini Gönder</span>
+                        </div>
+                      )}
+                    </button>
                   </div>
-                </div>
+                </form>
               </div>
             )}
 
@@ -440,16 +385,16 @@ const SupportAndComplaint = () => {
                               <div className="flex flex-wrap items-center gap-3 text-sm text-gray-600">
                                 <span>#{ticket.id.toString().padStart(6, '0')}</span>
                                 <span>•</span>
-                                <span>{categoryInfo.label}</span>
+                                <span>{getCategoryInfo(ticket.category).label}</span>
                                 <span>•</span>
-                                <span>{new Date(ticket.date).toLocaleDateString('tr-TR', { 
-                                  year: 'numeric', 
-                                  month: 'long', 
-                                  day: 'numeric' 
+                                <span>{new Date(ticket.createdAt).toLocaleDateString('tr-TR', {
+                                  year: 'numeric',
+                                  month: 'long',
+                                  day: 'numeric'
                                 })}</span>
                               </div>
                             </div>
-                            
+
                             <div className="flex items-center gap-3">
                               <span className={`px-3 py-1 text-xs font-medium rounded-full border ${priorityConfig.color}`}>
                                 {priorityConfig.text}
@@ -492,5 +437,4 @@ const SupportAndComplaint = () => {
     </div>
   );
 };
-
 export default SupportAndComplaint;

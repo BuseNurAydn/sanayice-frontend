@@ -170,8 +170,7 @@ const SellerVerification = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 py-8">
+    <div className="min-h-screen p-6 bg-gray-50">
         {/* Başlık */}
         <div className="mb-8">
           <AdminText className="text-3xl font-semibold text-gray-900">Satıcı Doğrulama</AdminText>
@@ -508,8 +507,6 @@ const SellerVerification = () => {
           </div>
         )}
       </div>
-    </div>
   );
 };
-
 export default SellerVerification;

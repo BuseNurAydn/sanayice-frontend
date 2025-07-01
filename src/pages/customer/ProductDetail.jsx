@@ -355,7 +355,7 @@ const ProductDetail = () => {
                   <div className="flex items-center gap-4">
                     <div className="flex items-center gap-2">
                       {renderStars(product.rating)}
-                      <span className="font-semibold">{product?.rating}</span>
+                      <span className="font-semibold">{product.rating}</span>
                     </div>
                     <span className="text-gray-500">({reviews.length} değerlendirme)</span>
                   </div>

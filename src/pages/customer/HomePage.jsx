@@ -121,11 +121,11 @@ const HomePage = () => {
 
   return (
     <div className="bg-gray-50">
-      {/*Header searchQuery={searchQuery} setSearchQuery={setSearchQuery} />*/}
+    
       <nav className="bg-white shadow-md border-b relative">
         <div className="container mx-auto px-6">
           {/* Menü Satırı */}
-          <div className="flex justify-center space-x-12 py-5">
+          <div className="flex justify-center space-x-8 py-5">
             {categories.map((category) => (
               <div
                 key={category.id}
@@ -135,7 +135,7 @@ const HomePage = () => {
               >
                 <Link 
                   to={`/category/${category.id}`} 
-                  className="text-sm font-semibold text-gray-700 hover:text-orange-600 transition-all duration-300 py-2 px-4 rounded-lg hover:bg-orange-50 relative flex items-center gap-1"
+                  className="text-sm font-medium text-gray-700 hover:text-orange-600 transition-all duration-300 py-2 px-4 rounded-lg hover:bg-orange-50 relative flex items-center gap-1"
                 >
                   {category.name}
                   {category.subcategories?.length > 0 && (
@@ -153,12 +153,11 @@ const HomePage = () => {
   
                 {/* Alt Kategoriler Dropdown */}
                 {activeCategory === category.id && category.subcategories?.length > 0 && (
-                  <div className="absolute left-0 top-full mt-3 bg-white shadow-2xl border border-gray-200 rounded-2xl min-w-[320px] py-5 px-6 z-50 animate-dropdown">
+                  <div className="absolute left-0 top-full bg-white shadow-2xl border border-gray-200 rounded-2xl min-w-[320px] py-5 px-6 z-50 animate-dropdown">
                     <div className="space-y-1">
                       {category.subcategories.map((sub, index) => (
                         <Link
-                          key={sub.id}
-                          to={`/subcategory/${sub.id}`}
+                           to={`/category/${category.id}`} 
                           className="flex items-center gap-3 text-sm text-gray-700 hover:text-orange-600 hover:bg-gradient-to-r hover:from-orange-50 hover:to-orange-100 px-4 py-3 rounded-xl transition-all duration-300 group"
                         >
                           <div className="w-2 h-2 bg-orange-200 rounded-full group-hover:bg-orange-500 transition-colors duration-300"></div>

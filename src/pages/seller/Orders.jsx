@@ -13,6 +13,7 @@ const Orders = () => {
   const boxStyle = 'border border-gray-200 p-6 rounded-lg shadow bg-white';
   const buttonStyle = "bg-[var(--color-orange)] text-white px-4 py-2 rounded-lg font-semibold hover:opacity-90 transition-opacity";
   const inputStyle = 'border-gray-200 outline-none border px-3 py-2 rounded-lg bg-gray-50';
+  
   const [userInfo, setUserInfo] = useState({
     name: "",
     email: "",
@@ -125,6 +126,7 @@ const Orders = () => {
 
   console.log(stats)
 
+  
   return (
     <div className="min-h-screen p-6 bg-gray-50">
       <div>
@@ -202,7 +204,7 @@ const Orders = () => {
                       <p className="text-gray-600">Telefon: <span className="text-gray-900">{order.customerPhone}</span></p>
                     </div>
                     <div>
-                      <p className="text-gray-600">Tarih: <span className="text-gray-900">{order.orderDate}</span></p>
+                      <p className="text-gray-600">Tarih: <span className="text-gray-900">{new Date(order.orderDate).toLocaleDateString()}</span></p>
                       <p className="text-gray-600">Teslimat: <span className="text-gray-900">{order.shippingAddress}</span></p>
                       <p className="text-gray-600">Ödeme: <span className="text-gray-900">{order?.paymentMethod}</span></p>
                     </div>
@@ -328,7 +330,7 @@ const Orders = () => {
                   <div>
                     <h3 className="font-medium text-gray-900 mb-2">Sipariş Bilgileri</h3>
                     <p className="text-sm text-gray-600">Sipariş No: <span className="text-gray-900">{selectedOrder.orderNumber}</span></p>
-                    <p className="text-sm text-gray-600">Tarih: <span className="text-gray-900">{selectedOrder.orderDate}</span></p>
+                  <p className="text-sm text-gray-600">Tarih: <span className="text-gray-900">{new Date(selectedOrder.orderDate).toLocaleDateString()}</span></p>
                     <p className="text-sm text-gray-600">Durum:
                       <span className={`ml-2 px-2 py-1 rounded text-xs ${getStatusColor(selectedOrder.overallStatus)}`}>
                         {getStatusText(selectedOrder.overallStatus)}
@@ -338,8 +340,8 @@ const Orders = () => {
                   <div>
                     <h3 className="font-medium text-gray-900 mb-2">Müşteri Bilgileri</h3>
                     <p className="text-sm text-gray-600">Ad Soyad: <span className="text-gray-900">{selectedOrder.customerName}</span></p>
-                    <p className="text-sm text-gray-600">E-posta: <span className="text-gray-900">{selectedOrder.customer?.email}</span></p>
-                    <p className="text-sm text-gray-600">Telefon: <span className="text-gray-900">{selectedOrder.customer?.phone}</span></p>
+                    <p className="text-sm text-gray-600">E-posta: <span className="text-gray-900">{selectedOrder.customerEmail}</span></p>
+                    <p className="text-sm text-gray-600">Telefon: <span className="text-gray-900">{selectedOrder.customerPhone}</span></p>
                   </div>
                 </div>
 

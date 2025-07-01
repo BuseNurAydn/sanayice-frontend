@@ -1,8 +1,13 @@
-import React, { useState, useEffect } from 'react';
-import { FaHeadset,FaExclamationTriangle,FaQuestionCircle,FaBug,FaUser,FaEnvelope,FaPhone,FaPaperPlane,FaHistory, 
-  FaClock,FaCheckCircle,FaTimesCircle,FaStar,FaChevronRight,FaTruck,FaCreditCard,FaFilter,FaSearch,FaChartBar,
-  FaReply,FaEye,FaUserTie,FaStore} from 'react-icons/fa';
+import { useState, useEffect } from 'react';
+import {
+  FaHeadset, FaExclamationTriangle, FaQuestionCircle, FaBug, FaUser, FaEnvelope, FaPhone, FaPaperPlane, FaHistory,
+  FaClock, FaCheckCircle, FaTimesCircle, FaStar, FaChevronRight, FaTruck, FaCreditCard, FaFilter, FaSearch, FaChartBar,
+  FaReply, FaEye, FaUserTie, FaStore
+} from 'react-icons/fa';
 import AdminText from '../../shared/Text/AdminText';
+import { getAllSupportTickets,replyToSupportTicket,updateTicketStatus} from '../../services/supportService';
+import { toast } from 'react-toastify';
+import { useSelector } from 'react-redux';
 
 const SupportManagerDashboard = () => {
   const [selectedTicket, setSelectedTicket] = useState(null);
@@ -12,150 +17,58 @@ const SupportManagerDashboard = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [replyText, setReplyText] = useState('');
   const [isReplying, setIsReplying] = useState(false);
+  const { user } = useSelector((state) => state.auth);
+  // tickets
+  const [tickets, setTickets] = useState([]);
 
-  // Örnek ticket verileri
-  const [tickets, setTickets] = useState([
-    {
-      id: 1,
-      subject: 'Sipariş Teslim Edilmedi',
-      category: 'delivery',
-      status: 'pending',
-      priority: 'high',
-      date: '2024-06-17',
-      customerName: 'Ayşe Yılmaz',
-      customerEmail: 'ayse.yilmaz@email.com',
-      customerPhone: '0532 123 45 67',
-      description: 'Siparişim 3 gündür gelmedi. Takip numarası ile kontrol ediyorum ama kargo şirketinde kayıt yok. Acilen çözüm istiyorum.',
-      userType: 'customer',
-      assignedTo: 'Mehmet Özkan',
-      replies: [
-        {
-          id: 1,
-          author: 'Mehmet Özkan',
-          message: 'Merhaba Ayşe Hanım, siparişinizle ilgili sorunu inceliyoruz. Kargo şirketi ile iletişime geçtik.',
-          date: '2024-06-17 14:30',
-          isManager: true
-        }
-      ]
-    },
-    {
-      id: 2,
-      subject: 'Ödeme İadesi Sorunu',
-      category: 'payment',
-      status: 'resolved',
-      priority: 'normal',
-      date: '2024-06-16',
-      customerName: 'Ali Demir',
-      customerEmail: 'ali.demir@email.com',
-      customerPhone: '0541 987 65 43',
-      description: 'İade ettiğim ürün için ödeme iadesi alamadım. 15 gün oldu.',
-      userType: 'customer',
-      assignedTo: 'Zeynep Kaya',
-      replies: [
-        {
-          id: 1,
-          author: 'Zeynep Kaya',
-          message: 'Merhaba Ali Bey, iade işleminiz onaylanmıştır. 3-5 iş günü içinde hesabınıza yansıyacaktır.',
-          date: '2024-06-16 10:15',
-          isManager: true
-        }
-      ]
-    },
-    {
-      id: 3,
-      subject: 'Satıcı Paneli Sorunu',
-      category: 'technical',
-      status: 'pending',
-      priority: 'high',
-      date: '2024-06-17',
-      customerName: 'Elektro Mağaza',
-      customerEmail: 'info@elektromarket.com',
-      customerPhone: '0212 555 12 34',
-      description: 'Satıcı panelinde ürün yükleyemiyorum. Sürekli hata veriyor.',
-      userType: 'seller',
-      assignedTo: 'Fatma Şen',
-      replies: []
-    },
-    {
-      id: 4,
-      subject: 'Genel Bilgi Talebi',
-      category: 'general',
-      status: 'closed',
-      priority: 'low',
-      date: '2024-06-15',
-      customerName: 'Mehmet Kara',
-      customerEmail: 'mehmet.kara@email.com',
-      customerPhone: '0505 444 33 22',
-      description: 'Komisyon oranları hakkında bilgi almak istiyorum.',
-      userType: 'seller',
-      assignedTo: 'Ahmet Yıldız',
-      replies: [
-        {
-          id: 1,
-          author: 'Ahmet Yıldız',
-          message: 'Merhaba, komisyon oranları kategori bazında değişmektedir. Detaylı bilgi için satıcı panelindeki komisyon tablosunu inceleyebilirsiniz.',
-          date: '2024-06-15 16:45',
-          isManager: true
-        }
-      ]
-    },
-    {
-      id: 5,
-      subject: 'Hesap Doğrulama Problemi',
-      category: 'account',
-      status: 'pending',
-      priority: 'normal',
-      date: '2024-06-17',
-      customerName: 'Fatma Özdemir',
-      customerEmail: 'fatma.ozdemir@email.com',
-      customerPhone: '0533 555 77 88',
-      description: 'Hesabımı doğrulama kodu gelmiyor. E-posta adresimi değiştirmek istiyorum.',
-      userType: 'customer',
-      assignedTo: 'Ayşe Kaya',
-      replies: []
-    },
-    {
-      id: 6,
-      subject: 'Ürün Kalite Şikayeti',
-      category: 'complaint',
-      status: 'pending',
-      priority: 'high',
-      date: '2024-06-16',
-      customerName: 'Hasan Yıldız',
-      customerEmail: 'hasan.yildiz@email.com',
-      customerPhone: '0544 333 22 11',
-      description: 'Aldığım ürün açıklamada belirtilenden farklı. İade etmek istiyorum ama satıcı kabul etmiyor.',
-      userType: 'customer',
-      assignedTo: 'Mehmet Özkan',
-      replies: [
-        {
-          id: 1,
-          author: 'Mehmet Özkan',
-          message: 'Merhaba Hasan Bey, durumu satıcı ile görüştük. İade sürecini başlattık.',
-          date: '2024-06-16 15:20',
-          isManager: true
-        }
-      ]
-    }
-  ]);
+  useEffect(() => {
+    const fetchTickets = async () => {
+      try {
+        const data = await getAllSupportTickets();
+        setTickets(data);
+         console.log("Gelen ticket verisi:", data)
+      } catch (err) {
+        toast.error(err.message);
+      }
+    };
+
+    fetchTickets();
+  }, []);
+   
+    const [userInfo, setUserInfo] = useState({
+      name: "",
+      email: "",
+      phone: ""
+    });
+  
+    useEffect(() => {
+      if (user) {
+        setUserInfo((prev) => ({
+          ...prev,
+          name: user.name,
+          email: user.email,
+          phone: user.phone,
+        }));
+      }
+    }, [user]);
 
   // Kategori tanımları
   const categories = [
-    { value: 'delivery', label: 'Teslimat', icon: <FaTruck />, color: 'text-red-500' },
-    { value: 'payment', label: 'Ödeme', icon: <FaCreditCard />, color: 'text-blue-500' },
-    { value: 'technical', label: 'Teknik', icon: <FaBug />, color: 'text-purple-500' },
-    { value: 'general', label: 'Genel', icon: <FaHeadset />, color: 'text-green-500' },
-    { value: 'complaint', label: 'Şikayet', icon: <FaExclamationTriangle />, color: 'text-orange-500' },
-    { value: 'account', label: 'Hesap', icon: <FaUser />, color: 'text-indigo-500' }
+    { value: 'DELIVERY', label: 'Teslimat', icon: <FaTruck />, color: 'text-red-500' },
+    { value: 'PAYMENT', label: 'Ödeme', icon: <FaCreditCard />, color: 'text-blue-500' },
+    { value: 'TECHNICAL', label: 'Teknik', icon: <FaBug />, color: 'text-purple-500' },
+    { value: 'GENERAL', label: 'Genel', icon: <FaHeadset />, color: 'text-green-500' },
+    { value: 'COMPLAINT', label: 'Şikayet', icon: <FaExclamationTriangle />, color: 'text-orange-500' },
+    { value: 'ACCOUNT', label: 'Hesap', icon: <FaUser />, color: 'text-indigo-500' }
   ];
 
   // İstatistikler
   const stats = {
     totalTickets: tickets.length,
-    pendingTickets: tickets.filter(t => t.status === 'pending').length,
-    resolvedTickets: tickets.filter(t => t.status === 'resolved').length,
-    closedTickets: tickets.filter(t => t.status === 'closed').length,
-    highPriorityTickets: tickets.filter(t => t.priority === 'high').length,
+    pendingTickets: tickets.filter(t => t.status === 'PENDING').length,
+    resolvedTickets: tickets.filter(t => t.status === 'RESOLVED').length,
+    closedTickets: tickets.filter(t => t.status === 'CLOSED').length,
+    highPriorityTickets: tickets.filter(t => t.priority === 'HIGH').length,
     customerTickets: tickets.filter(t => t.userType === 'customer').length,
     sellerTickets: tickets.filter(t => t.userType === 'seller').length
   };
@@ -163,20 +76,20 @@ const SupportManagerDashboard = () => {
   // Utility functions
   const getStatusConfig = (status) => {
     const configs = {
-      resolved: { icon: <FaCheckCircle />, text: 'Çözüldü', color: 'text-green-600 bg-green-100' },
-      pending: { icon: <FaClock />, text: 'Bekliyor', color: 'text-yellow-600 bg-yellow-100' },
-      closed: { icon: <FaTimesCircle />, text: 'Kapatıldı', color: 'text-gray-600 bg-gray-100' }
+      RESOLVED: { icon: <FaCheckCircle />, text: 'Çözüldü', color: 'text-green-600 bg-green-100' },
+      PENDING: { icon: <FaClock />, text: 'Bekliyor', color: 'text-yellow-600 bg-yellow-100' },
+      CLOSED: { icon: <FaTimesCircle />, text: 'Kapatıldı', color: 'text-gray-600 bg-gray-100' }
     };
-    return configs[status] || configs.pending;
+    return configs[status] || configs.PENDING;
   };
 
   const getPriorityConfig = (priority) => {
     const configs = {
-      high: { text: 'Yüksek', color: 'text-red-700 bg-red-100' },
-      normal: { text: 'Normal', color: 'text-blue-700 bg-blue-100' },
-      low: { text: 'Düşük', color: 'text-green-700 bg-green-100' }
+      HIGH: { text: 'Yüksek', color: 'text-red-700 bg-red-100' },
+      NORMAL: { text: 'Normal', color: 'text-blue-700 bg-blue-100' },
+      LOW: { text: 'Düşük', color: 'text-green-700 bg-green-100' }
     };
-    return configs[priority] || configs.normal;
+    return configs[priority] || configs.NORMAL;
   };
 
   const getCategoryInfo = (categoryValue) => {
@@ -188,66 +101,80 @@ const SupportManagerDashboard = () => {
     const statusMatch = filterStatus === 'all' || ticket.status === filterStatus;
     const priorityMatch = filterPriority === 'all' || ticket.priority === filterPriority;
     const categoryMatch = filterCategory === 'all' || ticket.category === filterCategory;
-    const searchMatch = searchTerm === '' || 
-      ticket.subject.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      ticket.customerName.toLowerCase().includes(searchTerm.toLowerCase());
-    
+    const searchMatch = searchTerm === '' ||
+      ticket.subject?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      ticket.customerName?.toLowerCase().includes(searchTerm.toLowerCase());
+
     return statusMatch && priorityMatch && categoryMatch && searchMatch;
   });
 
-  // Reply handler
+  //POST MESSAGE
   const handleReply = async () => {
-    if (!replyText.trim() || !selectedTicket) return;
-    
-    setIsReplying(true);
-    
-    setTimeout(() => {
-      const newReply = {
-        id: Date.now(),
-        author: 'Admin',
-        message: replyText,
-        date: new Date().toLocaleString('tr-TR'),
-        isManager: true
-      };
-      
-      setTickets(prev => prev.map(ticket => 
-        ticket.id === selectedTicket.id 
-          ? { ...ticket, replies: [...ticket.replies, newReply] }
-          : ticket
-      ));
-      
-      setSelectedTicket(prev => ({
-        ...prev,
-        replies: [...prev.replies, newReply]
-      }));
-      
-      setReplyText('');
-      setIsReplying(false);
-    }, 1000);
-  };
+  if (!replyText.trim() || !selectedTicket) return;
 
-  // Status güncelleme
-  const updateTicketStatus = (ticketId, newStatus) => {
-    setTickets(prev => prev.map(ticket => 
+  setIsReplying(true);
+
+  try {
+    await replyToSupportTicket(selectedTicket.id, replyText.trim());
+
+    // 2. Yanıt başarılı ise yeni yanıtı state'e ekle
+    const newReply = {
+      id: Date.now(), // Bu sadece frontend için, backend'den alınabilir
+      author: 'Admin',
+      message: replyText,
+      date: new Date().toLocaleString('tr-TR'),
+      isManager: true
+    };
+
+    // State güncellemesi
+    setTickets(prev => prev.map(ticket =>
+      ticket.id === selectedTicket.id
+        ? { ...ticket, replies: [...ticket.replies, newReply] }
+        : ticket
+    ));
+
+    setSelectedTicket(prev => ({
+      ...prev,
+      replies: [...prev.replies, newReply]
+    }));
+
+    setReplyText('');
+    toast.success("Yanıt başarıyla gönderildi.");
+  } catch (error) {
+    toast.error(error.message || "Yanıt gönderilirken hata oluştu.");
+  } finally {
+    setIsReplying(false);
+  }
+};
+ 
+//PUT STATUS
+  const updateStatus = async (ticketId, newStatus) => {
+  try {
+    await updateTicketStatus (ticketId, newStatus);
+
+    setTickets(prev => prev.map(ticket =>
       ticket.id === ticketId ? { ...ticket, status: newStatus } : ticket
     ));
-    
+
     if (selectedTicket?.id === ticketId) {
       setSelectedTicket(prev => ({ ...prev, status: newStatus }));
     }
-  };
 
+    toast.success("Durum güncellendi");
+  } catch (err) {
+    toast.error(err.message || "Durum güncellenemedi");
+  }
+};
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-8">
-      <div className="max-w-7xl mx-auto px-6">
-        
+    <div className="min-h-screen p-6 bg-gray-50">
+      <div className="">
         {/* Header */}
         <div className="flex flex-col lg:flex-row lg:items-center justify-between mb-8">
           <div>
             <AdminText className="text-3xl font-bold text-gray-800 mb-2">Destek Talepleri Yönetimi</AdminText>
             <p className="text-gray-600">Müşteri ve satıcı destek taleplerini yönetin</p>
           </div>
-          
+
           {/* İstatistik Kartları */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mt-6 lg:mt-0">
             <div className="bg-white rounded-lg p-4 shadow-md text-center">
@@ -280,7 +207,7 @@ const SupportManagerDashboard = () => {
               <FaUser className="text-blue-200 text-3xl" />
             </div>
           </div>
-          
+
           <div className="bg-gradient-to-r from-orange-500 to-orange-600 rounded-xl p-6 text-white">
             <div className="flex items-center justify-between">
               <div>
@@ -290,7 +217,7 @@ const SupportManagerDashboard = () => {
               <FaStore className="text-orange-200 text-3xl" />
             </div>
           </div>
-          
+
           <div className="bg-gradient-to-r from-purple-500 to-purple-600 rounded-xl p-6 text-white">
             <div className="flex items-center justify-between">
               <div>
@@ -306,10 +233,10 @@ const SupportManagerDashboard = () => {
         <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
           <div className="p-8">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              
+
               {/* Ticket List */}
               <div className="lg:col-span-1 space-y-6">
-                
+
                 {/* Filters */}
                 <div className="space-y-4">
                   <div className="relative">
@@ -319,37 +246,37 @@ const SupportManagerDashboard = () => {
                       placeholder="Ticket ara..."
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
-                      className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-1 focus:ring-orange-500 focus:border-orange-500 outline-none"
                     />
                   </div>
-                  
+
                   <div className="grid grid-cols-1 gap-3">
                     <select
                       value={filterStatus}
                       onChange={(e) => setFilterStatus(e.target.value)}
-                      className="text-sm border border-gray-300 rounded-lg px-3 py-2"
+                      className="text-sm border border-gray-300 rounded-lg px-3 py-2 outline-none"
                     >
                       <option value="all">Tüm Durum</option>
-                      <option value="pending">Bekliyor</option>
-                      <option value="resolved">Çözüldü</option>
-                      <option value="closed">Kapatıldı</option>
+                      <option value="PENDING">Bekliyor</option>
+                      <option value="RESOLVED">Çözüldü</option>
+                      <option value="CLOSED">Kapatıldı</option>
                     </select>
-                    
+
                     <select
                       value={filterPriority}
                       onChange={(e) => setFilterPriority(e.target.value)}
-                      className="text-sm border border-gray-300 rounded-lg px-3 py-2"
+                      className="text-sm border border-gray-300 rounded-lg px-3 py-2 outline-none"
                     >
                       <option value="all">Tüm Öncelik</option>
-                      <option value="high">Yüksek</option>
-                      <option value="normal">Normal</option>
-                      <option value="low">Düşük</option>
+                      <option value="HIGH">Yüksek</option>
+                      <option value="NORMAL">Normal</option>
+                      <option value="LOW">Düşük</option>
                     </select>
-                    
+
                     <select
                       value={filterCategory}
                       onChange={(e) => setFilterCategory(e.target.value)}
-                      className="text-sm border border-gray-300 rounded-lg px-3 py-2"
+                      className="text-sm border border-gray-300 rounded-lg px-3 py-2 outline-none"
                     >
                       <option value="all">Tüm Kategori</option>
                       {categories.map(cat => (
@@ -370,11 +297,10 @@ const SupportManagerDashboard = () => {
                       <div
                         key={ticket.id}
                         onClick={() => setSelectedTicket(ticket)}
-                        className={`p-4 border rounded-lg cursor-pointer transition-all duration-200 hover:shadow-md ${
-                          selectedTicket?.id === ticket.id 
-                            ? 'border-blue-500 bg-blue-50' 
-                            : 'border-gray-200 hover:border-gray-300'
-                        }`}
+                        className={`p-4 border rounded-lg cursor-pointer transition-all duration-200 hover:shadow-md ${selectedTicket?.id === ticket.id
+                          ? 'border-orange-500 bg-orange-50'
+                          : 'border-gray-200 hover:border-gray-300'
+                          }`}
                       >
                         <div className="flex items-start justify-between mb-2">
                           <div className="flex items-center gap-2">
@@ -390,18 +316,18 @@ const SupportManagerDashboard = () => {
                             {priorityConfig.text}
                           </span>
                         </div>
-                        
+
                         <h4 className="font-semibold text-gray-800 mb-1 line-clamp-1">
                           {ticket.subject}
                         </h4>
-                        
+
                         <p className="text-sm text-gray-600 mb-2 line-clamp-1">
                           {ticket.customerName}
                         </p>
-                        
+
                         <div className="flex items-center justify-between">
                           <span className="text-xs text-gray-500">
-                            {new Date(ticket.date).toLocaleDateString('tr-TR')}
+                            {new Date(ticket.createdAt).toLocaleDateString('tr-TR')}
                           </span>
                           <div className={`flex items-center gap-1 text-xs px-2 py-1 rounded-full ${statusConfig.color}`}>
                             {statusConfig.icon}
@@ -418,7 +344,7 @@ const SupportManagerDashboard = () => {
               <div className="lg:col-span-2">
                 {selectedTicket ? (
                   <div className="space-y-6">
-                    
+
                     {/* Ticket Header */}
                     <div className="border-b border-gray-200 pb-6">
                       <div className="flex items-start justify-between mb-4">
@@ -429,24 +355,24 @@ const SupportManagerDashboard = () => {
                           <div className="flex items-center gap-4 text-sm text-gray-600">
                             <span>#{selectedTicket.id.toString().padStart(6, '0')}</span>
                             <span>{getCategoryInfo(selectedTicket.category).label}</span>
-                            <span>{new Date(selectedTicket.date).toLocaleDateString('tr-TR')}</span>
+                            <span>{new Date(selectedTicket.createdAt).toLocaleDateString('tr-TR')}</span>
                           </div>
                         </div>
-                        
+
                         <div className="flex items-center gap-2">
                           <select
                             value={selectedTicket.status}
-                            onChange={(e) => updateTicketStatus(selectedTicket.id, e.target.value)}
-                            className="text-sm border border-gray-300 rounded-lg px-3 py-1"
+                            onChange={(e) => updateStatus(selectedTicket.id, e.target.value)}
+                            className="text-sm border border-gray-300 rounded-lg px-3 py-1 outline-none"
                           >
-                            <option value="pending">Bekliyor</option>
-                            <option value="resolved">Çözüldü</option>
-                            <option value="closed">Kapatıldı</option>
+                            <option value="PENDING">Bekliyor</option>
+                            <option value="RESOLVED">Çözüldü</option>
+                            <option value="CLOSED">Kapatıldı</option>
                           </select>
                         </div>
                       </div>
-                      
-                      {/* Customer Info */}
+
+                      {/* Customer Info  //Backendden gelmiyor , düzenlenmesi lazım */}
                       <div className="bg-gray-50 rounded-lg p-4">
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                           <div>
@@ -454,19 +380,19 @@ const SupportManagerDashboard = () => {
                               {selectedTicket.userType === 'seller' ? 'Satıcı' : 'Müşteri'}
                             </div>
                             <div className="font-medium text-gray-800">
-                              {selectedTicket.customerName}
+                              {selectedTicket.customer?.name}
                             </div>
                           </div>
                           <div>
                             <div className="text-sm text-gray-500 mb-1">E-posta</div>
                             <div className="font-medium text-gray-800">
-                              {selectedTicket.customerEmail}
+                              {selectedTicket.customer?.email}
                             </div>
                           </div>
                           <div>
                             <div className="text-sm text-gray-500 mb-1">Telefon</div>
                             <div className="font-medium text-gray-800">
-                              {selectedTicket.customerPhone}
+                                {selectedTicket.customer?.phone}
                             </div>
                           </div>
                         </div>
@@ -474,11 +400,11 @@ const SupportManagerDashboard = () => {
                     </div>
 
                     {/* Original Message */}
-                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <div className="bg-orange-100 border border-orange-500 rounded-lg p-4">
                       <div className="flex items-center gap-2 mb-3">
                         <div className={`w-8 h-8 rounded-full flex items-center justify-center ${selectedTicket.userType === 'seller' ? 'bg-orange-500' : 'bg-blue-500'}`}>
-                          {selectedTicket.userType === 'seller' ? 
-                            <FaStore className="text-white text-sm" /> : 
+                          {selectedTicket.userType === 'seller' ?
+                            <FaStore className="text-white text-sm" /> :
                             <FaUser className="text-white text-sm" />
                           }
                         </div>
@@ -487,7 +413,7 @@ const SupportManagerDashboard = () => {
                             {selectedTicket.customerName}
                           </div>
                           <div className="text-sm text-gray-500">
-                            {new Date(selectedTicket.date).toLocaleString('tr-TR')}
+                            {new Date(selectedTicket.createdAt).toLocaleString('tr-TR')}
                           </div>
                         </div>
                       </div>
@@ -531,17 +457,16 @@ const SupportManagerDashboard = () => {
                           value={replyText}
                           onChange={(e) => setReplyText(e.target.value)}
                           rows="4"
-                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
+                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-1 focus:ring-orange-500 focus:border-orange-500 resize-none outline-none"
                           placeholder="Yanıtınızı yazın..."
                         />
                         <button
                           onClick={handleReply}
                           disabled={!replyText.trim() || isReplying}
-                          className={`px-6 py-2 rounded-lg font-medium transition-all duration-200 ${
-                            !replyText.trim() || isReplying
-                              ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                              : 'bg-blue-500 text-white hover:bg-blue-600'
-                          }`}
+                          className={`px-6 py-2 rounded-lg font-medium transition-all duration-200 ${!replyText.trim() || isReplying
+                            ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                            : 'bg-blue-500 text-white hover:bg-blue-600'
+                            }`}
                         >
                           {isReplying ? (
                             <div className="flex items-center gap-2">

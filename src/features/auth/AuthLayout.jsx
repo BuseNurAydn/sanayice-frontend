@@ -10,7 +10,7 @@ const AuthLayout = ({ children }) => {
   const hideTabs = isSellerSignUp;
 
   return (
-    <div className="min-h-screen flex items-center flex-col">
+    <div className="min-h-screen flex items-center flex-col scrollbar-custom overflow-y-auto h-[400px]">
       
        <div className='bg-[var(--color-dark-orange)] h-[300px] w-full flex justify-center items-center pb-16'>
           <img src={Logo} alt="Logo" className='w-3/4 md:w-auto'/>

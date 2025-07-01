@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { Upload, FileText, X, Check, AlertTriangle, Eye, Download, RefreshCw, Clock, CheckCircle, XCircle } from 'lucide-react';
+import AdminText from '../../shared/Text/AdminText';
 
 const SellerDocumentUpload = () => {
   const [belgeler, setBelgeler] = useState([
@@ -189,11 +190,11 @@ const SellerDocumentUpload = () => {
   const reddedilenBelgeler = belgeler.filter(b => b.durum === 'REDDEDILDI').length;
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-6xl mx-auto px-4 py-8">
+    <div className="min-h-screen bg-gray-50 p-6">
+      <div className="">
         {/* Başlık */}
         <div className="mb-8">
-          <h1 className="text-3xl font-semibold text-gray-900">Satıcı Doğrulama Belgeleri</h1>
+          <AdminText>Satıcı Doğrulama Belgeleri</AdminText>
           <p className="mt-2 text-gray-600">Satıcı hesabınızı aktifleştirmek için gerekli belgeleri yükleyin</p>
         </div>
 

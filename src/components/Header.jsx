@@ -4,12 +4,14 @@ import { useDispatch } from "react-redux";
 import Logo from "../../src/assets/png/Logo2.png";
 import { FaShoppingCart } from "react-icons/fa";
 import AccountMenu from "../pages/customer/AccountPage/AccountMenu";
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { fetchCart, addToCart } from "../services/cartService";
 import { toast } from "react-toastify"
 import { fetchFavorites, addToFavorites } from "../services/favoritesService";
 
-const Header = ({ searchQuery, setSearchQuery }) => {
+const Header = () => {
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const favoriteItems = useSelector(state => state.favorites.items);
@@ -18,6 +20,15 @@ const Header = ({ searchQuery, setSearchQuery }) => {
   const totalQuantity = Array.isArray(cartItems)
     ? cartItems.reduce((total, item) => total + item.quantity, 0)
     : 0;
+
+  const searchHistory = [
+    "elektrik tesisat malzemeleri",
+    "hidrolik sistemler",
+    "elektrik malzemeleri",
+    "güvenlik alarm",
+  ];
+
+  const popularSearches = ["iphone 13", "klima", "stanley termos", "kamera"];
 
   useEffect(() => {
     dispatch(fetchFavorites()); //kullanıcının çıkış yaptıktan sonra sepette ve favorilerde ürünü varsa yüklensin
@@ -63,6 +74,8 @@ const Header = ({ searchQuery, setSearchQuery }) => {
         <div className="flex-1 max-w-2xl mx-6">
           <div className="relative">
             <input
+              onFocus={() => setShowSuggestions(true)}
+              onBlur={() => setTimeout(() => setShowSuggestions(false), 150)}
               className="w-full border border-gray-200 rounded-xl px-5 py-3 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:bg-white transition-all duration-200"
               placeholder="Ürün, kategori veya marka ara..."
               value={searchQuery}
@@ -73,18 +86,41 @@ const Header = ({ searchQuery, setSearchQuery }) => {
               <path d="m21 21-4.35-4.35" strokeWidth="2" strokeLinecap="round" />
             </svg>
           </div>
+          {showSuggestions && (
+            <div className="absolute z-50 w-2xl bg-white rounded-xl shadow-lg mt-2 p-4 space-y-4">
+              {/* Geçmiş aramalar */}
+              <div>
+                <div className="flex justify-between items-center text-gray-600 text-sm font-medium mb-1">
+                  <span>Geçmiş aramalarım</span>
+                  <button className="text-red-500 text-xs">Temizle</button>
+                </div>
+                <ul className="text-gray-700 space-y-1 text-sm">
+                  {searchHistory.map((item, i) => (
+                    <li key={i} className="flex items-center gap-2 cursor-pointer hover:text-orange-500">
+                      <svg width="16" height="16" fill="none" stroke="currentColor"><circle cx="8" cy="8" r="6" strokeWidth="2" /></svg>
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* Popüler aramalar */}
+              <div>
+                <div className="text-gray-600 text-sm font-medium mb-1">Popüler aramalar</div>
+                <div className="flex flex-wrap gap-2">
+                  {popularSearches.map((item, i) => (
+                    <span key={i} className="px-3 py-1 text-sm bg-gray-100 rounded-full cursor-pointer hover:bg-orange-100">
+                      {item}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
         </div>
 
-        <div className="flex items-center gap-3">
-          <button className="relative bg-gray-100 hover:bg-gray-200 p-3 rounded-xl transition-colors duration-200">
-            <svg width={20} height={20} fill="none" stroke="currentColor" className="text-gray-700">
-              <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" strokeWidth="2" />
-              <line x1="3" y1="6" x2="21" y2="6" strokeWidth="2" />
-              <path d="M16 10a4 4 0 0 1-8 0" strokeWidth="2" />
-            </svg>
-            <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">3</span>
-          </button>
-
+        <div className="flex items-center gap-4">
           {/* Favoriler Butonu */}
           <button
             className="relative bg-gray-100 hover:bg-gray-200 p-3 rounded-xl transition-colors duration-200"
@@ -119,5 +155,4 @@ const Header = ({ searchQuery, setSearchQuery }) => {
     </header>
   );
 };
-
 export default Header;

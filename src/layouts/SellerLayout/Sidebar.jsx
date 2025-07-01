@@ -50,7 +50,7 @@ const menuItems = [
   },
   {
     label: "Satıcı Doğrulama Sayfası",
-    to: "/seller/seller_vertification",
+    to: "/seller/seller-verification",
     icon: <MdVerifiedUser />,
   },
   {
@@ -120,7 +120,7 @@ const Sidebar = () => {
       {/* Mobile Overlay */}
       {isMobileOpen && (
         <div 
-          className="fixed inset-0 bg-black bg-opacity-50 z-30 md:hidden"
+          className="fixed inset-0 bg-opacity-50 z-30 md:hidden"
           onClick={() => setIsMobileOpen(false)}
         />
       )}
@@ -144,7 +144,7 @@ const Sidebar = () => {
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-slate-200 bg-white/50">
           {!collapsed && (
-            <h2 className="text-lg font-semibold text-slate-800 truncate">
+            <h2 className="text-lg pl-10 font-semibold text-slate-800 truncate">
               Yönetim Paneli
             </h2>
           )}
