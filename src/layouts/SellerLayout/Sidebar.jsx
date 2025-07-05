@@ -75,11 +75,11 @@ const menuItems = [
     to: "/seller/coupon_campaign_management",
     icon: <MdLocalOffer />,
   },
-  {
-    label: "Satıcıların Kupon Ve Kampanya Listesi",
-    to: "/seller/seller_coupon_campaign_management",
-    icon: <MdLocalOffer />,
-  },
+  // {
+  //   label: "Satıcıların Kupon Ve Kampanya Listesi",
+  //   to: "/seller/seller_coupon_campaign_management",
+  //   icon: <MdLocalOffer />,
+  // },
   {
     label: "Destek Ve Geri Bildirim Yönetimi",
     to: "/seller/support_management",
