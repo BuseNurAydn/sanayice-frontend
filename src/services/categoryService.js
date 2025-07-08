@@ -1,16 +1,17 @@
-const API_BASE = "/api/managers";
+const PUBLIC_API = import.meta.env.VITE_API_BASE_URL;
+const API_BASE = `${PUBLIC_API}/managers`;
 
 const getToken = () => localStorage.getItem("token");
 
-//KATEGORİLERİ LİSTELEME
+// KATEGORİLERİ LİSTELEME
 export const fetchCategories = async () => {
   const token = getToken();
 
-  const response = await fetch("/api/categories", {
+  const response = await fetch(`${PUBLIC_API}/categories`, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
-       Authorization: `Bearer ${token}`,
+      Authorization: `Bearer ${token}`,
     },
   });
 
@@ -19,11 +20,11 @@ export const fetchCategories = async () => {
   return response.json();
 };
 
-//ALT KATEGORİLERİ LİSTELEME
+// ALT KATEGORİLERİ LİSTELEME
 export const fetchSubcategories = async () => {
   const token = getToken();
 
-  const response = await fetch("/api/subcategories", {
+  const response = await fetch(`${PUBLIC_API}/subcategories`, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
@@ -36,11 +37,11 @@ export const fetchSubcategories = async () => {
   return response.json();
 };
 
-//Tıklanan kategori ve alt kategorilerini getirmek için
+// TIKLANAN KATEGORİYİ GETİR
 export const getCategoryById = async (id) => {
-  const token = localStorage.getItem("token");
+  const token = getToken();
 
-  const response = await fetch(`/api/categories/${id}`, {
+  const response = await fetch(`${PUBLIC_API}/categories/${id}`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
@@ -51,8 +52,7 @@ export const getCategoryById = async (id) => {
   return await response.json();
 };
 
-
-//KATEGORİ - ALT KATEGORİLERİ SİLME
+// KATEGORİ / ALT KATEGORİ SİLME
 export const deleteCategory = async (id, type = "category") => {
   const token = getToken();
 
@@ -71,7 +71,7 @@ export const deleteCategory = async (id, type = "category") => {
   if (!response.ok) throw new Error("Silme işlemi başarısız");
 };
 
-//DÜZENLEME İŞLEMİ
+// KATEGORİ GÜNCELLEME
 export const updateCategory = async (id, data) => {
   const token = getToken();
 
@@ -90,6 +90,7 @@ export const updateCategory = async (id, data) => {
   }
 };
 
+// ALT KATEGORİ EKLE / GÜNCELLE
 export const saveSubcategory = async (id, data) => {
   const token = getToken();
 
@@ -111,18 +112,18 @@ export const saveSubcategory = async (id, data) => {
   if (!response.ok) throw new Error("Alt kategori kaydedilemedi");
 };
 
-//KATEGORİ EKLEME
+// KATEGORİ EKLEME
 export const addCategory = async (categoryData) => {
   const token = getToken();
 
   const response = await fetch(`${API_BASE}/categories`, {
-    method: 'POST',
+    method: "POST",
     headers: {
-      'Content-Type': 'application/json',
-       Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
     },
     body: JSON.stringify(categoryData),
   });
 
-  if (!response.ok) throw new Error('Kategori eklenemedi');
+  if (!response.ok) throw new Error("Kategori eklenemedi");
 };
