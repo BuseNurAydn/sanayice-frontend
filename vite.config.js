@@ -8,7 +8,7 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'http://ec2-18-199-84-187.eu-central-1.compute.amazonaws.com:8080',
+        target: 'https://sanayice.ddns.net/',
         changeOrigin: true,
         secure: false,
       },

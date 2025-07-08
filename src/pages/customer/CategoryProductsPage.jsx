@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import ProductCard from "../../components/ProductCard";
 import { toast } from "react-toastify";
+import { FaFilter } from "react-icons/fa";
 import { getCategoryById } from "../../services/categoryService";
 import { getProductsByCategoryId } from "../../services/productsService";
 
@@ -81,12 +82,15 @@ function CategoryProductsPage() {
             </div>
 
             {/* Mobilde filtre butonu */}
-            <div className="md:hidden px-4 mt-4">
+            <div className="md:hidden px-4 mt-4 ">
                 <button
                     onClick={() => setIsFilterOpen(true)}
                     className="bg-orange-500 text-white py-2 px-4 rounded-md font-semibold w-full flex items-center justify-between"
-                >
-                    <span>Filtreler</span>
+                > 
+                <div className="flex items-center justify-center gap-2">
+                    <span >Tüm Filtreler</span>
+                     <FaFilter />
+                    </div>
                     <span className="text-xs bg-white text-orange-600 px-2 py-0.5 rounded-full">
                         {selectedSubcategories.length + (maxPrice < 30000 ? 1 : 0)} aktif
                     </span>
@@ -101,12 +105,12 @@ function CategoryProductsPage() {
                         onClick={() => setIsFilterOpen(false)}
                     ></div>
 
-                    <div className="relative bg-white w-4/5 max-w-sm h-full p-4 shadow-lg animate-slide-in-left z-50 overflow-y-auto">
-                        <div className="flex justify-between items-center mb-4">
-                            <h2 className="text-md font-semibold">Filtrele</h2>
+                    <div className="relative bg-white w-4/5 max-w-sm h-full p-6 shadow-lg animate-slide-in-left z-50 overflow-y-auto">
+                        <div className="flex justify-between items-center mb-8">
+                            <h2 className="text-lg font-semibold">Tüm Filtreler</h2>
                             <button
                                 onClick={() => setIsFilterOpen(false)}
-                                className="text-red-500 text-2xl font-bold"
+                                className="text-red-500 text-xl font-bold"
                             >
                                 ✕
                             </button>
