@@ -1,4 +1,5 @@
-const API_BASE = "/api/auth";
+const API_BASE = "https://sanayice.ddns.net/api/auth";
+
 
 export const login = async (loginData) => {
   try {
