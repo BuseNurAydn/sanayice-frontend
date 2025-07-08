@@ -1,21 +1,24 @@
-const PUBLIC_API = import.meta.env.VITE_API_BASE_URL;
-const API_BASE = `${PUBLIC_API}/managers`;
-
+const API_BASE = "https://sanayice.ddns.net/api";
 const getToken = () => localStorage.getItem("token");
 
 // KATEGORİLERİ LİSTELEME
 export const fetchCategories = async () => {
   const token = getToken();
+  if (!token) throw new Error("Token bulunamadı");
 
-  const response = await fetch(`${PUBLIC_API}/categories`, {
+  const response = await fetch(`${API_BASE}/categories`, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
+      // Dikkat: burayı mutlaka backtick (`) ile sarmalayın
       Authorization: `Bearer ${token}`,
     },
   });
 
-  if (!response.ok) throw new Error("Kategoriler alınamadı");
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`Kategoriler alınamadı: ${response.status} ${errorText}`);
+  }
 
   return response.json();
 };
