@@ -1,21 +1,28 @@
-const API_BASE = "/api/managers";
+const API_URL = import.meta.env.VITE_API_URL || '';
+const API_BASE = `${API_URL}/api/managers`;
 
 const getToken = () => localStorage.getItem("token");
 
 //KATEGORİLERİ LİSTELEME
+// Development için
 export const fetchCategories = async () => {
   const token = getToken();
-
-  const response = await fetch("/api/categories", {
+  
+  // Development'da proxy, production'da full URL
+  const baseURL = import.meta.env.DEV ? '' : import.meta.env.VITE_API_URL;
+  
+  const response = await fetch(`${baseURL}/api/categories`, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
-       Authorization: `Bearer ${token}`,
+      Authorization: `Bearer ${token}`,
     },
   });
-
-  if (!response.ok) throw new Error("Kategoriler alınamadı");
-
+  
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+  
   return response.json();
 };
 
