@@ -50,7 +50,7 @@ const Reviews = () => {
 
   return (
     <div className="bg-white p-6 rounded-lg shadow-md">
-      <h2 className="text-2xl font-bold text-gray-800 mb-6">Değerlendirmelerim</h2>
+      <h2 className="text-xl md:text-2xl font-bold text-gray-800 mb-6">Değerlendirmelerim</h2>
 
       <div className="space-y-4">
         {reviews.length > 0 ? (

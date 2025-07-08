@@ -71,7 +71,7 @@ const Login = () => {
             setTimeout(() => {
                 //Role göre yönlendirme
                 if (data.roles[0] == 'ROLE_SELLER') {
-                    navigate('/seller/dashboard');
+                    navigate('/seller/vertification');
                 } else if (data.roles[0] == 'ROLE_CUSTOMER') {
                     navigate('/');
                 }

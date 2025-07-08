@@ -71,6 +71,12 @@ const ProductDetail = () => {
     alert("Hemen satın al işlemi başlatılıyor...");
   };
 
+const htext = (text) => {
+  if (!text) return '';
+  return text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
+};
+
+
   function renderStars(rating) {
     const fullStars = Math.max(0, Math.min(Math.floor(rating || 0), 5));
     const hasHalfStar = rating % 1 >= 0.5;
@@ -102,11 +108,11 @@ const ProductDetail = () => {
       <div className="bg-white border-b">
         <div className="max-w-7xl mx-auto px-4 py-3">
           <nav className="text-sm text-gray-600">
-            <span className="hover:text-orange-600 cursor-pointer">Ana Sayfa</span>
+            <span className="hover:text-orange-600 cursor-pointer text-sm">Ana Sayfa</span>
             <span className="mx-2">/</span>
-            <span className="hover:text-orange-600 cursor-pointer">{product.categoryName}</span>
+            <span className="hover:text-orange-600 cursor-pointer text-xs">{htext(product.categoryName)}</span>
             <span className="mx-2">/</span>
-            <span className="text-gray-900 font-medium">{product.name}</span>
+            <span className="text-gray-900 font-medium text-sm">{product.name}</span>
           </nav>
         </div>
       </div>
@@ -172,7 +178,7 @@ const ProductDetail = () => {
             <div className="flex items-start justify-between">
               <div>
                 <p className="text-sm text-gray-500 font-medium mb-1">{product.brand}</p>
-                <h1 className="text-3xl font-bold text-gray-900 leading-tight">{product.name}</h1>
+                <h1 className="text-xl md:text-3xl font-bold text-gray-900 leading-tight">{product.name}</h1>
                 <p className="text-sm text-gray-500 mt-1">SKU: {product?.sku}</p>
               </div>
               <button
@@ -250,14 +256,14 @@ const ProductDetail = () => {
                 <button
                   onClick={handleAddToCart}
                   disabled={product.stockQuantity === 0}
-                  className="flex-1 bg-orange-500 hover:bg-orange-600 disabled:bg-gray-400 text-white py-4 px-6 rounded-xl font-semibold text-lg transition-all duration-200 transform hover:scale-105 disabled:transform-none disabled:cursor-not-allowed"
+                  className="flex-1 bg-orange-500 hover:bg-orange-600 disabled:bg-gray-400 text-white py-2 px-4 md:py-4 md:px-6 rounded-xl md:font-semibold md:text-lg text-sm transition-all duration-200 transform hover:scale-105 disabled:transform-none disabled:cursor-not-allowed"
                 >
                   Sepete Ekle
                 </button>
                 <button
                   onClick={handleBuyNow}
                   disabled={product.stockQuantity === 0}
-                  className="flex-1 bg-gray-900 hover:bg-gray-800 disabled:bg-gray-400 text-white py-4 px-6 rounded-xl font-semibold text-lg transition-all duration-200 transform hover:scale-105 disabled:transform-none disabled:cursor-not-allowed"
+                  className="flex-1 bg-gray-900 hover:bg-gray-800 disabled:bg-gray-400 text-white py-2 px-4 md:py-4 md:px-6 rounded-xl md:font-semibold md:text-lg text-sm transition-all duration-200 transform hover:scale-105 disabled:transform-none disabled:cursor-not-allowed"
                 >
                   Hemen Al
                 </button>
@@ -315,11 +321,11 @@ const ProductDetail = () => {
             {activeTab === "description" && (
               <div className="space-y-6">
                 <div>
-                  <h3 className="text-xl font-bold mb-4">Ürün Açıklaması</h3>
+                  <h3 className="md:text-xl text-lg font-bold mb-4">Ürün Açıklaması</h3>
                   <p className="text-gray-700 leading-relaxed mb-6">{product.description}</p>
                 </div>
                 <div>
-                  <h4 className="text-lg font-semibold mb-3">Öne Çıkan Özellikler</h4>
+                  <h4 className="md:text-lg text-md font-semibold mb-3">Öne Çıkan Özellikler</h4>
                   <ul className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     {product.highlightedFeatures.map((feature, idx) => (
                       <li key={idx} className="flex items-start gap-3">
@@ -336,7 +342,7 @@ const ProductDetail = () => {
 
             {activeTab === "specifications" && (
               <div>
-                <h3 className="text-xl font-bold mb-4">Teknik Özellikler</h3>
+                <h3 className="md:text-xl text-lg font-bold mb-4">Teknik Özellikler</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {Object.entries(product.technicalSpecifications).map(([key, value]) => (
                     <div key={key} className="border-b border-gray-200 pb-3">
@@ -351,7 +357,7 @@ const ProductDetail = () => {
             {activeTab === "reviews" && (
               <div>
                 <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-xl font-bold">Müşteri Değerlendirmeleri</h3>
+                  <h3 className="md:text-xl text-lg font-bold">Müşteri Değerlendirmeleri</h3>
                   <div className="flex items-center gap-4">
                     <div className="flex items-center gap-2">
                       {renderStars(product.rating)}

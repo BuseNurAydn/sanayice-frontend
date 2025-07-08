@@ -1,6 +1,9 @@
 import { useState, useEffect } from "react";
-import { Plus, Edit3, Trash2, Eye, EyeOff, BarChart3, Calendar, Percent, Users, Gift, Copy, Clock, Star, ShoppingCart, CreditCard } from "lucide-react";
+import { Plus, Edit3, Trash2, Eye, EyeOff, BarChart3, Calendar, Percent, Users, Gift, Copy, Clock, Star, ShoppingCart} from "lucide-react";
 import AdminText from "../../shared/Text/AdminText";
+import { addCampaign, getCampaigns, updateCampaign, deleteCampaign } from "../../services/campaignService";
+import { addCoupon, getCoupons, updateCoupon, deleteCoupon } from "../../services/couponService";
+import { toast } from "react-toastify";
 
 const CampaignCouponManagement = () => {
   const [campaigns, setCampaigns] = useState([]);
@@ -40,103 +43,32 @@ const CampaignCouponManagement = () => {
     isActive: true
   });
 
-  // Mock data
+  //GET CAMPAİGN
   useEffect(() => {
-    setCampaigns([
-      {
-        id: 1,
-        name: "Yaz İndirimleri 2024",
-        description: "Tüm yaz ürünlerinde geçerli büyük indirim kampanyası",
-        discountType: "percentage",
-        discountValue: 25,
-        startDate: "2024-06-01",
-        endDate: "2024-08-31",
-        minOrderAmount: 200,
-        isActive: true,
-        order: 1,
-        createdAt: "2024-05-15",
-        usageCount: 156
-      },
-      {
-        id: 2,
-        name: "Sonbahar Koleksiyonu",
-        description: "Yeni sezon ürünlerinde özel fırsatlar",
-        discountType: "fixed",
-        discountValue: 50,
-        startDate: "2024-09-01",
-        endDate: "2024-11-30",
-        minOrderAmount: 300,
-        isActive: true,
-        order: 2,
-        createdAt: "2024-05-20",
-        usageCount: 89
-      },
-      {
-        id: 3,
-        name: "Kış Kampanyası",
-        description: "Kış ürünlerinde büyük fırsatlar",
-        discountType: "percentage",
-        discountValue: 30,
-        startDate: "2024-12-01",
-        endDate: "2025-02-28",
-        minOrderAmount: 150,
-        isActive: false,
-        order: 3,
-        createdAt: "2024-04-10",
-        usageCount: 45
+    const fetchCampaigns = async () => {
+      try {
+        const data = await getCampaigns();
+        setCampaigns(data);
+      } catch (error) {
+        showToast(error.message || "Kampanyalar alınırken hata oluştu", "error");
       }
-    ]);
+    };
 
-    setCoupons([
-      {
-        id: 1,
-        code: "WELCOME2024",
-        name: "Hoş Geldin Kuponu",
-        description: "Yeni üyeler için özel indirim kuponu",
-        discountType: "percentage",
-        discountValue: 15,
-        startDate: "2024-01-01",
-        endDate: "2024-12-31",
-        usageLimit: 1000,
-        usedCount: 234,
-        minOrderAmount: 100,
-        targetType: "all",
-        isActive: true,
-        createdAt: "2024-01-01"
-      },
-      {
-        id: 2,
-        code: "SUMMER50",
-        name: "Yaz Kuponu",
-        description: "Yaz aylarında geçerli özel kupon",
-        discountType: "fixed",
-        discountValue: 50,
-        startDate: "2024-06-01",
-        endDate: "2024-08-31",
-        usageLimit: 500,
-        usedCount: 167,
-        minOrderAmount: 250,
-        targetType: "specific",
-        isActive: true,
-        createdAt: "2024-05-25"
-      },
-      {
-        id: 3,
-        code: "STUDENT20",
-        name: "Öğrenci İndirimi",
-        description: "Öğrenciler için özel indirim",
-        discountType: "percentage",
-        discountValue: 20,
-        startDate: "2024-09-01",
-        endDate: "2025-06-30",
-        usageLimit: 300,
-        usedCount: 78,
-        minOrderAmount: 150,
-        targetType: "specific",
-        isActive: false,
-        createdAt: "2024-08-15"
+    fetchCampaigns();
+  }, []);
+
+  //GET COUPONS
+  useEffect(() => {
+    const fetchCoupons = async () => {
+      try {
+        const data = await getCoupons();
+        setCoupons(data);
+      } catch (error) {
+        showToast(error.message, 'error');
       }
-    ]);
+    };
+
+    fetchCoupons();
   }, []);
 
   const showToast = (message, type = 'success') => {
@@ -197,10 +129,10 @@ const CampaignCouponManagement = () => {
         name: item.name,
         description: item.description,
         discountType: item.discountType,
-        discountValue: item.discountValue,
+        discountValue: Number(item.discountValue),
         startDate: item.startDate,
         endDate: item.endDate,
-        minOrderAmount: item.minOrderAmount,
+        minOrderAmount: Number(item.minOrderAmount),
         isActive: item.isActive,
         order: item.order
       });
@@ -210,12 +142,12 @@ const CampaignCouponManagement = () => {
         name: item.name,
         description: item.description,
         discountType: item.discountType,
-        discountValue: item.discountValue,
+        discountValue: Number(item.discountValue),
         startDate: item.startDate,
         endDate: item.endDate,
-        usageLimit: item.usageLimit,
-        usedCount: item.usedCount,
-        minOrderAmount: item.minOrderAmount,
+        usageLimit: Number(item.usageLimit),
+        usedCount: Number(item.usedCount),
+        minOrderAmount: Number(item.minOrderAmount),
         targetType: item.targetType,
         isActive: item.isActive
       });
@@ -225,74 +157,81 @@ const CampaignCouponManagement = () => {
     setIsModalOpen(true);
   };
 
-  const handleSave = () => {
-    if (modalType === 'campaign') {
-      if (!campaignFormData.name.trim() || !campaignFormData.discountValue) {
-        showToast("Kampanya adı ve indirim miktarı zorunludur!", 'error');
-        return;
-      }
-      
-      if (editingId) {
-        setCampaigns(prev => prev.map(campaign => 
-          campaign.id === editingId ? { ...campaign, ...campaignFormData } : campaign
-        ));
-        showToast("Kampanya güncellendi!");
+  const handleSave = async () => {
+    try {
+      if (modalType === 'campaign') {
+        if (!campaignFormData.name.trim() || !campaignFormData.discountValue) {
+          showToast("Kampanya adı ve indirim miktarı zorunludur!", 'error');
+          return;
+        }
+
+        if (editingId) {
+          await updateCampaign(editingId, campaignFormData);
+          toast("Kampanya güncellendi!");
+        } else {
+          await addCampaign(campaignFormData);
+          toast("Kampanya başarıyla eklendi!");
+        }
+
+        const updatedCampaigns = await getCampaigns();
+        setCampaigns(updatedCampaigns);
+
       } else {
-        const newCampaign = {
-          ...campaignFormData,
-          id: Date.now(),
-          createdAt: new Date().toISOString().split('T')[0],
-          usageCount: 0
-        };
-        setCampaigns(prev => [...prev, newCampaign]);
-        showToast("Kampanya eklendi!");
+        if (!couponFormData.code.trim() || !couponFormData.name.trim() || !couponFormData.discountValue) {
+          showToast("Kupon kodu, isim ve indirim miktarı zorunludur!", 'error');
+          return;
+        }
+
+        if (editingId) {
+          await updateCoupon(editingId, couponFormData);
+          toast("Kupon güncellendi!");
+        } else {
+          await addCoupon({
+            ...couponFormData,
+            targetType: couponFormData.targetType.toUpperCase(),
+          });
+          toast("Kupon başarıyla eklendi!");
+        }
+
+        const updatedCoupons = await getCoupons();
+        setCoupons(updatedCoupons);
       }
-    } else {
-      if (!couponFormData.code.trim() || !couponFormData.name.trim() || !couponFormData.discountValue) {
-        showToast("Kupon kodu, isim ve indirim miktarı zorunludur!", 'error');
-        return;
-      }
-      
-      if (editingId) {
-        setCoupons(prev => prev.map(coupon => 
-          coupon.id === editingId ? { ...coupon, ...couponFormData } : coupon
-        ));
-        showToast("Kupon güncellendi!");
-      } else {
-        const newCoupon = {
-          ...couponFormData,
-          id: Date.now(),
-          createdAt: new Date().toISOString().split('T')[0]
-        };
-        setCoupons(prev => [...prev, newCoupon]);
-        showToast("Kupon eklendi!");
-      }
+      setIsModalOpen(false);
+      setEditingId(null);
+    } catch (error) {
+      showToast(error.message || "Bir hata oluştu", 'error');
     }
-    setIsModalOpen(false);
-    setEditingId(null);
   };
 
-  const handleDelete = () => {
-    if (deleteType === 'campaign') {
-      setCampaigns(prev => prev.filter(campaign => campaign.id !== deleteId));
-      showToast("Kampanya silindi!");
-    } else {
-      setCoupons(prev => prev.filter(coupon => coupon.id !== deleteId));
-      showToast("Kupon silindi!");
+  const handleDelete = async () => {
+    try {
+      if (deleteType === 'campaign') {
+        await deleteCampaign(deleteId);
+        toast("Kampanya silindi!");
+        const updatedCampaigns = await getCampaigns();
+        setCampaigns(updatedCampaigns);
+      } else {
+        await deleteCoupon(deleteId);
+        toast("Kupon silindi!");
+        const updatedCoupons = await getCoupons();
+        setCoupons(updatedCoupons);
+      }
+      setShowConfirmDialog(false);
+      setDeleteId(null);
+      setDeleteType(null);
+    } catch (error) {
+      showToast(error.message || "Silme işlemi başarısız", 'error');
     }
-    setShowConfirmDialog(false);
-    setDeleteId(null);
-    setDeleteType(null);
   };
 
   const toggleStatus = (id, type) => {
     if (type === 'campaign') {
-      setCampaigns(prev => prev.map(campaign => 
+      setCampaigns(prev => prev.map(campaign =>
         campaign.id === id ? { ...campaign, isActive: !campaign.isActive } : campaign
       ));
       showToast("Kampanya durumu güncellendi!");
     } else {
-      setCoupons(prev => prev.map(coupon => 
+      setCoupons(prev => prev.map(coupon =>
         coupon.id === id ? { ...coupon, isActive: !coupon.isActive } : coupon
       ));
       showToast("Kupon durumu güncellendi!");
@@ -305,11 +244,11 @@ const CampaignCouponManagement = () => {
 
   const CampaignCard = ({ campaign }) => (
     <div className={`group relative overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition-all duration-300 hover:shadow-xl hover:-translate-y-1 ${!campaign.isActive ? 'opacity-60' : ''}`}>
-      <div className="p-6">
+      <div className="py-6 px-4">
         <div className="flex items-start justify-between mb-4">
           <div className="flex-1">
-            <div className="flex items-center gap-2 mb-2">
-              <h3 className="font-bold text-lg text-gray-900">{campaign.name}</h3>
+            <div className="flex items-center gap-6 mb-2">
+              <h3 className="font-bold text-md text-gray-900">{campaign.name}</h3>
               <span className={`px-3 py-1 text-xs font-medium rounded-full ${campaign.isActive ? 'bg-green-500 text-white' : 'bg-red-500 text-white'}`}>
                 {campaign.isActive ? 'Aktif' : 'Pasif'}
               </span>
@@ -344,25 +283,24 @@ const CampaignCouponManagement = () => {
           </div>
           <div className="flex items-center gap-2 text-gray-500 text-sm">
             <Clock className="w-4 h-4" />
-            <span>Oluşturulma: {campaign.createdAt}</span>
+            <span>Oluşturulma: {new Date(campaign.createdAt).toLocaleDateString('tr-TR')} </span>
           </div>
         </div>
-        
+
         <div className="flex gap-2">
           <button
             onClick={() => handleEdit(campaign, 'campaign')}
-            className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-blue-50 text-blue-600 rounded-xl hover:bg-blue-100 transition-colors font-medium"
+            className="flex-1 flex items-center justify-center gap-1 px-4 py-2 bg-blue-50 text-blue-600 rounded-xl hover:bg-blue-100 transition-colors font-medium"
           >
             <Edit3 className="w-4 h-4" />
             Düzenle
           </button>
           <button
             onClick={() => toggleStatus(campaign.id, 'campaign')}
-            className={`flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-xl transition-colors font-medium ${
-              campaign.isActive 
-                ? 'bg-orange-50 text-orange-600 hover:bg-orange-100' 
-                : 'bg-green-50 text-green-600 hover:bg-green-100'
-            }`}
+            className={`flex-1 flex items-center justify-center gap-1 px-4 py-2 rounded-xl transition-colors font-medium ${campaign.isActive
+              ? 'bg-orange-50 text-orange-600 hover:bg-orange-100'
+              : 'bg-green-50 text-green-600 hover:bg-green-100'
+              }`}
           >
             {campaign.isActive ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
             {campaign.isActive ? 'Pasifleştir' : 'Aktifleştir'}
@@ -384,7 +322,7 @@ const CampaignCouponManagement = () => {
 
   const CouponCard = ({ coupon }) => (
     <div className={`group relative overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition-all duration-300 hover:shadow-xl hover:-translate-y-1 ${!coupon.isActive ? 'opacity-60' : ''}`}>
-      <div className="p-6">
+      <div className="py-6 px-4">
         <div className="flex items-start justify-between mb-4">
           <div className="flex-1">
             <div className="flex items-center gap-2 mb-2">
@@ -418,7 +356,7 @@ const CampaignCouponManagement = () => {
             <span className="font-medium">{coupon.usedCount}/{coupon.usageLimit}</span>
           </div>
           <div className="w-full bg-white/40 rounded-full h-2 mt-1">
-            <div 
+            <div
               className="bg-purple-600 h-2 rounded-full transition-all"
               style={{ width: `${(coupon.usedCount / coupon.usageLimit) * 100}%` }}
             />
@@ -436,25 +374,29 @@ const CampaignCouponManagement = () => {
           </div>
           <div className="flex items-center gap-2 text-gray-600 text-sm">
             <Users className="w-4 h-4" />
-            <span>Hedef: {coupon.targetType === 'all' ? 'Tüm Kullanıcılar' : 'Belirli Kullanıcılar'}</span>
+            <span>Hedef: {coupon.targetType === 'ALL' ? 'Tüm Kullanıcılar' : 'Belirli Kullanıcılar'}</span>
           </div>
+          <div className="flex items-center gap-2 text-gray-500 text-sm">
+            <Clock className="w-4 h-4" />
+            <span>Oluşturulma: {new Date(coupon.createdAt).toLocaleDateString('tr-TR')} </span>
+          </div>
+
         </div>
-        
+
         <div className="flex gap-2">
           <button
             onClick={() => handleEdit(coupon, 'coupon')}
-            className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-blue-50 text-blue-600 rounded-xl hover:bg-blue-100 transition-colors font-medium"
+            className="flex-1 flex items-center justify-center gap-1 px-4 py-2 bg-blue-50 text-blue-600 rounded-xl hover:bg-blue-100 transition-colors font-medium"
           >
             <Edit3 className="w-4 h-4" />
             Düzenle
           </button>
           <button
             onClick={() => toggleStatus(coupon.id, 'coupon')}
-            className={`flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-xl transition-colors font-medium ${
-              coupon.isActive 
-                ? 'bg-orange-50 text-orange-600 hover:bg-orange-100' 
-                : 'bg-green-50 text-green-600 hover:bg-green-100'
-            }`}
+            className={`flex-1 flex items-center justify-center gap-1 px-4 py-2 rounded-xl transition-colors font-medium ${coupon.isActive
+              ? 'bg-orange-50 text-orange-600 hover:bg-orange-100'
+              : 'bg-green-50 text-green-600 hover:bg-green-100'
+              }`}
           >
             {coupon.isActive ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
             {coupon.isActive ? 'Pasifleştir' : 'Aktifleştir'}
@@ -514,7 +456,7 @@ const CampaignCouponManagement = () => {
               </div>
             </div>
           </div>
-          
+
           <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
             <div className="flex items-center justify-between">
               <div>
@@ -526,7 +468,7 @@ const CampaignCouponManagement = () => {
               </div>
             </div>
           </div>
-          
+
           <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
             <div className="flex items-center justify-between">
               <div>
@@ -562,19 +504,17 @@ const CampaignCouponManagement = () => {
               <button
                 key={tab.key}
                 onClick={() => setActiveTab(tab.key)}
-                className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-medium transition-colors ${
-                  activeTab === tab.key
-                    ? 'bg-orange-600 text-white shadow-lg'
-                    : 'text-gray-600 hover:bg-gray-50'
-                }`}
+                className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-medium transition-colors ${activeTab === tab.key
+                  ? 'bg-orange-600 text-white shadow-lg'
+                  : 'text-gray-600 hover:bg-gray-50'
+                  }`}
               >
                 <tab.icon className="w-4 h-4" />
                 {tab.label}
-                <span className={`px-2 py-1 text-xs rounded-full ${
-                  activeTab === tab.key 
-                    ? 'bg-white/20 text-white' 
-                    : 'bg-gray-100 text-gray-600'
-                }`}>
+                <span className={`px-2 py-1 text-xs rounded-full ${activeTab === tab.key
+                  ? 'bg-white/20 text-white'
+                  : 'bg-gray-100 text-gray-600'
+                  }`}>
                   {tab.count}
                 </span>
               </button>
@@ -589,32 +529,32 @@ const CampaignCouponManagement = () => {
             .map((campaign) => (
               <CampaignCard key={campaign.id} campaign={campaign} />
             ))}
-          
+
           {activeTab === 'coupons' && coupons.map((coupon) => (
             <CouponCard key={coupon.id} coupon={coupon} />
           ))}
         </div>
 
-        {((activeTab === 'campaigns' && campaigns.length === 0) || 
+        {((activeTab === 'campaigns' && campaigns.length === 0) ||
           (activeTab === 'coupons' && coupons.length === 0)) && (
-          <div className="text-center py-12">
-            <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              {activeTab === 'campaigns' ? 
-                <BarChart3 className="w-12 h-12 text-gray-400" /> :
-                <Gift className="w-12 h-12 text-gray-400" />
-              }
+            <div className="text-center py-12">
+              <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                {activeTab === 'campaigns' ?
+                  <BarChart3 className="w-12 h-12 text-gray-400" /> :
+                  <Gift className="w-12 h-12 text-gray-400" />
+                }
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                {activeTab === 'campaigns' ? 'Kampanya Bulunmuyor' : 'Kupon Bulunmuyor'}
+              </h3>
+              <p className="text-gray-600">
+                {activeTab === 'campaigns' ?
+                  'Henüz hiç kampanya eklenmemiş.' :
+                  'Henüz hiç kupon eklenmemiş.'
+                }
+              </p>
             </div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">
-              {activeTab === 'campaigns' ? 'Kampanya Bulunmuyor' : 'Kupon Bulunmuyor'}
-            </h3>
-            <p className="text-gray-600">
-              {activeTab === 'campaigns' ? 
-                'Henüz hiç kampanya eklenmemiş.' : 
-                'Henüz hiç kupon eklenmemiş.'
-              }
-            </p>
-          </div>
-        )}
+          )}
       </div>
 
       {/* Modal */}
@@ -624,7 +564,7 @@ const CampaignCouponManagement = () => {
             <div className="p-6 border-b border-gray-100">
               <div className="flex justify-between items-center">
                 <h2 className="text-2xl font-bold text-gray-900">
-                  {editingId ? 
+                  {editingId ?
                     (modalType === 'campaign' ? "Kampanya Güncelle" : "Kupon Güncelle") :
                     (modalType === 'campaign' ? "Yeni Kampanya Ekle" : "Yeni Kupon Ekle")
                   }
@@ -929,9 +869,8 @@ const CampaignCouponManagement = () => {
               <div className="flex gap-3">
                 <button
                   onClick={handleSave}
-                  className={`flex-1 px-6 py-3 text-white rounded-xl hover:opacity-90 transition-colors font-medium ${
-                    modalType === 'campaign' ? 'bg-orange-600' : 'bg-purple-600'
-                  }`}
+                  className={`flex-1 px-6 py-3 text-white rounded-xl hover:opacity-90 transition-colors font-medium ${modalType === 'campaign' ? 'bg-orange-600' : 'bg-purple-600'
+                    }`}
                 >
                   {editingId ? "Güncelle" : "Kaydet"}
                 </button>
@@ -982,5 +921,4 @@ const CampaignCouponManagement = () => {
     </div>
   );
 };
-
 export default CampaignCouponManagement;

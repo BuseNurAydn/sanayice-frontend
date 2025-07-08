@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState,useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { BsChevronDoubleRight, BsChevronDoubleLeft } from "react-icons/bs";
 import { IoIosArrowDown, IoIosArrowUp } from "react-icons/io";
@@ -87,13 +87,49 @@ const menuItems = [
   },
 ];
 
-
 const Sidebar = () => {
   const [collapsed, setCollapsed] = useState(false);
   const [openSubMenus, setOpenSubMenus] = useState({});
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const navigate = useNavigate();
   const role = useSelector((state) => state.auth.user?.role);
+  const [documentsVerified, setDocumentsVerified] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  const sellerId = useSelector((state) => state.auth.user?.id);
+
+ useEffect(() => {
+  const checkDocuments = async () => {
+    try {
+      const res = await fetch(`/api/sellers/${sellerId}/documents`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+
+      if (!res.ok) {
+        throw new Error("Belgeler alınamadı");
+      }
+      const data = await res.json();
+
+      // Yalnızca onaylanan belgeleri filtrele
+      const approvedDocuments = data.filter((doc) => doc.status === "ONAYLANDI");
+
+      console.log("ONAYLANAN BELGELER:", approvedDocuments);
+
+      // 4 belge de onaylıysa menüyü aç
+      setDocumentsVerified(approvedDocuments.length >= 4);
+    } catch (error) {
+      setDocumentsVerified(false);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (sellerId) {
+    checkDocuments();
+  }
+}, [sellerId]);
 
   const toggleSubMenu = (label) => {
     setOpenSubMenus((prev) => ({
@@ -105,8 +141,16 @@ const Sidebar = () => {
   // Role göre filtreleme
   const filteredMenuItems = menuItems.filter((item) => {
     if (role === "ROLE_SELLER") {
-      return item.label !== "Kategoriler" && item.label !== "Satıcı Doğrulama" && 
-             item.label !== "Banner Yönetimi" && item.label !== "Kupon Ve Kampanya Yönetimi" && item.label !== "Satıcıların Kupon Ve Kampanya Listesi" && item.label !== "Destek Ve Geri Bildirim Yönetimi" && item.label !== "Satıcı Doğrulama Sayfası" ;
+    if (!documentsVerified) {
+      return item.label === "Hesabımı Doğrulama";
+    }
+    return item.label !== "Kategoriler" &&
+           item.label !== "Satıcı Doğrulama" &&
+           item.label !== "Banner Yönetimi" &&
+           item.label !== "Kupon Ve Kampanya Yönetimi" &&
+           item.label !== "Satıcıların Kupon Ve Kampanya Listesi" &&
+           item.label !== "Destek Ve Geri Bildirim Yönetimi" &&
+           item.label !== "Satıcı Doğrulama Sayfası";
     } else if (role === "ROLE_MANAGER") {
       return item.label === "Satıcı Doğrulama" || item.label === "Kategoriler" || 
              item.label === "Banner Yönetimi" || item.label === "Kupon Ve Kampanya Yönetimi" || item.label === "Satıcıların Kupon Ve Kampanya Listesi" ||  item.label === "Destek Ve Geri Bildirim Yönetimi" ||  item.label === "Satıcı Doğrulama Sayfası";

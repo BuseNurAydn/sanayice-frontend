@@ -28,7 +28,7 @@ const CategoryCard = ({ category }) => {
 
             {/* İçerik */}
             <div className="relative z-10 p-6 flex flex-col h-full justify-end">
-                <h3 className="text-2xl font-bold text-white mb-2 drop-shadow-md">{category.name}</h3>
+                <h3 className="md:text-2xl text-lg font-bold text-white mb-2 drop-shadow-md">{category.name}</h3>
                 <p className="text-white text-sm mb-3 opacity-90 line-clamp-2">{category.description}</p>
 
                 <button

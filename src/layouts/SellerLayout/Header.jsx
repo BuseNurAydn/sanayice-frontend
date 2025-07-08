@@ -23,7 +23,7 @@ const Header = () => {
 
   return (
     <header className='bg-[var(--color-light)] p-2 pl-10 md:pl-4 flex justify-between'>
-      <Link to={user?.role === "ROLE_SELLER" ? '/seller/dashboard' : '/seller/seller-verification'}>
+      <Link to={user?.role === "ROLE_SELLER" ? '/seller/vertification' : '/seller/seller-verification'}>
         <img src={Logo} alt="Logo" className="cursor-pointer" />
       </Link>
       <div className="flex items-center space-x-3 pr-4">

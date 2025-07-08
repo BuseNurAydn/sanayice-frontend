@@ -3,11 +3,10 @@ import { Link } from 'react-router-dom'
 import Slider from "react-slick";
 import ProductCard from "../../components/ProductCard";
 import { getProducts } from "../../services/productsService";
-import { brands, cards1, cards2 } from './data/products';
+import { brands} from './data/products';
 import { fetchCategories } from "../../services/categoryService";
 import { getAllPublicBanners } from "../../services/bannerService";
 import CategoriesSection from '../../components/CategoriesSection';
-
 
 const HomePage = () => {
   const brandsScrollRef = useRef(null);
@@ -20,6 +19,7 @@ const HomePage = () => {
   const [loading, setLoading] = useState(false);
   const [activeCategory, setActiveCategory] = useState(null);
   const [banners, setBanners] = useState([]);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const settings = {
   dots: true,
@@ -121,8 +121,7 @@ const HomePage = () => {
 
   return (
     <div className="bg-gray-50">
-    
-      <nav className="bg-white shadow-md border-b relative">
+      <nav className="bg-white shadow-md border-b relative hidden md:block">
         <div className="container mx-auto px-6">
           {/* Menü Satırı */}
           <div className="flex justify-center space-x-8 py-5">
@@ -184,6 +183,7 @@ const HomePage = () => {
         </div>
       </nav>
   
+
       {/* CSS Animasyonları */}
       <style jsx>{`
         @keyframes dropdown {
@@ -223,12 +223,7 @@ const HomePage = () => {
                     className="block"
                   >
                   <div className="bg-white shadow rounded-xl overflow-hidden">
-                    <img src={banner.imageUrl} className="w-full h-48 object-cover" />
-                    {/** 
-                    <div className="p-4">
-                      <h4 className="text-md font-bold mb-2">{banner.title}</h4>
-                      <p className="text-sm text-gray-600">{banner.description}</p>
-                    </div>*/}
+                    <img src={banner.imageUrl} className="w-full h-auto max-h-64 md:max-h-80 object-contain" />
                   </div>
                   </a>
                 </div>
@@ -248,7 +243,7 @@ const HomePage = () => {
                     className="block"
                   >
                   <div className="bg-white shadow rounded-xl overflow-hidden">
-                    <img src={banner.imageUrl} className="w-full h-48 object-cover" />
+                    <img src={banner.imageUrl} className="w-full h-auto max-h-64 md:max-h-80 object-contain" />
                   </div>
                   </a>
                 </div>
@@ -260,8 +255,8 @@ const HomePage = () => {
         {/* Markalar */}
         <section className="mb-12">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="font-bold text-2xl text-gray-900">Popüler Markalar</h2>
-            <button className="text-orange-600 hover:text-orange-700 font-semibold">Tümünü Gör →</button>
+            <h2 className="font-bold text-lg md:text-2xl text-gray-900">Popüler Markalar</h2>
+            <button className="text-[var(--color-dark-orange)] font-semibold">Tümünü Gör →</button>
           </div>
           <ScrollSection scrollRef={brandsScrollRef}>
             {brands.map((brand, i) => (
@@ -278,8 +273,8 @@ const HomePage = () => {
         {/* Öne Çıkan Ürünler */}
         <section className="mb-12">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="font-bold text-2xl text-gray-900">Öne Çıkan Ürünler</h2>
-            <button className="text-orange-600 hover:text-orange-700 font-semibold">Tümünü Gör →</button>
+            <h2 className="font-bold text-lg md:text-2xl text-gray-900">Öne Çıkan Ürünler</h2>
+            <button className="text-[var(--color-dark-orange)] font-semibold">Tümünü Gör →</button>
           </div>
           <ScrollSection scrollRef={featuredScrollRef}>
             {products.map(product => (
@@ -292,10 +287,10 @@ const HomePage = () => {
         <section className="mb-12">
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h2 className="font-bold text-2xl text-gray-900">🔥 Süper İndirimler</h2>
+              <h2 className="font-bold text-lg md:text-2xl text-gray-900">🔥 Süper İndirimler</h2>
               <p className="text-gray-600 text-sm">Sınırlı süre için özel fiyatlar</p>
             </div>
-            <button className="text-red-600 hover:text-red-700 font-semibold">Tümünü Gör →</button>
+            <button className="text-[var(--color-dark-orange)] font-semibold">Tümünü Gör →</button>
           </div>
           <ScrollSection scrollRef={discountedScrollRef}>
             {products.map(product => (
@@ -308,10 +303,10 @@ const HomePage = () => {
         <section className="mb-12">
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h2 className="font-bold text-2xl text-gray-900">✨ Yeni Gelenler</h2>
+              <h2 className="font-bold text-lg md:text-2xl text-gray-900">✨ Yeni Gelenler</h2>
               <p className="text-gray-600 text-sm">En son çıkan ürünler</p>
             </div>
-            <button className="text-purple-600 hover:text-purple-700 font-semibold">Tümünü Gör →</button>
+            <button className="text-[var(--color-dark-orange)] font-semibold">Tümünü Gör →</button>
           </div>
           <ScrollSection scrollRef={newProductsScrollRef}>
             {products.map(product => (

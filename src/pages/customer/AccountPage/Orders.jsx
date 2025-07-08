@@ -93,7 +93,7 @@ const Orders = () => {
 
   return (
     <div className="bg-white min-h-screen p-6 rounded-lg shadow-md"> {/* Ana konteyner için gölge ve padding */}
-      <h2 className="text-2xl font-bold text-gray-800 mb-6">Siparişlerim</h2> {/* Başlık eklendi */}
+      <h2 className="text-xl md:text-2xl font-bold text-gray-800 mb-6">Siparişlerim</h2> {/* Başlık eklendi */}
 
       {/* Sekmeler */}
       <div className="flex flex-wrap gap-4 md:gap-8 border-b border-gray-200 pb-4 mb-6"> {/* Daha fazla boşluk, responsive düzen */}
@@ -153,10 +153,10 @@ const Orders = () => {
               {order.orderItems.map((item) => (
                 <div
                   key={item.id}
-                  className="flex items-center justify-between gap-4 border border-gray-100 p-4 rounded-md"
+                  className="flex flex-col md:flex-row md:items-center justify-between gap-4 border border-gray-100 p-4 rounded-md"
                 >
                   {/* Ürün görseli + bilgiler */}
-                  <div className="flex items-center gap-4">
+                  <div className="flex flex-col md:flex-row gap-4">
                     <img
                       src={item.additionalImages?.[0] || "https://via.placeholder.com/80"}
                       alt={item.productName}
@@ -187,13 +187,13 @@ const Orders = () => {
                     </div>
                   </div>
                   <div className="flex flex-row items-end gap-x-2">
-                    <button className="text-sm border border-blue-600 py-2 px-4 text-blue-600 font-semibold">
+                    <button className="text-xs md:text-sm border border-blue-600 py-1 px-2 md:py-2 md:px-4 text-blue-600 font-semibold">
                       Ürün Detay
                     </button>
                     {order.statusDisplayName === "Teslim Edildi" && (
                       <button
                         onClick={() => openReviewModal(item)}
-                        className="text-sm font-semibold border border-orange-600 py-2 px-4 text-orange-600"
+                        className="text-xs md:text-sm font-semibold border border-orange-600 py-1 px-2 md:py-2 md:px-4 text-orange-600"
                       >
                         Ürünü Değerlendir
                       </button>

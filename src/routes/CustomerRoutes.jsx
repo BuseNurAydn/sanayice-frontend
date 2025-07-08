@@ -1,8 +1,7 @@
-import { Routes, Route, Navigate} from 'react-router-dom';
+import { Routes, Route} from 'react-router-dom';
 import CustomerLayout from '../layouts/CustomerLayout/CustomerLayout';
 import HomePage from '../pages/customer/HomePage';
 import ProductDetail from '../pages/customer/ProductDetail'; 
-import ElectronicPage from '../pages/customer/CategoryProductsPage';
 import FavoritePage from '../pages/customer/FavoritePage'; 
 import CartPage from '../pages/customer/CartPage';
 import Contact from '../pages/public/Contact';

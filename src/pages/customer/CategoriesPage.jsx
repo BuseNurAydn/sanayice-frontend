@@ -78,7 +78,7 @@ const CategoriesPage = () => {
                   placeholder="Hangi kategoriyi arıyorsunuz?"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-12 pr-4 py-4 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none transition-all bg-white/70 backdrop-blur-sm text-lg"
+                  className="w-full pl-12 pr-4 md:py-4 py-2 border-1 border-gray-200 rounded-xl focus:ring-1 focus:ring-orange-500 focus:border-orange-500 outline-none transition-all bg-white/70 backdrop-blur-sm text-md md:text-lg"
                 />
                 <svg 
                   className="absolute left-4 top-1/2 transform -translate-y-1/2 w-6 h-6 text-gray-400" 
@@ -95,7 +95,7 @@ const CategoriesPage = () => {
             <div className="flex gap-3">
               <button
                 onClick={() => setSelectedFilter("all")}
-                className={`px-6 py-3 rounded-xl font-semibold transition-all transform hover:scale-105 ${
+                className={`md:px-6 md:py-3 px-4 py-2 rounded-xl text-md md:text-lg font-semibold transition-all transform hover:scale-105 ${
                   selectedFilter === "all" 
                     ? "bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-lg" 
                     : "bg-white/70 text-gray-700 hover:bg-white border-2 border-gray-200"
@@ -105,13 +105,13 @@ const CategoriesPage = () => {
               </button>
               <button
                 onClick={() => setSelectedFilter("with-sub")}
-                className={`px-6 py-3 rounded-xl font-semibold transition-all transform hover:scale-105 ${
+                className={`md:px-6 md:py-3 px-4 py-2 rounded-xl text-md md:text-lg font-semibold transition-all transform hover:scale-105 ${
                   selectedFilter === "with-sub" 
                     ? "bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-lg" 
                     : "bg-white/70 text-gray-700 hover:bg-white border-2 border-gray-200"
                 }`}
               >
-                Alt Kategorili ({categories.filter(c => c.subcategories?.length > 0).length})
+                Alt Kategoriler ({categories.filter(c => c.subcategories?.length > 0).length})
               </button>
             </div>
           </div>

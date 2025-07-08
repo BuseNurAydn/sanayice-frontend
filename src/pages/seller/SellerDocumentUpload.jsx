@@ -1,57 +1,95 @@
-import React, { useState, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Upload, FileText, X, Check, AlertTriangle, Eye, Download, RefreshCw, Clock, CheckCircle, XCircle } from 'lucide-react';
 import AdminText from '../../shared/Text/AdminText';
+import { useSelector } from "react-redux";
+import { toast } from 'react-toastify';
 
 const SellerDocumentUpload = () => {
-  const [belgeler, setBelgeler] = useState([
+
+  const sabitBelgeler = [
     {
       id: 1,
       tip: 'ticaret_sicili',
       ad: 'Ticaret Sicil Gazetesi',
-      dosyaAdi: 'ticaret_sicili.pdf',
-      durum: 'ONAYLANDI',
-      yuklenmeTarihi: '2025-01-15',
-      boyut: '2.4 MB',
       aciklama: 'Şirketinizin ticaret sicil gazetesi'
     },
     {
       id: 2,
       tip: 'vergi_levhasi',
       ad: 'Vergi Levhası',
-      dosyaAdi: null,
-      durum: 'BEKLIYOR',
-      yuklenmeTarihi: null,
-      boyut: null,
       aciklama: 'Vergi dairesinden alınan vergi levhası'
     },
     {
       id: 3,
-      tip: 'imza_sirküleri',
+      tip: 'imza_sirkuleri',
       ad: 'İmza Sirküleri',
-      dosyaAdi: 'imza_sirkuleri.pdf',
-      durum: 'INCELEME',
-      yuklenmeTarihi: '2025-01-18',
-      boyut: '1.8 MB',
       aciklama: 'Yetkili imza sahiplerinin imza sirküleri'
     },
     {
       id: 4,
       tip: 'faaliyet_belgesi',
       ad: 'Faaliyet Belgesi',
-      dosyaAdi: 'faaliyet_belgesi.pdf',
-      durum: 'REDDEDILDI',
-      yuklenmeTarihi: '2025-01-12',
-      boyut: '3.1 MB',
-      redNedeni: 'Belge süresinin dolmuş olması',
       aciklama: 'İş yeri açma ve çalışma ruhsatı'
-    }
-  ]);
+    },
+  ];
 
+  // Sabit ve API belgelerini birleştiren fonksiyon
+  const mergeBelgeler = (sabit, apiBelgeler) => {
+    return sabit.map(sabitBelge => {
+      const apiBelge = apiBelgeler.find(apiB =>
+        apiB.documentType.toLowerCase() === sabitBelge.tip.toLowerCase()
+      );
+      if (apiBelge) {
+        return {
+          ...sabitBelge,
+          belgeGercekId: apiBelge.id,
+          dosyaAdi: apiBelge.fileName,
+          durum: apiBelge.status,
+          yuklenmeTarihi: apiBelge.uploadDate,
+          boyut: apiBelge.fileSizeFormatted,
+          aciklama: apiBelge.description || sabitBelge.aciklama,
+          redNedeni: apiBelge.redReason || null,
+        };
+      }
+      return {
+        ...sabitBelge,
+        belgeGercekId: null,
+        dosyaAdi: null,
+        durum: 'BEKLIYOR',
+        yuklenmeTarihi: null,
+        boyut: null,
+        redNedeni: null,
+      };
+    });
+  };
+  const [belgeler, setBelgeler] = useState([]);
   const [suruklemeAktif, setSuruklemeAktif] = useState(false);
   const [yuklemeDurumu, setYuklemeDurumu] = useState({});
   const [modalAcik, setModalAcik] = useState(false);
   const [secilenBelge, setSecilenBelge] = useState(null);
   const fileInputRef = useRef(null);
+
+  const sellerId = useSelector((state) => state.auth.user?.id);
+
+  const fetchBelgeler = async () => {
+    try {
+      const res = await fetch(`/api/sellers/${sellerId}/documents`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+      if (!res.ok) throw new Error("Belgeler getirilemedi");
+      const apiBelgeler = await res.json();
+      const merged = mergeBelgeler(sabitBelgeler, apiBelgeler);
+      setBelgeler(merged);
+    } catch (err) {
+      console.error(err);
+      toast("Belgeler yüklenirken hata oluştu");
+    }
+  };
+  useEffect(() => {
+    if (sellerId) fetchBelgeler();
+  }, [sellerId]);
 
   const getDurumRozeti = (durum) => {
     switch (durum) {
@@ -88,73 +126,113 @@ const SellerDocumentUpload = () => {
     }
   };
 
-  const dosyaYukle = (dosyalar, belgeId = null) => {
+  const dosyaYukle = async (dosyalar, belgeId = null, sellerId) => {
     const dosya = dosyalar[0];
     if (!dosya) return;
 
-    // Dosya boyutu kontrolü (5MB)
+    // Dosya boyutu kontrolü
     if (dosya.size > 5 * 1024 * 1024) {
-      alert('Dosya boyutu 5MB\'dan büyük olamaz');
+      toast("Dosya boyutu 5MB'dan büyük olamaz");
       return;
     }
 
     // Dosya tipi kontrolü
     const izinliTipler = ['application/pdf', 'image/jpeg', 'image/png', 'image/jpg'];
     if (!izinliTipler.includes(dosya.type)) {
-      alert('Sadece PDF, JPG ve PNG dosyaları yüklenebilir');
+      toast('Sadece PDF, JPG ve PNG dosyaları yüklenebilir');
       return;
     }
 
-    const hedefBelge = belgeId ? belgeler.find(b => b.id === belgeId) : null;
-    
-    // Yükleme simülasyonu
-    const yuklemeTakipId = Date.now();
-    setYuklemeDurumu(prev => ({ ...prev, [yuklemeTakipId]: 0 }));
+    // Belge kontrolü
+    const belge = belgeler.find(b => b.id === belgeId);
+    if (!belge) {
+      toast("Belge bulunamadı");
+      return;
+    }
 
-    const interval = setInterval(() => {
-      setYuklemeDurumu(prev => {
-        const yeniDurum = (prev[yuklemeTakipId] || 0) + 10;
-        if (yeniDurum >= 100) {
-          clearInterval(interval);
-          
-          // Belgeyi güncelle
-          setBelgeler(prev => prev.map(belge => 
-            belge.id === (belgeId || hedefBelge?.id) ? {
-              ...belge,
+    // FormData oluştur
+    const formData = new FormData();
+    formData.append('file', dosya);
+    formData.append('documentType', belge.tip.toUpperCase());
+    formData.append('description', belge.aciklama);
+
+    try {
+      const token = localStorage.getItem("token");
+
+      const response = await fetch(`/api/sellers/${sellerId}/documents/upload`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`
+        },
+        body: formData
+      });
+
+      if (!response.ok) {
+        throw new Error(`Sunucu hatası: ${response.status}`);
+      }
+
+      // Başarılı ise state güncelle
+      setBelgeler(prev =>
+        prev.map(b =>
+          b.id === belgeId
+            ? {
+              ...b,
               dosyaAdi: dosya.name,
               durum: 'INCELEME',
               yuklenmeTarihi: new Date().toISOString().split('T')[0],
-              boyut: `${(dosya.size / (1024 * 1024)).toFixed(1)} MB`
-            } : belge
-          ));
+              boyut: `${(dosya.size / (1024 * 1024)).toFixed(1)} MB`,
+              redNedeni: null
+            }
+            : b
+        )
+      );
 
-          // Yükleme durumunu temizle
-          setTimeout(() => {
-            setYuklemeDurumu(prev => {
-              const yeni = { ...prev };
-              delete yeni[yuklemeTakipId];
-              return yeni;
-            });
-          }, 1000);
-          
-          return { ...prev, [yuklemeTakipId]: 100 };
-        }
-        return { ...prev, [yuklemeTakipId]: yeniDurum };
-      });
-    }, 100);
+      toast("Belge başarıyla yüklendi!");
+      fetchBelgeler();
+    } catch (error) {
+      toast("Yükleme hatası: " + error.message);
+    }
   };
 
-  const dosyaKaldir = (belgeId) => {
-    setBelgeler(prev => prev.map(belge => 
-      belge.id === belgeId ? {
-        ...belge,
-        dosyaAdi: null,
-        durum: 'BEKLIYOR',
-        yuklenmeTarihi: null,
-        boyut: null,
-        redNedeni: null
-      } : belge
-    ));
+  const dosyaKaldir = async (belgeId) => {
+    const belge = belgeler.find(b => b.id === belgeId);
+
+    const onay = window.confirm("Bu belgeyi silmek istediğinizden emin misiniz?");
+    if (!onay) return;
+
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch(`/api/sellers/${sellerId}/documents/${belge.belgeGercekId}`, {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error("Belge silinemedi.");
+      }
+
+      // UI'yi güncelle
+      setBelgeler(prev => prev.map(b =>
+        b.id === belgeId
+          ? {
+            ...b,
+            belgeGercekId: null,
+            dosyaAdi: null,
+            durum: 'BEKLIYOR',
+            yuklenmeTarihi: null,
+            boyut: null,
+            redNedeni: null
+          }
+          : b
+      ));
+
+      toast("Belge başarıyla silindi.");
+    } catch (err) {
+      console.error(err);
+      toast("Silme işlemi sırasında hata oluştu.");
+    }
   };
 
   const belgeyiGoruntule = (belge) => {
@@ -204,9 +282,9 @@ const SellerDocumentUpload = () => {
             <h2 className="text-lg font-medium text-gray-900">Doğrulama İlerlemesi</h2>
             <span className="text-sm text-gray-600">{tamamlananBelgeler}/{toplamBelgeler} Belge Tamamlandı</span>
           </div>
-          
+
           <div className="w-full bg-gray-200 rounded-full h-2 mb-4">
-            <div 
+            <div
               className="bg-blue-600 h-2 rounded-full transition-all duration-300"
               style={{ width: `${(tamamlananBelgeler / toplamBelgeler) * 100}%` }}
             ></div>
@@ -228,47 +306,13 @@ const SellerDocumentUpload = () => {
           </div>
         </div>
 
-        {/* Yükleme Alanı */}
-        <div className="mb-8">
-          <div 
-            className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
-              suruklemeAktif ? 'border-blue-400 bg-blue-50' : 'border-gray-300 bg-white'
-            }`}
-            onDragOver={suruklemeBaslat}
-            onDragLeave={suruklemeBitir}
-            onDrop={(e) => dosyaBirak(e)}
-          >
-            <Upload className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">Belge Yükleyin</h3>
-            <p className="text-gray-600 mb-4">
-              Dosyaları buraya sürükleyin veya tıklayarak seçin
-            </p>
-            <input
-              ref={fileInputRef}
-              type="file"
-              className="hidden"
-              accept=".pdf,.jpg,.jpeg,.png"
-              onChange={(e) => dosyaYukle(e.target.files)}
-            />
-            <button
-              onClick={() => fileInputRef.current?.click()}
-              className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <Upload className="w-4 h-4 mr-2" />
-              Dosya Seç
-            </button>
-            <p className="text-xs text-gray-500 mt-3">
-              Desteklenen formatlar: PDF, JPG, PNG (Maksimum 5MB)
-            </p>
-          </div>
-        </div>
 
         {/* Belge Listesi */}
         <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
           <div className="px-6 py-4 border-b border-gray-200">
             <h2 className="text-lg font-medium text-gray-900">Gerekli Belgeler</h2>
           </div>
-          
+
           <div className="divide-y divide-gray-200">
             {belgeler.map((belge) => (
               <div key={belge.id} className="p-6">
@@ -276,27 +320,27 @@ const SellerDocumentUpload = () => {
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-2">
                       <FileText className="w-5 h-5 text-gray-400" />
-                      <h3 className="text-sm font-medium text-gray-900">{belge.ad}</h3>
-                      {getDurumRozeti(belge.durum)}
+                      <h3 className="text-sm font-medium text-gray-900">{belge.ad || belge.documentName}</h3>
+                      {getDurumRozeti(belge.durum || belge.status)}
                     </div>
-                    
-                    <p className="text-sm text-gray-600 mb-3">{belge.aciklama}</p>
-                    
-                    {belge.dosyaAdi && (
+
+                    <p className="text-sm text-gray-600 mb-3">{belge.aciklama || belge.description}</p>
+
+                    {(belge.dosyaAdi || belge.fileName) && (
                       <div className="text-sm text-gray-500">
-                        <span>Dosya: {belge.dosyaAdi}</span>
-                        {belge.boyut && <span className="ml-3">Boyut: {belge.boyut}</span>}
-                        {belge.yuklenmeTarihi && <span className="ml-3">Tarih: {formatTarih(belge.yuklenmeTarihi)}</span>}
+                        <span>Dosya: {belge.dosyaAdi || belge.fileName}</span>
+                        {(belge.boyut || belge.fileSizeFormatted) && <span className="ml-3">Boyut: {belge.boyut || belge.fileSizeFormatted}</span>}
+                        {(belge.yuklenmeTarihi || belge.uploadDate) && <span className="ml-3">Tarih: {formatTarih(belge.yuklenmeTarihi || belge.uploadDate)}</span>}
                       </div>
                     )}
 
-                    {belge.durum === 'REDDEDILDI' && belge.redNedeni && (
+                    {(belge.durum === 'REDDEDILDI' || belge.status === 'REDDEDILDI') && (belge.redNedeni || belge.redReason) && (
                       <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded-md">
                         <div className="flex items-start gap-2">
                           <AlertTriangle className="w-4 h-4 text-red-600 mt-0.5" />
                           <div>
                             <p className="text-sm font-medium text-red-800">Red Nedeni:</p>
-                            <p className="text-sm text-red-700">{belge.redNedeni}</p>
+                            <p className="text-sm text-red-700">{belge.redNedeni || belge.redReason}</p>
                           </div>
                         </div>
                       </div>
@@ -304,7 +348,7 @@ const SellerDocumentUpload = () => {
                   </div>
 
                   <div className="flex items-center gap-2 ml-4">
-                    {belge.dosyaAdi ? (
+                    {(belge.dosyaAdi || belge.fileName) ? (
                       <>
                         <button
                           onClick={() => belgeyiGoruntule(belge)}
@@ -323,15 +367,19 @@ const SellerDocumentUpload = () => {
                       </>
                     ) : (
                       <div
-                        className="border-2 border-dashed border-gray-300 rounded-lg p-4 hover:border-blue-400 hover:bg-blue-50 transition-colors cursor-pointer"
+                        className={`border-2 border-dashed border-gray-300 rounded-lg p-4 hover:border-blue-400 hover:bg-blue-50 transition-colors cursor-pointer ${suruklemeAktif ? 'bg-blue-100' : ''}`}
                         onDragOver={suruklemeBaslat}
                         onDragLeave={suruklemeBitir}
                         onDrop={(e) => dosyaBirak(e, belge.id)}
                         onClick={() => {
+                          if (!sellerId) {
+                            alert("Seller ID bulunamadı");
+                            return;
+                          }
                           const input = document.createElement('input');
                           input.type = 'file';
                           input.accept = '.pdf,.jpg,.jpeg,.png';
-                          input.onchange = (e) => dosyaYukle(e.target.files, belge.id);
+                          input.onchange = (e) => dosyaYukle(e.target.files, belge.id, sellerId);
                           input.click();
                         }}
                       >
@@ -350,7 +398,7 @@ const SellerDocumentUpload = () => {
                       <span>{progress}%</span>
                     </div>
                     <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div 
+                      <div
                         className="bg-blue-600 h-2 rounded-full transition-all duration-300"
                         style={{ width: `${progress}%` }}
                       ></div>
@@ -394,7 +442,7 @@ const SellerDocumentUpload = () => {
                   <X className="w-6 h-6" />
                 </button>
               </div>
-              
+
               <div className="p-6">
                 <div className="flex items-center justify-center h-96 bg-gray-100 rounded-lg">
                   <div className="text-center">
@@ -403,7 +451,7 @@ const SellerDocumentUpload = () => {
                     <p className="text-sm text-gray-500 mt-1">{secilenBelge.dosyaAdi}</p>
                   </div>
                 </div>
-                
+
                 <div className="mt-6 flex justify-end gap-3">
                   <button className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
                     <Download className="w-4 h-4 mr-2" />
@@ -424,5 +472,4 @@ const SellerDocumentUpload = () => {
     </div>
   );
 };
-
 export default SellerDocumentUpload;

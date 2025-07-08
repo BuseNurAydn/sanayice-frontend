@@ -1,3 +1,4 @@
+// CategoryProductsPage.jsx
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import ProductCard from "../../components/ProductCard";
@@ -6,15 +7,16 @@ import { getCategoryById } from "../../services/categoryService";
 import { getProductsByCategoryId } from "../../services/productsService";
 
 function CategoryProductsPage() {
-    const { id } = useParams(); // kategori ID
+    const { id } = useParams();
     const [products, setProducts] = useState([]);
     const [filteredProducts, setFilteredProducts] = useState([]);
     const [categoryData, setCategoryData] = useState(null);
     const [subcategories, setSubcategories] = useState([]);
     const [selectedSubcategories, setSelectedSubcategories] = useState([]);
     const [maxPrice, setMaxPrice] = useState(30000);
+    const [isFilterOpen, setIsFilterOpen] = useState(false);
+    const [expanded, setExpanded] = useState(true);
 
-    //Tıklanan kategorinin id'sine göre kategori verisini çektim. Alt kategorilerde zaten geliyor
     useEffect(() => {
         const fetchCategory = async () => {
             try {
@@ -28,7 +30,6 @@ function CategoryProductsPage() {
         fetchCategory();
     }, [id]);
 
-    // Ürünleri kategoriye göre çektim
     useEffect(() => {
         const fetchProducts = async () => {
             try {
@@ -44,20 +45,14 @@ function CategoryProductsPage() {
 
     useEffect(() => {
         let result = [...products];
-
-        // Alt kategori filtresi
         if (selectedSubcategories.length > 0) {
             result = result.filter((product) =>
                 selectedSubcategories.includes(product.subcategoryName)
             );
         }
-
-        // Fiyat filtresi
         result = result.filter((product) => Number(product.price) <= maxPrice);
-
         setFilteredProducts(result);
     }, [selectedSubcategories, maxPrice, products]);
-
 
     const toggleSubcategory = (subcategoryName) => {
         setSelectedSubcategories((prev) =>
@@ -65,6 +60,15 @@ function CategoryProductsPage() {
                 ? prev.filter((name) => name !== subcategoryName)
                 : [...prev, subcategoryName]
         );
+    };
+
+    const clearFilters = () => {
+        setSelectedSubcategories([]);
+        setMaxPrice(30000);
+    };
+
+    const removeFilter = (name) => {
+        setSelectedSubcategories((prev) => prev.filter((item) => item !== name));
     };
 
     return (
@@ -76,12 +80,123 @@ function CategoryProductsPage() {
                 Yeni ürünler eklendi!
             </div>
 
-            <main className="max-w-7xl mx-auto px-6 flex py-10 gap-6">
-                {/* Sol Panel: Filtre */}
-                <div className="w-1/4 bg-white p-6 rounded shadow-md">
-                    <h2 className="text-lg font-semibold mb-4">Filtrele</h2>
+            {/* Mobilde filtre butonu */}
+            <div className="md:hidden px-4 mt-4">
+                <button
+                    onClick={() => setIsFilterOpen(true)}
+                    className="bg-orange-500 text-white py-2 px-4 rounded-md font-semibold w-full flex items-center justify-between"
+                >
+                    <span>Filtreler</span>
+                    <span className="text-xs bg-white text-orange-600 px-2 py-0.5 rounded-full">
+                        {selectedSubcategories.length + (maxPrice < 30000 ? 1 : 0)} aktif
+                    </span>
+                </button>
+            </div>
 
-                    {/* Alt Kategori */}
+            {/* Mobil Filtre Paneli */}
+            {isFilterOpen && (
+                <div className="fixed inset-0 z-50 flex">
+                    <div
+                        className="fixed inset-0 bg-opacity-30 "
+                        onClick={() => setIsFilterOpen(false)}
+                    ></div>
+
+                    <div className="relative bg-white w-4/5 max-w-sm h-full p-4 shadow-lg animate-slide-in-left z-50 overflow-y-auto">
+                        <div className="flex justify-between items-center mb-4">
+                            <h2 className="text-md font-semibold">Filtrele</h2>
+                            <button
+                                onClick={() => setIsFilterOpen(false)}
+                                className="text-red-500 text-2xl font-bold"
+                            >
+                                ✕
+                            </button>
+                        </div>
+
+                        {(selectedSubcategories.length > 0 || maxPrice < 30000) && (
+                            <div className="mb-4">
+                                <div className="flex items-center justify-between mb-2">
+                                    <h3 className="text-sm font-semibold text-gray-600">Uygulanan Filtreler:</h3>
+                                    <button
+                                        onClick={clearFilters}
+                                        className="text-xs text-red-500 underline"
+                                    >
+                                        Temizle
+                                    </button>
+                                </div>
+                                <div className="flex flex-wrap gap-2 text-sm">
+                                    {selectedSubcategories.map((name) => (
+                                        <span
+                                            key={name}
+                                            className="bg-orange-100 text-orange-700 px-2 py-1 rounded-full flex items-center"
+                                        >
+                                            {name}
+                                            <button
+                                                onClick={() => removeFilter(name)}
+                                                className="ml-2 text-orange-500 hover:text-orange-700 font-bold"
+                                                aria-label={`${name} filtresini kaldır`}
+                                            >
+                                                ×
+                                            </button>
+                                        </span>
+                                    ))}
+                                    {maxPrice < 30000 && (
+                                        <span className="bg-blue-100 text-blue-700 px-2 py-1 rounded-full flex items-center">
+                                            Maks. {maxPrice.toLocaleString()} TL
+                                            <button
+                                                onClick={() => setMaxPrice(30000)}
+                                                className="ml-2 text-blue-600 hover:text-blue-800 font-bold"
+                                                aria-label="Fiyat filtresini kaldır"
+                                            >
+                                                ×
+                                            </button>
+                                        </span>
+                                    )}
+                                </div>
+                            </div>
+                        )}
+
+                        <div className="mb-6">
+                            <h3
+                                onClick={() => setExpanded(!expanded)}
+                                className="font-semibold mb-2 cursor-pointer text-orange-600"
+                            >
+                                Alt Kategoriler
+                            </h3>
+                            {expanded && subcategories.map((subcat) => (
+                                <label key={subcat.id} className="block text-sm mb-1">
+                                    <input
+                                        type="checkbox"
+                                        className="mr-2"
+                                        checked={selectedSubcategories.includes(subcat.name)}
+                                        onChange={() => toggleSubcategory(subcat.name)}
+                                    />
+                                    {subcat.name}
+                                </label>
+                            ))}
+                        </div>
+
+                        <div>
+                            <h3 className="font-semibold mb-2">Fiyat Aralığı</h3>
+                            <input
+                                type="range"
+                                min={200}
+                                max={30000}
+                                step={100}
+                                value={maxPrice}
+                                onChange={(e) => setMaxPrice(Number(e.target.value))}
+                                className="w-full"
+                            />
+                            <p className="text-sm mt-1">
+                                Maksimum: {maxPrice.toLocaleString()} TL
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            <main className="max-w-7xl mx-auto px-6 flex py-10 gap-6">
+                <div className="w-1/4 bg-white p-6 rounded shadow-md hidden md:block">
+                    <h2 className="text-lg font-semibold mb-4">Filtrele</h2>
                     <div className="mb-6">
                         <h3 className="font-semibold mb-2">Alt Kategoriler</h3>
                         {subcategories.map((subcat) => (
@@ -96,8 +211,6 @@ function CategoryProductsPage() {
                             </label>
                         ))}
                     </div>
-
-                    {/* Fiyat Aralığı */}
                     <div className="mb-6">
                         <h3 className="font-semibold mb-2">Fiyat Aralığı</h3>
                         <input
@@ -115,8 +228,7 @@ function CategoryProductsPage() {
                     </div>
                 </div>
 
-                {/* Sağ Panel: Ürünler */}
-                <div className="w-3/4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="w-full md:w-3/4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                     {filteredProducts.length === 0 ? (
                         <div className="col-span-full text-center text-gray-500">
                             Ürün bulunamadı.

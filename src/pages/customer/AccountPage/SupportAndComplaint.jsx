@@ -142,14 +142,14 @@ const SupportAndComplaint = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-8">
-      <div className="max-w-5xl mx-auto px-6">
+      <div className="max-w-5xl mx-auto md:px-6 px-2">
 
         {/* Header */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-orange-500 rounded-full mb-4">
             <FaHeadset className="text-white text-2xl" />
           </div>
-          <h1 className="text-3xl font-bold text-gray-800 mb-2">Destek Merkezi</h1>
+          <h1 className=" text-2xl md:text-3xl font-bold text-gray-800 mb-2">Destek Merkezi</h1>
           <p className="text-gray-600">Size nasıl yardımcı olabiliriz?</p>
         </div>
 
@@ -186,14 +186,14 @@ const SupportAndComplaint = () => {
             </nav>
           </div>
 
-          <div className="p-8">
+          <div className="md:p-8 px-3 py-6">
             {/* New Request Form */}
             {activeTab === 'new' && (
               <div className="space-y-8">
 
                 {/* Category Selection - Yeniden Tasarlandı */}
                 <div>
-                  <h3 className="text-xl font-semibold text-gray-800 mb-6 text-center">
+                  <h3 className="text-md md:text-xl font-semibold text-gray-800 mb-6 text-center">
                     Hangi konuda yardıma ihtiyacınız var?
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -310,7 +310,7 @@ const SupportAndComplaint = () => {
                     <button
                       type="submit"
                       disabled={isSubmitting}
-                      className={`w-full py-4 px-6 rounded-lg font-semibold text-white transition-all duration-200 transform ${isSubmitting
+                      className={`w-full px-4 py-2 md:py-4 md:px-6 rounded-lg font-semibold text-white transition-all duration-200 transform ${isSubmitting
                         ? 'bg-gray-400 cursor-not-allowed'
                         : 'bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 hover:scale-105 active:scale-95 shadow-lg hover:shadow-xl'
                         }`}

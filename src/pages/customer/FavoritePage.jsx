@@ -67,8 +67,8 @@ const handleRemoveFavorite = async (productId) => {
       <main className="flex-1 container mx-auto px-6 py-12">
         {/* Başlık Bölümü */}
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-gray-800 mb-4">Favorilerim</h1>
-          <p className="text-gray-600 text-lg">Beğendiğiniz ürünler burada</p>
+          <h1 className="text-2xl md:text-4xl font-bold text-gray-800 mb-4">Favorilerim</h1>
+          <p className="text-gray-600 text-sm md:text-lg">Beğendiğiniz ürünler burada</p>
           <div className="w-24 h-1 bg-gradient-to-r from-orange-400 to-pink-400 mx-auto mt-4 rounded-full"></div>
         </div>
 
@@ -91,7 +91,7 @@ const handleRemoveFavorite = async (productId) => {
               >
                 <div className="flex flex-col lg:flex-row">
                   {/* Ürün Görseli */}
-                  <div className="relative lg:w-80 h-80 lg:h-auto bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center p-8">
+                  <div className="relative lg:w-64 lg:h-auto  bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center p-8">
                     <img 
                       src={item.additionalImages[0]} 
                       alt={item.name} 
@@ -131,7 +131,7 @@ const handleRemoveFavorite = async (productId) => {
                       </div>
 
                       {/* Ürün Adı */}
-                      <h2 className="text-2xl font-bold text-gray-800 leading-tight">
+                      <h2 className="md:text-2xl text-md font-bold text-gray-800 leading-tight">
                         {item.name}
                       </h2>
 
@@ -145,7 +145,7 @@ const handleRemoveFavorite = async (productId) => {
 
                       {/* Fiyat */}
                       <div className="flex items-baseline gap-3">
-                        <span className="text-3xl font-bold text-orange-600">
+                        <span className="md:text-3xl text-xl font-bold text-orange-600">
                           ₺{item.price.toLocaleString()}
                         </span>
                         {item.oldPrice && (
@@ -168,7 +168,7 @@ const handleRemoveFavorite = async (productId) => {
                     <div className="flex flex-col sm:flex-row gap-4 mt-8">
                       <button
                         onClick={() => handleAddToCart(item.id)}
-                         className="flex-1 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white py-4 px-8 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl">
+                         className="flex-1 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white md:py-4 md:px-8 px-4 py-2 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl">
                         <div className="flex items-center justify-center gap-2">
                           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 2.5M7 13l2.5 2.5" />
@@ -179,7 +179,7 @@ const handleRemoveFavorite = async (productId) => {
                       
                       <button
                      onClick={() => handleRemoveFavorite(item.id)}
-                      className="sm:w-auto border-2 border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300 py-4 px-8 rounded-xl font-semibold transition-all duration-300">
+                      className="sm:w-auto border-2 border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300 md:py-4 md:px-8 px-4 py-2 rounded-xl font-semibold transition-all duration-300">
                         Favoriden Çıkar
                       </button>
                     </div>

@@ -82,7 +82,7 @@ const ProductCard = ({ product }) => {
   return (
     <div
       onClick={handleClick}
-      className="bg-white border border-gray-300 rounded-xl shadow-sm p-4 min-w-[220px] max-h-[360px] flex flex-col hover:shadow-lg transition-all duration-300 group cursor-pointer relative group"
+      className="bg-white border border-gray-300 rounded-xl shadow-sm p-4 min-w-[220px] max-h-[360px] flex flex-col hover:shadow-lg transition-all duration-300 cursor-pointer relative"
       tabIndex={0}
       onKeyDown={(e) => { if (e.key === "Enter") handleClick(); }}
     >
@@ -118,7 +118,7 @@ const ProductCard = ({ product }) => {
       </div>
       <button
         disabled={adding}
-        className="mt-3 w-full bg-orange-500 hover:bg-orange-600 text-white py-2 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300 cursor-pointer"
+        className="mt-3 w-full bg-orange-400 hover:bg-orange-500 text-white py-2 rounded cursor-pointer"
         onClick={handleAddToCart}
       >
         {adding ? "Ekleniyor..." : "Sepete Ekle"}
