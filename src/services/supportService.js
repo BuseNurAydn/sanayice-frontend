@@ -1,9 +1,12 @@
+import { API_BASE } from "../config";
+
+const SUPPORT_API = `${API_BASE}`;
 
 //POST 
 export const createSupportTicket = async (ticketData) => {
   const token = localStorage.getItem('token');
 
-  const response = await fetch('/api/support/tickets', {
+  const response = await fetch(`${SUPPORT_API}/support/tickets`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -25,7 +28,7 @@ export const createSupportTicket = async (ticketData) => {
 export const getSupportTicketsByCustomer = async (customerId) => {
   const token = localStorage.getItem('token');
 
-  const response = await fetch(`/api/support/tickets/customer/${customerId}`, {
+  const response = await fetch(`${SUPPORT_API}/support/tickets/customer/${customerId}`, {
     headers: {
       Authorization: `Bearer ${token}`
     }
@@ -42,7 +45,7 @@ export const getSupportTicketsByCustomer = async (customerId) => {
 export const getAllSupportTickets = async () => {
   const token = localStorage.getItem('token');
 
-  const response = await fetch('/api/managers/support/tickets', {
+  const response = await fetch(`${SUPPORT_API}/managers/support/tickets`, {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
@@ -60,7 +63,7 @@ export const getAllSupportTickets = async () => {
 export const replyToSupportTicket = async (ticketId, message) => {
   const token = localStorage.getItem('token'); 
 
-  const response = await fetch(`/api/managers/support/tickets/${ticketId}/replies`, {
+  const response = await fetch(`${SUPPORT_API}/managers/support/tickets/${ticketId}/replies`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -80,7 +83,7 @@ export const replyToSupportTicket = async (ticketId, message) => {
 export const updateTicketStatus = async (ticketId, status) => {
   const token = localStorage.getItem('token');
 
-  const response = await fetch(`/api/managers/support/tickets/${ticketId}/status?status=${status}`, {
+  const response = await fetch(`${SUPPORT_API}/managers/support/tickets/${ticketId}/status?status=${status}`, {
     method: 'PUT',
     headers: {
        Authorization: `Bearer ${token}`

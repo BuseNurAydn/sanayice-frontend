@@ -1,11 +1,12 @@
+import { API_BASE } from "../config";
 
-const API_BASE = "/api/addresses"
+const ADDRESS_API = `${API_BASE}/addresses`;
 
 //POST ADDRESS
 export const createAddress = async (addressData) => {
   const token = localStorage.getItem("token");
 
-  const response = await fetch(API_BASE, {
+  const response = await fetch(ADDRESS_API, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -26,7 +27,7 @@ export const createAddress = async (addressData) => {
 export const fetchAddresses = async () => {
   const token = localStorage.getItem("token");
 
-  const response = await fetch(API_BASE, {
+  const response = await fetch(ADDRESS_API, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
@@ -46,7 +47,7 @@ export const fetchAddresses = async () => {
 export const deleteAddress = async (id) => {
   const token = localStorage.getItem("token");
 
-  const response = await fetch(`${API_BASE}/${id}`, {
+  const response = await fetch(`${ADDRESS_API}/${id}`, {
     method: "DELETE",
     headers: {
       Authorization: `Bearer ${token}`,
@@ -64,7 +65,7 @@ export const deleteAddress = async (id) => {
 export const getAddressById = async (id) => {
   const token = localStorage.getItem("token");
 
-  const response = await fetch(`${API_BASE}/${id}`, {
+  const response = await fetch(`${ADDRESS_API}/${id}`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
@@ -81,7 +82,7 @@ export const getAddressById = async (id) => {
 export const updateAddress = async (id, formData) => {
   const token = localStorage.getItem("token");
 
-  const response = await fetch(`${API_BASE}/${id}`, {
+  const response = await fetch(`${ADDRESS_API}/${id}`, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",

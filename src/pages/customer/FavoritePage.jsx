@@ -1,7 +1,7 @@
-import { useState,useEffect } from "react";
-import { fetchFavorites, removeFavorites} from "../../services/favoritesService";
+import { useState, useEffect } from "react";
+import { fetchFavorites, removeFavorites } from "../../services/favoritesService";
 import { addToCart } from "../../services/cartService";
-import { useDispatch ,useSelector} from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { toast } from "react-toastify";
 
 const renderStars = (rating) => {
@@ -13,19 +13,19 @@ const renderStars = (rating) => {
     <div className="flex items-center gap-1">
       {[...Array(safeRating)].map((_, i) => (
         <svg key={`full-${i}`} className="w-4 h-4 text-yellow-400 fill-current" viewBox="0 0 20 20">
-          <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/>
+          <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" />
         </svg>
       ))}
 
       {halfStar && (
         <svg className="w-4 h-4 text-yellow-400 fill-current" viewBox="0 0 20 20">
-          <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0v15z"/>
+          <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0v15z" />
         </svg>
       )}
 
       {[...Array(emptyStars)].map((_, i) => (
         <svg key={`empty-${i}`} className="w-4 h-4 text-gray-300 fill-current" viewBox="0 0 20 20">
-          <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/>
+          <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" />
         </svg>
       ))}
     </div>
@@ -34,32 +34,32 @@ const renderStars = (rating) => {
 const FavoritePage = () => {
   const [favorites, setFavorites] = useState([]);
   const dispatch = useDispatch();
-  const { items} = useSelector(state => state.favorites);
+  const { items } = useSelector(state => state.favorites);
 
   useEffect(() => {
     dispatch(fetchFavorites());
   }, [dispatch]);
 
-const handleRemoveFavorite = async (productId) => {
-  try {
-    await dispatch(removeFavorites(productId)).unwrap(); // Favoriden çıkar
-    toast.info('Favorilerden çıkarıldı!');
-    await dispatch(fetchFavorites()); // Listeyi güncelle
-  } catch (err) {
-    console.error("Silme işlemi başarısız:", err);
-  }
-};
+  const handleRemoveFavorite = async (productId) => {
+    try {
+      await dispatch(removeFavorites(productId)).unwrap(); // Favoriden çıkar
+      toast.info('Favorilerden çıkarıldı!');
+      await dispatch(fetchFavorites()); // Listeyi güncelle
+    } catch (err) {
+      console.error("Silme işlemi başarısız:", err);
+    }
+  };
 
-//sepete ekleme
+  //sepete ekleme
   const handleAddToCart = async (productId) => {
 
-  try {
-    await dispatch(addToCart({ productId, quantity: 1 })).unwrap();
-    toast.success("Ürün sepete eklendi");
-  } catch (err) {
-    toast.error(err?.message || "Sepete eklenemedi.");
-  }
-};
+    try {
+      await dispatch(addToCart({ productId, quantity: 1 })).unwrap();
+      toast.success("Ürün sepete eklendi");
+    } catch (err) {
+      toast.error(err?.message || "Sepete eklenemedi.");
+    }
+  };
 
 
   return (
@@ -92,12 +92,13 @@ const handleRemoveFavorite = async (productId) => {
                 <div className="flex flex-col lg:flex-row">
                   {/* Ürün Görseli */}
                   <div className="relative lg:w-64 lg:h-auto  bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center p-8">
-                    <img 
+                    {item?.additionalImages?.[0] && (
+                      <img 
                       src={item.additionalImages[0]} 
-                      alt={item.name} 
-                      className="object-contain max-h-48 max-w-48 group-hover:scale-105 transition-transform duration-300" 
-                    />
-                    
+                      alt="Ürün görseli"
+                      className="object-contain max-h-48 max-w-48 group-hover:scale-105 transition-transform duration-300"
+                      />
+                    )}
                     {/* Badges */}
                     <div className="absolute top-4 left-4 flex flex-col gap-2">
                       {item?.badge && (
@@ -168,7 +169,7 @@ const handleRemoveFavorite = async (productId) => {
                     <div className="flex flex-col sm:flex-row gap-4 mt-8">
                       <button
                         onClick={() => handleAddToCart(item.id)}
-                         className="flex-1 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white md:py-4 md:px-8 px-4 py-2 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl">
+                        className="flex-1 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white md:py-4 md:px-8 px-4 py-2 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl">
                         <div className="flex items-center justify-center gap-2">
                           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 2.5M7 13l2.5 2.5" />
@@ -176,10 +177,10 @@ const handleRemoveFavorite = async (productId) => {
                           Sepete Ekle
                         </div>
                       </button>
-                      
+
                       <button
-                     onClick={() => handleRemoveFavorite(item.id)}
-                      className="sm:w-auto border-2 border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300 md:py-4 md:px-8 px-4 py-2 rounded-xl font-semibold transition-all duration-300">
+                        onClick={() => handleRemoveFavorite(item.id)}
+                        className="sm:w-auto border-2 border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300 md:py-4 md:px-8 px-4 py-2 rounded-xl font-semibold transition-all duration-300">
                         Favoriden Çıkar
                       </button>
                     </div>

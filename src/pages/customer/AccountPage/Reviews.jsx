@@ -1,16 +1,19 @@
 import { useState,useEffect } from 'react';
 import { FaStar, FaEdit, FaTrashAlt } from 'react-icons/fa';
+import { API_BASE } from "../../../config";
 
 const Reviews = () => {
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  const REVIEWS_API = `${API_BASE}`;
+
    useEffect(() => {
     const fetchReviews = async () => {
       try {
         const token = localStorage.getItem("token");
-        const response = await fetch("/api/products/reviews/my-reviews", {
+        const response = await fetch(`${REVIEWS_API}/products/reviews/my-reviews`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         if (!response.ok) throw new Error("Değerlendirmeler alınamadı");

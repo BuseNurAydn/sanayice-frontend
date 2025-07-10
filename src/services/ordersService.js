@@ -1,12 +1,13 @@
+import { API_BASE } from "../config";
+
+const ORDERS_API = `${API_BASE}/orders`;
 
 //Sepeti Onayla - Post
-const API_BASE = '/api/orders'
-
 export const handleConfirmCart = async ({ shippingAddress, billingAddress, customerNotes }) => {
   const token = localStorage.getItem("token");
 
   try {
-    const response = await fetch(`${API_BASE}/confirm`, {
+    const response = await fetch(`${ORDERS_API}/confirm`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -36,7 +37,7 @@ export const getOrders = async () => {
   const token = localStorage.getItem("token");
 
   try {
-    const response = await fetch(API_BASE, {
+    const response = await fetch(ORDERS_API, {
       method: "GET",
       headers: {
         Authorization: `Bearer ${token}`,

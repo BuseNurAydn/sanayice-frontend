@@ -1,9 +1,11 @@
-//ANASAYFA İÇİN ÜRÜNLER
-const API_BASE = "/api/products";
+import { API_BASE } from "../config";
 
+const PRODUCTS_API = `${API_BASE}/products`;
+
+//ANASAYFA İÇİN ÜRÜNLER
 export const getProducts = async () => {
  
-  const response = await fetch(API_BASE, {
+  const response = await fetch(PRODUCTS_API, {
   });
 
   if (!response.ok) {
@@ -18,7 +20,7 @@ export const getProducts = async () => {
 export const getProductsByCategoryId = async (categoryId) => {
   const token = localStorage.getItem("token");
 
-  const response = await fetch(`${API_BASE}/categories/${categoryId}`, {
+  const response = await fetch(`${PRODUCTS_API}/categories/${categoryId}`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },

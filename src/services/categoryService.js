@@ -1,17 +1,16 @@
-const API_BASE = "https://sanayice.ddns.net/api";
+import { API_BASE } from "../config";
+
+const CATEGORY_API = `${API_BASE}`;
+
 const getToken = () => localStorage.getItem("token");
 
 // KATEGORİLERİ LİSTELEME
 export const fetchCategories = async () => {
-  const token = getToken();
-  if (!token) throw new Error("Token bulunamadı");
-
-  const response = await fetch(`${API_BASE}/categories`, {
+  
+  const response = await fetch(`${CATEGORY_API}/categories`, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
-      // Dikkat: burayı mutlaka backtick (`) ile sarmalayın
-      Authorization: `Bearer ${token}`,
     },
   });
 
@@ -27,7 +26,7 @@ export const fetchCategories = async () => {
 export const fetchSubcategories = async () => {
   const token = getToken();
 
-  const response = await fetch(`${PUBLIC_API}/subcategories`, {
+  const response = await fetch(`${CATEGORY_API}/subcategories`, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
@@ -44,7 +43,7 @@ export const fetchSubcategories = async () => {
 export const getCategoryById = async (id) => {
   const token = getToken();
 
-  const response = await fetch(`${PUBLIC_API}/categories/${id}`, {
+  const response = await fetch(`${CATEGORY_API}/categories/${id}`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
@@ -61,8 +60,8 @@ export const deleteCategory = async (id, type = "category") => {
 
   const endpoint =
     type === "subcategory"
-      ? `${API_BASE}/subcategories/${id}`
-      : `${API_BASE}/categories/${id}`;
+      ? `${CATEGORY_API}/subcategories/${id}`
+      : `${CATEGORY_API}/categories/${id}`;
 
   const response = await fetch(endpoint, {
     method: "DELETE",
@@ -78,7 +77,7 @@ export const deleteCategory = async (id, type = "category") => {
 export const updateCategory = async (id, data) => {
   const token = getToken();
 
-  const response = await fetch(`${API_BASE}/categories/${id}`, {
+  const response = await fetch(`${CATEGORY_API}/categories/${id}`, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
@@ -98,8 +97,8 @@ export const saveSubcategory = async (id, data) => {
   const token = getToken();
 
   const url = id
-    ? `${API_BASE}/subcategories/${id}`
-    : `${API_BASE}/subcategories`;
+    ? `${CATEGORY_API}/subcategories/${id}`
+    : `${CATEGORY_API}/subcategories`;
 
   const method = id ? "PUT" : "POST";
 
@@ -119,7 +118,7 @@ export const saveSubcategory = async (id, data) => {
 export const addCategory = async (categoryData) => {
   const token = getToken();
 
-  const response = await fetch(`${API_BASE}/categories`, {
+  const response = await fetch(`${CATEGORY_API}/categories`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

@@ -1,7 +1,11 @@
+import { API_BASE } from "../config";
+
+const CAMPAIGN_API = `${API_BASE}/sellers/campaigns`;
+
 // ADD CAMPAİGN
  export const addCampaign = async (campaignData) => {
   try {
-    const response = await fetch("/api/sellers/campaigns", {
+    const response = await fetch(CAMPAIGN_API, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -28,7 +32,7 @@
 
 // GET CAMPAİGN
 export const getCampaigns = async () => {
-  const response = await fetch('/api/managers/campaigns', {
+  const response = await fetch(`${API_BASE}/managers/campaigns`, {
     headers: {
       Authorization: `Bearer ${localStorage.getItem('token')}`,
     },
@@ -43,7 +47,7 @@ export const getCampaigns = async () => {
 
 // UPDATE CAMPAİGN
 export const updateCampaign = async (id, updatedData) => {
-  const response = await fetch(`/api/sellers/campaigns/${id}`, {
+  const response = await fetch(`${CAMPAIGN_API}/${id}`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
@@ -61,7 +65,7 @@ export const updateCampaign = async (id, updatedData) => {
 
 // DELETE CAMPAİGN
 export const deleteCampaign = async (id) => {
-  const response = await fetch(`/api/sellers/campaigns/${id}`, {
+  const response = await fetch(`${CAMPAIGN_API}/${id}`, {
     method: 'DELETE',
     headers: {
       'Content-Type': 'application/json',

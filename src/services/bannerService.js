@@ -1,9 +1,11 @@
-const API_BASE = "/api/managers/banners";
+import { API_BASE } from "../config";
+
+const BANNER_API = `${API_BASE}/managers/banners`;
 
 //POST BANNER 
 export const addBanner = async (banner) => {
   const token = localStorage.getItem("token");
-  const response = await fetch(API_BASE, {
+  const response = await fetch(BANNER_API, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -22,7 +24,7 @@ export const addBanner = async (banner) => {
 // PUT BANNER
 export const updateBanner = async (id, banner) => {
   const token = localStorage.getItem("token");
-  const response = await fetch(`${API_BASE}/${id}`, {
+  const response = await fetch(`${BANNER_API}/${id}`, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
@@ -42,7 +44,7 @@ export const updateBanner = async (id, banner) => {
 export const getBanners = async () => {
   const token = localStorage.getItem("token");
 
-  const response = await fetch(API_BASE, {
+  const response = await fetch(BANNER_API, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
@@ -59,7 +61,7 @@ export const getBanners = async () => {
 export const toggleBannerStatus = async (bannerId) => {
   const token = localStorage.getItem("token"); 
 
-  const response = await fetch(`${API_BASE}/${bannerId}/toggle-status`, {
+  const response = await fetch(`${BANNER_API}/${bannerId}/toggle-status`, {
     method: "PUT",
     headers: {
        Authorization: `Bearer ${token}`,
@@ -76,7 +78,7 @@ export const toggleBannerStatus = async (bannerId) => {
 // Banner sırasını değiştir
 export const updateBannerOrder = async (bannerId, newOrder) => {
   const token = localStorage.getItem("token"); 
-  const response = await fetch(`${API_BASE}/${bannerId}/order?order=${newOrder}`, {
+  const response = await fetch(`${BANNER_API}/${bannerId}/order?order=${newOrder}`, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
@@ -96,7 +98,7 @@ export const updateBannerOrder = async (bannerId, newOrder) => {
 export const deleteBanner = async (bannerId) => {
   const token = localStorage.getItem("token");
 
-  const response = await fetch(`${API_BASE}/${bannerId}`, {
+  const response = await fetch(`${BANNER_API}/${bannerId}`, {
     method: "DELETE",
     headers: {
       Authorization: `Bearer ${token}`,
@@ -112,7 +114,7 @@ export const deleteBanner = async (bannerId) => {
 
 // PUBLİC BANNER
 export const getAllPublicBanners = async () => {
-  const response = await fetch("/api/banners/active");
+  const response = await fetch(`${API_BASE}/banners/active`);
 
   if (!response.ok) {
     throw new Error("Bannerlar alınamadı.");

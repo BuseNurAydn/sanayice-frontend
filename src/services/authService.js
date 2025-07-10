@@ -1,9 +1,10 @@
-const API_BASE = "https://sanayice.ddns.net/api/auth";
+import { API_BASE } from "../config";
 
+const AUTH_API = `${API_BASE}/auth`;
 
 export const login = async (loginData) => {
   try {
-    const response = await fetch(`${API_BASE}/login`, {
+    const response = await fetch(`${AUTH_API}/login`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -23,8 +24,7 @@ export const login = async (loginData) => {
 };
 
 export const registerCustomer = async (payload) => {
-
-  const response = await fetch(`${API_BASE}/register`, {
+  const response = await fetch(`${AUTH_API}/register`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -43,7 +43,7 @@ export const registerCustomer = async (payload) => {
 
 export const registerSeller = async (payload) => {
 
-    const response = await fetch(`${API_BASE}/register`, {
+    const response = await fetch(`${AUTH_API}/register`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -64,7 +64,7 @@ export const registerSeller = async (payload) => {
 export const getMyProfile = async () => {
   const token = localStorage.getItem("token");
 
-  const response = await fetch(`${API_BASE}/profile`, {
+  const response = await fetch(`${AUTH_API}/profile`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
@@ -81,7 +81,7 @@ export const getMyProfile = async () => {
 export const updateMyProfile = async (profileData) => {
   const token = localStorage.getItem("token");
 
-  const response = await fetch(`${API_BASE}/update-profile`, {
+  const response = await fetch(`${AUTH_API}/update-profile`, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",

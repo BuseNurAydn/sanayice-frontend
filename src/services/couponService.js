@@ -1,6 +1,10 @@
+import { API_BASE } from "../config";
+
+const COUPON_API = `${API_BASE}/sellers/coupons`;
+
 // ADD COUPON
 export const addCoupon = async (couponData) => {
-  const response = await fetch('/api/sellers/coupons', {
+  const response = await fetch(COUPON_API, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -21,7 +25,7 @@ export const addCoupon = async (couponData) => {
 
 // GET COUPON
 export const getCoupons = async () => {
-  const response = await fetch('/api/sellers/coupons', {
+  const response = await fetch(COUPON_API, {
     headers: {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${localStorage.getItem('token')}`,
@@ -37,7 +41,7 @@ export const getCoupons = async () => {
 
 //UPDATE COUPON
 export const updateCoupon = async (id, couponData) => {
-  const response = await fetch(`/api/sellers/coupons/${id}`, {
+  const response = await fetch(`${COUPON_API}/${id}`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
@@ -59,7 +63,7 @@ export const updateCoupon = async (id, couponData) => {
 
 // DELETE COUPON
 export const deleteCoupon = async (id) => {
-  const response = await fetch(`/api/sellers/coupons/${id}`, {
+  const response = await fetch(`${COUPON_API}/${id}`, {
     method: 'DELETE',
     headers: {
       Authorization: `Bearer ${localStorage.getItem("token")}`,

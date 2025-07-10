@@ -1,6 +1,8 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
+import { API_BASE } from "../config";
 
-const API_BASE = '/api/cart'
+const CART_API = `${API_BASE}/cart`;
+
 
 const getToken = () => localStorage.getItem("token");
 
@@ -10,7 +12,7 @@ export const fetchCart = createAsyncThunk(
   async (_, thunkAPI) => {
     try {
       const token = getToken(); 
-      const response = await fetch(API_BASE, {
+      const response = await fetch(CART_API, {
         method: 'GET',
         headers: {
           Authorization: `Bearer ${token}`,
@@ -35,7 +37,7 @@ export const addToCart = createAsyncThunk(
   async ({ productId, quantity }, thunkAPI) => {
     try {
       const token = getToken();
-      const response = await fetch(`${API_BASE}/items`, {
+      const response = await fetch(`${CART_API}/items`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -63,7 +65,7 @@ export const removeCart = createAsyncThunk(
   async (cartItemId, thunkAPI) => {  // sepet tablosundaki id
     try {
       const token = getToken();
-      const response = await fetch(`${API_BASE}/items/${cartItemId}`, {
+      const response = await fetch(`${CART_API}/items/${cartItemId}`, {
         method: 'DELETE',
         headers: {
           Authorization: `Bearer ${token}`
@@ -86,7 +88,7 @@ export const clearCart = createAsyncThunk(
   async (_, thunkAPI) => {
     try {
       const token = getToken();
-      const response = await fetch(API_BASE, {
+      const response = await fetch(CART_API, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${token}`
@@ -111,7 +113,7 @@ export const changeQuantity = createAsyncThunk(
     try {
       const token = getToken(); 
 
-      const response = await fetch(`${API_BASE}/items/${itemId}`, {
+      const response = await fetch(`${CART_API}/items/${itemId}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",

@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import { Eye, Check, X, Search, Clock, Building, Download, Phone, Mail, MapPin, FileText, Shield, AlertTriangle, MoreVertical, Filter } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Eye, Check, X, Search, Clock, Building, Download, MapPin, FileText,AlertTriangle} from 'lucide-react';
 import AdminText from '../../shared/Text/AdminText';
 import { toast } from 'react-toastify';
+import { API_BASE } from "../../config";
 
 const SellerVerification = () => {
-  const [saticilar, setSaticilar] = useState([]);
   const [filtreliSaticilar, setFiltreliSaticilar] = useState([]);
   const [secilenSatici, setSecilenSatici] = useState(null);
   const [aramaTermi, setAramaTermi] = useState('');
@@ -19,10 +19,11 @@ const SellerVerification = () => {
   const [redGerekcesi, setRedGerekcesi] = useState("");
   const [belgeModalAcik, setBelgeModalAcik] = useState(false);
   const [secilenBelge, setSecilenBelge] = useState(null);
+  const DOCUMENT_API = `${API_BASE}/managers/seller-verifications`;
 
   const fetchVerifications = async () => {
     try {
-      const res = await fetch("/api/managers/seller-verifications", {
+      const res = await fetch(DOCUMENT_API, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`
         }
