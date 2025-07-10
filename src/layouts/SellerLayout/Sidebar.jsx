@@ -9,6 +9,7 @@ import { FaPlus } from "react-icons/fa6";
 import { GiHamburgerMenu } from "react-icons/gi";
 import { useSelector } from "react-redux";
 import { MdStorefront, MdVerifiedUser, MdViewCarousel, MdLocalOffer, MdSupport } from "react-icons/md";
+import { API_BASE } from "../../config"; 
 
 const menuItems = [
   {
@@ -95,13 +96,13 @@ const Sidebar = () => {
   const role = useSelector((state) => state.auth.user?.role);
   const [documentsVerified, setDocumentsVerified] = useState(false);
   const [loading, setLoading] = useState(true);
-
   const sellerId = useSelector((state) => state.auth.user?.id);
+  const DOCUMENT_API = `${API_BASE}/sellers`;
 
  useEffect(() => {
   const checkDocuments = async () => {
     try {
-      const res = await fetch(`/api/sellers/${sellerId}/documents`, {
+      const res = await fetch(`${DOCUMENT_API}/${sellerId}/documents`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },

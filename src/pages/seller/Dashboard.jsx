@@ -4,6 +4,7 @@ import { FaBoxes, FaChartLine, FaDollarSign, FaShoppingCart, FaStore, FaEye } fr
 import { Link } from 'react-router-dom';
 import { fetchDashboardStats, fetchRecentOrders, fetchPopulerProducts } from "../../services/dashboardService";
 
+
 const Dashboard = () => {
   const [stats, setStats] = useState([]);
   const [recentOrders, setRecentOrders] = useState([]);

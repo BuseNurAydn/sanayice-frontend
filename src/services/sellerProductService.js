@@ -1,4 +1,6 @@
-const API_BASE = '/api/products';
+import { API_BASE } from "../config";
+
+const PRODUCTS_API = `${API_BASE}/products`;
 
 const getToken = () => localStorage.getItem("token");
 
@@ -6,7 +8,7 @@ const getToken = () => localStorage.getItem("token");
 export const fetchMyProducts = async () => {
   const token = getToken();
  
-  const response = await fetch(`${API_BASE}/my-products`, {
+  const response = await fetch(`${PRODUCTS_API}/my-products`, {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
@@ -25,7 +27,7 @@ export const fetchMyProducts = async () => {
 export const deleteProduct = async (productId) => {
   const token = getToken();
 
-  const response = await fetch(`${API_BASE}/${productId}`, {
+  const response = await fetch(`${PRODUCTS_API}/${productId}`, {
     method: 'DELETE',
     headers: {
       'Content-Type': 'application/json',
@@ -44,7 +46,7 @@ export const deleteProduct = async (productId) => {
 export const createProduct = async (productData) => {
   const token = getToken();
 
-  const response = await fetch(API_BASE, {
+  const response = await fetch(PRODUCTS_API, {
     method: "POST",
     headers: {
       'Content-Type': 'application/json',
@@ -60,7 +62,7 @@ export const createProduct = async (productData) => {
 export const updateProduct = async (id, updatedProduct) => {
   const token = getToken();
 
-  const response = await fetch(`${API_BASE}/${id}`, {
+  const response = await fetch(`${PRODUCTS_API}/${id}`, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",

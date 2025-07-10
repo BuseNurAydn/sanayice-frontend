@@ -3,6 +3,7 @@ import { Upload, FileText, X, Check, AlertTriangle, Eye, Download, RefreshCw, Cl
 import AdminText from '../../shared/Text/AdminText';
 import { useSelector } from "react-redux";
 import { toast } from 'react-toastify';
+import { API_BASE } from "../../config";
 
 const SellerDocumentUpload = () => {
 
@@ -68,12 +69,12 @@ const SellerDocumentUpload = () => {
   const [modalAcik, setModalAcik] = useState(false);
   const [secilenBelge, setSecilenBelge] = useState(null);
   const fileInputRef = useRef(null);
-
+  const DOCUMENT_API = `${API_BASE}/sellers`;
   const sellerId = useSelector((state) => state.auth.user?.id);
 
   const fetchBelgeler = async () => {
     try {
-      const res = await fetch(`/api/sellers/${sellerId}/documents`, {
+      const res = await fetch(`${DOCUMENT_API}/${sellerId}/documents`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },

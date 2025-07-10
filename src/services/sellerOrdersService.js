@@ -1,11 +1,13 @@
-const API_BASE = "/api/seller/orders";
+import { API_BASE } from "../config";
+
+const ORDERS_API = `${API_BASE}/seller/orders`;
 
 const getToken = () => localStorage.getItem("token");
 
 export const fetchSellerOrders = async () => {
   const token = getToken();
 
-  const response = await fetch(`${API_BASE}/summary`, {
+  const response = await fetch(`${ORDERS_API}/summary`, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
@@ -26,7 +28,7 @@ export const updateOrderStatus = async (orderId, action) => {
   const token = getToken();
 
   try {
-    const response = await fetch(`/api/seller/orders/order/${orderId}/${action}`, {
+    const response = await fetch(`${ORDERS_API}/order/${orderId}/${action}`, {
       method: "PUT",
       headers: {
         Authorization: `Bearer ${token}`,

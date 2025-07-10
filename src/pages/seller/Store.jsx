@@ -127,7 +127,9 @@ const Store = () => {
             {filteredProducts.map((product) => (
               <Link to={`/seller_product/${product.id}`} key={product.id} className="block group">
                 <div className={`${boxStyle} h-96 p-4 flex flex-col items-center text-center hover:shadow-lg transition-shadow duration-300`}>
-                  <img src={product.additionalImages[0]} alt={product.name} className="w-full h-48 object-contain mb-4 rounded-md" />
+                  {product?.additionalImages?.[0] && (
+                    <img src={product.additionalImages[0]} alt="Ürün görseli" name={product.name} className="w-full h-48 object-contain mb-4 rounded-md" />
+                  )}
                   <h3 className="text-md font-semibold text-gray-900 transition-colors duration-200 line-clamp-2">{product.name}</h3>
                   <p className="text-gray-500 text-sm mt-1">{product.category}</p>
                   <p className="text-xl font-bold text-[var(--color-orange)] mt-3">₺{product.price.toLocaleString()}</p>
