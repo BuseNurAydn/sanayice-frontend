@@ -112,7 +112,7 @@ const Header = ({ categories = [] }) => {
           <img
             src={Logo}
             alt="Logo"
-            className="rounded-lg object-contain cursor-pointer w-36 md:w-44"
+            className="w-[160px] h-auto rounded-lg object-contain cursor-pointer"
             onClick={() => navigate('/')}
           />
         </div>

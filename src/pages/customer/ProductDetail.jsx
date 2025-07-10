@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
+import { API_BASE } from "../../config";
 
 const ProductDetail = () => {
   const { id } = useParams();
@@ -11,7 +12,8 @@ const ProductDetail = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [reviews, setReviews] = useState([])
-
+  const PRODUCTS_API = `${API_BASE}/products`;
+  
   // imageUrl ve additionalImages birleştirdim
   const images = [
     ...(product?.imageUrl ? [product.imageUrl] : []),
@@ -27,7 +29,7 @@ const ProductDetail = () => {
       setLoading(true);
       try {
         const token = localStorage.getItem("token");
-        const response = await fetch(`/api/products/${id}`, {
+        const response = await fetch(`${PRODUCTS_API}/${id}`, {
           headers: {
             "Authorization": `Bearer ${token}`
           }
@@ -44,7 +46,7 @@ const ProductDetail = () => {
     };
     const fetchReviews = async () => {
       try {
-        const res = await fetch(`/api/products/${id}/reviews`);
+        const res = await fetch(`${PRODUCTS_API}/${id}/reviews`);
         const data = await res.json();
         setReviews(data);
         console.log(data)
@@ -123,7 +125,7 @@ const htext = (text) => {
             {/* Ana görsel + slider */}
             <div className="relative bg-white rounded-2xl p-8 shadow-sm border">
               <div className="aspect-square flex items-center justify-center">
-                {images.length > 0 ? (
+                {images?.length > 0 ? (
                   <img
                     src={images[sliderIndex]}
                     alt={product?.name || "Ürün resmi"}
@@ -135,7 +137,7 @@ const htext = (text) => {
               </div>
 
               {/* Slider okları */}
-              {images.length > 1 && (
+              {images?.length > 1 && (
                 <>
                   <button className="absolute left-4 top-1/2 -translate-y-1/2 bg-white bg-opacity-90 hover:bg-opacity-100 rounded-full p-3 shadow-lg transition-all duration-200 hover:scale-110"
                     onClick={() => setSliderIndex((prev) => prev === 0 ? images.length - 1 : prev - 1)}
@@ -158,7 +160,7 @@ const htext = (text) => {
 
             {/* Alt küçük görseller */}
             <div className="flex gap-3 overflow-x-auto pb-2">
-              {images.map((img, idx) => (
+              {images?.map((img, idx) => (
                 <button
                   key={idx}
                   onClick={() => setSliderIndex(idx)}
