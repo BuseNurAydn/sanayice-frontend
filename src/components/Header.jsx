@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useSelector } from 'react-redux';
 import { useDispatch } from "react-redux";
 import Logo from "../../src/assets/png/Logo2.png";
@@ -20,7 +20,7 @@ const Header = ({ categories = [] }) => {
 
   const [shouldRenderMenu, setShouldRenderMenu] = useState(false); // Menü DOM'da mı
   const [menuVisible, setMenuVisible] = useState(false);           // Menü görünür mü (translate-x-0)
-  
+
   const [expanded, setExpanded] = useState(null);
   const favoriteItems = useSelector(state => state.favorites.items);
   const favoriteCount = favoriteItems.length;
@@ -72,15 +72,15 @@ const Header = ({ categories = [] }) => {
   // Menü açılış animasyonu için efekt
   useEffect(() => {
     if (menuOpen) {
-      setShouldRenderMenu(true);          
+      setShouldRenderMenu(true);
       setTimeout(() => {
-        setMenuVisible(true);            
-      }, 10);                           
+        setMenuVisible(true);
+      }, 10);
     } else {
-      setMenuVisible(false);           
+      setMenuVisible(false);
       setTimeout(() => {
-        setShouldRenderMenu(false);     
-      }, 300);                        
+        setShouldRenderMenu(false);
+      }, 300);
     }
   }, [menuOpen]);
 
@@ -277,13 +277,14 @@ const Header = ({ categories = [] }) => {
                 {categories.map((cat) => (
                   <li key={cat.id}>
                     <div className="flex justify-between items-center py-2 px-1 rounded-lg hover:bg-orange-50 transition-colors duration-200 cursor-pointer">
-                      <a
-                        href={`/category/${cat.id}`}
-                        className="text-gray-800 text-[10px] font-semibold"
+                      <Link
+                        to={`/category/${cat.id}`}
                         onClick={() => setMenuOpen(false)}
+                        className="text-gray-800 text-[10px] font-semibold"
                       >
                         {cat.name}
-                      </a>
+                      </Link>
+
 
                       {/* Alt Kategori Toggle */}
                       {cat.subcategories?.length > 0 && (
@@ -305,13 +306,14 @@ const Header = ({ categories = [] }) => {
                       <ul className="ml-4 mt-2 space-y-2 border-l-2 border-orange-200 pl-4">
                         {cat.subcategories.map((sub) => (
                           <li key={sub.id}>
-                            <a
-                              href={`/category/${cat.id}`}
-                              className="text-gray-600 hover:text-orange-500 text-xs font-medium block transition-colors duration-200"
+                            <Link
+                              to={`/category/${cat.id}`}
                               onClick={() => setMenuOpen(false)}
+                              className="text-gray-600 hover:text-orange-500 text-xs font-medium block transition-colors duration-200"
                             >
                               {sub.name}
-                            </a>
+                            </Link>
+
                           </li>
                         ))}
                       </ul>
