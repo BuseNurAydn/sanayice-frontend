@@ -417,18 +417,18 @@ const CampaignCouponManagement = () => {
   );
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="min-h-screen bg-gray-50 md:p-6 py-6 px-3">
       <div className="">
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
           <div>
-            <AdminText className="text-3xl font-bold text-gray-900 mb-2">Kampanya ve Kupon Yönetimi</AdminText>
+            <AdminText>Kampanya ve Kupon Yönetimi</AdminText>
             <p className="text-gray-600">İndirim kampanyalarınızı ve kuponlarınızı yönetin</p>
           </div>
           <div className="flex gap-3">
             <button
               onClick={() => handleAdd('campaign')}
-              className="flex items-center gap-2 px-6 py-3 bg-orange-600 text-white rounded-xl hover:bg-orange-700 transition-colors font-medium shadow-lg"
+              className="flex items-center gap-2 md:px-6 md:py-3 px-2 py-1 bg-orange-600 text-white rounded-xl hover:bg-orange-700 transition-colors font-medium shadow-lg"
             >
               <Plus className="w-5 h-5" />
               Yeni Kampanya
@@ -449,7 +449,7 @@ const CampaignCouponManagement = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-gray-600 text-sm font-medium">Toplam Kampanya</p>
-                <p className="text-3xl font-bold text-gray-900 mt-1">{campaigns.length}</p>
+                <p className="text-2xl md:text-3xl font-bold text-gray-900 mt-1">{campaigns.length}</p>
               </div>
               <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center">
                 <BarChart3 className="w-6 h-6 text-orange-600" />
@@ -461,7 +461,7 @@ const CampaignCouponManagement = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-gray-600 text-sm font-medium">Aktif Kampanya</p>
-                <p className="text-3xl font-bold text-green-600 mt-1">{activeCampaigns.length}</p>
+                <p className="text-2xl md:text-3xl font-bold text-green-600 mt-1">{activeCampaigns.length}</p>
               </div>
               <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
                 <Eye className="w-6 h-6 text-green-600" />
@@ -473,7 +473,7 @@ const CampaignCouponManagement = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-gray-600 text-sm font-medium">Toplam Kupon</p>
-                <p className="text-3xl font-bold text-purple-600 mt-1">{coupons.length}</p>
+                <p className="text-2xl md:text-3xl font-bold text-purple-600 mt-1">{coupons.length}</p>
               </div>
               <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
                 <Gift className="w-6 h-6 text-purple-600" />
@@ -485,7 +485,7 @@ const CampaignCouponManagement = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-gray-600 text-sm font-medium">Toplam Kullanım</p>
-                <p className="text-3xl font-bold text-blue-600 mt-1">{totalUsage}</p>
+                <p className="text-2xl md:text-3xl font-bold text-blue-600 mt-1">{totalUsage}</p>
               </div>
               <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
                 <Star className="w-6 h-6 text-blue-600" />
@@ -504,7 +504,7 @@ const CampaignCouponManagement = () => {
               <button
                 key={tab.key}
                 onClick={() => setActiveTab(tab.key)}
-                className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-medium transition-colors ${activeTab === tab.key
+                className={`flex-1 flex items-center justify-center gap-2 md:px-4 md:py-3 p-2 rounded-xl font-medium transition-colors ${activeTab === tab.key
                   ? 'bg-orange-600 text-white shadow-lg'
                   : 'text-gray-600 hover:bg-gray-50'
                   }`}

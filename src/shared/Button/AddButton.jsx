@@ -3,7 +3,7 @@ const AddButton = ({ children, onClick, type = "button" }) => {
     <button
       type={type}
       onClick={onClick}
-      className="px-4 py-2 bg-[var(--color-dark-orange)] text-white rounded-lg"
+      className="md:px-4 md:py-2 px-2 py-1 text-sm md:text-base bg-[var(--color-dark-orange)] text-white rounded-lg"
     >
       {children}
     </button>

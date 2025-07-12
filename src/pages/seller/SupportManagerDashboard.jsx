@@ -166,17 +166,17 @@ const SupportManagerDashboard = () => {
   }
 };
   return (
-    <div className="min-h-screen p-6 bg-gray-50">
+    <div className="min-h-screen md:p-6 px-3 py-6 bg-gray-50">
       <div className="">
         {/* Header */}
         <div className="flex flex-col lg:flex-row lg:items-center justify-between mb-8">
           <div>
-            <AdminText className="text-3xl font-bold text-gray-800 mb-2">Destek Talepleri Yönetimi</AdminText>
+            <AdminText>Destek Talepleri Yönetimi</AdminText>
             <p className="text-gray-600">Müşteri ve satıcı destek taleplerini yönetin</p>
           </div>
 
           {/* İstatistik Kartları */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mt-6 lg:mt-0">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-6 lg:mt-0">
             <div className="bg-white rounded-lg p-4 shadow-md text-center">
               <div className="text-2xl font-bold text-blue-600">{stats.totalTickets}</div>
               <div className="text-sm text-gray-500">Toplam</div>
@@ -198,7 +198,7 @@ const SupportManagerDashboard = () => {
 
         {/* Additional Stats Row */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl p-6 text-white">
+          <div className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl p-4 md:p-6 text-white">
             <div className="flex items-center justify-between">
               <div>
                 <div className="text-3xl font-bold">{stats.customerTickets}</div>
@@ -231,7 +231,7 @@ const SupportManagerDashboard = () => {
 
         {/* Main Card */}
         <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
-          <div className="p-8">
+          <div className="px-2 py-4 md:p-8">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
               {/* Ticket List */}

@@ -143,7 +143,7 @@ const handleDelete = async () => {
 };
 
   return (
-    <div className="min-h-screen p-6 bg-gray-50">
+    <div className="min-h-screen px-3 py-6 md:p-6  bg-gray-50">
       <div className="flex justify-between items-center mb-6">
         <AdminText>Kategoriler</AdminText>
         <AddButton onClick={handleAdd}>Yeni Kategori Ekle</AddButton>

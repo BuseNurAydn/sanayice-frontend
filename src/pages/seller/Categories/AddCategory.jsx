@@ -51,7 +51,7 @@ const AddCategory = () => {
   };
 
   return (
-    <div className="min-h-screen p-6 bg-gray-50">
+    <div className="min-h-screen md:p-6 px-3 py-6 bg-gray-50">
       <div className="max-w-5xl">
       <AdminText>Kategori Ekle</AdminText>
 {/** 

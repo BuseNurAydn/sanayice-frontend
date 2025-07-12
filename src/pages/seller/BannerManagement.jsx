@@ -145,7 +145,7 @@ const handleSave = async () => {
 
   const BannerCard = ({ banner, active }) => (
     <div className={`group relative overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition-all duration-300 hover:shadow-xl hover:-translate-y-1 ${!active ? 'opacity-60' : ''}`}>
-      <div className="aspect-video relative overflow-hidden">
+       <div className="aspect-video relative overflow-hidden">
         <img
           src={banner.imageUrl}
           alt={banner.title}
@@ -231,17 +231,17 @@ const handleSave = async () => {
   );
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="min-h-screen bg-gray-50 md:p-6 px-3 py-6">
       <div className="">
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
           <div>
-            <AdminText className="text-3xl font-bold text-gray-900 mb-2">Banner Yönetimi</AdminText>
+            <AdminText>Banner Yönetimi</AdminText>
             <p className="text-gray-600">Web sitenizin banner içeriklerini yönetin</p>
           </div>
           <button
             onClick={handleAdd}
-            className="flex items-center gap-2 px-6 py-3 bg-orange-400 text-white rounded-xl hover:bg-orange-600 transition-colors font-medium shadow-lg cursor-pointer"
+            className="flex items-center gap-2 md:px-6 md:py-3 px-4 py-2 bg-orange-400 text-white rounded-xl hover:bg-orange-600 transition-colors font-medium shadow-lg cursor-pointer"
           >
             <Plus className="w-5 h-5" />
             Yeni Banner
@@ -254,7 +254,7 @@ const handleSave = async () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-gray-600 text-sm font-medium">Toplam Banner</p>
-                <p className="text-3xl font-bold text-gray-900 mt-1">{banners.length}</p>
+                <p className=" text-2xl md:text-3xl font-bold text-gray-900 mt-1">{banners.length}</p>
               </div>
               <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
                 <BarChart3 className="w-6 h-6 text-blue-600" />
@@ -266,7 +266,7 @@ const handleSave = async () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-gray-600 text-sm font-medium">Aktif Banner</p>
-                <p className="text-3xl font-bold text-green-600 mt-1">{activeBanners.length}</p>
+                <p className="text-2xl md:text-3xl font-bold text-green-600 mt-1">{activeBanners.length}</p>
               </div>
               <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
                 <Eye className="w-6 h-6 text-green-600" />
@@ -278,7 +278,7 @@ const handleSave = async () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-gray-600 text-sm font-medium">Pasif Banner</p>
-                <p className="text-3xl font-bold text-red-600 mt-1">{inactiveBanners.length}</p>
+                <p className="text-2xl md:text-3xl font-bold text-red-600 mt-1">{inactiveBanners.length}</p>
               </div>
               <div className="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center">
                 <EyeOff className="w-6 h-6 text-red-600" />
