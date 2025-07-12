@@ -69,6 +69,7 @@ const SellerDocumentUpload = () => {
   const [modalAcik, setModalAcik] = useState(false);
   const [secilenBelge, setSecilenBelge] = useState(null);
   const fileInputRef = useRef(null);
+  const [silmeOnayAcilacakBelge, setSilmeOnayAcilacakBelge] = useState(null);
   const DOCUMENT_API = `${API_BASE}/sellers`;
   const sellerId = useSelector((state) => state.auth.user?.id);
 
@@ -105,7 +106,7 @@ const SellerDocumentUpload = () => {
         return (
           <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800">
             <RefreshCw className="w-3 h-3 mr-1" />
-            İnceleme Aşamasında
+            İnceleme
           </span>
         );
       case 'ONAYLANDI':
@@ -160,7 +161,7 @@ const SellerDocumentUpload = () => {
     try {
       const token = localStorage.getItem("token");
 
-      const response = await fetch(`/api/sellers/${sellerId}/documents/upload`, {
+      const response = await fetch(`${DOCUMENT_API}/${sellerId}/documents/upload`, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${token}`
@@ -197,13 +198,11 @@ const SellerDocumentUpload = () => {
 
   const dosyaKaldir = async (belgeId) => {
     const belge = belgeler.find(b => b.id === belgeId);
-
-    const onay = window.confirm("Bu belgeyi silmek istediğinizden emin misiniz?");
-    if (!onay) return;
+    if (!belge) return;
 
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch(`/api/sellers/${sellerId}/documents/${belge.belgeGercekId}`, {
+      const response = await fetch(`${DOCUMENT_API}/${sellerId}/documents/${belge.belgeGercekId}`, {
         method: 'DELETE',
         headers: {
           Authorization: `Bearer ${token}`
@@ -233,6 +232,8 @@ const SellerDocumentUpload = () => {
     } catch (err) {
       console.error(err);
       toast("Silme işlemi sırasında hata oluştu.");
+    } finally {
+      setSilmeOnayAcilacakBelge(null);
     }
   };
 
@@ -269,19 +270,19 @@ const SellerDocumentUpload = () => {
   const reddedilenBelgeler = belgeler.filter(b => b.durum === 'REDDEDILDI').length;
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="min-h-screen bg-gray-50 py-6 px-3 md:p-6">
       <div className="">
         {/* Başlık */}
         <div className="mb-8">
           <AdminText>Satıcı Doğrulama Belgeleri</AdminText>
-          <p className="mt-2 text-gray-600">Satıcı hesabınızı aktifleştirmek için gerekli belgeleri yükleyin</p>
+          <p className="mt-2 text-gray-600 text-sm md:text-base">Satıcı hesabınızı aktifleştirmek için gerekli belgeleri yükleyin</p>
         </div>
 
         {/* İlerleme Kartı */}
-        <div className="bg-white rounded-lg border border-gray-200 p-6 mb-8">
+        <div className="bg-white rounded-lg border border-gray-200 px-3 py-6 md:p-6 mb-8">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-medium text-gray-900">Doğrulama İlerlemesi</h2>
-            <span className="text-sm text-gray-600">{tamamlananBelgeler}/{toplamBelgeler} Belge Tamamlandı</span>
+            <h2 className="text-sm md:text-lg font-medium text-gray-900">Doğrulama İlerlemesi</h2>
+            <span className="text-xs md:text-sm text-gray-600">{tamamlananBelgeler}/{toplamBelgeler} Belge Tamamlandı</span>
           </div>
 
           <div className="w-full bg-gray-200 rounded-full h-2 mb-4">
@@ -310,57 +311,76 @@ const SellerDocumentUpload = () => {
 
         {/* Belge Listesi */}
         <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-          <div className="px-6 py-4 border-b border-gray-200">
+          <div className="p-4 border-b border-gray-200">
             <h2 className="text-lg font-medium text-gray-900">Gerekli Belgeler</h2>
           </div>
-
           <div className="divide-y divide-gray-200">
             {belgeler.map((belge) => (
-              <div key={belge.id} className="p-6">
-                <div className="flex items-start justify-between">
+              <div key={belge.id} className="px-4 py-6">
+                <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
+                  {/* Sol: Belge Bilgileri */}
                   <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-2">
+                    <div className="flex items-center gap-3 mb-4">
                       <FileText className="w-5 h-5 text-gray-400" />
-                      <h3 className="text-sm font-medium text-gray-900">{belge.ad || belge.documentName}</h3>
+                      <h3 className="text-sm font-medium text-gray-900">
+                        {belge.ad || belge.documentName}
+                      </h3>
                       {getDurumRozeti(belge.durum || belge.status)}
                     </div>
 
-                    <p className="text-sm text-gray-600 mb-3">{belge.aciklama || belge.description}</p>
+                    <p className="text-sm text-gray-600 mb-6">
+                      {belge.aciklama || belge.description}
+                    </p>
 
                     {(belge.dosyaAdi || belge.fileName) && (
                       <div className="text-sm text-gray-500">
                         <span>Dosya: {belge.dosyaAdi || belge.fileName}</span>
-                        {(belge.boyut || belge.fileSizeFormatted) && <span className="ml-3">Boyut: {belge.boyut || belge.fileSizeFormatted}</span>}
-                        {(belge.yuklenmeTarihi || belge.uploadDate) && <span className="ml-3">Tarih: {formatTarih(belge.yuklenmeTarihi || belge.uploadDate)}</span>}
+                        {(belge.boyut || belge.fileSizeFormatted) && (
+                          <span className="ml-4">
+                            Boyut: {belge.boyut || belge.fileSizeFormatted}
+                          </span>
+                        )}
+                        {(belge.yuklenmeTarihi || belge.uploadDate) && (
+                          <span className="ml-4">
+                            Tarih: {formatTarih(belge.yuklenmeTarihi || belge.uploadDate)}
+                          </span>
+                        )}
                       </div>
                     )}
 
-                    {(belge.durum === 'REDDEDILDI' || belge.status === 'REDDEDILDI') && (belge.redNedeni || belge.redReason) && (
-                      <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded-md">
-                        <div className="flex items-start gap-2">
-                          <AlertTriangle className="w-4 h-4 text-red-600 mt-0.5" />
-                          <div>
-                            <p className="text-sm font-medium text-red-800">Red Nedeni:</p>
-                            <p className="text-sm text-red-700">{belge.redNedeni || belge.redReason}</p>
+                    {(belge.durum === "REDDEDILDI" ||
+                      belge.status === "REDDEDILDI") &&
+                      (belge.redNedeni || belge.redReason) && (
+                        <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded-md">
+                          <div className="flex items-start gap-2">
+                            <AlertTriangle className="w-4 h-4 text-red-600 mt-0.5" />
+                            <div>
+                              <p className="text-sm font-medium text-red-800">
+                                Red Nedeni:
+                              </p>
+                              <p className="text-sm text-red-700">
+                                {belge.redNedeni || belge.redReason}
+                              </p>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    )}
+                      )}
                   </div>
 
-                  <div className="flex items-center gap-2 ml-4">
+                  {/* Sağ veya Mobilde Altta: Butonlar */}
+                  <div className="flex flex-col md:flex-row gap-2 w-full md:w-auto">
                     {(belge.dosyaAdi || belge.fileName) ? (
                       <>
                         <button
                           onClick={() => belgeyiGoruntule(belge)}
-                          className="inline-flex items-center px-3 py-1.5 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+                          className="inline-flex items-center justify-center px-3 py-1.5 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
                         >
                           <Eye className="w-4 h-4 mr-1" />
                           Görüntüle
                         </button>
                         <button
-                          onClick={() => dosyaKaldir(belge.id)}
-                          className="inline-flex items-center px-3 py-1.5 border border-red-300 rounded-md text-sm font-medium text-red-700 bg-white hover:bg-red-50"
+                          onClick={() => setSilmeOnayAcilacakBelge(belge)}
+                          className="inline-flex items-center justify-center px-3 py-1.5 border border-red-300 rounded-md text-sm font-medium text-red-700 bg-white hover:bg-red-50"
                         >
                           <X className="w-4 h-4 mr-1" />
                           Kaldır
@@ -368,7 +388,7 @@ const SellerDocumentUpload = () => {
                       </>
                     ) : (
                       <div
-                        className={`border-2 border-dashed border-gray-300 rounded-lg p-4 hover:border-blue-400 hover:bg-blue-50 transition-colors cursor-pointer ${suruklemeAktif ? 'bg-blue-100' : ''}`}
+                        className={`border-2 border-dashed border-gray-300 rounded-lg p-4 hover:border-blue-400 hover:bg-blue-50 transition-colors cursor-pointer w-full md:w-auto`}
                         onDragOver={suruklemeBaslat}
                         onDragLeave={suruklemeBitir}
                         onDrop={(e) => dosyaBirak(e, belge.id)}
@@ -377,10 +397,11 @@ const SellerDocumentUpload = () => {
                             alert("Seller ID bulunamadı");
                             return;
                           }
-                          const input = document.createElement('input');
-                          input.type = 'file';
-                          input.accept = '.pdf,.jpg,.jpeg,.png';
-                          input.onchange = (e) => dosyaYukle(e.target.files, belge.id, sellerId);
+                          const input = document.createElement("input");
+                          input.type = "file";
+                          input.accept = ".pdf,.jpg,.jpeg,.png";
+                          input.onchange = (e) =>
+                            dosyaYukle(e.target.files, belge.id, sellerId);
                           input.click();
                         }}
                       >
@@ -392,23 +413,26 @@ const SellerDocumentUpload = () => {
                 </div>
 
                 {/* Yükleme Durumu */}
-                {Object.entries(yuklemeDurumu).map(([id, progress]) => (
-                  <div key={id} className="mt-3">
-                    <div className="flex items-center justify-between text-sm text-gray-600 mb-1">
-                      <span>Yükleniyor...</span>
-                      <span>{progress}%</span>
+                {Object.entries(yuklemeDurumu).map(([id, progress]) =>
+                  id === String(belge.id) ? (
+                    <div key={id} className="mt-3">
+                      <div className="flex items-center justify-between text-sm text-gray-600 mb-1">
+                        <span>Yükleniyor...</span>
+                        <span>{progress}%</span>
+                      </div>
+                      <div className="w-full bg-gray-200 rounded-full h-2">
+                        <div
+                          className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                          style={{ width: `${progress}%` }}
+                        ></div>
+                      </div>
                     </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div
-                        className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-                        style={{ width: `${progress}%` }}
-                      ></div>
-                    </div>
-                  </div>
-                ))}
+                  ) : null
+                )}
               </div>
             ))}
           </div>
+
         </div>
 
         {/* Alt Bilgi */}
@@ -469,8 +493,34 @@ const SellerDocumentUpload = () => {
             </div>
           </div>
         )}
+        {silmeOnayAcilacakBelge && (
+          <div className="fixed inset-0 z-50 bg-opacity-40 flex items-center justify-center">
+            <div className="bg-white rounded-lg shadow-lg p-6 max-w-sm w-full">
+              <h3 className="text-lg font-semibold mb-4 text-gray-800">Belgeyi silmek istiyor musunuz?</h3>
+              <p className="text-sm text-gray-600 mb-6">
+                <strong>{silmeOnayAcilacakBelge.dosyaAdi || silmeOnayAcilacakBelge.documentName}</strong> adlı belge kalıcı olarak silinecektir.
+              </p>
+              <div className="flex justify-end gap-3">
+                <button
+                  onClick={() => setSilmeOnayAcilacakBelge(null)}
+                  className="px-4 py-2 text-sm bg-gray-100 rounded hover:bg-gray-200"
+                >
+                  Vazgeç
+                </button>
+                <button
+                  onClick={() => dosyaKaldir(silmeOnayAcilacakBelge.id)}
+                  className="px-4 py-2 text-sm bg-red-600 text-white rounded hover:bg-red-700"
+                >
+                  Sil
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
+
   );
+
 };
 export default SellerDocumentUpload;

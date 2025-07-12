@@ -59,7 +59,7 @@ const Products = () => {
   );
 
   return (
-    <div className="min-h-screen p-6 bg-gray-50">
+    <div className="min-h-screen py-6 px-3 md:p-6 bg-gray-50">
       <AdminText>Ürünlerim</AdminText>
 
       <div className="flex items-center justify-between mb-4">

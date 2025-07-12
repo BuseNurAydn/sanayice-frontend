@@ -128,12 +128,12 @@ const Orders = () => {
 
   
   return (
-    <div className="min-h-screen p-6 bg-gray-50">
+    <div className="min-h-screen py-6 px-3 md:p-6 bg-gray-50">
       <div>
         <AdminText>Siparişler</AdminText>
 
         {/* İstatistik Kartları */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mt-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4 mt-6">
           <div className={boxStyle + " text-center"}>
             <div className="text-2xl font-bold text-[var(--color-orange)]">{stats.total}</div>
             <div className="text-sm text-gray-600">Toplam Sipariş</div>
@@ -161,7 +161,7 @@ const Orders = () => {
         </div>
 
         {/* Filtreler */}
-        <div className={boxStyle + " mt-6"}>
+        <div className="border border-gray-200 md:p-6 p-3 rounded-lg shadow bg-white mt-6">
           <div className="flex flex-wrap gap-4 items-center">
             <span className="font-medium text-gray-700">Durum Filtresi:</span>
             <select
@@ -185,7 +185,7 @@ const Orders = () => {
         {/* Siparişler Listesi */}
         <div className="mt-6 space-y-4">
           {filteredOrders.map((order) => (
-            <div key={order.id} className={boxStyle}>
+            <div key={order.id} className="border border-gray-200 md:p-6 p-3 rounded-lg shadow bg-white">
               <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
                 {/* Sol taraf - Sipariş bilgileri */}
                 <div className="flex-1">

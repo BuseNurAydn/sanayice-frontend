@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Plus, Edit3, Trash2, Eye, EyeOff, Gift, Copy, Calendar, Percent, Users, ShoppingCart, Clock, Star, CheckCircle, XCircle, AlertCircle } from "lucide-react";
+import AdminText from "../../shared/Text/AdminText";
 
 const SellerCampaignManagement = () => {
   const [coupons, setCoupons] = useState([]);
@@ -213,7 +214,7 @@ const SellerCampaignManagement = () => {
 
   const CouponCard = ({ coupon }) => (
     <div className={`group relative overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition-all duration-300 hover:shadow-xl hover:-translate-y-1 ${!coupon.isActive ? 'opacity-60' : ''}`}>
-      <div className="p-6">
+      <div className="p-3">
         <div className="flex items-start justify-between mb-4">
           <div className="flex-1">
             <div className="flex items-center gap-2 mb-2">
@@ -302,18 +303,18 @@ const SellerCampaignManagement = () => {
   );
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="min-h-screen bg-gray-50 py-6 px-3 md:p-6">
       <div className="">
         {/* Header */}
         <div className="mb-8">
-          <div className="flex flex-col lg:flex-row lg:items-center justify-between mb-6">
+          <div className="flex flex-col lg:flex-row lg:items-center gap-y-4 justify-between mb-6">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">Kupon Yönetimi</h1>
+              <AdminText>Kupon Yönetimi</AdminText>
               <p className="text-gray-600">Mağazanız için kuponlar oluşturun ve yönetin</p>
             </div>
             <button
               onClick={handleAdd}
-              className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl hover:shadow-lg transition-all duration-300 font-medium"
+              className="flex items-center gap-2 md:px-6 md:py-3 px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl hover:shadow-lg transition-all duration-300 font-medium"
             >
               <Plus className="w-5 h-5" />
               Yeni Kupon Ekle

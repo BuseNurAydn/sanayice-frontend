@@ -58,14 +58,14 @@ const SellerProfile = () => {
   };
 
 
-  const boxStyle = 'border border-gray-200 p-6 rounded-lg shadow bg-white';
+  const boxStyle = 'border border-gray-200 p-4 rounded-lg shadow bg-white';
   const labelStyle = 'block text-sm font-medium text-gray-900 pb-1';
   const valueStyle = 'text-gray-800 text-base mb-2';
   const buttonStyle = "bg-[var(--color-orange)] text-white px-4 py-2 rounded-lg font-semibold";
   const inputStyle = 'w-full border-gray-200 outline-none border px-3 py-2 rounded-lg mb-3 bg-gray-50';
 
   return (
-    <div className='min-h-screen py-8 px-4 bg-[var(--color-light)]'>
+    <div className='min-h-screen py-6 px-3 bg-[var(--color-light)]'>
       <div className='max-w-3xl mx-auto'>
         <AdminText>
           {user?.role === "ROLE_MANAGER" ? "Yönetici Profili" : "Satıcı Profili"}
@@ -96,7 +96,7 @@ const SellerProfile = () => {
               <input type="email" name='email' className={inputStyle} defaultValue={profile?.email} />
             </div>
             {/* Butonlar */}
-            <div className="mt-8 flex gap-4">
+            <div className="mt-8 flex gap-4 text-xs md:text-base">
               <button type="submit" className={buttonStyle}>
                 Bilgileri Kaydet
               </button>

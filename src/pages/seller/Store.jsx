@@ -76,16 +76,16 @@ const Store = () => {
             {storeInfo.logo && (
               <img src={storeInfo.logo} alt={`${storeInfo.name} Logo`} className="w-24 h-24 rounded-full mx-auto mb-4 border-4 border-white shadow-lg" />
             )}
-            <h1 className="text-4xl font-bold">{storeInfo.name}</h1>
-            <p className="text-lg mt-2">{storeInfo.description}</p>
+            <h1 className="text-2xl md:text-4xl font-bold">{storeInfo.name}</h1>
+            <p className="text-sm md:text-lg mt-2">{storeInfo.description}</p>
           </div>
         </div>
       </div>
 
       {/* Mağaza Bilgileri ve İletişim */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8">
+      <div className="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8 mt-8">
         <div className={`${boxStyle} mb-8`}>
-          <h2 className="text-2xl font-semibold text-gray-800 mb-4">Mağaza Bilgileri</h2>
+          <h2 className="text-lg md:text-2xl font-semibold text-gray-800 mb-4">Mağaza Bilgileri</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-700">
             {/**  <p className="flex items-center gap-2"><FaMapMarkerAlt className="text-[var(--color-orange)]" /> Adres: {storeInfo.address || "Adres bilgisi bulunamadı."}</p>
             <p className="flex items-center gap-2"><FaPhone className="text-[var(--color-orange)]" /> Telefon:  {storeInfo.phone || "Telefon bilgisi bulunamadı."}</p>*/}
@@ -121,7 +121,7 @@ const Store = () => {
         </div>
 
         {/* Ürünler Grid */}
-        <h2 className="text-2xl font-semibold text-gray-800 mb-6">Ürünlerimiz ({filteredProducts.length})</h2>
+        <h2 className="text-xl md:text-2xl font-semibold text-gray-800 mb-6">Ürünlerimiz ({filteredProducts.length})</h2>
         {filteredProducts.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {filteredProducts.map((product) => (

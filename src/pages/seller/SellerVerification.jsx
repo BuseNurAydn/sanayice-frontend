@@ -145,7 +145,7 @@ const SellerVerification = () => {
     try {
       setYukleniyor(true);
 
-      const response = await fetch(`/api/managers/documents/${saticiId}/review?managerId=${managerId}`, {
+      const response = await fetch(`${API_BASE}/managers/documents/${saticiId}/review?managerId=${managerId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -195,7 +195,7 @@ const SellerVerification = () => {
     try {
       setYukleniyor(true);
 
-      const response = await fetch(`/api/managers/documents/${saticiId}/review?managerId=${managerId || 1}`, {
+      const response = await fetch(`${API_BASE}/managers/documents/${saticiId}/review?managerId=${managerId || 1}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

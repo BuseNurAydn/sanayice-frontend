@@ -104,7 +104,7 @@ const EditProduct = () => {
 
 
   return (
-    <div className="min-h-screen md:w-2/3 ">
+    <div className="min-h-screen py-6 px-3 md:p-6 bg-gray-50 ">
       <AdminText>Ürün Düzenleme</AdminText>
 
       <form className="space-y-4" onSubmit={handleSubmit}>

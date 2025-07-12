@@ -88,7 +88,7 @@ const Dashboard = () => {
     return colors[status] || "bg-gray-100 text-gray-800";
   };
   return (
-    <div className="min-h-screen p-6 bg-gray-50"> {/* Arka plan rengi eklendi */}
+    <div className="min-h-screen py-6 px-3 md:p-6 bg-gray-50">
       <AdminText>Yönetim Paneli</AdminText>
 
       {/* Genel İstatistik Kartları */}
@@ -98,28 +98,28 @@ const Dashboard = () => {
             <div className="text-xl font-bold text-[var(--color-orange)]">₺{stats.totalRevenue?.toLocaleString()}</div>
             <div className="text-sm text-gray-600">Toplam Ciro</div>
           </div>
-          <FaDollarSign className="text-4xl text-green-500 opacity-70" />
+          <FaDollarSign className="text-2xl md:text-4xl text-green-500 opacity-70" />
         </div>
         <div className={`${boxStyle} flex items-center justify-between`}>
           <div>
             <div className="text-xl font-bold text-blue-600">{stats.totalOrders}</div>
             <div className="text-sm text-gray-600">Toplam Sipariş</div>
           </div>
-          <FaShoppingCart className="text-4xl text-blue-500 opacity-70" />
+          <FaShoppingCart className="text-2xl md:text-4xl text-blue-500 opacity-70" />
         </div>
         <div className={`${boxStyle} flex items-center justify-between`}>
           <div>
             <div className="text-xl font-bold text-purple-600">{stats.totalProducts}</div>
             <div className="text-sm text-gray-600">Toplam Ürün</div>
           </div>
-          <FaBoxes className="text-4xl text-purple-500 opacity-70" />
+          <FaBoxes className="text-2xl md:text-4xl text-purple-500 opacity-70" />
         </div>
         <div className={`${boxStyle} flex items-center justify-between`}>
           <div>
             <div className="text-xl font-bold text-yellow-600">{stats.pendingOrders}</div>
             <div className="text-sm text-gray-600">Bekleyen Sipariş</div>
           </div>
-          <FaChartLine className="text-4xl text-yellow-500 opacity-70" />
+          <FaChartLine className="text-2xl md:text-4xl text-yellow-500 opacity-70" />
         </div>
       </div>
 
@@ -166,7 +166,7 @@ const Dashboard = () => {
           )}
           <div className="mt-4 text-right">
             <Link to="/seller/orders">
-              <button className={buttonStyle + " px-6 py-2"}>
+              <button className={buttonStyle + " md:px-6 md:py-2"}>
                 Tüm Siparişleri Görüntüle
               </button>
             </Link>

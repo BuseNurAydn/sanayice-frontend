@@ -172,7 +172,7 @@ const Sidebar = () => {
 
       {/* Mobile Menu Button */}
       <button
-        className="md:hidden fixed top-4 left-4 z-50 p-2 bg-white rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-200"
+        className="md:hidden fixed top-2 left-2 z-50 p-2 bg-white rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-200"
         onClick={() => setIsMobileOpen(true)}
       >
         <GiHamburgerMenu className="w-5 h-5 text-gray-700" />
@@ -189,7 +189,7 @@ const Sidebar = () => {
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-slate-200 bg-white/50">
           {!collapsed && (
-            <h2 className="text-lg pl-10 font-semibold text-slate-800 truncate">
+            <h2 className="text-lg pl-12 font-semibold text-slate-800 truncate">
               Yönetim Paneli
             </h2>
           )}

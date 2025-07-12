@@ -2,15 +2,15 @@ import AdminText from '../../../shared/Text/AdminText'
 import { useState, useEffect } from 'react'
 import { FaTrash } from "react-icons/fa";
 import { fetchCategories, fetchSubcategories } from "../../../services/categoryService";
-import {createProduct} from "../../../services/sellerProductService";
+import { createProduct } from "../../../services/sellerProductService";
 import { toast } from 'react-toastify';
 
 const AddProduct = () => {
-  const boxStyle = 'border border-gray-200 p-4 rounded-lg shadow';
+  const boxStyle = 'border border-gray-200 md:p-4 p-2 rounded-lg shadow';
   const lineStyle = 'w-full h-[1px] bg-gray-300 mb-4'
   const labelStyle = 'block text-sm font-medium text-gray-900 pb-2';
   const inputStyle = 'w-full border-gray-200 outline-none border px-3 py-2 rounded-lg mb-3';
-  const buttonStyle = "bg-[var(--color-orange)] text-white md:px-4 md:py-2 px-2 py-1 rounded-lg";
+  const buttonStyle = "bg-[var(--color-orange)] text-white px-4 py-2 rounded-lg text-md";
 
   const [categories, setCategories] = useState([]);
   const [subcategories, setSubcategories] = useState([]);
@@ -158,32 +158,32 @@ const AddProduct = () => {
     sub => sub.categoryId === parseInt(formData.categoryId)
   );
   const handleClear = () => {
-  setFormData({
-    name: "",
-    description: "",
-    brand: "",
-    modelNumber: "",
-    stockQuantity: "",
-    price: "",
-    imageUrl: "",
-    categoryId: "",
-    subcategoryId: "",
-    highlightedFeatures: ["", "", ""],
-    technicalSpecifications: { "": "" },
-    additionalImages: ["", ""],
-    weightGrams: "",
-    lengthMm: "",
-    widthMm: "",
-    heightMm: "",
-    warrantyMonths: "",
-    freeShipping: false,
-    shippingDays: ""
-  });
-};
+    setFormData({
+      name: "",
+      description: "",
+      brand: "",
+      modelNumber: "",
+      stockQuantity: "",
+      price: "",
+      imageUrl: "",
+      categoryId: "",
+      subcategoryId: "",
+      highlightedFeatures: ["", "", ""],
+      technicalSpecifications: { "": "" },
+      additionalImages: ["", ""],
+      weightGrams: "",
+      lengthMm: "",
+      widthMm: "",
+      heightMm: "",
+      warrantyMonths: "",
+      freeShipping: false,
+      shippingDays: ""
+    });
+  };
 
 
   return (
-    <div className='min-h-screen bg-gray-50 p-6'>
+    <div className='min-h-screen bg-gray-50 px-3 py-6 md:p-6'>
       <AdminText>Ürün Ekle</AdminText>
 
       {/* Form Alanı */}
@@ -250,14 +250,17 @@ const AddProduct = () => {
 
             <div className="flex flex-wrap">
               {Object.entries(formData.technicalSpecifications).map(([key, value], idx) => (
-                <div key={idx} style={{ marginBottom: "10px" }}>
+                <div
+                  key={idx}
+                  className="flex flex-wrap md:flex-nowrap items-center gap-2 mb-4"
+                >
                   <input
                     placeholder="Özellik Adı"
                     value={key}
                     onChange={(e) =>
                       handleTechSpecChange(key, e.target.value, value, true)
                     }
-                    className='border-gray-200 outline-none border p-2 rounded-lg mr-2'
+                    className="flex-1 min-w-[120px] border-gray-200 outline-none border p-2 rounded-lg"
                   />
                   <input
                     placeholder="Değeri"
@@ -265,12 +268,12 @@ const AddProduct = () => {
                     onChange={(e) =>
                       handleTechSpecChange(key, key, e.target.value, false)
                     }
-                    className='border-gray-200 outline-none border p-2 rounded-lg mr-4'
+                    className="flex-1 min-w-[120px] border-gray-200 outline-none border p-2 rounded-lg"
                   />
                   <button
                     type="button"
                     onClick={() => removeTechSpec(key)}
-                    className="text-red-500 hover:text-red-700 cursor-pointer"
+                    className="text-red-500 hover:text-red-700"
                   >
                     <FaTrash />
                   </button>
@@ -279,7 +282,7 @@ const AddProduct = () => {
               <button
                 type="button"
                 onClick={addTechSpec}
-                className="mt-2 px-4 py-1 bg-amber-500 text-white rounded"
+                className="mt-2 md:px-4 md:py-1 px-2 py-1 bg-amber-500 text-white rounded"
               >
                 Özellik Ekle
               </button>
@@ -435,7 +438,7 @@ const AddProduct = () => {
                   additionalImages: [...prev.additionalImages, ""],
                 }))
               }
-              className="mt-2 px-4 py-1 bg-amber-500 text-white rounded"
+              className="mt-2 md:px-4 md:py-1 px-2 py-1 bg-amber-500 text-white rounded"
             >
               Görsel Ekle
             </button>
@@ -443,10 +446,9 @@ const AddProduct = () => {
         </div>
       </form>
       {/* Butonlar */}
-      <div className="mt-8 flex md:gap-4 gap-x-2 justify-center">
+      <div className="mt-8 flex flex-col md:flex-row gap-4 justify-center">
         <button type="submit" className={buttonStyle} onClick={handleSubmit}>Ürünü Kaydet</button>
         <button type="button" className={buttonStyle} onClick={handleClear}>Temizle</button>
-        <button type="button" className={buttonStyle}>Dökümanı Yazdır</button>
       </div>
     </div>
   );

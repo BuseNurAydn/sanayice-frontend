@@ -22,11 +22,15 @@ const Header = () => {
   };
 
   return (
-    <header className='bg-[var(--color-light)] p-2 pl-10 md:pl-4 flex justify-between'>
+    <header className='bg-[var(--color-light)] p-2 pl-12 md:pl-4 flex justify-between'>
       <Link to={user?.role === "ROLE_SELLER" ? '/seller/vertification' : '/seller/seller-verification'}>
-        <img src={Logo} alt="Logo" className="cursor-pointer" />
+        <img
+          src={Logo}
+          alt="Logo"
+          className="cursor-pointer h-10 w-auto"
+        />
       </Link>
-      <div className="flex items-center space-x-3 pr-4">
+      <div className="flex items-center space-x-3 pr-2">
         <Link to="#" className={iconStyle}><BsBellFill /></Link>
 
         <div
