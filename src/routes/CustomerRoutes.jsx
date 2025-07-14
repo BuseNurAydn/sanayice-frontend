@@ -12,6 +12,9 @@ import Profile from '../pages/customer/AccountPage/Profile';
 import CategoryProductsPage from '../pages/customer/CategoryProductsPage';
 import CategoriesPage from '../pages/customer/CategoriesPage';
 import PrivacyPolicy from '../pages/public/PrivacyPolicy';
+import ReturnPolicy from '../pages/public/ReturnPolicy';
+import TermsOfUse from '../pages/public/TermsOfUse';
+
 
 const CustomerRoutes = () => {
     return (
@@ -28,6 +31,8 @@ const CustomerRoutes = () => {
                 <Route path="profile" element={<Profile />} />
                 <Route path="about_us" element={<AboutUs />} />
                 <Route path="privacy_policy" element={<PrivacyPolicy />} />
+                <Route path="return_policy" element={<ReturnPolicy />} />
+                <Route path="terms_of_use" element={<TermsOfUse />} />
                 <Route path="categories" element={<CategoriesPage />} />
 
             {accountRoutes}

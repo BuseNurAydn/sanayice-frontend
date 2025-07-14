@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FaShieldAlt, FaLock, FaUserShield, FaEye, FaFileContract, FaPhone, FaEnvelope, FaMapMarkerAlt, FaCheckCircle } from 'react-icons/fa';
+import { FaShieldAlt, FaLock, FaUserShield, FaEye, FaFileContract, FaPhone, FaEnvelope, FaMapMarkerAlt, FaCheckCircle, FaUser, FaShoppingCart, FaChartBar } from 'react-icons/fa';
 
 const PrivacyPolicy = () => {
   const [isVisible, setIsVisible] = useState(false);
@@ -12,64 +12,72 @@ const PrivacyPolicy = () => {
   const sections = [
     {
       id: 'collection',
-      title: 'Toplanan Bilgiler',
-      icon: FaEye,
+      title: 'İletişim Bilgileri',
+      icon: FaUser,
       content: [
-        'Ad, soyad ve iletişim bilgileriniz',
-        'E-posta adresi ve telefon numaranız',
-        'Teslimat ve fatura adresi bilgileriniz',
-        'Ödeme bilgileriniz (güvenli şekilde işlenir)',
-        'Site kullanım bilgileri ve çerez verileri',
-        'Sipariş geçmişi ve alışveriş tercihleriniz'
+        'Ad ve Soyad: Kullanıcı hesabınızı oluşturmak ve kimliğinizi doğrulamak için',
+        'E-posta Adresi: Hesap yönetimi, bildirimler ve uygulama içerisindeki iletişim için',
+        'Telefon Numarası: Güvenlik doğrulamaları ve çağrı merkezi hizmetleri için',
+        'Fiziksel Adres: Sipariş teslimatları ve ilgili lojistik işlemler için',
+        'Profil Fotoğrafı: Uygulama içerisinde kullanım için profil fotoğrafı yükleyebilirsiniz'
       ]
     },
     {
-      id: 'usage',
-      title: 'Bilgilerin Kullanım Amacı',
-      icon: FaUserShield,
+      id: 'purchases',
+      title: 'Satın Alımlar',
+      icon: FaShoppingCart,
       content: [
-        'Siparişlerinizi işleme alma ve teslimat',
-        'Müşteri hizmetleri desteği sağlama',
-        'Ürün ve kampanya bilgilendirmeleri',
-        'Site deneyiminizi kişiselleştirme',
-        'Yasal yükümlülüklerimizi yerine getirme',
-        'Güvenlik ve dolandırıcılık önleme'
+        'Sipariş detaylarınız (ürün veya hizmet bilgileri)',
+        'Hizmetlerinizi sağlamak için kullanılır',
+        'Yasal yükümlülüklerimizi yerine getirmek için işlenir',
+        'Sipariş takibi ve müşteri hizmetleri için saklanır'
+      ]
+    },
+    {
+      id: 'behavior',
+      title: 'Kullanıcı Davranış Bilgileri',
+      icon: FaChartBar,
+      content: [
+        'Kullanım Alışkanlıkları: Uygulamanın geliştirilmesi için',
+        'Kullanıcı deneyiminin optimize edilmesi için',
+        'Uygulama performansının iyileştirilmesi için',
+        'Kişiselleştirilmiş hizmet sunumu için'
       ]
     },
     {
       id: 'sharing',
-      title: 'Bilgi Paylaşımı',
+      title: 'Veri Paylaşımı',
       icon: FaLock,
       content: [
-        'Kişisel bilgileriniz üçüncü taraflarla satılmaz',
-        'Kargo firmaları ile sadece teslimat için paylaşılır',
-        'Ödeme işlemleri güvenli ödeme sağlayıcıları ile yapılır',
-        'Yasal zorunluluklar haricinde paylaşım yapılmaz',
-        'İş ortaklarımız gizlilik sözleşmesi ile bağlıdır'
-      ]
-    },
-    {
-      id: 'security',
-      title: 'Güvenlik Önlemleri',
-      icon: FaShieldAlt,
-      content: [
-        'SSL sertifikası ile şifreleme koruması',
-        'Güvenli sunucu altyapısı kullanımı',
-        'Düzenli güvenlik güncellemeleri',
-        'Sınırlı erişim ve yetkilendirme sistemi',
-        'Veri yedekleme ve koruma protokolleri'
+        'Hizmet Sağlayıcıları ve Tedarikçiler: Lojistik, ödeme sistemleri ve teknik destek hizmetleri için',
+        'Yetkili Kamu Kurumları: Mevzuatın gerektirdiği durumlarda',
+        'Hukuki Yargı Mercileri: Yasal uyuşmazlıkların çözülmesi amacıyla',
+        'Kişisel bilgileriniz üçüncü taraflarla satılmaz'
       ]
     },
     {
       id: 'rights',
-      title: 'Haklarınız',
+      title: 'Veri Sahiplerinin Hakları',
       icon: FaFileContract,
       content: [
-        'Kişisel verilerinizi görme hakkı',
-        'Bilgilerinizi düzeltme ve güncelleme hakkı',
-        'Verilerinizin silinmesini talep etme hakkı',
-        'Veri işlemeye itiraz etme hakkı',
-        'Şikayetlerinizi ilgili mercilere iletme hakkı'
+        'Kişisel verilerinizin işlenip işlenmediğini öğrenme hakkı',
+        'Kişisel verileriniz işlenmişse buna ilişkin bilgi talep etme hakkı',
+        'Kişisel verilerinizin işlenme amacını öğrenme hakkı',
+        'Kişisel verilerinizin eksik veya yanlış işlenmesi halinde düzeltilmesini talep etme hakkı',
+        'Kişisel verilerinizin silinmesini veya yok edilmesini talep etme hakkı',
+        'Yasalara aykırı işleme nedeniyle zarara uğramışsanız, zararınızın giderilmesini talep etme hakkı'
+      ]
+    },
+    {
+      id: 'security',
+      title: 'Veri Güvenliği',
+      icon: FaShieldAlt,
+      content: [
+        'Verileriniz yasal gerekliliklere uygun şekilde korunur',
+        'Güncel teknik çözüm ve önlemlerle güvence altına alınır',
+        'SSL sertifikası ile şifreleme koruması',
+        'Güvenli sunucu altyapısı kullanımı',
+        'Düzenli güvenlik güncellemeleri yapılır'
       ]
     }
   ];
@@ -118,14 +126,14 @@ const PrivacyPolicy = () => {
           </h2>
           <div className="prose prose-lg text-gray-700 leading-relaxed space-y-4">
             <p>
-              Sanayice olarak, kişisel verilerinizin korunması konusunda sorumluluğumuzun bilincindeyiz. 
-              Bu gizlilik politikası, web sitemizi ziyaret ettiğinizde ve hizmetlerimizi kullandığınızda 
-              kişisel bilgilerinizin nasıl toplandığını, kullanıldığını ve korunduğunu açıklamaktadır.
+              ŞAHİS ŞİRKETİMİZ ("SANAYİCE") olarak, 6698 sayılı Kişisel Verilerin Korunması Kanunu ("KVKK") 
+              ve diğer ilgili mevzuat uyarınca kişisel verilerinizin korunmasına büyük önem veriyoruz. 
+              Bu Gizlilik Politikamız, mobil uygulamamızı kullanırken hangi kişisel verilerinizi topladığımızı, 
+              bu verileri nasıl kullandığımızı ve haklarınızı içermektedir.
             </p>
             <p>
-              6698 sayılı Kişisel Verilerin Korunması Kanunu (KVKK) kapsamında, kişisel verilerinizi 
-              işlerken yasal yükümlülüklerimizi yerine getirmekte ve en yüksek güvenlik standartlarını 
-              uygulamaktayız.
+              Mobil uygulamamız ve web sitemizi kullanımınız esnasında kişisel verilerinizi işlerken 
+              yasal yükümlülüklerimizi yerine getirmekte ve en yüksek güvenlik standartlarını uygulamaktayız.
             </p>
           </div>
         </div>
@@ -186,17 +194,17 @@ const PrivacyPolicy = () => {
           </h3>
           <div className="space-y-4 text-gray-700">
             <p>
-              Web sitemiz, size daha iyi hizmet verebilmek için çerezler (cookies) kullanmaktadır. 
+              Mobil uygulamamız ve web sitemiz, size daha iyi hizmet verebilmek için çerezler (cookies) kullanmaktadır. 
               Çerezler, tarayıcınız tarafından bilgisayarınızda saklanan küçük metin dosyalarıdır.
             </p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
               <div className="bg-white rounded-xl p-6 shadow-sm">
                 <h4 className="font-semibold text-gray-800 mb-3">Zorunlu Çerezler</h4>
-                <p className="text-sm text-gray-600">Site işlevselliği için gerekli olan temel çerezler</p>
+                <p className="text-sm text-gray-600">Uygulama işlevselliği için gerekli olan temel çerezler</p>
               </div>
               <div className="bg-white rounded-xl p-6 shadow-sm">
                 <h4 className="font-semibold text-gray-800 mb-3">Analitik Çerezler</h4>
-                <p className="text-sm text-gray-600">Site performansını iyileştirmek için kullanılan çerezler</p>
+                <p className="text-sm text-gray-600">Uygulama performansını iyileştirmek için kullanılan çerezler</p>
               </div>
             </div>
           </div>
@@ -217,19 +225,19 @@ const PrivacyPolicy = () => {
             <div className="bg-white rounded-xl p-6 text-center shadow-sm hover:shadow-md transition-shadow duration-200">
               <FaEnvelope className="text-2xl text-blue-600 mx-auto mb-3" />
               <h4 className="font-semibold text-gray-800 mb-2">E-posta</h4>
-              <p className="text-sm text-gray-600">gizlilik@sanayice.com</p>
+              <p className="text-sm text-gray-600">bilgi@sanayice.com</p>
             </div>
             
             <div className="bg-white rounded-xl p-6 text-center shadow-sm hover:shadow-md transition-shadow duration-200">
               <FaPhone className="text-2xl text-green-600 mx-auto mb-3" />
               <h4 className="font-semibold text-gray-800 mb-2">Telefon</h4>
-              <p className="text-sm text-gray-600">0850 XXX XX XX</p>
+              <p className="text-sm text-gray-600">0507 853 24 12</p>
             </div>
             
             <div className="bg-white rounded-xl p-6 text-center shadow-sm hover:shadow-md transition-shadow duration-200">
               <FaMapMarkerAlt className="text-2xl text-red-600 mx-auto mb-3" />
               <h4 className="font-semibold text-gray-800 mb-2">Adres</h4>
-              <p className="text-sm text-gray-600">İstanbul, Türkiye</p>
+              <p className="text-sm text-gray-600">Fenerbahçe Mah. İğrip Sk. No: 13 İç Kapı No: 1 Kadıköy/İstanbul</p>
             </div>
           </div>
         </div>
@@ -244,11 +252,15 @@ const PrivacyPolicy = () => {
             </li>
             <li className="flex items-start">
               <FaCheckCircle className="text-green-500 text-sm mt-1 mr-3 flex-shrink-0" />
-              <span>Yapılan değişiklikler web sitemizde yayınlandığı tarihten itibaren geçerli olacaktır.</span>
+              <span>Yapılan değişiklikler web sitemizde ve mobil uygulamamızda yayınlandığı tarihten itibaren geçerli olacaktır.</span>
             </li>
             <li className="flex items-start">
               <FaCheckCircle className="text-green-500 text-sm mt-1 mr-3 flex-shrink-0" />
               <span>Hizmetlerimizi kullanmaya devam ederek bu politikayı kabul etmiş sayılırsınız.</span>
+            </li>
+            <li className="flex items-start">
+              <FaCheckCircle className="text-green-500 text-sm mt-1 mr-3 flex-shrink-0" />
+              <span>Politikamız zaman zaman güncellenebilir. Son değişikliklerden haberdar olmak için lütfen bu sayfayı düzenli olarak kontrol ediniz.</span>
             </li>
           </ul>
         </div>

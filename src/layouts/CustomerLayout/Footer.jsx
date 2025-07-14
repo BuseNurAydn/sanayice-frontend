@@ -79,6 +79,8 @@ const Footer = () => {
           <p> @2025 Sanayice. Tüm hakları saklıdır</p>
           <div className="flex space-x-8 mt-2 md:mt-0">
             <Link to="/privacy_policy">Gizlilik Politikası</Link>
+            <Link to="/terms_of_use">Kullanım Koşulları</Link>
+            <Link to="/return_policy">İptal ve İade Koşulları</Link>
           </div>
         </div>
       </div>
