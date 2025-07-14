@@ -18,7 +18,6 @@ const BannerManagement = () => {
     try {
       const data = await getBanners();
       setBanners(data); // bannerları state'e kaydet
-      console.log(data)
     } catch (err) {
       console.error("Bannerlar yüklenemedi:", err);
     }

@@ -10,8 +10,8 @@ const Store = () => {
     id: "seller-123",
     name: "Sanayice Teknoloji Mağazası",
     description: "En yeni elektronik ürünler ve teknolojik aksesuarlar.",
-    logo: "https://via.placeholder.com/150/0000FF/FFFFFF?text=StoreLogo", // Örnek logo
-    banner: "https://via.placeholder.com/1200x300/FFA500/FFFFFF?text=StoreBanner", // Örnek banner
+    //logo: "https://via.placeholder.com/150/0000FF/FFFFFF?text=StoreLogo", // Örnek logo
+    //banner: "https://via.placeholder.com/1200x300/FFA500/FFFFFF?text=StoreBanner", // Örnek banner
     address: "Örnek Mah. Örnek Cad. No:123, İzmir",
     phone: "+90 232 123 45 67",
     email: "info@sanayicetechnology.com",
@@ -70,11 +70,11 @@ const Store = () => {
   return (
     <div className="min-h-screen bg-gray-50 pb-10">
       {/* Mağaza Bannerı */}
-      <div className="relative w-full h-64 bg-cover bg-center" style={{ backgroundImage: `url(${storeInfo.banner})` }}>
+      <div className="relative w-full h-64 bg-cover bg-center" style={{ backgroundImage: `url(${storeInfo?.banner})` }}>
         <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center p-4">
           <div className="text-white text-center">
             {storeInfo.logo && (
-              <img src={storeInfo.logo} alt={`${storeInfo.name} Logo`} className="w-24 h-24 rounded-full mx-auto mb-4 border-4 border-white shadow-lg" />
+              <img src={storeInfo.logo} alt="Mağaza logosu"className="w-24 h-24 rounded-full mx-auto mb-4 border-4 border-white shadow-lg" />
             )}
             <h1 className="text-2xl md:text-4xl font-bold">{storeInfo.name}</h1>
             <p className="text-sm md:text-lg mt-2">{storeInfo.description}</p>

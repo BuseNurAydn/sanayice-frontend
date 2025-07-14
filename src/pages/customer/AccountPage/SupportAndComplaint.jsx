@@ -72,7 +72,6 @@ const SupportAndComplaint = () => {
         try {
           const data = await getSupportTicketsByCustomer(user.id);
           setSupportHistory(data);
-          console.log(data)
         } catch (error) {
           toast.error(error.message || "Talepler yüklenirken hata oluştu");
         }

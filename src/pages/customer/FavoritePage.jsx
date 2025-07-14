@@ -84,9 +84,9 @@ const FavoritePage = () => {
           </div>
         ) : (
           <div className="grid gap-8 max-w-6xl mx-auto">
-            {items.map(item => (
+            {items.map((item, index)=> (
               <div
-                key={item.productId}
+                key={index}
                 className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden group"
               >
                 <div className="flex flex-col lg:flex-row">

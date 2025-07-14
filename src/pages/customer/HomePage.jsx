@@ -39,7 +39,7 @@ const HomePage = () => {
       try {
         const data = await fetchCategories();
         setCategories(data);
-        console.log("Kategoriler:", data)
+
       } catch (err) {
         setError(err.message || "Bir hata oluştu");
       } finally {
@@ -154,9 +154,10 @@ const HomePage = () => {
                 {activeCategory === category.id && category.subcategories?.length > 0 && (
                   <div className="absolute left-0 top-full bg-white shadow-2xl border border-gray-200 rounded-2xl min-w-[320px] py-5 px-6 z-50 animate-dropdown">
                     <div className="space-y-1">
-                      {category.subcategories.map((sub, index) => (
+                      {category.subcategories.map((sub) => (
                         <Link
-                           to={`/category/${category.id}`} 
+                          key={sub.id} 
+                          to={`/category/${category.id}`} 
                           className="flex items-center gap-3 text-sm text-gray-700 hover:text-orange-600 hover:bg-gradient-to-r hover:from-orange-50 hover:to-orange-100 px-4 py-3 rounded-xl transition-all duration-300 group"
                         >
                           <div className="w-2 h-2 bg-orange-200 rounded-full group-hover:bg-orange-500 transition-colors duration-300"></div>
@@ -185,7 +186,7 @@ const HomePage = () => {
   
 
       {/* CSS Animasyonları */}
-      <style jsx>{`
+      <style>{`
         @keyframes dropdown {
           0% {
             opacity: 0;
@@ -319,7 +320,7 @@ const HomePage = () => {
         <CategoriesSection categories={categories} />
       </main>
 
-      <style jsx>{`
+      <style>{`
         .scrollbar-hide {
           -ms-overflow-style: none;
           scrollbar-width: none;

@@ -1,6 +1,10 @@
 import { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { API_BASE } from "../../config";
+import { useDispatch } from "react-redux";
+import { addToCart } from "../../services/cartService";
+import { toast } from "react-toastify";
+import { setBuyNowItem } from "../../store/buyNowSlice";
 
 const ProductDetail = () => {
   const { id } = useParams();
@@ -12,8 +16,11 @@ const ProductDetail = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [reviews, setReviews] = useState([])
+
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
   const PRODUCTS_API = `${API_BASE}/products`;
-  
+
   // imageUrl ve additionalImages birleştirdim
   const images = [
     ...(product?.imageUrl ? [product.imageUrl] : []),
@@ -37,7 +44,6 @@ const ProductDetail = () => {
         if (!response.ok) throw new Error("Ürün bulunamadı");
         const data = await response.json();
         setProduct(data);
-        console.log(data);
       } catch (err) {
         setError(err.message);
       } finally {
@@ -49,7 +55,6 @@ const ProductDetail = () => {
         const res = await fetch(`${PRODUCTS_API}/${id}/reviews`);
         const data = await res.json();
         setReviews(data);
-        console.log(data)
       } catch (err) {
         console.error("Yorumlar alınamadı:", err);
       }
@@ -65,18 +70,25 @@ const ProductDetail = () => {
   if (error) return <p>Hata: {error}</p>;
   if (!product) return <p>Ürün bulunamadı.</p>;
 
-  const handleAddToCart = () => {
-    alert(`${quantity} adet ${product.name} sepete eklendi!`);
+  const handleAddToCart = async () => {
+    try {
+      await dispatch(addToCart({ productId: product.id, quantity })).unwrap();
+      toast('Sepete eklendi!');
+    } catch (error) {
+      console.error("Sepete ekleme hatası:", error);
+      toast("Sepete eklenirken bir hata oluştu.");
+    }
   };
 
   const handleBuyNow = () => {
-    alert("Hemen satın al işlemi başlatılıyor...");
+    dispatch(setBuyNowItem({ product, quantity }));
+    navigate('/checkout');
   };
 
-const htext = (text) => {
-  if (!text) return '';
-  return text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
-};
+  const htext = (text) => {
+    if (!text) return '';
+    return text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
+  };
 
 
   function renderStars(rating) {
@@ -244,13 +256,16 @@ const htext = (text) => {
                 <div className="flex items-center border border-gray-300 rounded-lg">
                   <button
                     onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                    className="px-3 py-2 hover:bg-gray-100 transition-colors"
+                    className="px-3 py-2 hover:bg-gray-100 transition-colors cursor-pointer"
                   > - </button>
                   <span className="px-4 py-2 min-w-12 text-center">{quantity}</span>
                   <button
-                    onClick={() => setQuantity(Math.min(product.stock, quantity + 1))}
-                    className="px-3 py-2 hover:bg-gray-100 transition-colors"
-                  > + </button>
+                    onClick={() => setQuantity(Math.min(product.stockQuantity, quantity + 1))}
+                    className="px-3 py-2 hover:bg-gray-100 transition-colors cursor-pointer"
+                  >
+                    +
+                  </button>
+
                 </div>
               </div>
 

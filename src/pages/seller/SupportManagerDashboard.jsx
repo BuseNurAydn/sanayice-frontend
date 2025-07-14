@@ -26,12 +26,10 @@ const SupportManagerDashboard = () => {
       try {
         const data = await getAllSupportTickets();
         setTickets(data);
-         console.log("Gelen ticket verisi:", data)
       } catch (err) {
         toast.error(err.message);
       }
     };
-
     fetchTickets();
   }, []);
    

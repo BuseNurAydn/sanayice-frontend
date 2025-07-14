@@ -33,7 +33,6 @@ const SellerVerification = () => {
 
       const data = await res.json();
       setVerifications(data);
-      console.log(data)
     } catch (err) {
       console.error(err);
       toast("Satıcı doğrulama verileri alınamadı");
@@ -362,8 +361,8 @@ const SellerVerification = () => {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {filtreliSaticilar.map((satici) => (
-                <tr key={satici.id} className="hover:bg-gray-50">
+              {filtreliSaticilar.map((satici, index) => (
+                <tr key={satici.id || index} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div>
                       <div className="text-sm font-medium text-gray-900">{satici.companyName}</div>

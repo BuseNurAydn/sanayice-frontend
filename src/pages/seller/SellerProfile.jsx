@@ -28,7 +28,6 @@ const SellerProfile = () => {
           companyName: data.companyName || "",
           taxId: data.taxId || "",
         });
-        console.log(data);
       } catch (err) {
         console.error("Profil alınamadı:", err);
       } finally {

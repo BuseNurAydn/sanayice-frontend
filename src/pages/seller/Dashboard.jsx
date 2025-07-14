@@ -16,10 +16,8 @@ const Dashboard = () => {
       try {
         const data = await fetchDashboardStats();
         setStats(data);
-        console.log("Dashboard API verisi:", data);
       } catch (err) {
         setError(err.message);
-        console.error("Dashboard istatistik hatası:", err);
       }
     };
     getStats();
@@ -30,7 +28,6 @@ const Dashboard = () => {
       try {
         const data = await fetchRecentOrders();
         setRecentOrders(data);
-        console.log("Son 3 sipariş:", data);
       } catch (err) {
         setError(err.message);
       }
@@ -43,7 +40,6 @@ const Dashboard = () => {
       try {
         const data = await fetchPopulerProducts();
         setPopular(data);
-        console.log("Popular:", data);
       } catch (err) {
         setError(err.message);
       }
@@ -143,7 +139,7 @@ const Dashboard = () => {
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
                   {recentOrders.map((order) => (
-                    <tr key={order.id}>
+                    <tr key={order.orderId}>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">#{order.orderId}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{order.customerName}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">₺{order.totalAmount.toLocaleString()}</td>
@@ -232,8 +228,8 @@ const Dashboard = () => {
           <h3 className="text-lg font-semibold text-gray-800 mb-4">Popüler Ürünler</h3>
           {popular.length > 0 ? (
             <div className="space-y-3">
-              {popular.map((product) => (
-                <div key={product.id} className="flex justify-between items-center border-b pb-3 last:border-b-0 last:pb-0">
+              {popular.map((product,index) => (
+                <div key={product.id || index} className="flex justify-between items-center border-b pb-3 last:border-b-0 last:pb-0">
                   <div>
                     <p className="font-medium text-gray-900">{product.productName}</p>
                     <p className="text-sm text-gray-600">Satış: {product.totalSales} | Stok: {product.stockQuantity}</p>

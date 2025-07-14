@@ -50,7 +50,6 @@ const Login = () => {
         try {
             
             const data = await login(loginData);
-            console.log(data);
 
             // Giriş başarılı mesajı
             setSuccessMessage('Giriş başarılı! Yönlendiriliyorsunuz...');
@@ -74,7 +73,6 @@ const Login = () => {
                 name: data.name,
                 role: data.roles[0],
             }));
-            console.log(data.roles[0]);
 
             setTimeout(() => {
                 //Role göre yönlendirme

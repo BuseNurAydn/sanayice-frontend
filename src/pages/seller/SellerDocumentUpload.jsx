@@ -85,7 +85,6 @@ const SellerDocumentUpload = () => {
       const merged = mergeBelgeler(sabitBelgeler, apiBelgeler);
       setBelgeler(merged);
     } catch (err) {
-      console.error(err);
       toast("Belgeler yüklenirken hata oluştu");
     }
   };

@@ -100,11 +100,13 @@ const Sidebar = () => {
   const DOCUMENT_API = `${API_BASE}/sellers`;
 
  useEffect(() => {
+  const token = localStorage.getItem("token");
+
   const checkDocuments = async () => {
     try {
       const res = await fetch(`${DOCUMENT_API}/${sellerId}/documents`, {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
+           Authorization: `Bearer ${token}`,
         },
       });
 
@@ -115,8 +117,6 @@ const Sidebar = () => {
 
       // Yalnızca onaylanan belgeleri filtrele
       const approvedDocuments = data.filter((doc) => doc.status === "ONAYLANDI");
-
-      console.log("ONAYLANAN BELGELER:", approvedDocuments);
 
       // 4 belge de onaylıysa menüyü aç
       setDocumentsVerified(approvedDocuments.length >= 4);
@@ -305,7 +305,8 @@ const Sidebar = () => {
       </aside>
 
       {/* Custom Styles */}
-      <style jsx>{`
+      <style>
+        {`
         @keyframes fadeIn {
           from {
             opacity: 0;

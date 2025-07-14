@@ -28,6 +28,7 @@ const Reviews = () => {
 
     fetchReviews();
   }, []);
+  
   const handleEditReview = (id) => {
     console.log(`Edit review with ID: ${id}`);
     // Implement logic to edit review

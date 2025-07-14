@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { getOrders } from "../../../services/ordersService"; // siparişleri getiren fonksiyon
+import { getOrders } from "../../../services/ordersService"; 
 import ReviewModal from "../../../components/ReviewModal";
 import { toast } from "react-toastify";
 const Orders = () => {
@@ -31,7 +31,6 @@ const Orders = () => {
 
     fetchOrders();
   }, []);
-  console.log(orders)
 
   // Duruma göre filtrele
   const filteredOrders =
@@ -158,7 +157,7 @@ const Orders = () => {
                   {/* Ürün görseli + bilgiler */}
                   <div className="flex flex-col md:flex-row gap-4">
                     <img
-                      src={item.additionalImages?.[0] || "https://via.placeholder.com/80"}
+                      src={item.additionalImages?.[0]}
                       alt={item.productName}
                       className="w-20 h-20 object-cover rounded"
                     />

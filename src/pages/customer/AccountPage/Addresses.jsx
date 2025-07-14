@@ -26,7 +26,6 @@ const Addresses = () => {
       try {
         const data = await fetchAddresses();
         setAddresses(data);
-        console.log(data)
       } catch (error) {
         toast.error(error.message);
       }

@@ -9,11 +9,28 @@ import { useDispatch, useSelector } from 'react-redux';
 const CheckoutPage = () => {
   const dispatch = useDispatch();
   const cartItems = useSelector(state => state.cart.items);
+  const buyNow = useSelector(state => state.buyNow);
   const navigate = useNavigate();
 
   useEffect(() => {
     dispatch(fetchCart());
   }, [dispatch]);
+
+  const hasBuyNowItem = buyNow && buyNow.product;
+
+  const displayItems = hasBuyNowItem
+    ? [{
+        id: buyNow.product.id,
+        productName: buyNow.product.name,
+        quantity: buyNow.quantity,
+        unitPrice: buyNow.product.price
+      }]
+    : cartItems.map(item => ({
+        id: item.productId,
+        productName: item.productName,
+        quantity: item.quantity,
+        unitPrice: item.unitPrice
+      }));
 
   // Mock kargo firmaları ve fiyatları
   const [shippingOptions, setShippingOptions] = useState([
@@ -190,7 +207,9 @@ const CheckoutPage = () => {
   const [shippingCalculating, setShippingCalculating] = useState(false);
 
   const getTotal = () =>
-    cartItems.reduce((acc, item) => acc + item.unitPrice * item.quantity, 0);
+   // cartItems.reduce((acc, item) => acc + item.unitPrice * item.quantity, 0);
+    displayItems.reduce((total, item) => total + item.unitPrice * item.quantity, 0);
+
 
   const getSelectedShippingPrice = () => {
     const selected = shippingOptions.find(option => option.id === formData.selectedShipping);
@@ -760,7 +779,7 @@ const CheckoutPage = () => {
         <h3 className="text-lg font-semibold mb-4">Sipariş Özeti</h3>
 
         <div className="space-y-2 mb-4">
-          {cartItems.map((item) => (
+          {displayItems.map((item) => (
             <div key={item.id} className="flex justify-between text-sm">
               <span>{item.productName} x{item.quantity}</span>
               <span>₺{(item.unitPrice * item.quantity).toLocaleString()}</span>

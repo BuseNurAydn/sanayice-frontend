@@ -25,16 +25,13 @@ const Orders = () => {
       try {
         const data = await fetchSellerOrders();
         setOrders(data);
-        console.log("Satıcı siparişleri:", data);
       } catch (err) {
-        console.error("Siparişler alınamadı:", err);
         setError(err.message);
       }
     };
     getOrders();
   }, [])
 
-  console.log(orders)
 
   useEffect(() => {
     if (user) {
@@ -124,9 +121,6 @@ const Orders = () => {
 
   };
 
-  console.log(stats)
-
-  
   return (
     <div className="min-h-screen py-6 px-3 md:p-6 bg-gray-50">
       <div>
@@ -184,8 +178,8 @@ const Orders = () => {
 
         {/* Siparişler Listesi */}
         <div className="mt-6 space-y-4">
-          {filteredOrders.map((order) => (
-            <div key={order.id} className="border border-gray-200 md:p-6 p-3 rounded-lg shadow bg-white">
+          {filteredOrders.map((order, index) => (
+            <div key={order.id || index} className="border border-gray-200 md:p-6 p-3 rounded-lg shadow bg-white">
               <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
                 {/* Sol taraf - Sipariş bilgileri */}
                 <div className="flex-1">

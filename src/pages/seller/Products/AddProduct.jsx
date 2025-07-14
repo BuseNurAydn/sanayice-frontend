@@ -466,7 +466,7 @@ const AddProduct = () => {
 
             {/* Ana Resim */}
             <div
-              className="border-2 border-dashed border-gray-300 rounded-lg p-4 hover:border-blue-400 hover:bg-blue-50 cursor-pointer w-64 mb-4"
+              className="border-2 border-dashed border-gray-300 rounded-lg p-4 hover:border-orange-500 hover:bg-orange-50 cursor-pointer w-64 mb-4"
               onClick={() => {
                 const input = document.createElement("input");
                 input.type = "file";
@@ -488,10 +488,9 @@ const AddProduct = () => {
                 />
               </div>
             )}
-
             {/* Ek Resimler */}
             <div
-              className="border-2 border-dashed border-gray-300 rounded-lg p-4 hover:border-green-400 hover:bg-green-50 cursor-pointer w-64 mb-4"
+              className="border-2 border-dashed border-gray-300 rounded-lg p-4 hover:border-orange-500 hover:bg-orange-50 cursor-pointer w-64 mb-4"
               onClick={() => {
                 const input = document.createElement("input");
                 input.type = "file";
@@ -520,9 +519,6 @@ const AddProduct = () => {
             )}
           </div>
         </div>
-
-
-
       </form>
       {/* Butonlar */}
       <div className="mt-8 flex flex-col md:flex-row gap-4 justify-center">
