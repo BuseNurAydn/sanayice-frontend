@@ -4,86 +4,90 @@ const PRODUCTS_API = `${API_BASE}/products`;
 
 const getToken = () => localStorage.getItem("token");
 
-//LİSTELEME - GET
+// ✅ LİSTELEME - GET
 export const fetchMyProducts = async () => {
   const token = getToken();
- 
+
   const response = await fetch(`${PRODUCTS_API}/my-products`, {
-    method: 'GET',
+    method: "GET",
     headers: {
-      'Content-Type': 'application/json',
-       Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
     },
   });
 
   if (!response.ok) {
-    throw new Error('Ürünler alınamadı');
+    throw new Error("Ürünler alınamadı");
   }
 
   return await response.json();
-}
+};
 
-//SİLME - DELETE
+// ✅ SİLME - DELETE
 export const deleteProduct = async (productId) => {
   const token = getToken();
 
   const response = await fetch(`${PRODUCTS_API}/${productId}`, {
-    method: 'DELETE',
+    method: "DELETE",
     headers: {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
     },
   });
 
   if (!response.ok) {
-    throw new Error('Ürün silinemedi');
+    throw new Error("Ürün silinemedi");
   }
 
-  return true; // Silme başarılıysa dönebilirsin
-}
+  return true;
+};
 
-//ÜRÜN EKLEME - POST
+// ✅ ÜRÜN EKLEME - POST (multipart/form-data uyumlu)
 export const createProduct = async (formData) => {
-  const token = getToken();
+  const token = localStorage.getItem("token");
 
-  const response = await fetch(PRODUCTS_API, {
+  // FormData mı gerçekten?
+  if (!(formData instanceof FormData)) {
+    throw new Error("Hatalı form verisi! FormData bekleniyor.");
+  }
+  for (let [key, value] of formData.entries()) {
+    console.log(key, value);
+  }
+  const response = await fetch(`${API_BASE}/products`, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${token}`,
-      
+      // ⚠️ Content-Type header'ını kaldırdık - browser otomatik ayarlayacak
     },
     body: formData,
   });
 
-  console.log(formData instanceof FormData)
-
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}));
-    console.error("Backend Hatası:", errorData);
     throw new Error(errorData.message || "Ürün eklenemedi.");
   }
+
+  return await response.json();
 };
 
-
-//DÜZENLEME - PUT
-export const updateProduct = async (id, updatedProduct) => {
+// ✅ ÜRÜN GÜNCELLEME - PUT (multipart/form-data formatına uygun)
+export const updateProduct = async (id, formData) => {
   const token = getToken();
 
   const response = await fetch(`${PRODUCTS_API}/${id}`, {
     method: "PUT",
     headers: {
-      "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
+      // ⚠️ Content-Type header'ını kaldırdık - browser otomatik ayarlayacak
     },
-    body: JSON.stringify(updatedProduct),
+    body: formData,
   });
 
   if (!response.ok) {
-    throw new Error("Ürün güncelleme başarısız!");
+    const errorData = await response.json().catch(() => ({}));
+    console.error("Güncelleme hatası:", errorData);
+    throw new Error(errorData.message || "Ürün güncellenemedi.");
   }
 
-  return response.json();
+  return await response.json();
 };
-
-
-

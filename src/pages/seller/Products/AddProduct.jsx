@@ -6,7 +6,6 @@ import { createProduct } from "../../../services/sellerProductService";
 import { toast } from 'react-toastify';
 import { Upload } from "lucide-react";
 
-
 const AddProduct = () => {
   const boxStyle = 'border border-gray-200 md:p-4 p-2 rounded-lg shadow';
   const lineStyle = 'w-full h-[1px] bg-gray-300 mb-4'
@@ -117,7 +116,7 @@ const AddProduct = () => {
       };
     });
   };
-  /////////////////////////////////
+
   // Kategori değiştiğinde alt kategori sıfırlanır
   const handleCategoryChange = (e) => {
     const selectedId = parseInt(e.target.value);
@@ -148,9 +147,7 @@ const AddProduct = () => {
     setFormData((prev) => ({ ...prev, imageUrl }));
   };
 
-
   // Ek resimler dosyası yükleme handler'ı (çoklu dosya)
-
   const handleAdditionalImagesUpload = (fileList) => {
     const files = Array.from(fileList);
     setAdditionalImageFiles((prev) => [...prev, ...files]);
@@ -168,67 +165,83 @@ const AddProduct = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    // Ürün objesi oluştur
+  
+    if (!mainImageFile) {
+      toast.error("Ana resim yüklemek zorunludur!");
+      return;
+    }
+  
+    if (!formData.name || !formData.description || !formData.price) {
+      toast.error("Gerekli alanları doldurun!");
+      return;
+    }
+  
+    const safeParseInt = (val) => {
+      const parsed = parseInt(val);
+      return isNaN(parsed) ? null : parsed;
+    };
+  
+    const safeParseFloat = (val) => {
+      const parsed = parseFloat(val);
+      return isNaN(parsed) ? null : parsed;
+    };
+  
     const productObj = {
       name: formData.name,
       description: formData.description,
       brand: formData.brand,
       modelNumber: formData.modelNumber,
-      stockQuantity: parseInt(formData.stockQuantity),
-      price: parseFloat(formData.price),
-      categoryId: parseInt(formData.categoryId),
-      subcategoryId: parseInt(formData.subcategoryId),
+      stockQuantity: safeParseInt(formData.stockQuantity),
+      price: safeParseFloat(formData.price),
+      categoryId: safeParseInt(formData.categoryId),
+      subcategoryId: safeParseInt(formData.subcategoryId),
       highlightedFeatures: formData.highlightedFeatures.filter(f => f.trim() !== ""),
-      technicalSpecifications: formData.technicalSpecifications,
-      weightGrams: parseInt(formData.weightGrams),
-      lengthMm: parseInt(formData.lengthMm),
-      widthMm: parseInt(formData.widthMm),
-      heightMm: parseInt(formData.heightMm),
-      warrantyMonths: parseInt(formData.warrantyMonths),
+      technicalSpecifications: Object.fromEntries(
+        Object.entries(formData.technicalSpecifications).filter(
+          ([k, v]) => k.trim() && v.trim()
+        )
+      ),
+      weightGrams: safeParseInt(formData.weightGrams),
+      lengthMm: safeParseInt(formData.lengthMm),
+      widthMm: safeParseInt(formData.widthMm),
+      heightMm: safeParseInt(formData.heightMm),
+      warrantyMonths: safeParseInt(formData.warrantyMonths),
       freeShipping: formData.freeShipping,
-      shippingDays: parseInt(formData.shippingDays)
+      shippingDays: safeParseInt(formData.shippingDays),
     };
-
+  
+    // FormData oluşturma
     const form = new FormData();
-
-    // Ürün bilgisini JSON string olarak ekle
+    
+    // ✅ Backend'in beklediği "product" adında part ekle
     form.append("product", JSON.stringify(productObj));
-
+    
+    // ✅ Ana resim ekleme (imageFiles array'i olarak)
     if (mainImageFile) {
-      form.append("imageFiles", mainImageFile, mainImageFile.name);
+      form.append("imageFiles", mainImageFile);
     }
-
-    additionalImageFiles.forEach(file => {
-      form.append("imageFiles", file, file.name);
+    
+    // ✅ Ek resimleri ekleme
+    additionalImageFiles.forEach((file) => {
+      form.append("imageFiles", file);
     });
-
-    for (let pair of form.entries()) {
-      console.log(pair[0], pair[1]);
-    }
-
-    for (let [key, value] of form.entries()) {
-      console.log("KEY:", key);
-      if (value instanceof File) {
-        console.log("FILE:", value.name);
-      } else {
-        console.log("VALUE:", value);
-      }
-    }
-
+  
     try {
-      await createProduct(form);
+      const result = await createProduct(form);
       toast.success("Ürün başarıyla eklendi!");
+      handleClear();
+      setMainImageFile(null);
+      setAdditionalImageFiles([]);
     } catch (error) {
-      console.error(error);
-      toast.error("Ürün eklenemedi.");
+      console.error("Hata detayı:", error);
+      toast.error(`Ürün eklenemedi: ${error?.message || "Sunucu hatası"}`);
     }
   };
-
 
   const filteredSubcategories = subcategories.filter(
     sub => sub.categoryId === parseInt(formData.categoryId)
   );
+
   const handleClear = () => {
     setFormData({
       name: "",
@@ -249,8 +262,9 @@ const AddProduct = () => {
       freeShipping: false,
       shippingDays: ""
     });
+    setMainImageFile(null);
+    setAdditionalImageFiles([]);
   };
-
   return (
     <div className='min-h-screen bg-gray-50 px-3 py-6 md:p-6'>
       <AdminText>Ürün Ekle</AdminText>
