@@ -43,20 +43,27 @@ export const deleteProduct = async (productId) => {
 }
 
 //ÜRÜN EKLEME - POST
-export const createProduct = async (productData) => {
+export const createProduct = async (formData) => {
   const token = getToken();
 
   const response = await fetch(PRODUCTS_API, {
     method: "POST",
     headers: {
-      'Content-Type': 'application/json',
-       Authorization: `Bearer ${token}`,
+      Authorization: `Bearer ${token}`,
+      'Content-Type':'multipart/form-data; boundary=<calculated when request is sent>'
     },
-    body: JSON.stringify(productData),
+    body: formData,
   });
 
-  if (!response.ok) throw new Error("Ürün eklenemedi.");
+  console.log(formData instanceof FormData)
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    console.error("Backend Hatası:", errorData);
+    throw new Error(errorData.message || "Ürün eklenemedi.");
+  }
 };
+
 
 //DÜZENLEME - PUT
 export const updateProduct = async (id, updatedProduct) => {

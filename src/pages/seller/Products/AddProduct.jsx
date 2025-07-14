@@ -4,6 +4,8 @@ import { FaTrash } from "react-icons/fa";
 import { fetchCategories, fetchSubcategories } from "../../../services/categoryService";
 import { createProduct } from "../../../services/sellerProductService";
 import { toast } from 'react-toastify';
+import { Upload } from "lucide-react";
+
 
 const AddProduct = () => {
   const boxStyle = 'border border-gray-200 md:p-4 p-2 rounded-lg shadow';
@@ -14,6 +16,8 @@ const AddProduct = () => {
 
   const [categories, setCategories] = useState([]);
   const [subcategories, setSubcategories] = useState([]);
+  const [mainImageFile, setMainImageFile] = useState(null);
+  const [additionalImageFiles, setAdditionalImageFiles] = useState([]);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -22,12 +26,10 @@ const AddProduct = () => {
     modelNumber: "",
     stockQuantity: "",
     price: "",
-    imageUrl: "", // Ana resim URL'si
     categoryId: "",
     subcategoryId: "",
     highlightedFeatures: ["", "", ""],
     technicalSpecifications: { "": "" },
-    additionalImages: ["", ""], // 2 ek resim
     weightGrams: "",
     lengthMm: "",
     widthMm: "",
@@ -126,33 +128,103 @@ const AddProduct = () => {
     }));
   };
 
+  // Ana resim dosyası yükleme handler'ı
+  const handleMainImageUpload = (file) => {
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast("Dosya boyutu 5MB'dan büyük olamaz");
+      return;
+    }
+
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg'];
+    if (!allowedTypes.includes(file.type)) {
+      toast('Sadece JPG ve PNG dosyaları yüklenebilir');
+      return;
+    }
+
+    setMainImageFile(file);
+    const imageUrl = URL.createObjectURL(file);
+    setFormData((prev) => ({ ...prev, imageUrl }));
+  };
+
+
+  // Ek resimler dosyası yükleme handler'ı (çoklu dosya)
+
+  const handleAdditionalImagesUpload = (fileList) => {
+    const files = Array.from(fileList);
+    setAdditionalImageFiles((prev) => [...prev, ...files]);
+  };
+
+  // Ek resim silme fonksiyonu
+  const removeAdditionalImage = (index) => {
+    setFormData(prev => ({
+      ...prev,
+      additionalImages: prev.additionalImages.filter((_, i) => i !== index)
+    }));
+
+    setAdditionalImageFiles(prev => prev.filter((_, i) => i !== index));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const productData = {
-      ...formData,
+    // Ürün objesi oluştur
+    const productObj = {
+      name: formData.name,
+      description: formData.description,
+      brand: formData.brand,
+      modelNumber: formData.modelNumber,
       stockQuantity: parseInt(formData.stockQuantity),
       price: parseFloat(formData.price),
       categoryId: parseInt(formData.categoryId),
       subcategoryId: parseInt(formData.subcategoryId),
+      highlightedFeatures: formData.highlightedFeatures.filter(f => f.trim() !== ""),
+      technicalSpecifications: formData.technicalSpecifications,
       weightGrams: parseInt(formData.weightGrams),
       lengthMm: parseInt(formData.lengthMm),
       widthMm: parseInt(formData.widthMm),
       heightMm: parseInt(formData.heightMm),
       warrantyMonths: parseInt(formData.warrantyMonths),
-      freeShipping: Boolean(formData.freeShipping),
+      freeShipping: formData.freeShipping,
       shippingDays: parseInt(formData.shippingDays)
     };
 
+    const form = new FormData();
+
+    // Ürün bilgisini JSON string olarak ekle
+    form.append("product", JSON.stringify(productObj));
+
+    if (mainImageFile) {
+      form.append("imageFiles", mainImageFile, mainImageFile.name);
+    }
+
+    additionalImageFiles.forEach(file => {
+      form.append("imageFiles", file, file.name);
+    });
+
+    for (let pair of form.entries()) {
+      console.log(pair[0], pair[1]);
+    }
+
+    for (let [key, value] of form.entries()) {
+      console.log("KEY:", key);
+      if (value instanceof File) {
+        console.log("FILE:", value.name);
+      } else {
+        console.log("VALUE:", value);
+      }
+    }
+
     try {
-      await createProduct(productData);  //servisi kullandık
-      toast("Ürün başarıyla eklendi!");
-      console.log("Form gönderildi:", formData);
+      await createProduct(form);
+      toast.success("Ürün başarıyla eklendi!");
     } catch (error) {
       console.error(error);
-      toast('Sunucu hatası!');
+      toast.error("Ürün eklenemedi.");
     }
   };
+
 
   const filteredSubcategories = subcategories.filter(
     sub => sub.categoryId === parseInt(formData.categoryId)
@@ -165,12 +237,10 @@ const AddProduct = () => {
       modelNumber: "",
       stockQuantity: "",
       price: "",
-      imageUrl: "",
       categoryId: "",
       subcategoryId: "",
       highlightedFeatures: ["", "", ""],
       technicalSpecifications: { "": "" },
-      additionalImages: ["", ""],
       weightGrams: "",
       lengthMm: "",
       widthMm: "",
@@ -180,7 +250,6 @@ const AddProduct = () => {
       shippingDays: ""
     });
   };
-
 
   return (
     <div className='min-h-screen bg-gray-50 px-3 py-6 md:p-6'>
@@ -395,55 +464,65 @@ const AddProduct = () => {
             <h3 className="font-semibold mb-2">Ürün Görselleri</h3>
             <div className={lineStyle} />
 
-            {formData.additionalImages.map((url, index) => (
-              <div key={index} className="flex items-center gap-2 mb-2">
-                <input
-                  type="text"
-                  className={inputStyle}
-                  placeholder={`Görsel URL ${index + 1}`}
-                  value={url}
-                  onChange={(e) => {
-                    const updatedImages = [...formData.additionalImages];
-                    updatedImages[index] = e.target.value;
-                    setFormData((prev) => ({
-                      ...prev,
-                      additionalImages: updatedImages,
-                    }));
-                  }}
-                />
-                {url && (
-                  <img src={url} alt={`Görsel ${index + 1}`} className="w-16 h-16 object-cover border rounded" />
-                )}
-                <button
-                  type="button"
-                  onClick={() => {
-                    const filtered = formData.additionalImages.filter((_, i) => i !== index);
-                    setFormData((prev) => ({
-                      ...prev,
-                      additionalImages: filtered,
-                    }));
-                  }}
-                  className="text-red-500 hover:text-red-700 cursor-pointer"
-                >
-                  <FaTrash />
-                </button>
-              </div>
-            ))}
-
-            <button
-              type="button"
-              onClick={() =>
-                setFormData((prev) => ({
-                  ...prev,
-                  additionalImages: [...prev.additionalImages, ""],
-                }))
-              }
-              className="mt-2 md:px-4 md:py-1 px-2 py-1 bg-amber-500 text-white rounded"
+            {/* Ana Resim */}
+            <div
+              className="border-2 border-dashed border-gray-300 rounded-lg p-4 hover:border-blue-400 hover:bg-blue-50 cursor-pointer w-64 mb-4"
+              onClick={() => {
+                const input = document.createElement("input");
+                input.type = "file";
+                input.accept = "image/*";
+                input.onchange = (e) => handleMainImageUpload(e.target.files[0]);
+                input.click();
+              }}
             >
-              Görsel Ekle
-            </button>
+              <Upload className="w-6 h-6 text-gray-400 mx-auto mb-2" />
+              <p className="text-xs text-center text-gray-600">Ana Resim Yükle</p>
+            </div>
+
+            {mainImageFile && (
+              <div className="mb-4">
+                <img
+                  src={URL.createObjectURL(mainImageFile)}
+                  alt="Ana Resim"
+                  className="w-32 h-32 object-cover rounded"
+                />
+              </div>
+            )}
+
+            {/* Ek Resimler */}
+            <div
+              className="border-2 border-dashed border-gray-300 rounded-lg p-4 hover:border-green-400 hover:bg-green-50 cursor-pointer w-64 mb-4"
+              onClick={() => {
+                const input = document.createElement("input");
+                input.type = "file";
+                input.accept = "image/*";
+                input.multiple = true;
+                input.onchange = (e) => handleAdditionalImagesUpload(e.target.files);
+                input.click();
+              }}
+            >
+              <Upload className="w-6 h-6 text-gray-400 mx-auto mb-2" />
+              <p className="text-xs text-center text-gray-600">Ek Resim(ler) Yükle</p>
+            </div>
+
+            {additionalImageFiles.length > 0 && (
+              <div className="flex gap-3 flex-wrap">
+                {additionalImageFiles.map((file, idx) => (
+                  <div key={idx} className="relative w-20 h-20">
+                    <img
+                      src={URL.createObjectURL(file)}
+                      alt={`Ek ${idx + 1}`}
+                      className="w-full h-full object-cover rounded"
+                    />
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
+
+
+
       </form>
       {/* Butonlar */}
       <div className="mt-8 flex flex-col md:flex-row gap-4 justify-center">
