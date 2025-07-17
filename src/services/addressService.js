@@ -5,6 +5,7 @@ const ADDRESS_API = `${API_BASE}/addresses`;
 //POST ADDRESS
 export const createAddress = async (addressData) => {
   const token = localStorage.getItem("token");
+  
 
   const response = await fetch(ADDRESS_API, {
     method: "POST",
