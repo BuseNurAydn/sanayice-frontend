@@ -3,6 +3,7 @@ import { Plus, Edit3, Trash2, Eye, EyeOff, BarChart3, Calendar, Link, FileImage,
 import { addBanner, updateBanner, getBanners, toggleBannerStatus, updateBannerOrder,deleteBanner } from "../../services/bannerService";
 import { toast } from "react-toastify";
 import AdminText from "../../shared/Text/AdminText";
+import { Upload } from "lucide-react";
 
 const BannerManagement = () => {
   const [banners, setBanners] = useState([]);
@@ -12,6 +13,7 @@ const BannerManagement = () => {
   const [deleteId, setDeleteId] = useState(null);
   const [activeTab, setActiveTab] = useState('all');
   const [editingOrder, setEditingOrder] = useState(null);
+  const [mainImageFile, setMainImageFile] = useState(null);
 
 //GET
   const fetchBanners = async () => {
@@ -29,12 +31,37 @@ const BannerManagement = () => {
   const [formData, setFormData] = useState({
     title: '',
     description: '',
-    imageUrl: '',
     linkUrl: '',
     buttonText: '',
     active: true,
     order: 1,
   });
+
+   // Ana resim dosyası yükleme handler'ı
+  const handleMainImageUpload = (file) => {
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast("Dosya boyutu 5MB'dan büyük olamaz");
+      return;
+    }
+
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg'];
+    if (!allowedTypes.includes(file.type)) {
+      toast('Sadece JPG ve PNG dosyaları yüklenebilir');
+      return;
+    }
+
+    setMainImageFile(file);
+    const imageUrl = URL.createObjectURL(file);
+    setFormData((prev) => ({ ...prev, imageUrl }));
+  };
+
+  const handleRemoveImage = () => {
+  setMainImageFile(null);
+  setFormData((prev) => ({ ...prev, imageUrl: "" }));
+};
+
 
   //POST - PUT - ORDER CHANGE
   const handleChange = (e) => {
@@ -63,28 +90,49 @@ const handleEdit = (banner) => {
 
 // handleSave fonksiyonu
 const handleSave = async () => {
+
+    if (!mainImageFile) {
+    toast.error("Ana resim yüklemek zorunludur!");
+    return;
+  }
+
+  if (!formData.title || !formData.description || !formData.linkUrl || !formData.buttonText || !formData.active || !formData.order ) {
+    toast.error("Gerekli alanları doldurun!");
+    return;
+  }
+
   const payload = {
     title: formData.title,
     description: formData.description,
-    imageUrl: formData.imageUrl,
     linkUrl: formData.linkUrl,
     buttonText: formData.buttonText,
     active: formData.active,
     order: parseInt(formData.order),
   };
 
+   // FormData oluşturma
+    const form = new FormData();
+
+    // Backend'in beklediği "banner" adında part 
+    form.append("banner", JSON.stringify(payload));
+
+    //  resim ekleme
+    if (mainImageFile) {
+      form.append("imageFile", mainImageFile);
+    }
+
   try {
     if (editingId) {
-      await updateBanner(editingId, payload);
+      await updateBanner(editingId, form);
 
       // order değiştiyse, ayrı endpointi çağırdım 
-      if (editingOrder !== payload.order) {
-        await updateBannerOrder(editingId, payload.order);
+      if (editingOrder !== form.order) {
+        await updateBannerOrder(editingId, form.order);
       }
 
       toast.success("Banner başarıyla güncellendi!");
     } else {
-      await addBanner(payload);
+      await addBanner(form);
       toast.success("Banner başarıyla eklendi!");
     }
 
@@ -407,30 +455,40 @@ const handleSave = async () => {
                 <div>
                   <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
                     <FileImage className="w-4 h-4" />
-                    Görsel URL *
+                    Görsel *
                   </label>
-                  <input
-                    type="url"
-                    name="imageUrl"
-                    value={formData.imageUrl}
-                    onChange={handleChange}
-                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
-                    placeholder="https://example.com/banner.jpg"
-                  />
-                  {formData.imageUrl && (
-                    <div className="mt-4">
-                      <div className="aspect-video rounded-xl overflow-hidden border border-gray-200">
-                        <img
-                          src={formData.imageUrl}
-                          alt="Önizleme"
-                          className="w-full h-full object-cover"
-                          onError={(e) => {
-                            e.target.style.display = 'none';
-                          }}
-                        />
-                      </div>
-                    </div>
-                  )}
+                 {/* Ana Resim */}
+            <div
+              className="border-2 border-dashed border-gray-300 rounded-lg p-4 hover:border-orange-500 hover:bg-orange-50 cursor-pointer w-64 mb-4"
+              onClick={() => {
+                const input = document.createElement("input");
+                input.type = "file";
+                input.accept = "image/*";
+                input.onchange = (e) => handleMainImageUpload(e.target.files[0]);
+                input.click();
+              }}
+            >
+              <Upload className="w-6 h-6 text-gray-400 mx-auto mb-2" />
+              <p className="text-xs text-center text-gray-600">Resim Yükle</p>
+            </div>
+
+            {mainImageFile && (
+              <div className="mb-4 relative w-fit">
+                <img
+                  src={URL.createObjectURL(mainImageFile)}
+                  alt="Ana Resim"
+                  className="w-32 h-32 object-cover rounded border border-gray-50"
+                />
+                <button
+                  type="button"
+                  onClick={handleRemoveImage}
+                  className="absolute -top-2 -right-2 bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm hover:bg-red-700 cursor-pointer"
+                  title="Resmi kaldır"
+                >
+                  &times;
+                </button>
+              </div>
+            )}
                 </div>
 
                 <div>

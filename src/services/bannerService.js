@@ -8,17 +8,18 @@ export const addBanner = async (banner) => {
   const response = await fetch(BANNER_API, {
     method: "POST",
     headers: {
-      "Content-Type": "application/json",
        Authorization: `Bearer ${token}`,
     },
-    body: JSON.stringify(banner),
+    body: banner,
   });
 
   if (!response.ok) {
-    throw new Error("Banner eklenemedi.");
+    const errorData = await response.json().catch(() => ({}));
+    console.error("Güncelleme hatası:", errorData);
+    throw new Error(errorData.message || "Banner eklenemedi.");
   }
 
-  return response.json();
+  return await response.json();
 };
 
 // PUT BANNER
@@ -27,17 +28,17 @@ export const updateBanner = async (id, banner) => {
   const response = await fetch(`${BANNER_API}/${id}`, {
     method: "PUT",
     headers: {
-      "Content-Type": "application/json",
        Authorization: `Bearer ${token}`,
     },
-    body: JSON.stringify(banner),
+    body: banner,
   });
 
   if (!response.ok) {
-    throw new Error("Banner güncellenemedi.");
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.message || "Banner güncellenemedi.");
   }
 
-  return response.json();
+  return await response.json();
 };
 
 // GET BANNER
