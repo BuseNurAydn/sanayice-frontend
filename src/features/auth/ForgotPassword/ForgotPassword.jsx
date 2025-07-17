@@ -7,11 +7,12 @@ import GrayButton from '../../../shared/Button/GrayButton';
 import { BsTelephone } from 'react-icons/bs';
 import { CiMail } from 'react-icons/ci';
 import { IoArrowBack } from 'react-icons/io5';
+import { forgotPassword, verifyResetCode, resetPassword } from '../../../services/authService';
 
 const ForgotPassword = () => {
     const [formData, setFormData] = useState({
         email: '',
-        phone: '',
+        phoneNumber: '',
     });
     const [isPhoneReset, setIsPhoneReset] = useState(false);
     const [errors, setErrors] = useState({});
@@ -52,7 +53,7 @@ const ForgotPassword = () => {
     
     const toggleResetMethod = () => {
         setIsPhoneReset((prev) => !prev);
-        setFormData({ email: '', phone: '' });
+        setFormData({ email: '', phoneNumber: '' });
         setErrors({});
         setSuccessMessage('');
     };
@@ -65,10 +66,10 @@ const ForgotPassword = () => {
         const newErrors = {};
         
         if (isPhoneReset) {
-            if (!formData.phone) {
-                newErrors.phone = 'Telefon numarası gereklidir';
-            } else if (!/^[0-9]{10,11}$/.test(formData.phone.replace(/\s/g, ''))) {
-                newErrors.phone = 'Geçerli bir telefon numarası giriniz';
+            if (!formData.phoneNumber) {
+                newErrors.phoneNumber = 'Telefon numarası gereklidir';
+            } else if (!/^[0-9]{10,15}$/.test(formData.phoneNumber.replace(/\s/g, ''))) {
+                newErrors.phoneNumber = 'Telefon numarası 10-15 karakter arasında olmalıdır';
             }
         } else {
             if (!formData.email) {
@@ -123,14 +124,15 @@ const ForgotPassword = () => {
         setErrors({});
 
         try {
-            // API çağrısı simülasyonu
-            await new Promise(resolve => setTimeout(resolve, 1500));
-            
-            const resetMethod = isPhoneReset ? 'telefon numarası' : 'e-posta adresi';
-            setSuccessMessage(`Şifre sıfırlama kodu ${resetMethod}nıza gönderildi.`);
+            const resetData = isPhoneReset 
+                ? { phoneNumber: formData.phoneNumber }
+                : { email: formData.email };
+
+            const response = await forgotPassword(resetData);
+            setSuccessMessage(response);
             setStep('verification');
         } catch (error) {
-            setErrors({ general: 'Şifre sıfırlama isteği gönderilemedi. Lütfen tekrar deneyin.' });
+            setErrors({ general: error.message || 'Şifre sıfırlama isteği gönderilemedi. Lütfen tekrar deneyin.' });
         } finally {
             setIsLoading(false);
         }
@@ -145,13 +147,19 @@ const ForgotPassword = () => {
         setErrors({});
 
         try {
-            // API çağrısı simülasyonu
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            
-            setSuccessMessage('Doğrulama başarılı! Yeni şifrenizi belirleyebilirsiniz.');
+            const verificationData = {
+                verificationCode: verificationCode,
+                ...(isPhoneReset 
+                    ? { phoneNumber: formData.phoneNumber }
+                    : { email: formData.email }
+                )
+            };
+
+            const response = await verifyResetCode(verificationData);
+            setSuccessMessage(response);
             setStep('reset');
         } catch (error) {
-            setErrors({ code: 'Geçersiz doğrulama kodu. Lütfen tekrar deneyin.' });
+            setErrors({ code: error.message || 'Geçersiz doğrulama kodu. Lütfen tekrar deneyin.' });
         } finally {
             setIsLoading(false);
         }
@@ -166,16 +174,24 @@ const ForgotPassword = () => {
         setErrors({});
 
         try {
-            // API çağrısı simülasyonu
-            await new Promise(resolve => setTimeout(resolve, 1500));
-            
-            setSuccessMessage('Şifreniz başarıyla güncellendi! Giriş sayfasına yönlendiriliyorsunuz...');
+            const resetData = {
+                verificationCode: verificationCode,
+                newPassword: newPassword,
+                confirmPassword: confirmPassword,
+                ...(isPhoneReset 
+                    ? { phoneNumber: formData.phoneNumber }
+                    : { email: formData.email }
+                )
+            };
+
+            const response = await resetPassword(resetData);
+            setSuccessMessage(response + ' Giriş sayfasına yönlendiriliyorsunuz...');
             
             setTimeout(() => {
                 navigate('/auth/login');
             }, 2000);
         } catch (error) {
-            setErrors({ general: 'Şifre güncellenemedi. Lütfen tekrar deneyin.' });
+            setErrors({ general: error.message || 'Şifre güncellenemedi. Lütfen tekrar deneyin.' });
         } finally {
             setIsLoading(false);
         }
@@ -188,7 +204,7 @@ const ForgotPassword = () => {
                 <p className="text-gray-600 text-sm">
                     {isPhoneReset 
                         ? 'Telefon numaranızı girin, size doğrulama kodu gönderelim' 
-                        : 'E-posta adresinizi girin, size şifre sıfırlama bağlantısı gönderelim'
+                        : 'E-posta adresinizi girin, size şifre sıfırlama kodu gönderelim'
                     }
                 </p>
             </div>
@@ -206,12 +222,12 @@ const ForgotPassword = () => {
                     <Input 
                         type="tel" 
                         placeholder="Telefon Numarası" 
-                        name="phone"
-                        value={formData.phone}
+                        name="phoneNumber"
+                        value={formData.phoneNumber}
                         onChange={handleInputChange}
                     />
-                    {errors.phone && (
-                        <p className="text-red-500 text-sm mt-1">{errors.phone}</p>
+                    {errors.phoneNumber && (
+                        <p className="text-red-500 text-sm mt-1">{errors.phoneNumber}</p>
                     )}
                 </>
             ) : (
@@ -237,7 +253,9 @@ const ForgotPassword = () => {
                 {isLoading ? 'Gönderiliyor...' : 'Şifre Sıfırlama Kodu Gönder'}
             </OrangeButton>
 
-        
+            <div className="text-center mt-4">
+                
+            </div>
         </>
     );
 
@@ -247,7 +265,7 @@ const ForgotPassword = () => {
                 <h2 className="text-2xl font-bold text-gray-800 mb-2">Doğrulama Kodu</h2>
                 <p className="text-gray-600 text-sm">
                     {isPhoneReset 
-                        ? `${formData.phone} numarasına gönderilen 6 haneli kodu girin`
+                        ? `${formData.phoneNumber} numarasına gönderilen 6 haneli kodu girin`
                         : `${formData.email} adresine gönderilen doğrulama kodunu girin`
                     }
                 </p>
@@ -277,6 +295,9 @@ const ForgotPassword = () => {
                 {isLoading ? 'Doğrulanıyor...' : 'Doğrula'}
             </OrangeButton>
 
+            <div className="text-center mt-4">
+                
+            </div>
         </>
     );
 
@@ -327,16 +348,23 @@ const ForgotPassword = () => {
             >
                 {isLoading ? 'Güncelleniyor...' : 'Şifremi Güncelle'}
             </OrangeButton>
+
+            <div className="text-center mt-4">
+                
+            </div>
         </>
     );
 
     return (
         <AuthLayout>
             <form className="space-y-6 flex flex-col p-4 mt-8">
-
                 {step === 'request' && renderRequestStep()}
                 {step === 'verification' && renderVerificationStep()}
                 {step === 'reset' && renderResetStep()}
+
+                <div className="text-center mt-6">
+                
+                </div>
 
                 <div className="text-center text-xs text-green-600 mt-6">
                     Güvenli şifre sıfırlama

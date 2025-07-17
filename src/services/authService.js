@@ -144,5 +144,74 @@ export const updateMyProfile = async (profileData) => {
   return response.json();
 };
 
+// API servislerinize eklenecek fonksiyonlar
 
+// Şifre sıfırlama talebi
+export const forgotPassword = async (resetData) => {
+  try {
+    const response = await fetch(`${AUTH_API}/forgot-password`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(resetData),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || 'Şifre sıfırlama talebi başarısız');
+    }
+
+    const data = await response.text(); // Backend string döndürüyor
+    return data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+// Şifre sıfırlama kodu doğrulama
+export const verifyResetCode = async (verificationData) => {
+  try {
+    const response = await fetch(`${AUTH_API}/verify-reset-code`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(verificationData),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || 'Kod doğrulama başarısız');
+    }
+
+    const data = await response.text(); // Backend string döndürüyor
+    return data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+// Şifre sıfırlama
+export const resetPassword = async (resetData) => {
+  try {
+    const response = await fetch(`${AUTH_API}/reset-password`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(resetData),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || 'Şifre sıfırlama başarısız');
+    }
+
+    const data = await response.text(); // Backend string döndürüyor
+    return data;
+  } catch (error) {
+    throw error;
+  }
+};
 
