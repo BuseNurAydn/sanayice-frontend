@@ -49,6 +49,7 @@ const ForgotPassword = () => {
         setErrors((prev) => ({ ...prev, [name]: '' }));
     };
 
+    
     const toggleResetMethod = () => {
         setIsPhoneReset((prev) => !prev);
         setFormData({ email: '', phone: '' });

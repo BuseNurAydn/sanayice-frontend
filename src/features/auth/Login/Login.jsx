@@ -118,9 +118,10 @@ const Login = () => {
             {errors.password && (
                 <p className="text-red-500 text-sm mt-1">{errors.password}</p>
             )}
+            
 
             <a href="/auth/forgot-password" className="custom-font font-medium text-[var(--color-light-orange)]">
-                Şifremi Unuttum
+                Şifremi Unuttum   
             </a>
             <div className="flex items-start space-x-2 mt-4">
                 <input
