@@ -1,6 +1,53 @@
 import { API_BASE } from "../config";
 
 const AUTH_API = `${API_BASE}/auth`;
+export const verifyEmail = async (verificationData) => {
+  try {
+    const response = await fetch(`${AUTH_API}/verify-email`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(verificationData),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || 'Email doğrulama başarısız');
+    }
+
+    const data = await response.text(); // Backend string döndürüyor
+    return data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+// Doğrulama kodu tekrar gönderme fonksiyonu
+export const resendVerificationCode = async (resendData) => {
+  try {
+    const response = await fetch(`${AUTH_API}/resend-verification`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(resendData),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || 'Kod gönderme başarısız');
+    }
+
+    const data = await response.text(); // Backend string döndürüyor
+    return data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+
+
 
 export const login = async (loginData) => {
   try {
