@@ -1,10 +1,15 @@
-import { NavLink } from "react-router-dom";
-import { useSelector } from "react-redux";
+import { NavLink, useNavigate } from "react-router-dom";
+import { useSelector, useDispatch } from "react-redux";
+import { logout } from '../../../store/authSlice';
+import {clear} from '../../../store/cartSlice';
+import { clearFavorites } from '../../../store/favoritesSlice';
 import {FaShoppingBag,FaMapMarkerAlt,FaStar,FaUserCircle,FaSignOutAlt} from "react-icons/fa";
 import { FaMessage } from "react-icons/fa6";
 
 const Sidebar = () => {
   const user = useSelector((state) => state.auth.user);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const menuItems = [
     { to: "orders", label: "Siparişlerim", icon: <FaShoppingBag /> },
@@ -13,9 +18,16 @@ const Sidebar = () => {
     { to: "support_and_complaint", label: "Destek ve Şikayet", icon: <FaMessage /> },
   ];
 
-  const handleLogout = () => {
-    console.log("Kullanıcı çıkış yaptı");
+ const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("pendingFavoriteItem"); 
+    localStorage.removeItem("pendingCartItem");
+    dispatch(clear());
+    dispatch(clearFavorites());
+    dispatch(logout());
+    navigate('/');
   };
+  
 
   return (
     <div className="bg-white shadow-lg rounded-lg p-4 flex flex-col md:w-64 w-full md:min-h-screen items-center">
@@ -55,7 +67,7 @@ const Sidebar = () => {
       {/* Çıkış Butonu */}
       <button
         onClick={handleLogout}
-        className="flex items-center justify-center md:justify-start gap-2 md:gap-4 p-2 md:p-3 rounded-md text-red-500 hover:bg-red-50 transition-all duration-200 font-medium text-lg md:text-base"
+        className="flex items-center justify-center md:justify-start gap-2 md:gap-4 p-2 md:p-3 rounded-md text-red-500 hover:bg-red-50 transition-all duration-200 font-medium text-lg md:text-base cursor-pointer"
       >
         <FaSignOutAlt />
         <span className="hidden md:inline">Çıkış Yap</span>

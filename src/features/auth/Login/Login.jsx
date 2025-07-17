@@ -142,16 +142,16 @@ const Login = () => {
 
             <OrangeButton type="submit" onClick={handleLogin}> Giriş Yap </OrangeButton>
 
-            <GrayButton type="button" onClick={toggleLoginMethod}>
+           {/** <GrayButton type="button" onClick={toggleLoginMethod}>
                 <BsTelephone className="w-5 h-5" />
                 Telefon Numarası ile Giriş Yap
-            </GrayButton>
+            </GrayButton>*/} 
         </>
     );
 
-    const renderPhoneLogin = () => (
+   {/* const renderPhoneLogin = () => (
         <>
-            {/* Telefon Girişi */}
+            Telefon Girişi
             <Input type="tel" placeholder="Telefon Numarası" />
 
             <OrangeButton type="submit"> Giriş Yap </OrangeButton>
@@ -174,13 +174,14 @@ const Login = () => {
                 ))}
             </div>
         </div>
-    );
+    );*/}
     return (
         <AuthLayout>
           <form className="space-y-6 flex flex-col p-4 mt-8">
-            {isPhoneLogin ? renderPhoneLogin() : renderEmailLogin()}
+            {renderEmailLogin()}
+            {/*{isPhoneLogin ? renderPhoneLogin() : renderEmailLogin()}*/}
       
-            <SocialLogin />
+            {/** <SocialLogin />*/}
       
             <div className="text-center text-xs text-green-600">
               Güvenli alışveriş
@@ -267,7 +268,6 @@ const Login = () => {
             </div>
           )}
         </AuthLayout>
-      );
-      
+      );   
 };
 export default Login;
