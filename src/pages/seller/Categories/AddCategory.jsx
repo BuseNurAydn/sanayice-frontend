@@ -1,50 +1,78 @@
-import {useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AdminText from '../../../shared/Text/AdminText';
 import { addCategory } from '../../../services/categoryService';
+import { Upload } from "lucide-react";
 
 const AddCategory = () => {
-//const [image, setImage] = useState(null);
-//const [previewImage, setImagePreview] = useState(null);
-//const [imageFile, setImageFile] = useState(null);
-//const [fileName, setFileName] = useState('');
+
   const navigate = useNavigate();
-  const [name, setName] = useState('');
-  const [description, setDescription] = useState('');
-  const [imageUrl, setImageUrl] = useState('');
-{/*
-  const handleImageChange = (e) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setImageFile(file);
-      setFileName(file.name); 
-      setImagePreview(URL.createObjectURL(file));
-      setImage(file); 
-    } else {
-      setFileName('');
-      setImagePreview('');
-      setImage(null);
+  const [mainImageFile, setMainImageFile] = useState(null);
+
+  const [formData, setFormData] = useState({
+    name: "",
+    description: "",
+  });
+
+  // Ana resim dosyası yükleme handler'ı
+  const handleMainImageUpload = (file) => {
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast("Dosya boyutu 5MB'dan büyük olamaz");
+      return;
     }
+
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg'];
+    if (!allowedTypes.includes(file.type)) {
+      toast('Sadece JPG ve PNG dosyaları yüklenebilir');
+      return;
+    }
+
+    setMainImageFile(file);
+    const imageUrl = URL.createObjectURL(file);
+    setFormData((prev) => ({ ...prev, imageUrl }));
   };
 
   const handleRemoveImage = () => {
-    setImageFile(null);
-    setImagePreview('');
-    setImage(null);
-  };
- */}
+  setMainImageFile(null);
+  setFormData((prev) => ({ ...prev, imageUrl: "" }));
+};
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-     const newCategory = {
-      name: name,
-      description: description,
-      imageUrl: imageUrl,
+    if (!mainImageFile) {
+    toast.error("Ana resim yüklemek zorunludur!");
+    return;
+  }
+
+  if (!formData.name || !formData.description) {
+    toast.error("Gerekli alanları doldurun!");
+    return;
+  }
+
+    const newCategory = {
+      name: formData.name,
+      description: formData.description,
     };
 
-   try {
-      await addCategory(newCategory);
+    // FormData oluşturma
+    const form = new FormData();
+
+    // Backend'in beklediği "category" adında part ekle
+    form.append("category", JSON.stringify(newCategory));
+
+    // Ana resim ekleme
+    if (mainImageFile) {
+      form.append("imageFile", mainImageFile);
+    }
+
+    try {
+      await addCategory(form);
       navigate('/seller/categories');
+      handleClear();
+      setMainImageFile(null);
     } catch (error) {
       console.error('Kategori eklenirken hata oluştu:', error);
     }
@@ -53,53 +81,67 @@ const AddCategory = () => {
   return (
     <div className="min-h-screen md:p-6 px-3 py-6 bg-gray-50">
       <div className="max-w-5xl">
-      <AdminText>Kategori Ekle</AdminText>
-{/** 
-      {previewImage && (
-        <div className="relative w-40 h-40 my-4">
-          <img src={previewImage} alt="Ürün Görseli" className="w-full h-full object-cover rounded border"/>
-          <button type="button" onClick={handleRemoveImage} className="absolute top-1 right-1 bg-red-600 hover:bg-red-700 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs" title="Sil">✕</button>
-        </div>
-      )}
+        <AdminText>Kategori Ekle</AdminText>
 
-      <div>
-        <div className="flex items-center gap-4">
-          <label className="inline-block my-4 bg-gray-100 border border-gray-300 px-4 py-2 rounded cursor-pointer hover:bg-gray-200 text-sm relative">
-            Resim Ekle
-            <input type="file" accept="image/*" onChange={handleImageChange} className="absolute inset-0 opacity-0 cursor-pointer"/>
-          </label>
-          {fileName && <span className="text-gray-600 text-sm italic truncate max-w-xs">{fileName}</span>}
-        </div>
-      </div>
-*/}
-      <form onSubmit={handleSubmit}  className="space-y-4">
-        <div>
-          <label className="block mb-1 font-medium">Kategori Adı</label>
-          <input type="text" id='name' value={name} onChange={(e) => setName(e.target.value)}
-            className="w-full border border-gray-300 rounded px-3 py-2 outline-none"
-            required
-          />
-        </div>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="block mb-1 font-medium">Kategori Adı</label>
+            <input type="text" id='name' value={formData.name} onChange={(e) =>setFormData((prev) => ({ ...prev, name: e.target.value }))}
 
-        <div>
-          <label className="block mb-1 font-medium">Kategori Açıklaması</label>
-          <textarea id='description' value={description} onChange={(e) => setDescription(e.target.value)}
-            rows="4" className="w-full border border-gray-300 rounded px-3 py-2 outline-none"/>
-        </div>
-         <div>
-          <label className="block mb-1 font-medium">Resim Ekle</label>
-          <input id='imageUrl' value={imageUrl} onChange={(e) => setImageUrl(e.target.value)} 
-          placeholder="https://example.com/resim.jpg" className="w-full border border-gray-300 rounded px-3 py-2 outline-none"
-          />
-        </div>
+              className="w-full border border-gray-300 rounded px-3 py-2 outline-none"
+              required
+            />
+          </div>
 
-        <div className="text-right">
-          <button type="submit" className="bg-[var(--color-dark-orange)] text-white px-4 py-2 rounded transition"
-          >
-            Kaydet
-          </button>
-        </div>
-      </form>
+          <div>
+            <label className="block mb-1 font-medium">Kategori Açıklaması</label>
+            <textarea id='description' value={formData.description} onChange={(e) =>setFormData((prev) => ({ ...prev, description: e.target.value }))}
+
+              rows="4" className="w-full border border-gray-300 rounded px-3 py-2 outline-none" />
+          </div>
+          <div>
+            <label className="block mb-1 font-medium">Resim Ekle</label>
+            {/* Ana Resim */}
+            <div
+              className="border-2 border-dashed border-gray-300 rounded-lg p-4 hover:border-orange-500 hover:bg-orange-50 cursor-pointer w-64 mb-4"
+              onClick={() => {
+                const input = document.createElement("input");
+                input.type = "file";
+                input.accept = "image/*";
+                input.onchange = (e) => handleMainImageUpload(e.target.files[0]);
+                input.click();
+              }}
+            >
+              <Upload className="w-6 h-6 text-gray-400 mx-auto mb-2" />
+              <p className="text-xs text-center text-gray-600">Ana Resim Yükle</p>
+            </div>
+
+            {mainImageFile && (
+              <div className="mb-4 relative w-fit">
+                <img
+                  src={URL.createObjectURL(mainImageFile)}
+                  alt="Ana Resim"
+                  className="w-32 h-32 object-cover rounded border border-gray-50"
+                />
+                <button
+                  type="button"
+                  onClick={handleRemoveImage}
+                  className="absolute -top-2 -right-2 bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm hover:bg-red-700 cursor-pointer"
+                  title="Resmi kaldır"
+                >
+                  &times;
+                </button>
+              </div>
+            )}
+          </div>
+
+          <div className="text-right">
+            <button type="submit" onClick={handleSubmit} className="bg-[var(--color-dark-orange)] text-white px-4 py-2 rounded transition"
+            >
+              Kaydet
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   );

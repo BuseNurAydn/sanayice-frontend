@@ -100,12 +100,13 @@ const Products = () => {
               filteredProducts.map((product) => (
                 <tr key={product.id} className="text-center">
                   <td className="border border-gray-300 py-2 px-2">
-                    <div className="flex justify-center">
+                    <div className="flex justify-center bg-transparent">
                       <img
-                        src={product.imageUrl}
+                        src={product.imageUrls[0]}
                         alt={product.name}
-                        className="mt-2 w-12 h-12 object-cover rounded"
+                        className="mt-2 w-16 h-16 object-cover rounded bg-transparent"
                       />
+
                     </div>
                   </td>
                   <td className={borderStyle}>{product.name}</td>

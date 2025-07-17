@@ -100,16 +100,16 @@ const ProductCard = ({ product }) => {
 
       <div className="relative mb-3">
         <div className="h-32 w-full rounded-lg mb-3 flex items-center justify-center group-hover:scale-105 transition-transform duration-300">
-          {product.additionalImages ? (
-            <img src={product.additionalImages[0]} alt={product.name} className="h-full object-contain" />
+          {product.imageUrls ? (
+            <img src={product.imageUrls[0]} alt={product.name} className="h-full object-contain" />
           ) : (
             <span className="text-gray-400 text-sm">Ürün Görseli</span>
           )}
         </div>
         {/* ...badge ve diğerleri aynı */}
       </div>
-      <h1 className="font-semibold text-gray-800 flex-1">{product.name}</h1>
-      <p className="text-sm mb-2">{product.brand}</p>
+      <h1 className="text-sm font-semibold text-gray-800 flex-1">{product.name}</h1>
+      <p className="text-md mb-2">{product.brand}</p>
       <div className="flex flex-col gap-1 mb-3">
         {product.oldPrice && (
           <span className="text-gray-400 line-through text-sm">₺{product.oldPrice.toLocaleString()}</span>

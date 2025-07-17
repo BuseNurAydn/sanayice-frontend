@@ -21,11 +21,7 @@ const ProductDetail = () => {
   const navigate = useNavigate();
   const PRODUCTS_API = `${API_BASE}/products`;
 
-  // imageUrl ve additionalImages birleştirdim
-  const images = [
-    ...(product?.imageUrl ? [product.imageUrl] : []),
-    ...(product?.additionalImages || []),
-  ];
+  const images = product?.imageUrls || []; // imageUrls backend'den (array halinde)
 
   useEffect(() => {
     window.scrollTo(0, 0);

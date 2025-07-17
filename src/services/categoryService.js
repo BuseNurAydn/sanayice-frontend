@@ -74,23 +74,26 @@ export const deleteCategory = async (id, type = "category") => {
 };
 
 // KATEGORİ GÜNCELLEME
-export const updateCategory = async (id, data) => {
+export const updateCategory = async (id, formData) => {
   const token = getToken();
 
-  const response = await fetch(`${CATEGORY_API}/categories/${id}`, {
+  const response = await fetch(`${CATEGORY_API}/managers/categories/${id}`, {
     method: "PUT",
     headers: {
-      "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
     },
-    body: JSON.stringify(data),
+    body: formData,
   });
 
-  if (!response.ok) {
-    const errorData = await response.json();
-    throw new Error(errorData.message || "Güncelleme başarısız");
+   if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    console.error("Güncelleme hatası:", errorData);
+    throw new Error(errorData.message || "Kategori güncellenemedi.");
   }
+
+  return await response.json();
 };
+
 
 // ALT KATEGORİ EKLE / GÜNCELLE
 export const saveSubcategory = async (id, data) => {
@@ -115,17 +118,30 @@ export const saveSubcategory = async (id, data) => {
 };
 
 // KATEGORİ EKLEME
-export const addCategory = async (categoryData) => {
+export const addCategory = async (formData) => {
   const token = getToken();
 
-  const response = await fetch(`${CATEGORY_API}/categories`, {
+ // formData mı gerçekten?
+  if (!(formData instanceof FormData)) {
+    throw new Error("Hatalı form verisi! CategoryData bekleniyor.");
+  }
+
+  for (let [key, value] of formData.entries()) {
+    console.log(key, value);
+  }
+
+  const response = await fetch(`${CATEGORY_API}/managers/categories`, {
     method: "POST",
     headers: {
-      "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
     },
-    body: JSON.stringify(categoryData),
+    body: formData,
   });
 
-  if (!response.ok) throw new Error("Kategori eklenemedi");
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.message || "Kategori eklenemedi.");
+  }
+
+  return await response.json();
 };
