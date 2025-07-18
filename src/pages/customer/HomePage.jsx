@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import Slider from "react-slick";
 import ProductCard from "../../components/ProductCard";
 import { getProducts } from "../../services/productsService";
-import { brands} from './data/products';
+import { fetchActiveBrands } from "../../services/brandservice"; // Brand service import
 import { fetchCategories } from "../../services/categoryService";
 import { getAllPublicBanners } from "../../services/bannerService";
 import CategoriesSection from '../../components/CategoriesSection';
@@ -15,6 +15,7 @@ const HomePage = () => {
   const newProductsScrollRef = useRef(null);
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
+  const [brands, setBrands] = useState([]); // Brands state
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [activeCategory, setActiveCategory] = useState(null);
@@ -22,24 +23,23 @@ const HomePage = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const settings = {
-  dots: true,
-  arrows: false,
-  infinite: banners.length > 1, // 1'den fazlaysa döngü yapsın
-  speed: 300,
-  slidesToShow: 1,
-  slidesToScroll: 1,
-  autoplay: true,
-  autoplaySpeed: 3000,
-};
+    dots: true,
+    arrows: false,
+    infinite: banners.length > 1,
+    speed: 300,
+    slidesToShow: 1,
+    slidesToScroll: 1,
+    autoplay: true,
+    autoplaySpeed: 3000,
+  };
 
-  //GET CATEGORİES
+  // GET CATEGORIES
   useEffect(() => {
     const loadCategories = async () => {
       setLoading(true);
       try {
         const data = await fetchCategories();
         setCategories(data);
-
       } catch (err) {
         setError(err.message || "Bir hata oluştu");
       } finally {
@@ -49,7 +49,7 @@ const HomePage = () => {
     loadCategories();
   }, []);
 
-  //GET PRODUCTS
+  // GET PRODUCTS
   useEffect(() => {
     getProducts()
       .then(data => {
@@ -60,7 +60,21 @@ const HomePage = () => {
       });
   }, []);
 
-  //GET BANNERS
+  // GET BRANDS
+  useEffect(() => {
+    const loadBrands = async () => {
+      try {
+        const data = await fetchActiveBrands();
+        setBrands(data);
+      } catch (error) {
+        console.error("Markalar yüklenemedi:", error);
+        setError("Markalar yüklenemedi");
+      }
+    };
+    loadBrands();
+  }, []);
+
+  // GET BANNERS
   useEffect(() => {
     const fetchBanners = async () => {
       try {
@@ -184,7 +198,6 @@ const HomePage = () => {
         </div>
       </nav>
   
-
       {/* CSS Animasyonları */}
       <style>{`
         @keyframes dropdown {
@@ -210,6 +223,7 @@ const HomePage = () => {
           display: none;
         }
       `}</style>
+      
       <main className="max-w-7xl mx-auto py-8 px-4">
         <section className="flex flex-col md:flex-row gap-6 pb-8">
           {/* Sol Slider */}
@@ -252,7 +266,7 @@ const HomePage = () => {
             </Slider>
           </div>
         </section>
-
+        
         {/* Markalar */}
         <section className="mb-12">
           <div className="flex items-center justify-between mb-6">
@@ -260,16 +274,32 @@ const HomePage = () => {
             <button className="text-[var(--color-dark-orange)] font-semibold">Tümünü Gör →</button>
           </div>
           <ScrollSection scrollRef={brandsScrollRef}>
-            {brands.map((brand, i) => (
-              <div key={i} className="bg-white border border-gray-300 rounded-xl shadow-sm flex flex-col items-center min-w-[140px] p-5 hover:shadow-md transition-all duration-300 cursor-pointer group">
-                <div className="w-16 h-16 flex items-center justify-center bg-gray-50 rounded-full mb-3 border group-hover:bg-gray-100 transition-colors duration-200">
-                  <span className="text-gray-600 font-bold text-sm">{brand.name.charAt(0)}</span>
+            {brands.map((brand) => (
+              <div
+                key={brand.id}
+                className="bg-white border border-gray-300 rounded-xl shadow-sm flex flex-col items-center min-w-[160px] p-6 hover:shadow-md transition-all duration-300 cursor-pointer group"
+              >
+                <div className="w-24 h-24 flex items-center justify-center bg-gray-50 rounded-full mb-4 border group-hover:bg-gray-100 transition-colors duration-200 overflow-hidden">
+                  {brand.imageUrl ? (
+                    <img
+                      src={brand.imageUrl}
+                      alt={brand.name}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <span className="text-gray-600 font-bold text-lg">
+                      {brand.name.charAt(0)}
+                    </span>
+                  )}
                 </div>
-                <span className="font-medium text-gray-700 text-sm">{brand.name}</span>
+                <span className="font-medium text-gray-700 text-sm text-center">
+                  {brand.name}
+                </span>
               </div>
             ))}
           </ScrollSection>
         </section>
+
 
         {/* Öne Çıkan Ürünler */}
         <section className="mb-12">

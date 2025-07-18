@@ -67,6 +67,11 @@ const menuItems = [
     ],
   },
   {
+    label: "Marka Listesi",
+    to: "/seller/brand_list",
+    icon: <MdViewCarousel />,
+  },
+  {
     label: "Banner Yönetimi",
     to: "/seller/banner_management",
     icon: <MdViewCarousel />,
@@ -146,6 +151,7 @@ const Sidebar = () => {
       return item.label === "Hesabımı Doğrulama";
     }
     return item.label !== "Kategoriler" &&
+           item.label !== "Marka Listesi" &&
            item.label !== "Satıcı Doğrulama" &&
            item.label !== "Banner Yönetimi" &&
            item.label !== "Kupon Ve Kampanya Yönetimi" &&
@@ -153,7 +159,7 @@ const Sidebar = () => {
            item.label !== "Destek Ve Geri Bildirim Yönetimi" &&
            item.label !== "Satıcı Doğrulama Sayfası";
     } else if (role === "ROLE_MANAGER") {
-      return item.label === "Satıcı Doğrulama" || item.label === "Kategoriler" || 
+      return item.label === "Satıcı Doğrulama" || item.label === "Kategoriler" ||  item.label === "Marka Listesi" || 
              item.label === "Banner Yönetimi" || item.label === "Kupon Ve Kampanya Yönetimi" || item.label === "Satıcıların Kupon Ve Kampanya Listesi" ||  item.label === "Destek Ve Geri Bildirim Yönetimi" ||  item.label === "Satıcı Doğrulama Sayfası";
     } else {
       return true;

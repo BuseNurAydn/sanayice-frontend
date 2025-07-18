@@ -17,6 +17,8 @@ import SupportManagerDashboard from '../pages/seller/SupportManagerDashboard';
 import SellerCampaignOverview from '../pages/seller/SellerCampaignOverview';
 import SellerCampaignManagement from '../pages/seller/SellerCampaignManagement';
 import SellerDocumentUpload from '../pages/seller/SellerDocumentUpload';
+import AddBrand from '../pages/seller/Brand/AddBrand';
+import BrandList from '../pages/seller/Brand/BrandList';
 
 const SellerRoutes = () => {
     return (
@@ -138,7 +140,22 @@ const SellerRoutes = () => {
                         </RoleProtectedRoute>
                     }
                 />
-                
+                 <Route
+                    path="add_brand"
+                    element={
+                        <RoleProtectedRoute allowedRoles={['ROLE_MANAGER']}>
+                            <AddBrand />
+                        </RoleProtectedRoute>
+                    }
+                />
+                <Route
+                    path="brand_list"
+                    element={
+                        <RoleProtectedRoute allowedRoles={['ROLE_MANAGER']}>
+                            <BrandList />
+                        </RoleProtectedRoute>
+                    }
+                />
                 <Route
                     path="support_management"
                     element={
@@ -166,6 +183,7 @@ const SellerRoutes = () => {
                         </RoleProtectedRoute>
                     }
                 />
+                
             </Route>
         </Routes>
 
