@@ -85,21 +85,6 @@ const AddCategory = () => {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block mb-1 font-medium">Kategori Adı</label>
-            <input type="text" id='name' value={formData.name} onChange={(e) =>setFormData((prev) => ({ ...prev, name: e.target.value }))}
-
-              className="w-full border border-gray-300 rounded px-3 py-2 outline-none"
-              required
-            />
-          </div>
-
-          <div>
-            <label className="block mb-1 font-medium">Kategori Açıklaması</label>
-            <textarea id='description' value={formData.description} onChange={(e) =>setFormData((prev) => ({ ...prev, description: e.target.value }))}
-
-              rows="4" className="w-full border border-gray-300 rounded px-3 py-2 outline-none" />
-          </div>
-          <div>
             <label className="block mb-1 font-medium">Resim Ekle</label>
             {/* Ana Resim */}
             <div
@@ -113,7 +98,8 @@ const AddCategory = () => {
               }}
             >
               <Upload className="w-6 h-6 text-gray-400 mx-auto mb-2" />
-              <p className="text-xs text-center text-gray-600">Ana Resim Yükle</p>
+              <p className="text-xs text-center text-gray-600">
+                Kategori Resmi Yükle</p>
             </div>
 
             {mainImageFile && (
@@ -134,6 +120,22 @@ const AddCategory = () => {
               </div>
             )}
           </div>
+          <div>
+            <label className="block mb-1 font-medium">Kategori Adı</label>
+            <input type="text" id='name' value={formData.name} onChange={(e) =>setFormData((prev) => ({ ...prev, name: e.target.value }))}
+
+              className="w-full border border-gray-300 rounded px-3 py-2 outline-none"
+              required
+            />
+          </div>
+
+          <div>
+            <label className="block mb-1 font-medium">Kategori Açıklaması</label>
+            <textarea id='description' value={formData.description} onChange={(e) =>setFormData((prev) => ({ ...prev, description: e.target.value }))}
+
+              rows="4" className="w-full border border-gray-300 rounded px-3 py-2 outline-none" />
+          </div>
+        
 
           <div className="text-right">
             <button type="submit" onClick={handleSubmit} className="bg-[var(--color-dark-orange)] text-white px-4 py-2 rounded transition"

@@ -104,7 +104,7 @@ const Products = () => {
                       <img
                         src={product.imageUrls[0]}
                         alt={product.name}
-                        className="mt-2 w-16 h-16 object-cover rounded bg-transparent"
+                        className="mt-2 w-20 h-20 object-cover rounded bg-transparent"
                       />
 
                     </div>

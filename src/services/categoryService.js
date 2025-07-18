@@ -60,8 +60,8 @@ export const deleteCategory = async (id, type = "category") => {
 
   const endpoint =
     type === "subcategory"
-      ? `${CATEGORY_API}/subcategories/${id}`
-      : `${CATEGORY_API}/categories/${id}`;
+      ? `${CATEGORY_API}/managers/subcategories/${id}`
+      : `${CATEGORY_API}/managers/categories/${id}`;
 
   const response = await fetch(endpoint, {
     method: "DELETE",
@@ -96,25 +96,29 @@ export const updateCategory = async (id, formData) => {
 
 
 // ALT KATEGORİ EKLE / GÜNCELLE
-export const saveSubcategory = async (id, data) => {
+export const saveSubcategory = async (id, formData) => {
   const token = getToken();
 
   const url = id
-    ? `${CATEGORY_API}/subcategories/${id}`
-    : `${CATEGORY_API}/subcategories`;
+    ? `${CATEGORY_API}/managers/subcategories/${id}`
+    : `${CATEGORY_API}/managers/subcategories`;
 
   const method = id ? "PUT" : "POST";
 
   const response = await fetch(url, {
     method,
     headers: {
-      "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
     },
-    body: JSON.stringify(data),
+    body: formData,
   });
 
-  if (!response.ok) throw new Error("Alt kategori kaydedilemedi");
+   if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.message || "Alt Kategori kaydedilemedi.");
+  }
+
+  return await response.json();
 };
 
 // KATEGORİ EKLEME

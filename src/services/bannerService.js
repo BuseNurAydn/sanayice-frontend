@@ -82,9 +82,9 @@ export const updateBannerOrder = async (bannerId, newOrder) => {
   const response = await fetch(`${BANNER_API}/${bannerId}/order?order=${newOrder}`, {
     method: "PUT",
     headers: {
-      "Content-Type": "application/json",
        Authorization: `Bearer ${token}`,
     },
+    
   });
 
   if (!response.ok) {

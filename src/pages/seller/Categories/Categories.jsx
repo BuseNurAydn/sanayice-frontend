@@ -7,7 +7,7 @@ import { FcPlus } from "react-icons/fc";
 import AdminText from "../../../shared/Text/AdminText";
 import AddButton from "../../../shared/Button/AddButton";
 import SubModal from "./SubModal";
-import {fetchCategories,fetchSubcategories,deleteCategory,updateCategory,saveSubcategory,} from "../../../services/categoryService";
+import { fetchCategories, fetchSubcategories, deleteCategory, updateCategory, saveSubcategory, } from "../../../services/categoryService";
 
 const Categories = () => {
   const [categories, setCategories] = useState([]);
@@ -20,34 +20,36 @@ const Categories = () => {
   const [isSubModalOpen, setIsSubModalOpen] = useState(false);
   const [selectedCategoryId, setSelectedCategoryId] = useState(null);
   const [deleteType, setDeleteType] = useState("category");
-
+  const [mainImageFile, setMainImageFile] = useState(null); // Dosyayı burada tut
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
     name: "",
     description: "",
-    imageUrl: "",
+    imageUrl: ""
+
   });
   const [subFormData, setSubFormData] = useState({
     name: "",
     description: "",
-    imageUrl: "",
+    imageUrl: ""
+
   });
 
- useEffect(() => {
-  const load = async () => {
-    try {
-      const cats = await fetchCategories();
-      setCategories(cats);
-
-      const subs = await fetchSubcategories();
-      setSubcategories(subs);
-    } catch (error) {
-      console.error(error);
-    }
-  };
-  load();
-}, []);
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const cats = await fetchCategories();
+        setCategories(cats);
+         console.log(cats)
+        const subs = await fetchSubcategories();
+        setSubcategories(subs);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    load();
+  }, []);
 
   //Ekleme sayfasına yönlendirme
   const handleAdd = () => {
@@ -55,34 +57,36 @@ const Categories = () => {
   };
 
   //Silme
-const handleDelete = async () => {
-  try {
-    await deleteCategory(deleteId, deleteType);
-    setConfirmOpen(false);
-    setDeleteId(null);
+  const handleDelete = async () => {
+    try {
+      await deleteCategory(deleteId, deleteType);
+      setConfirmOpen(false);
+      setDeleteId(null);
 
-    if (deleteType === "subcategory") {
-      const subs = await fetchSubcategories();
-      setSubcategories(subs);
-    } else {
-      const cats = await fetchCategories();
-      setCategories(cats);
+      if (deleteType === "subcategory") {
+        const subs = await fetchSubcategories();
+        setSubcategories(subs);
+      } else {
+        const cats = await fetchCategories();
+        setCategories(cats);
+      }
+    } catch (error) {
+      console.error(error);
     }
-  } catch (error) {
-    console.error(error);
-  }
-};
+  };
 
   //Düzenleme
   const handleEdit = (category) => {
     setFormData({
       name: category.name,
       description: category.description,
-      imageUrl: category.imageUrl
+      imageUrl: category.imageUrl || ""
     });
+    setMainImageFile(null); // Önceki dosya temizlenmeli
     setEditingId(category.id);
     setIsModalOpen(true);
   };
+
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -93,16 +97,29 @@ const handleDelete = async () => {
   };
 
   const handleSave = async () => {
-  try {
-    await updateCategory(editingId, formData);
-    setIsModalOpen(false);
-    setEditingId(null);
-    const cats = await fetchCategories();
-    setCategories(cats);
-  } catch (error) {
-    console.error(error);
-  }
-};
+    try {
+      const form = new FormData();
+
+      form.append("category", JSON.stringify({
+        name: formData.name,
+        description: formData.description
+      }));
+
+      if (mainImageFile) {
+        form.append("imageFile", mainImageFile);
+      }
+
+      await updateCategory(editingId, form);
+      setIsModalOpen(false);
+      setEditingId(null);
+      setMainImageFile(null);
+      const cats = await fetchCategories();
+      setCategories(cats);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   // Sub Kategori - İnput değişikliklerini dinleme
   const handleSubChange = (e) => {
     const { name, value } = e.target;
@@ -111,36 +128,50 @@ const handleDelete = async () => {
       [name]: value,
     }));
   };
-
-  //Ana ve alt kategori ekleme
   const handleSubSave = async () => {
-  try {
-    await saveSubcategory(editingId, {
-      ...subFormData,
-      categoryId: selectedCategoryId,
-    });
-    setIsSubModalOpen(false);
-    setSubFormData({ name: "", description: "", imageUrl: "" });
-    setEditingId(null);
-    const subs = await fetchSubcategories();
-    setSubcategories(subs);
-    const cats = await fetchCategories();
-    setCategories(cats);
-  } catch (error) {
-    console.error(error);
-  }
-};
+    try {
+      const form = new FormData();
+      form.append(
+        "subcategory",
+        JSON.stringify({
+          name: subFormData.name,
+          description: subFormData.description,
+          categoryId: selectedCategoryId,
+        })
+      );
+
+      if (mainImageFile) {
+        form.append("imageFile", mainImageFile);
+      }
+
+      // PUT ise editingId, yoksa null
+      await saveSubcategory(editingId ? editingId : null, form);
+
+      setIsSubModalOpen(false);
+      setEditingId(null);
+
+      const subs = await fetchSubcategories();
+      setSubcategories(subs);
+      const cats = await fetchCategories();
+      setCategories(cats);
+    } catch (error) {
+      console.error("Alt kategori kaydında hata:", error);
+    }
+  };
+
   // Alt kategoriyi düzenleme
   const handleEditSub = (sub) => {
-  setSubFormData({
-    name: sub.name,
-    description: sub.description,
-    imageUrl: sub.imageUrl,
-  });
-  setEditingId(sub.id); // Alt kategori ID
-  setSelectedCategoryId(sub.categoryId); // Hangi kategoriye ait olduğu
-  setIsSubModalOpen(true);
-};
+    console.log("Editlenen alt kategori:", sub); 
+    setSubFormData({
+      name: sub.name,
+      description: sub.description,
+      imageUrl: sub.imageUrl || ""
+    });
+    setEditingId(sub.id); // Alt kategori ID
+    setSelectedCategoryId(sub.categoryId); // Hangi kategoriye ait olduğu
+    setMainImageFile(null);
+    setIsSubModalOpen(true);
+  };
 
   return (
     <div className="min-h-screen px-3 py-6 md:p-6  bg-gray-50">
@@ -168,6 +199,10 @@ const handleDelete = async () => {
                   onClick={(e) => {
                     e.stopPropagation();
                     setSelectedCategoryId(category.id);
+                    // Formu sıfırla
+                    setSubFormData({ name: "", description: "", imageUrl: "" });
+                    setMainImageFile(null);
+                    setEditingId(null);
                     setIsSubModalOpen(true);
                   }}
                   title="Alt Kategori Ekle"
@@ -184,6 +219,8 @@ const handleDelete = async () => {
                     onChange={handleChange}
                     onSave={handleSave}
                     onClose={() => setIsModalOpen(false)}
+                    setMainImageFile={setMainImageFile}
+
                   />
                 )}
                 <button
@@ -195,7 +232,7 @@ const handleDelete = async () => {
                   }}
                   title="Kategori Sil"
                   className="text-red-600 hover:text-red-800"
-                  >
+                >
                   <FaTrash size={18} />
                 </button>
               </div>
@@ -243,10 +280,10 @@ const handleDelete = async () => {
         />
       )}
       {isSubModalOpen && (
-        <SubModal title="Alt Kategori Ekle" subFormData={subFormData} onChange={handleSubChange} onSave={handleSubSave}
-          onClose={() => setIsSubModalOpen(false)}/>
+        <SubModal  title={editingId ? "Alt Kategoriyi Güncelle" : "Alt Kategori Ekle"} subFormData={subFormData} onChange={handleSubChange} onSave={handleSubSave} setMainImageFile={setMainImageFile} setSubFormData={setSubFormData} mainImageFile={mainImageFile}
+          onClose={() => setIsSubModalOpen(false)} />
       )}
-      </div>
+    </div>
   );
 };
 export default Categories;

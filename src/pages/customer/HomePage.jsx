@@ -223,7 +223,7 @@ const HomePage = () => {
                     rel="noopener noreferrer"
                     className="block"
                   >
-                  <div className="bg-white shadow rounded-xl overflow-hidden">
+                  <div className="overflow-hidden">
                     <img src={banner.imageUrl} className="w-full h-auto max-h-64 md:max-h-80 object-contain" />
                   </div>
                   </a>
@@ -243,7 +243,7 @@ const HomePage = () => {
                     rel="noopener noreferrer"
                     className="block"
                   >
-                  <div className="bg-white shadow rounded-xl overflow-hidden">
+                  <div className="overflow-hidden">
                     <img src={banner.imageUrl} className="w-full h-auto max-h-64 md:max-h-80 object-contain" />
                   </div>
                   </a>

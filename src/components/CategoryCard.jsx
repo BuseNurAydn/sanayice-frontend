@@ -15,7 +15,7 @@ const CategoryCard = ({ category }) => {
             className="relative rounded-3xl overflow-hidden h-60 shadow-xl group cursor-pointer transform hover:scale-105 hover:-translate-y-1 transition-all duration-300"
             style={{
                 backgroundImage: `url(${category.imageUrl})`,
-                backgroundSize: 'cover',
+                backgroundSize: 'contain',
                 backgroundPosition: 'center'
             }}
         >

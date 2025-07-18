@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Plus, Edit3, Trash2, Eye, EyeOff, BarChart3, Calendar, Link, FileImage, Type, Mouse } from "lucide-react";
-import { addBanner, updateBanner, getBanners, toggleBannerStatus, updateBannerOrder,deleteBanner } from "../../services/bannerService";
+import { addBanner, updateBanner, getBanners, toggleBannerStatus, updateBannerOrder, deleteBanner } from "../../services/bannerService";
 import { toast } from "react-toastify";
 import AdminText from "../../shared/Text/AdminText";
 import { Upload } from "lucide-react";
@@ -14,12 +14,15 @@ const BannerManagement = () => {
   const [activeTab, setActiveTab] = useState('all');
   const [editingOrder, setEditingOrder] = useState(null);
   const [mainImageFile, setMainImageFile] = useState(null);
+  const [mainImagePreviewUrl, setMainImagePreviewUrl] = useState(null);
 
-//GET
+
+  //GET
   const fetchBanners = async () => {
     try {
       const data = await getBanners();
       setBanners(data); // bannerları state'e kaydet
+      console.log(data);
     } catch (err) {
       console.error("Bannerlar yüklenemedi:", err);
     }
@@ -37,7 +40,7 @@ const BannerManagement = () => {
     order: 1,
   });
 
-   // Ana resim dosyası yükleme handler'ı
+  // Ana resim dosyası yükleme handler'ı
   const handleMainImageUpload = (file) => {
     if (!file) return;
 
@@ -53,15 +56,14 @@ const BannerManagement = () => {
     }
 
     setMainImageFile(file);
-    const imageUrl = URL.createObjectURL(file);
-    setFormData((prev) => ({ ...prev, imageUrl }));
+    setMainImagePreviewUrl(URL.createObjectURL(file)); // sadece önizleme için
   };
 
   const handleRemoveImage = () => {
-  setMainImageFile(null);
-  setFormData((prev) => ({ ...prev, imageUrl: "" }));
-};
-
+    setMainImageFile(null);
+    setMainImagePreviewUrl(null);
+    setFormData((prev) => ({ ...prev, imageUrl: "" }));
+  };
 
   //POST - PUT - ORDER CHANGE
   const handleChange = (e) => {
@@ -72,45 +74,50 @@ const BannerManagement = () => {
     }));
   };
 
-// handleEdit fonksiyonunda
-const handleEdit = (banner) => {
-  setEditingId(banner.id);
-  setEditingOrder(banner.order);  // mevcut sırasını tut
-  setFormData({
-    title: banner.title,
-    description: banner.description,
-    imageUrl: banner.imageUrl,
-    linkUrl: banner.linkUrl,
-    buttonText: banner.buttonText,
-    active: banner.active,
-    order: banner.order,
-  });
-  setIsModalOpen(true);
-};
+  // handleEdit fonksiyonunda
+  const handleEdit = (banner) => {
+    setEditingId(banner.id);
+    setEditingOrder(banner.order);
 
-// handleSave fonksiyonu
-const handleSave = async () => {
+    setFormData({
+      title: banner.title,
+      description: banner.description,
+      linkUrl: banner.linkUrl,
+      buttonText: banner.buttonText,
+      active: banner.active,
+      order: banner.order,
+      imageUrl: banner.imageUrl,
+    });
 
-    if (!mainImageFile) {
-    toast.error("Ana resim yüklemek zorunludur!");
-    return;
-  }
-
-  if (!formData.title || !formData.description || !formData.linkUrl || !formData.buttonText || !formData.active || !formData.order ) {
-    toast.error("Gerekli alanları doldurun!");
-    return;
-  }
-
-  const payload = {
-    title: formData.title,
-    description: formData.description,
-    linkUrl: formData.linkUrl,
-    buttonText: formData.buttonText,
-    active: formData.active,
-    order: parseInt(formData.order),
+    setMainImageFile(null); // Yeni dosya seçilmedikçe boş kalacak
+    setMainImagePreviewUrl(banner.imageUrl); // Eski resmi göster
+    setIsModalOpen(true);
   };
 
-   // FormData oluşturma
+
+  // handleSave fonksiyonu
+  const handleSave = async () => {
+
+    if (!mainImageFile) {
+      toast.error("Ana resim yüklemek zorunludur!");
+      return;
+    }
+
+    if (!formData.title || !formData.description || !formData.linkUrl || !formData.buttonText || !formData.active || !formData.order) {
+      toast.error("Gerekli alanları doldurun!");
+      return;
+    }
+
+    const payload = {
+      title: formData.title,
+      description: formData.description,
+      linkUrl: formData.linkUrl,
+      buttonText: formData.buttonText,
+      active: formData.active,
+      order: parseInt(formData.order),
+    };
+
+    // FormData oluşturma
     const form = new FormData();
 
     // Backend'in beklediği "banner" adında part 
@@ -121,39 +128,40 @@ const handleSave = async () => {
       form.append("imageFile", mainImageFile);
     }
 
-  try {
-    if (editingId) {
-      await updateBanner(editingId, form);
+    try {
+      if (editingId) {
+        await updateBanner(editingId, form);
 
-      // order değiştiyse, ayrı endpointi çağırdım 
-      if (editingOrder !== form.order) {
-        await updateBannerOrder(editingId, form.order);
+        // order değiştiyse, ayrı endpointi çağırdım 
+        if (editingOrder !== payload.order) {
+          await updateBannerOrder(editingId, payload.order);
+        }
+
+
+        toast.success("Banner başarıyla güncellendi!");
+      } else {
+        await addBanner(form);
+        toast.success("Banner başarıyla eklendi!");
       }
 
-      toast.success("Banner başarıyla güncellendi!");
-    } else {
-      await addBanner(form);
-      toast.success("Banner başarıyla eklendi!");
+      setIsModalOpen(false);
+      setFormData({
+        title: "",
+        description: "",
+        imageUrl: "",
+        linkUrl: "",
+        buttonText: "",
+        active: true,
+        order: 1,
+      });
+      setEditingId(null);
+      setEditingOrder(null);
+      fetchBanners();
+
+    } catch (err) {
+      toast.error(err.message || "Bir hata oluştu.");
     }
-
-    setIsModalOpen(false);
-    setFormData({
-      title: "",
-      description: "",
-      imageUrl: "",
-      linkUrl: "",
-      buttonText: "",
-      active: true,
-      order: 1,
-    });
-    setEditingId(null);
-    setEditingOrder(null);
-    fetchBanners();
-
-  } catch (err) {
-    toast.error(err.message || "Bir hata oluştu.");
-  }
-};
+  };
 
   const handleAdd = () => {
     setFormData({
@@ -170,15 +178,15 @@ const handleSave = async () => {
   };
 
   const handleDelete = async () => {
-  try {
-    await deleteBanner(deleteId);
-    toast.success("Banner başarıyla silindi!");
-    fetchBanners(); // Listeyi güncelle
-    setShowConfirmDialog(false);
-  } catch (err) {
-    toast.error(err.message || "Silme işlemi sırasında bir hata oluştu.");
-  }
-};
+    try {
+      await deleteBanner(deleteId);
+      toast.success("Banner başarıyla silindi!");
+      fetchBanners(); // Listeyi güncelle
+      setShowConfirmDialog(false);
+    } catch (err) {
+      toast.error(err.message || "Silme işlemi sırasında bir hata oluştu.");
+    }
+  };
   const activeBanners = banners.filter(b => b.active);
   const inactiveBanners = banners.filter(b => !b.active);
 
@@ -192,11 +200,11 @@ const handleSave = async () => {
 
   const BannerCard = ({ banner, active }) => (
     <div className={`group relative overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition-all duration-300 hover:shadow-xl hover:-translate-y-1 ${!active ? 'opacity-60' : ''}`}>
-       <div className="aspect-video relative overflow-hidden">
+      <div className="relative overflow-hidden">
         <img
           src={banner.imageUrl}
           alt={banner.title}
-          className={`w-full h-full object-cover transition-transform duration-300 group-hover:scale-105 ${!active ? 'grayscale' : ''}`}
+          className={`w-full h-full object-contain transition-transform duration-300 group-hover:scale-105 ${!active ? 'grayscale' : ''}`}
           onError={(e) => {
             e.target.src = "https://via.placeholder.com/800x300/e2e8f0/64748b?text=Görsel+Yüklenemedi";
           }}
@@ -457,38 +465,38 @@ const handleSave = async () => {
                     <FileImage className="w-4 h-4" />
                     Görsel *
                   </label>
-                 {/* Ana Resim */}
-            <div
-              className="border-2 border-dashed border-gray-300 rounded-lg p-4 hover:border-orange-500 hover:bg-orange-50 cursor-pointer w-64 mb-4"
-              onClick={() => {
-                const input = document.createElement("input");
-                input.type = "file";
-                input.accept = "image/*";
-                input.onchange = (e) => handleMainImageUpload(e.target.files[0]);
-                input.click();
-              }}
-            >
-              <Upload className="w-6 h-6 text-gray-400 mx-auto mb-2" />
-              <p className="text-xs text-center text-gray-600">Resim Yükle</p>
-            </div>
+                  {/* Ana Resim */}
+                  <div
+                    className="border-2 border-dashed border-gray-300 rounded-lg p-4 hover:border-orange-500 hover:bg-orange-50 cursor-pointer w-64 mb-4"
+                    onClick={() => {
+                      const input = document.createElement("input");
+                      input.type = "file";
+                      input.accept = "image/*";
+                      input.onchange = (e) => handleMainImageUpload(e.target.files[0]);
+                      input.click();
+                    }}
+                  >
+                    <Upload className="w-6 h-6 text-gray-400 mx-auto mb-2" />
+                    <p className="text-xs text-center text-gray-600">Resim Yükle</p>
+                  </div>
+                  {mainImagePreviewUrl && (
+                    <div className="mb-4 relative w-fit">
+                      <img
+                        src={mainImagePreviewUrl}
+                        alt="Ana Resim"
+                        className="w-32 h-32 object-cover rounded border border-gray-50"
+                      />
+                      <button
+                        type="button"
+                        onClick={handleRemoveImage}
+                        className="absolute -top-2 -right-2 bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm hover:bg-red-700 cursor-pointer"
+                        title="Resmi kaldır"
+                      >
+                        &times;
+                      </button>
+                    </div>
+                  )}
 
-            {mainImageFile && (
-              <div className="mb-4 relative w-fit">
-                <img
-                  src={URL.createObjectURL(mainImageFile)}
-                  alt="Ana Resim"
-                  className="w-32 h-32 object-cover rounded border border-gray-50"
-                />
-                <button
-                  type="button"
-                  onClick={handleRemoveImage}
-                  className="absolute -top-2 -right-2 bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm hover:bg-red-700 cursor-pointer"
-                  title="Resmi kaldır"
-                >
-                  &times;
-                </button>
-              </div>
-            )}
                 </div>
 
                 <div>
@@ -540,7 +548,7 @@ const handleSave = async () => {
               <div className="flex gap-3">
                 <button
                   onClick={handleSave}
-                  className="flex-1 px-6 py-3 bg-orange-600 text-white rounded-xl hover:bg-blue-700 transition-colors font-medium"
+                  className="flex-1 px-6 py-3 bg-orange-600 text-white rounded-xl hover:bg-orange-700 transition-colors font-medium cursor-pointer"
                 >
                   {editingId ? "Güncelle" : "Kaydet"}
                 </button>
