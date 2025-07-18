@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Plus, Edit3, Trash2, Eye, EyeOff, BarChart3, Calendar, Percent, Users, Gift, Copy, Clock, Star, ShoppingCart} from "lucide-react";
+import { Plus, Edit3, Trash2, Eye, EyeOff, BarChart3, Calendar, Percent, Users, Gift, Copy, Clock, Star, FileImage,Upload ,ShoppingCart} from "lucide-react";
 import AdminText from "../../shared/Text/AdminText";
 import { addCampaign, getCampaigns, updateCampaign, deleteCampaign } from "../../services/campaignService";
 import { addCoupon, getCoupons, updateCoupon, deleteCoupon } from "../../services/couponService";
@@ -15,6 +15,8 @@ const CampaignCouponManagement = () => {
   const [deleteId, setDeleteId] = useState(null);
   const [deleteType, setDeleteType] = useState(null);
   const [activeTab, setActiveTab] = useState('campaigns');
+  const [mainImageFile, setMainImageFile] = useState(null);
+  const [mainImagePreviewUrl, setMainImagePreviewUrl] = useState(null);
 
   const [campaignFormData, setCampaignFormData] = useState({
     name: "",
@@ -25,7 +27,7 @@ const CampaignCouponManagement = () => {
     endDate: "",
     minOrderAmount: "",
     isActive: true,
-    order: 1
+    
   });
 
   const [couponFormData, setCouponFormData] = useState({
@@ -71,10 +73,40 @@ const CampaignCouponManagement = () => {
     fetchCoupons();
   }, []);
 
+  // Ana resim dosyası yükleme handler'ı
+  const handleMainImageUpload = (file) => {
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast("Dosya boyutu 5MB'dan büyük olamaz");
+      return;
+    }
+
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg'];
+    if (!allowedTypes.includes(file.type)) {
+      toast('Sadece JPG ve PNG dosyaları yüklenebilir');
+      return;
+    }
+
+    setMainImageFile(file);
+    setMainImagePreviewUrl(URL.createObjectURL(file)); // sadece önizleme için
+  };
+
+  const handleRemoveImage = () => {
+    setMainImageFile(null);
+    setMainImagePreviewUrl(null);
+    setCampaignFormData((prev) => ({ ...prev, imageUrl: "" }));
+  };
+
   const showToast = (message, type = 'success') => {
     console.log(`${type}: ${message}`);
   };
 
+const formatDate = (date) => {
+  if (!date) return ""; // boşsa boş string dön
+  const d = new Date(date);
+  return isNaN(d.getTime()) ? "" : d.toISOString().split("T")[0];
+};
   const generateCouponCode = () => {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
     let result = '';
@@ -100,7 +132,7 @@ const CampaignCouponManagement = () => {
         endDate: "",
         minOrderAmount: "",
         isActive: true,
-        order: campaigns.length + 1
+       
       });
     } else {
       setCouponFormData({
@@ -134,7 +166,7 @@ const CampaignCouponManagement = () => {
         endDate: item.endDate,
         minOrderAmount: Number(item.minOrderAmount),
         isActive: item.isActive,
-        order: item.order
+       
       });
     } else {
       setCouponFormData({
@@ -165,16 +197,38 @@ const CampaignCouponManagement = () => {
           return;
         }
 
-        if (editingId) {
-          await updateCampaign(editingId, campaignFormData);
-          toast("Kampanya güncellendi!");
-        } else {
-          await addCampaign(campaignFormData);
-          toast("Kampanya başarıyla eklendi!");
-        }
+      // FormData hazırla
+      const form = new FormData();
 
-        const updatedCampaigns = await getCampaigns();
-        setCampaigns(updatedCampaigns);
+      const payload = {
+        name: campaignFormData.name,
+        description: campaignFormData.description,
+        discountType: campaignFormData.discountType.toUpperCase(),
+        discountValue: parseFloat(campaignFormData.discountValue),
+        startDate: formatDate(campaignFormData.startDate),
+        endDate: formatDate(campaignFormData.endDate),
+        minOrderAmount: parseFloat(campaignFormData.minOrderAmount || 0),
+        isActive: campaignFormData.isActive,
+      };
+
+      form.append("campaign", JSON.stringify(payload));
+
+      if (mainImageFile) {
+        form.append("imageFile", mainImageFile);
+      }
+
+      if (editingId) {
+        await updateCampaign(editingId, form);
+        toast("Kampanya güncellendi!");
+      } else {
+        await addCampaign(form);
+        toast("Kampanya başarıyla eklendi!");
+      }
+
+      const updatedCampaigns = await getCampaigns();
+      setCampaigns(updatedCampaigns);
+      setIsModalOpen(false);
+      setEditingId(null);
 
       } else {
         if (!couponFormData.code.trim() || !couponFormData.name.trim() || !couponFormData.discountValue) {
@@ -560,7 +614,7 @@ const CampaignCouponManagement = () => {
       {/* Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden shadow-2xl">
+          <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[100vh] overflow-hidden shadow-2xl">
             <div className="p-6 border-b border-gray-100">
               <div className="flex justify-between items-center">
                 <h2 className="text-2xl font-bold text-gray-900">
@@ -607,6 +661,44 @@ const CampaignCouponManagement = () => {
                         placeholder="Kampanya açıklaması"
                       />
                     </div>
+                     <div>
+                  <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
+                    <FileImage className="w-4 h-4" />
+                    Görsel *
+                  </label>
+                  {/* Ana Resim */}
+                  <div
+                    className="border-2 border-dashed border-gray-300 rounded-lg p-4 hover:border-orange-500 hover:bg-orange-50 cursor-pointer w-64 mb-4"
+                    onClick={() => {
+                      const input = document.createElement("input");
+                      input.type = "file";
+                      input.accept = "image/*";
+                      input.onchange = (e) => handleMainImageUpload(e.target.files[0]);
+                      input.click();
+                    }}
+                  >
+                    <Upload className="w-6 h-6 text-gray-400 mx-auto mb-2" />
+                    <p className="text-xs text-center text-gray-600">Resim Yükle</p>
+                  </div>
+                  {mainImagePreviewUrl && (
+                    <div className="mb-4 relative w-fit">
+                      <img
+                        src={mainImagePreviewUrl}
+                        alt="Ana Resim"
+                        className="w-32 h-32 object-cover rounded border border-gray-50"
+                      />
+                      <button
+                        type="button"
+                        onClick={handleRemoveImage}
+                        className="absolute -top-2 -right-2 bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm hover:bg-red-700 cursor-pointer"
+                        title="Resmi kaldır"
+                      >
+                        &times;
+                      </button>
+                    </div>
+                  )}
+
+                </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div>
@@ -676,18 +768,7 @@ const CampaignCouponManagement = () => {
                           placeholder="0"
                         />
                       </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Sıra
-                        </label>
-                        <input
-                          type="number"
-                          value={campaignFormData.order}
-                          onChange={(e) => setCampaignFormData(prev => ({ ...prev, order: e.target.value }))}
-                          className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none transition-all"
-                          min="1"
-                        />
-                      </div>
+                     
                     </div>
 
                     <div className="flex items-center">
@@ -753,6 +834,43 @@ const CampaignCouponManagement = () => {
                         placeholder="Kupon açıklaması"
                       />
                     </div>
+                     <div>
+                  <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
+                    <FileImage className="w-4 h-4" />
+                    Görsel *
+                  </label>
+                  {/* Ana Resim */}
+                  <div
+                    className="border-2 border-dashed border-gray-300 rounded-lg p-4 hover:border-orange-500 hover:bg-orange-50 cursor-pointer w-64 mb-4"
+                    onClick={() => {
+                      const input = document.createElement("input");
+                      input.type = "file";
+                      input.accept = "image/*";
+                      input.onchange = (e) => handleMainImageUpload(e.target.files[0]);
+                      input.click();
+                    }}
+                  >
+                    <Upload className="w-6 h-6 text-gray-400 mx-auto mb-2" />
+                    <p className="text-xs text-center text-gray-600">Resim Yükle</p>
+                  </div>
+                  {mainImagePreviewUrl && (
+                    <div className="mb-4 relative w-fit">
+                      <img
+                        src={mainImagePreviewUrl}
+                        alt="Ana Resim"
+                        className="w-32 h-32 object-cover rounded border border-gray-50"
+                      />
+                      <button
+                        type="button"
+                        onClick={handleRemoveImage}
+                        className="absolute -top-2 -right-2 bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm hover:bg-red-700 cursor-pointer"
+                        title="Resmi kaldır"
+                      >
+                        &times;
+                      </button>
+                    </div>
+                  )}
+                </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div>

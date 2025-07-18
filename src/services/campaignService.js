@@ -3,18 +3,17 @@ import { API_BASE } from "../config";
 const CAMPAIGN_API = `${API_BASE}/sellers/campaigns`;
 
 // ADD CAMPAİGN
- export const addCampaign = async (campaignData) => {
+ export const addCampaign = async (formData) => {
   try {
+     
     const response = await fetch(CAMPAIGN_API, {
       method: "POST",
       headers: {
-        "Content-Type": "application/json",
         Authorization: `Bearer ${localStorage.getItem("token")}`,
       },
-      body: JSON.stringify({
-        ...campaignData,
-        discountType: campaignData.discountType.toUpperCase() // "percentage" → "PERCENTAGE"
-      }),
+      body: 
+        formData,
+     
     });
 
     if (!response.ok) {
@@ -46,14 +45,13 @@ export const getCampaigns = async () => {
 };
 
 // UPDATE CAMPAİGN
-export const updateCampaign = async (id, updatedData) => {
+export const updateCampaign = async (id, formData) => {
   const response = await fetch(`${CAMPAIGN_API}/${id}`, {
     method: 'PUT',
     headers: {
-      'Content-Type': 'application/json',
       Authorization: `Bearer ${localStorage.getItem('token')}`,
     },
-    body: JSON.stringify(updatedData),
+    body: formData,
   });
 
   if (!response.ok) {
