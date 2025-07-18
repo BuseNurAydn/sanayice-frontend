@@ -11,8 +11,6 @@ const AuthRoutes = () => {
         <Route path="signUp" element={<SignUp />} />
         <Route path='signUp/seller' element={<SellerSignUp/>}/>
         <Route path="forgot-password" element={<ForgotPassword />} />
-        
-
       </Routes>
   )
 }

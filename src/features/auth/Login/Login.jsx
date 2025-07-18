@@ -7,7 +7,7 @@ import { CiMail } from 'react-icons/ci';
 import Input from '../../../shared/Input/Input';
 import OrangeButton from '../../../shared/Button/OrangeButton';
 import GrayButton from '../../../shared/Button/GrayButton';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { setCredentials } from '../../../store/authSlice';
 import { login } from '../../../services/authService';
@@ -120,9 +120,9 @@ const Login = () => {
             )}
             
 
-            <a href="/auth/forgot-password" className="custom-font font-medium text-[var(--color-light-orange)]">
+            <Link to="/auth/forgot-password" className="custom-font font-medium text-[var(--color-light-orange)]">
                 Şifremi Unuttum   
-            </a>
+            </Link>
             <div className="flex items-start space-x-2 mt-4">
                 <input
                     type="checkbox"
