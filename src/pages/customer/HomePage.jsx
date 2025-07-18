@@ -138,7 +138,7 @@ const HomePage = () => {
       <nav className="bg-white shadow-md border-b relative hidden md:block">
         <div className="container mx-auto px-6">
           {/* Menü Satırı */}
-          <div className="flex justify-center space-x-8 py-5">
+          <div className="flex justify-start space-x-8 py-5">
             {categories.map((category) => (
               <div
                 key={category.id}
@@ -284,7 +284,7 @@ const HomePage = () => {
                     <img
                       src={brand.imageUrl}
                       alt={brand.name}
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-contain"
                     />
                   ) : (
                     <span className="text-gray-600 font-bold text-lg">

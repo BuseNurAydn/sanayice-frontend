@@ -192,7 +192,7 @@ const Login = () => {
           {/* Üyelik Sözleşmesi Modal */}
           {isModalOpen && (
             <div className="fixed inset-0 bg-transparent backdrop-filter backdrop-blur-sm flex items-center justify-center z-50 p-4">
-                <div className="bg-white bg-opacity-25 rounded-2xl shadow-xl w-full max-w-3xl max-h-[80vh] overflow-hidden">
+                <div className="bg-white bg-opacity-25 rounded-2xl shadow-xl w-full max-w-3xl max-h-[100vh] overflow-hidden">
             
                 {/* Header */}
                 <div className="flex justify-between items-center px-6 py-4 border-b">

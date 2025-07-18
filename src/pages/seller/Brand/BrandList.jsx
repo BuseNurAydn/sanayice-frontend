@@ -186,7 +186,7 @@ const BrandList = () => {
                             <img 
                               src={brand.imageUrl} 
                               alt={brand.name}
-                              className="w-10 h-10 rounded-full object-cover mr-3"
+                              className="w-10 h-10 rounded-full object-contain mr-3"
                             />
                           )}
                           <div>
