@@ -5,8 +5,10 @@ import { fetchCategories, fetchSubcategories } from "../../../services/categoryS
 import { createProduct } from "../../../services/sellerProductService";
 import { toast } from 'react-toastify';
 import { Upload } from "lucide-react";
+import { Navigate, useNavigate } from 'react-router-dom';
 
 const AddProduct = () => {
+  const navigate = useNavigate();
   const boxStyle = 'border border-gray-200 md:p-4 p-2 rounded-lg shadow';
   const lineStyle = 'w-full h-[1px] bg-gray-300 mb-4'
   const labelStyle = 'block text-sm font-medium text-gray-900 pb-2';
@@ -229,6 +231,7 @@ const AddProduct = () => {
     try {
       const result = await createProduct(form);
       toast.success("Ürün başarıyla eklendi!");
+      navigate(`/seller/products`);
       handleClear();
       setMainImageFile(null);
       setAdditionalImageFiles([]);

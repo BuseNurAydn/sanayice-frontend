@@ -84,7 +84,7 @@ const FavoritePage = () => {
           </div>
         ) : (
           <div className="grid gap-8 max-w-6xl mx-auto">
-            {items.map((item, index)=> (
+            {items.map((item, index) => (
               <div
                 key={index}
                 className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden group"
@@ -92,12 +92,14 @@ const FavoritePage = () => {
                 <div className="flex flex-col lg:flex-row">
                   {/* Ürün Görseli */}
                   <div className="relative lg:w-64 lg:h-auto  bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center p-8">
-                    {item?.additionalImages?.[0] && (
-                      <img 
-                      src={item.additionalImages[0]} 
-                      alt="Ürün görseli"
-                      className="object-contain max-h-48 max-w-48 group-hover:scale-105 transition-transform duration-300"
+                    {item.imageUrls ? (
+                      <img
+                        src={item.imageUrls[0]} 
+                        alt={item.name}
+                        className="object-contain max-h-48 max-w-48 group-hover:scale-105 transition-transform duration-300"
                       />
+                    ) : (
+                      <span className="text-gray-400 text-sm">Ürün Görseli</span>
                     )}
                     {/* Badges */}
                     <div className="absolute top-4 left-4 flex flex-col gap-2">
@@ -169,7 +171,7 @@ const FavoritePage = () => {
                     <div className="flex flex-col sm:flex-row gap-4 mt-8">
                       <button
                         onClick={() => handleAddToCart(item.id)}
-                        className="flex-1 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white md:py-4 md:px-8 px-4 py-2 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl">
+                        className="flex-1 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white md:py-4 md:px-8 px-4 py-2 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl cursor-pointer">
                         <div className="flex items-center justify-center gap-2">
                           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 2.5M7 13l2.5 2.5" />
@@ -180,7 +182,7 @@ const FavoritePage = () => {
 
                       <button
                         onClick={() => handleRemoveFavorite(item.id)}
-                        className="sm:w-auto border-2 border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300 md:py-4 md:px-8 px-4 py-2 rounded-xl font-semibold transition-all duration-300">
+                        className="sm:w-auto border-2 border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300 md:py-4 md:px-8 px-4 py-2 rounded-xl font-semibold transition-all duration-300 cursor-pointer">
                         Favoriden Çıkar
                       </button>
                     </div>
