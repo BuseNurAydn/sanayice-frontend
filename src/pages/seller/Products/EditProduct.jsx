@@ -33,32 +33,63 @@ const EditProduct = () => {
   const [additionalImageUrls, setAdditionalImageUrls] = useState(product?.imageUrls?.slice(1) || []);
   const [additionalImageFiles, setAdditionalImageFiles] = useState([]);
 
+  // Eksik state'leri ekle
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
   // URL'den File objesi oluşturmak için yardımcı fonksiyon
   async function urlToFile(url, filename, mimeType) {
-    const res = await fetch(url);
-    const blob = await res.blob();
-    return new File([blob], filename, { type: mimeType });
+    try {
+      const res = await fetch(url);
+      const blob = await res.blob();
+      return new File([blob], filename, { type: mimeType });
+    } catch (error) {
+      console.error('URL\'den file dönüştürme hatası:', error);
+      return null;
+    }
   }
 
-  // Component yüklendiğinde URL’leri File objesine çeviriyoruz
+  // Component yüklendiğinde URL'leri File objesine çeviriyoruz
   useEffect(() => {
     async function convertImages() {
-      if (mainImageUrl && !mainImageFile) {
-        const file = await urlToFile(mainImageUrl, "main-image.jpg", "image/jpeg");
-        setMainImageFile(file);
-        setMainImageUrl('');
-      }
+      try {
+        // Ana resim URL'sini File'a çevir
+        if (mainImageUrl && !mainImageFile) {
+          console.log('Ana resim URL\'si File objesine çevriliyor:', mainImageUrl);
+          const file = await urlToFile(mainImageUrl, "main-image.jpg", "image/jpeg");
+          if (file) {
+            setMainImageFile(file);
+            setMainImageUrl('');
+            console.log('Ana resim başarıyla File objesine çevrildi:', file.name);
+          }
+        }
 
-      if (additionalImageUrls.length > 0 && additionalImageFiles.length === 0) {
-        const files = await Promise.all(
-          additionalImageUrls.map((url, i) => urlToFile(url, `additional-image-${i}.jpg`, "image/jpeg"))
-        );
-        setAdditionalImageFiles(files);
-        setAdditionalImageUrls([]);
+        // Ek resimlerin URL'lerini File'lara çevir
+        if (additionalImageUrls.length > 0 && additionalImageFiles.length === 0) {
+          console.log('Ek resimler URL\'lerden File objelerine çevriliyor:', additionalImageUrls);
+          const files = await Promise.all(
+            additionalImageUrls.map((url, i) => urlToFile(url, `additional-image-${i}.jpg`, "image/jpeg"))
+          );
+          
+          // Null olmayan dosyaları filtrele
+          const validFiles = files.filter(file => file !== null);
+          if (validFiles.length > 0) {
+            setAdditionalImageFiles(validFiles);
+            setAdditionalImageUrls([]);
+            console.log('Ek resimler başarıyla File objelerine çevrildi:', validFiles.length, 'adet');
+          }
+        }
+      } catch (error) {
+        console.error('Resim dönüştürme sırasında hata:', error);
+        setError('Resimler yüklenirken bir hata oluştu');
       }
     }
-    convertImages();
-  }, []);
+    
+    // Product varsa dönüştürme işlemini başlat
+    if (product) {
+      convertImages();
+    }
+  }, [product, mainImageUrl, mainImageFile, additionalImageUrls, additionalImageFiles.length]);
 
   // Diğer event handlerlar
   const handleFeatureChange = (index, value) => {
@@ -92,23 +123,68 @@ const EditProduct = () => {
 
   const handleMainImageUpload = (file) => {
     if (file) {
+      // Dosya boyutu kontrolü (5MB limit)
+      if (file.size > 5 * 1024 * 1024) {
+        setError('Ana resim dosyası 5MB\'dan küçük olmalıdır');
+        return;
+      }
+      
+      // Dosya tipi kontrolü
+      const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+      if (!allowedTypes.includes(file.type)) {
+        setError('Sadece JPG, PNG ve WebP formatları desteklenmektedir');
+        return;
+      }
+
       setMainImageFile(file);
       setMainImageUrl('');
+      setError(''); // Hata varsa temizle
+      console.log('Yeni ana resim seçildi:', file.name, file.size + ' bytes');
     }
   };
 
   const removeMainImage = () => {
     setMainImageFile(null);
     setMainImageUrl('');
+    
+    // File input'u temizle
+    if (mainImageInputRef.current) {
+      mainImageInputRef.current.value = '';
+    }
+    
+    console.log('Ana resim seçimi temizlendi');
   };
 
   const handleAdditionalImagesUpload = (files) => {
     const filesArr = Array.from(files);
-    setAdditionalImageFiles(prev => [...prev, ...filesArr]);
+    
+    // Her dosya için boyut ve tip kontrolü
+    const validFiles = [];
+    for (const file of filesArr) {
+      if (file.size > 5 * 1024 * 1024) {
+        setError('Ek resim dosyası 5MB\'dan küçük olmalıdır');
+        continue;
+      }
+      
+      const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+      if (!allowedTypes.includes(file.type)) {
+        setError('Sadece JPG, PNG ve WebP formatları desteklenmektedir');
+        continue;
+      }
+      
+      validFiles.push(file);
+    }
+
+    if (validFiles.length > 0) {
+      setAdditionalImageFiles(prev => [...prev, ...validFiles]);
+      setError(''); // Hata varsa temizle
+      console.log('Yeni ek resimler eklendi:', validFiles.length, 'adet');
+    }
   };
 
   const removeAdditionalImageFile = (index) => {
     setAdditionalImageFiles(prev => prev.filter((_, i) => i !== index));
+    console.log('Ek resim silindi, index:', index);
   };
 
   // Form submit
@@ -120,49 +196,63 @@ const EditProduct = () => {
       return;
     }
 
-    const techSpecsObject = {};
-    formData.technicalSpecifications.forEach(({ key, value }) => {
-      if (key && value) {
-        techSpecsObject[key] = value;
-      }
-    });
-
-    const updatedProduct = {
-      name: product.name,
-      description: product.description,
-      brand: product.brand,
-      modelNumber: product.modelNumber,
-      categoryId: product.categoryId,
-      subcategoryId: product.subcategoryId,
-      price: parseFloat(formData.price),
-      stockQuantity: parseInt(formData.stockQuantity),
-      highlightedFeatures: formData.highlightedFeatures.filter(f => f.trim() !== ""),
-      technicalSpecifications: techSpecsObject,
-      weightGrams: product.weightGrams,
-      lengthMm: product.lengthMm,
-      widthMm: product.widthMm,
-      heightMm: product.heightMm,
-      warrantyMonths: product.warrantyMonths,
-      freeShipping: product.freeShipping,
-      shippingDays: product.shippingDays,
-    };
-
-    const formDataToSend = new FormData();
-
-    formDataToSend.append("product", JSON.stringify(updatedProduct));
-
-    // Ana resim dosyası
-    formDataToSend.append("imageFiles", mainImageFile);
-
-    // Ek resim dosyaları
-    additionalImageFiles.forEach(file => formDataToSend.append("imageFiles", file));
+    setLoading(true);
+    setError('');
 
     try {
+      const techSpecsObject = {};
+      formData.technicalSpecifications.forEach(({ key, value }) => {
+        if (key && value) {
+          techSpecsObject[key] = value;
+        }
+      });
+
+      const updatedProduct = {
+        name: product.name,
+        description: product.description,
+        brand: product.brand,
+        modelNumber: product.modelNumber,
+        categoryId: product.categoryId,
+        subcategoryId: product.subcategoryId,
+        price: parseFloat(formData.price),
+        stockQuantity: parseInt(formData.stockQuantity),
+        highlightedFeatures: formData.highlightedFeatures.filter(f => f.trim() !== ""),
+        technicalSpecifications: techSpecsObject,
+        weightGrams: product.weightGrams,
+        lengthMm: product.lengthMm,
+        widthMm: product.widthMm,
+        heightMm: product.heightMm,
+        warrantyMonths: product.warrantyMonths,
+        freeShipping: product.freeShipping,
+        shippingDays: product.shippingDays,
+      };
+
+      const formDataToSend = new FormData();
+
+      formDataToSend.append("product", JSON.stringify(updatedProduct));
+
+      // Ana resim dosyası
+      formDataToSend.append("imageFiles", mainImageFile);
+
+      // Ek resim dosyaları
+      additionalImageFiles.forEach(file => formDataToSend.append("imageFiles", file));
+
+      // FormData içeriğini kontrol et (debug için)
+      console.log('Gönderilecek veriler:');
+      console.log('Ana resim:', mainImageFile ? mainImageFile.name : 'Yok');
+      console.log('Ek resimler:', additionalImageFiles.length, 'adet');
+
       await updateProduct(product.id, formDataToSend);
       toast.success("Ürün başarıyla güncellendi!");
       navigate('/seller/products');
+
     } catch (error) {
+      console.error('Ürün güncellenemedi:', error);
+      const errorMessage = error.message || 'Ürün güncelleme sırasında bir hata oluştu';
+      setError(errorMessage);
       toast.error("Ürün güncellenemedi, lütfen tekrar deneyin.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -170,7 +260,7 @@ const EditProduct = () => {
     <div className="min-h-screen py-6 px-3 md:p-6 bg-gray-50">
       <AdminText>Ürün Düzenleme</AdminText>
 
-      {/* ✅ Hata mesajı göster */}
+      {/* Hata mesajı göster */}
       {error && (
         <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
           {error}
@@ -215,6 +305,7 @@ const EditProduct = () => {
               placeholder={`Özellik ${i + 1}`}
               value={formData.highlightedFeatures[i] || ''}
               onChange={e => handleFeatureChange(i, e.target.value)}
+              disabled={loading}
             />
           ))}
         </div>
@@ -230,7 +321,12 @@ const EditProduct = () => {
               onRemove={removeTechSpec}
             />
           ))}
-          <button type="button" onClick={addTechSpec} className="mt-2 mb-4 px-3 py-1 bg-gray-200 rounded">
+          <button 
+            type="button" 
+            onClick={addTechSpec} 
+            className="mt-2 mb-4 px-3 py-1 bg-gray-200 rounded hover:bg-gray-300"
+            disabled={loading}
+          >
             Teknik Özellik Ekle
           </button>
         </div>
@@ -240,8 +336,10 @@ const EditProduct = () => {
           <div className="border-b border-gray-300 mb-4" />
 
           <div
-            className="border-2 border-dashed border-gray-300 rounded-lg p-4 hover:border-orange-500 hover:bg-orange-50 cursor-pointer w-64 mb-4 text-center"
-            onClick={() => mainImageInputRef.current?.click()}
+            className={`border-2 border-dashed border-gray-300 rounded-lg p-4 hover:border-orange-500 hover:bg-orange-50 cursor-pointer w-64 mb-4 text-center ${
+              loading ? 'opacity-50 cursor-not-allowed' : ''
+            }`}
+            onClick={() => !loading && mainImageInputRef.current?.click()}
           >
             <Upload className="w-6 h-6 text-gray-400 mx-auto mb-2" />
             <p className="text-xs text-gray-600">Ana Resim Yükle</p>
@@ -251,6 +349,7 @@ const EditProduct = () => {
               accept="image/*"
               className="hidden"
               onChange={(e) => handleMainImageUpload(e.target.files[0])}
+              disabled={loading}
             />
           </div>
 
@@ -265,6 +364,7 @@ const EditProduct = () => {
                 type="button"
                 onClick={removeMainImage}
                 className="absolute top-0 right-0 bg-red-600 text-white rounded-full px-1 hover:bg-red-800"
+                disabled={loading}
               >
                 ×
               </button>
@@ -272,8 +372,10 @@ const EditProduct = () => {
           )}
 
           <div
-            className="border-2 border-dashed border-gray-300 rounded-lg p-4 hover:border-orange-500 hover:bg-orange-50 cursor-pointer w-64 mb-4 text-center"
-            onClick={() => additionalImagesInputRef.current?.click()}
+            className={`border-2 border-dashed border-gray-300 rounded-lg p-4 hover:border-orange-500 hover:bg-orange-50 cursor-pointer w-64 mb-4 text-center ${
+              loading ? 'opacity-50 cursor-not-allowed' : ''
+            }`}
+            onClick={() => !loading && additionalImagesInputRef.current?.click()}
           >
             <Upload className="w-6 h-6 text-gray-400 mx-auto mb-2" />
             <p className="text-xs text-gray-600">Ek Resim(ler) Yükle</p>
@@ -284,6 +386,7 @@ const EditProduct = () => {
               multiple
               className="hidden"
               onChange={(e) => handleAdditionalImagesUpload(e.target.files)}
+              disabled={loading}
             />
           </div>
 
@@ -299,6 +402,7 @@ const EditProduct = () => {
                   type="button"
                   onClick={() => removeAdditionalImageFile(i)}
                   className="absolute top-0 right-0 bg-red-600 text-white rounded-full px-1 hover:bg-red-800"
+                  disabled={loading}
                 >
                   ×
                 </button>
@@ -310,16 +414,19 @@ const EditProduct = () => {
         <div className="flex justify-end">
           <button
             type="submit"
-            className="bg-dark-orange text-white font-semibold px-6 py-2 rounded-md"
+            className={`px-6 py-2 rounded-md font-semibold ${
+              loading 
+                ? 'bg-gray-400 cursor-not-allowed' 
+                : 'bg-dark-orange hover:bg-orange-600'
+            } text-white`}
+            disabled={loading}
           >
-            Güncelle
+            {loading ? 'Güncelleniyor...' : 'Güncelle'}
           </button>
         </div>
       </form>
     </div>
   );
 };
+
 export default EditProduct;
-
-
-
