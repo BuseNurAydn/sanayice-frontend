@@ -1,4 +1,4 @@
-// SignUp.jsx - Geliştirilmiş versiyon
+// SignUp.jsx - Geliştirilmiş versiyon (Üyelik Sözleşmesi Modal Eklendi)
 
 import { useState, useEffect } from 'react';
 import AuthLayout from '../AuthLayout';
@@ -26,6 +26,8 @@ const SignUp = () => {
     role: 'ROLE_CUSTOMER',
     shippingAddress: '',
     billingAddress: '',
+    acceptTerms: false,
+    allowMarketing: false,
   });
 
   // Email doğrulama state'leri
@@ -36,11 +38,17 @@ const SignUp = () => {
   const [countdown, setCountdown] = useState(0);
   const [showPendingVerification, setShowPendingVerification] = useState(false);
 
+  // Üyelik sözleşmesi modal state
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
   const [message, setMessage] = useState("");
   const [messageType, setMessageType] = useState("info");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const info = 'text-center font-medium custom-font text-[10px] text-black bg-[var(--color-orange)] opacity-80 rounded-lg flex items-center px-1';
+
+  const openModal = () => setIsModalOpen(true);   
+  const closeModal = () => setIsModalOpen(false);
 
   // Component mount olduğunda bekleyen doğrulama var mı kontrol et
   useEffect(() => {
@@ -129,6 +137,13 @@ const SignUp = () => {
       !formData.confirmPassword
     ) {
       setMessage("Lütfen tüm alanları doldurun.");
+      setMessageType("error");
+      return;
+    }
+
+    // Üyelik sözleşmesi kontrolü
+    if (!formData.acceptTerms) {
+      setMessage("Üyelik sözleşmesini kabul etmeniz gerekmektedir.");
       setMessageType("error");
       return;
     }
@@ -277,6 +292,8 @@ const SignUp = () => {
       role: 'ROLE_CUSTOMER',
       shippingAddress: '',
       billingAddress: '',
+      acceptTerms: false,
+      allowMarketing: false,
     });
     setMessage('');
   };
@@ -517,19 +534,25 @@ const SignUp = () => {
           <label className="flex items-start gap-2">
             <input 
               type="checkbox" 
-              name="acceptTerms" 
+              name="acceptTerms"
+              checked={formData.acceptTerms}
               onChange={handleChange} 
               className="accent-[var(--color-dark-orange)] mt-1" 
             />
             <span>
-              <Link className="text-[var(--color-orange)]" to="#"> Üyelik Sözleşmesini </Link>
-              okudum ve kabul ediyorum.
+              <span 
+                className="text-[var(--color-light-orange)] cursor-pointer hover:underline"
+                onClick={openModal}
+              >
+                Üyelik Sözleşmesini
+              </span> okudum, anladım ve kabul ediyorum.
             </span>
           </label>
           <label className="flex items-start gap-2">
             <input 
               type="checkbox" 
-              name="allowMarketing" 
+              name="allowMarketing"
+              checked={formData.allowMarketing}
               onChange={handleChange} 
               className="accent-[var(--color-dark-orange)] mt-1" 
             />
@@ -553,6 +576,151 @@ const SignUp = () => {
         Ürünlerini pazarlamaya ne dersin?<br />
         O zaman sen de bize katıl.
       </div>
+
+      {/* Üyelik Sözleşmesi Modal */}
+      {isModalOpen && (
+        <div className="fixed inset-0 bg-transparent backdrop-filter backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white bg-opacity-25 rounded-2xl shadow-xl w-full max-w-3xl max-h-[80vh] overflow-hidden">
+      
+            {/* Header */}
+            <div className="flex justify-between items-center px-6 py-4 border-b">
+              <h2 className="text-2xl font-semibold">Üyelik Sözleşmesi</h2>
+              <button
+                onClick={closeModal}
+                className="text-gray-500 hover:text-gray-800 text-3xl leading-none"
+              >
+                &times;
+              </button>
+            </div>
+
+            {/* Content */}
+            <div className="px-6 py-4 overflow-y-auto space-y-6 text-sm leading-relaxed">
+              <h3 className="font-bold text-lg">ÜYE KULLANICI SÖZLEŞMESİ</h3>
+              
+              <section className="space-y-3">
+                <h4 className="font-semibold">TARAFLAR</h4>
+                <p>
+                  İşbu Üye Kullanıcı Üyelik Sözleşmesi ("Sözleşme"), bir tarafta
+                  FENERBAHÇE MAH. İĞRİP SK. NO: 13 İÇ KAPI NO: 1 KADIKÖY/
+                  İSTANBUL adresinde bulunan ŞAHIS ŞİRKETİMİZ ("Sanayice") ile
+                  diğer tarafta üye kullanıcı (Üye/Üyeler) arasında aşağıda belirtilen
+                  şartlar ve hükümler dâhilinde sözleşmenin Üye/Üyeler tarafından
+                  mobil uygulama ve/veya internet sitesi üzerinden Sanayice'nin
+                  sunmuş olduğu işbu sözleşmeyi onaylayarak ve/veya Platformu
+                  indirip kullanarak ve/veya Platform üzerinden işlem yaptığı anda
+                  yürürlüğe girmiştir.
+                </p>
+                <p>
+                  İş bu sözleşme kapsamında Sanayice ve Üye ayrı ayrı "Taraf",
+                  birlikte "Taraflar" olarak anılacaktır. İşbu Sözleşme'nin ekleri
+                  ve Sanayice tarafından sunulan hizmetlerinin kullanımına ilişkin
+                  tüm yazılı süreçler, açıklamalar ile ek diğer tüm dokümanlar
+                  Sözleşme'nin ayrılmaz birer parçası kabul edilecektir.
+                </p>
+              </section>
+              
+              <section className="space-y-3">
+                <h4 className="font-semibold">TANIMLAR</h4>
+                <p>
+                  <strong>PLATFORM:</strong> Sanayice'nin sahip olduğu ve/veya işlettiği
+                  mobil uygulama ve/veya internet sitesini ifade eder.
+                </p>
+                <p>
+                  <strong>ÜYE:</strong> Platform'a kayıt olarak üyelik sözleşmesini
+                  kabul eden, Platform üzerinden alışveriş yapan gerçek kişileri
+                  ifade eder.
+                </p>
+                <p>
+                  <strong>KİŞİSEL VERİ:</strong> 6698 sayılı Kişisel Verilerin
+                  Korunması Kanunu'nda tanımlanan kimliği belirli veya
+                  belirlenebilir kılan gerçek kişiye ilişkin her türlü bilgi
+                  ifade eder.
+                </p>
+              </section>
+
+              <section className="space-y-3">
+                <h4 className="font-semibold">ÜYE YÜKÜMLÜLÜKLERİ</h4>
+                <p>
+                  Üye, Platform'ı kullanırken aşağıdaki yükümlülükleri yerine getirmeyi kabul eder:
+                </p>
+                <ul className="list-disc list-inside space-y-1 ml-4">
+                  <li>Kayıt sırasında doğru ve eksiksiz bilgi vermek</li>
+                  <li>Hesap güvenliğini sağlamak ve şifresini güvende tutmak</li>
+                  <li>Platform'un kullanım şartlarına uymak</li>
+                  <li>Yasalara aykırı faaliyetlerde bulunmamak</li>
+                  <li>Platform'a zarar verebilecek davranışlardan kaçınmak</li>
+                </ul>
+              </section>
+
+              <section className="space-y-3">
+                <h4 className="font-semibold">ALIŞVERİŞ VE ÖDEME</h4>
+                <p>
+                  Üye, Platform üzerinden alışveriş yaparken ürün fiyatları,
+                  kargo ücretleri ve diğer masrafları ödemeyi kabul eder.
+                  Tüm ödemeler güvenli ödeme sistemleri aracılığıyla yapılır.
+                </p>
+              </section>
+
+              <section className="space-y-3">
+                <h4 className="font-semibold">İPTAL VE İADE</h4>
+                <p>
+                  Üye, 6502 sayılı Tüketicinin Korunması Hakkında Kanun
+                  kapsamında cayma hakkına sahiptir. İptal ve iade koşulları
+                  Platform'da belirtilen süreç dahilinde gerçekleştirilir.
+                </p>
+              </section>
+
+              <section className="space-y-3">
+                <h4 className="font-semibold">KİŞİSEL VERİLERİN KORUNMASI</h4>
+                <p>
+                  Sanayice, Üye'nin kişisel verilerini 6698 sayılı Kişisel
+                  Verilerin Korunması Kanunu hükümlerine uygun olarak işler
+                  ve korur. Ayrıntılı bilgi için Kişisel Verilerin Korunması
+                  ve İşlenmesi Politikası incelenebilir.
+                </p>
+              </section>
+
+              <section className="space-y-3">
+                <h4 className="font-semibold">HESAP TERMİNİ</h4>
+                <p>
+                  Platform, Üye'nin sözleşme hükümlerini ihlal etmesi durumunda
+                  hesabını askıya alabilir veya tamamen kapatabilir. Üye
+                  istediği zaman üyeliğini sonlandırabilir.
+                </p>
+              </section>
+
+              <section className="space-y-3">
+                <h4 className="font-semibold">UYGULANACAK HUKUK</h4>
+                <p>
+                  İşbu sözleşmeden doğacak her türlü uyuşmazlıkta Türkiye Cumhuriyeti
+                  hukuku uygulanır. Uyuşmazlıklar İstanbul Mahkemeleri ve İcra
+                  Müdürlüklerinin yetkisindedir.
+                </p>
+              </section>
+
+              <section className="space-y-3">
+                <h4 className="font-semibold">KAMPANYA VE PROMOSYONLAR</h4>
+                <p>
+                  Platform, üyelere özel kampanya ve promosyonlar düzenleyebilir.
+                  Kampanya şartları ve süresi Platform tarafından belirlenir.
+                  Üye, kampanyalardan haberdar olmak için izin verirse,
+                  bilgilendirme mesajları alabilir.
+                </p>
+              </section>
+            </div>
+
+            {/* Footer */}
+            <div className="px-6 py-4 border-t flex justify-end">
+              <button
+                onClick={closeModal}
+                className="px-5 py-2 bg-orange-500 text-white font-medium rounded-lg hover:bg-orange-600 transition"
+              >
+                Kapat
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </AuthLayout>
   );
 };

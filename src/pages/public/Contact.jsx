@@ -3,13 +3,19 @@ import { FaPhone, FaEnvelope, FaMapMarkerAlt, FaFacebook, FaLinkedin } from 'rea
 import { AiFillInstagram } from 'react-icons/ai';
 import { IoLogoYoutube } from 'react-icons/io';
 import { useState } from 'react';
+import { sendContactEmail } from '../../services/contactService';
 
 const Contact = () => {
   const [formData, setFormData] = useState({
-    name: '',
+    firstName: '',
+    lastName: '',
     email: '',
     message: '',
   });
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitMessage, setSubmitMessage] = useState('');
+  const [submitStatus, setSubmitStatus] = useState(''); // 'success' or 'error'
 
   // Handles changes to form input fields
   const handleChange = (e) => {
@@ -21,14 +27,35 @@ const Contact = () => {
   };
 
   // Handles form submission
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Contact form submitted:", formData);
-    // In a real application, you would send this data to a backend API.
-    // For demonstration purposes, we'll use a simple alert.
-    // IMPORTANT: In a production app, replace `alert()` with a custom modal or toast notification.
-    alert("Mesajınız başarıyla gönderildi!");
-    setFormData({ name: '', email: '', message: '' }); // Clear the form after submission
+    setIsSubmitting(true);
+    setSubmitMessage('');
+    setSubmitStatus('');
+
+    try {
+      const result = await sendContactEmail(formData);
+      
+      if (result.success) {
+        setSubmitStatus('success');
+        setSubmitMessage(result.message);
+        setFormData({ firstName: '', lastName: '', email: '', message: '' });
+      } else {
+        setSubmitStatus('error');
+        setSubmitMessage(result.message);
+      }
+    } catch (error) {
+      setSubmitStatus('error');
+      setSubmitMessage('Bir hata oluştu. Lütfen daha sonra tekrar deneyin.');
+    } finally {
+      setIsSubmitting(false);
+      
+      // Mesajı 5 saniye sonra temizle
+      setTimeout(() => {
+        setSubmitMessage('');
+        setSubmitStatus('');
+      }, 5000);
+    }
   };
 
   return (
@@ -82,24 +109,58 @@ const Contact = () => {
         {/* Contact Form Section */}
         <div className="flex flex-col space-y-4">
           <h3 className="text-xl font-semibold text-gray-700 mb-3">Mesaj Gönderin</h3>
+          
+          {/* Success/Error Message */}
+          {submitMessage && (
+            <div className={`p-3 rounded-md ${
+              submitStatus === 'success' 
+                ? 'bg-green-100 text-green-700 border border-green-200' 
+                : 'bg-red-100 text-red-700 border border-red-200'
+            }`}>
+              {submitMessage}
+            </div>
+          )}
+
           <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Name Input */}
+            {/* First Name Input */}
             <div>
-              <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">Adınız Soyadınız</label>
+              <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-1">Adınız *</label>
               <input
                 type="text"
-                id="name"
-                name="name"
-                value={formData.name}
+                id="firstName"
+                name="firstName"
+                value={formData.firstName}
                 onChange={handleChange}
                 className="w-full p-3 border border-gray-300 rounded-md focus:ring-orange-500 focus:border-orange-500 transition-all duration-200"
-                placeholder="Adınız Soyadınız"
+                placeholder="Adınız"
                 required
+                disabled={isSubmitting}
+                minLength="2"
+                maxLength="50"
               />
             </div>
+
+            {/* Last Name Input */}
+            <div>
+              <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-1">Soyadınız *</label>
+              <input
+                type="text"
+                id="lastName"
+                name="lastName"
+                value={formData.lastName}
+                onChange={handleChange}
+                className="w-full p-3 border border-gray-300 rounded-md focus:ring-orange-500 focus:border-orange-500 transition-all duration-200"
+                placeholder="Soyadınız"
+                required
+                disabled={isSubmitting}
+                minLength="2"
+                maxLength="50"
+              />
+            </div>
+
             {/* Email Input */}
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">E-posta Adresiniz</label>
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">E-posta Adresiniz *</label>
               <input
                 type="email"
                 id="email"
@@ -109,11 +170,13 @@ const Contact = () => {
                 className="w-full p-3 border border-gray-300 rounded-md focus:ring-orange-500 focus:border-orange-500 transition-all duration-200"
                 placeholder="örnek@eposta.com"
                 required
+                disabled={isSubmitting}
               />
             </div>
+
             {/* Message Textarea */}
             <div>
-              <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-1">Mesajınız</label>
+              <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-1">Mesajınız *</label>
               <textarea
                 id="message"
                 name="message"
@@ -123,14 +186,26 @@ const Contact = () => {
                 className="w-full p-3 border border-gray-300 rounded-md focus:ring-orange-500 focus:border-orange-500 transition-all duration-200"
                 placeholder="Mesajınızı buraya yazın..."
                 required
+                disabled={isSubmitting}
+                minLength="10"
+                maxLength="1000"
               ></textarea>
+              <div className="text-sm text-gray-500 mt-1">
+                {formData.message.length}/1000 karakter
+              </div>
             </div>
+
             {/* Submit Button */}
             <button
               type="submit"
-              className="w-full bg-orange-600 text-white py-3 px-6 rounded-md font-semibold hover:bg-orange-700 transition-colors duration-300 shadow-md"
+              disabled={isSubmitting}
+              className={`w-full py-3 px-6 rounded-md font-semibold transition-colors duration-300 shadow-md ${
+                isSubmitting 
+                  ? 'bg-gray-400 cursor-not-allowed text-white' 
+                  : 'bg-orange-600 text-white hover:bg-orange-700'
+              }`}
             >
-              Mesajı Gönder
+              {isSubmitting ? 'Gönderiliyor...' : 'Mesajı Gönder'}
             </button>
           </form>
         </div>
