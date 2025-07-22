@@ -1,5 +1,5 @@
 import { useState,useEffect } from 'react';
-import { FaStar, FaEdit, FaTrashAlt } from 'react-icons/fa';
+import { FaStar, FaEdit, FaTrashAlt, FaEye } from 'react-icons/fa';
 import { API_BASE } from "../../../config";
 
 const Reviews = () => {
@@ -40,6 +40,11 @@ const Reviews = () => {
     // Implement logic to delete review
   };
 
+  const handleViewProduct = (productId) => {
+    console.log(`View product with ID: ${productId}`);
+    // Implement logic to navigate to product detail page
+  };
+
   const renderStars = (rating) => {
     const stars = [];
     for (let i = 0; i < 5; i++) {
@@ -64,12 +69,7 @@ const Reviews = () => {
               key={review.id}
               className="border border-gray-200 rounded-lg p-4 flex flex-col md:flex-row justify-between items-start bg-white shadow-sm hover:shadow-md transition-shadow duration-200"
             >
-              <div className="flex flex-col md:flex-row gap-4 items-start w-full md:w-3/4">
-                <img
-                  src={review.productImageUrl}
-                  alt={review.productName}
-                  className="w-24 h-24 object-cover rounded-md border border-gray-100"
-                />
+              <div className="flex flex-col gap-4 items-start w-full md:w-3/4">
                 <div className="flex-1">
                   <p className="text-base text-gray-800 font-medium mb-1 break-words">
                     {review.productName}
@@ -80,6 +80,14 @@ const Reviews = () => {
                   </div>
                   <p className="text-gray-700 italic mb-2">"{review.comment}"</p>
                   <p className="text-sm text-gray-500">Tarih: {new Date(review.createdAt).toLocaleDateString()}</p>
+                  
+                  <button
+                    onClick={() => handleViewProduct(review.productId)}
+                    className="mt-3 flex items-center gap-2 text-green-600 hover:text-green-800 transition-colors duration-200 bg-green-50 hover:bg-green-100 px-3 py-2 rounded-md text-sm font-medium"
+                  >
+                    <FaEye size={16} />
+                    Ürün Detayına Git
+                  </button>
                 </div>
               </div>
               <div className="flex gap-3 mt-4 md:mt-0">
