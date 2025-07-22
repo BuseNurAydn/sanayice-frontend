@@ -7,6 +7,8 @@ import { toast } from 'react-toastify';
 import { Upload } from "lucide-react";
 
 const EditProduct = () => {
+ 
+
   const navigate = useNavigate();
   const location = useLocation();
   const product = location.state?.product;

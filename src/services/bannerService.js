@@ -13,13 +13,16 @@ export const addBanner = async (banner) => {
     body: banner,
   });
 
-  if (!response.ok) {
+ if (!response.ok) {
+    if (response.status === 413) {
+      throw new Error("413"); // özel mesaj fırlat
+    }
+
     const errorData = await response.json().catch(() => ({}));
-    console.error("Güncelleme hatası:", errorData);
-    throw new Error(errorData.message || "Banner eklenemedi.");
+    throw new Error(errorData.message || "Bir hata oluştu");
   }
 
-  return await response.json();
+  return response.json();
 };
 
 // PUT BANNER

@@ -45,7 +45,7 @@ const BannerManagement = () => {
     if (!file) return;
 
     if (file.size > 5 * 1024 * 1024) {
-      toast("Dosya boyutu 5MB'dan büyük olamaz");
+     toast.error("Dosya boyutu 5MB'dan büyük olamaz");
       return;
     }
 
@@ -158,9 +158,15 @@ const BannerManagement = () => {
       setEditingOrder(null);
       fetchBanners();
 
-    } catch (err) {
-      toast.error(err.message || "Bir hata oluştu.");
-    }
+    
+    }catch (err) {
+  if (err.message === "413") {
+    toast.error("Yüklemeye çalıştığınız görsel dosyası çok büyük. Lütfen 5MB'dan küçük bir dosya seçin.");
+  } else {
+    toast.error(err.message || "Bir hata oluştu.");
+  }
+}
+
   };
 
   const handleAdd = () => {
