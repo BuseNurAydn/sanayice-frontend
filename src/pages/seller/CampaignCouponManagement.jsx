@@ -219,10 +219,10 @@ const CampaignCouponManagement = () => {
           showToast("Kampanya adı ve indirim miktarı zorunludur!", 'error');
           return;
         }
-
+  
         // FormData hazırla
         const form = new FormData();
-
+  
         const payload = {
           name: campaignFormData.name,
           description: campaignFormData.description,
@@ -233,13 +233,13 @@ const CampaignCouponManagement = () => {
           minOrderAmount: parseFloat(campaignFormData.minOrderAmount || 0),
           isActive: campaignFormData.isActive,
         };
-
+  
         form.append("campaign", JSON.stringify(payload));
-
+  
         if (mainImageFile) {
           form.append("imageFile", mainImageFile);
         }
-
+  
         if (editingId) {
           await updateCampaign(editingId, form);
           toast("Kampanya güncellendi!");
@@ -247,41 +247,48 @@ const CampaignCouponManagement = () => {
           await addCampaign(form);
           toast("Kampanya başarıyla eklendi!");
         }
-
+  
         const updatedCampaigns = await getCampaigns();
         setCampaigns(updatedCampaigns);
         setIsModalOpen(false);
         setEditingId(null);
-
+  
       } else {
-        if (!couponFormData.code.trim() || !couponFormData.name.trim() || !couponFormData.discountValue) {
-          showToast("Kupon kodu, isim ve indirim miktarı zorunludur!", 'error');
+        // Kupon için validasyon - trim() ve parseFloat kontrolü ekledik
+        const discountValue = parseFloat(couponFormData.discountValue);
+        
+        if (!couponFormData.code.trim() || 
+            !couponFormData.name.trim() || 
+            !couponFormData.discountValue.trim() || 
+            isNaN(discountValue) || 
+            discountValue <= 0) {
+          showToast("Kupon kodu, isim ve geçerli bir indirim miktarı zorunludur!", 'error');
           return;
         }
-
+  
         // FormData hazırla
         const form = new FormData();
-
+  
         const payload = {
           code: couponFormData.code,
           name: couponFormData.name,
           description: couponFormData.description,
           discountType: couponFormData.discountType.toUpperCase(),
-          discountValue: parseFloat(couponFormData.discountValue),
+          discountValue: discountValue,
           startDate: formatDate(couponFormData.startDate),
-          endDate: formatDate(campaignFormData.endDate),
-          usageLimit: parseInt(couponFormData.usageLimit),
+          endDate: formatDate(couponFormData.endDate), // Burada da hata vardı - campaignFormData yerine couponFormData olmalı
+          usageLimit: parseInt(couponFormData.usageLimit) || 0,
           minOrderAmount: parseFloat(couponFormData.minOrderAmount || 0),
           targetType: couponFormData.targetType.toUpperCase(),
           isActive: couponFormData.isActive,
         };
-
+  
         form.append("coupon", JSON.stringify(payload));
-
+  
         if (mainImageFile) {
           form.append("imageFile", mainImageFile);
         }
-
+  
         if (editingId) {
           await updateCoupon(editingId, form);
           toast("Kupon güncellendi!");
@@ -289,7 +296,7 @@ const CampaignCouponManagement = () => {
           await addCoupon(form);
           toast("Kupon başarıyla eklendi!");
         }
-
+  
         const updatedCoupons = await getCoupons();
         setCoupons(updatedCoupons);
       }
