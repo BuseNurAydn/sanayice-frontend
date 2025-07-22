@@ -57,18 +57,15 @@ const EditProduct = () => {
       try {
         // Ana resim URL'sini File'a çevir
         if (mainImageUrl && !mainImageFile) {
-          console.log('Ana resim URL\'si File objesine çevriliyor:', mainImageUrl);
           const file = await urlToFile(mainImageUrl, "main-image.jpg", "image/jpeg");
           if (file) {
             setMainImageFile(file);
             setMainImageUrl('');
-            console.log('Ana resim başarıyla File objesine çevrildi:', file.name);
           }
         }
 
         // Ek resimlerin URL'lerini File'lara çevir
         if (additionalImageUrls.length > 0 && additionalImageFiles.length === 0) {
-          console.log('Ek resimler URL\'lerden File objelerine çevriliyor:', additionalImageUrls);
           const files = await Promise.all(
             additionalImageUrls.map((url, i) => urlToFile(url, `additional-image-${i}.jpg`, "image/jpeg"))
           );
@@ -78,7 +75,7 @@ const EditProduct = () => {
           if (validFiles.length > 0) {
             setAdditionalImageFiles(validFiles);
             setAdditionalImageUrls([]);
-            console.log('Ek resimler başarıyla File objelerine çevrildi:', validFiles.length, 'adet');
+
           }
         }
       } catch (error) {
@@ -141,7 +138,6 @@ const EditProduct = () => {
       setMainImageFile(file);
       setMainImageUrl('');
       setError(''); // Hata varsa temizle
-      console.log('Yeni ana resim seçildi:', file.name, file.size + ' bytes');
     }
   };
 

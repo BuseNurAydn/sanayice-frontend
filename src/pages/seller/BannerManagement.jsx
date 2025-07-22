@@ -15,7 +15,7 @@ const BannerManagement = () => {
   const [editingOrder, setEditingOrder] = useState(null);
   const [mainImageFile, setMainImageFile] = useState(null);
   const [mainImagePreviewUrl, setMainImagePreviewUrl] = useState(null);
-
+  const MAX_FILE_SIZE_MB = 5; // Maksimum 5 MB
 
   //GET
   const fetchBanners = async () => {
@@ -41,22 +41,23 @@ const BannerManagement = () => {
   });
 
   // Ana resim dosyası yükleme handler'ı
-  const handleMainImageUpload = (file) => {
+ const handleMainImageUpload = (file) => {
+    console.log('handleMainImageUpload çağrıldı', file);
     if (!file) return;
 
     if (file.size > 5 * 1024 * 1024) {
-     toast.error("Dosya boyutu 5MB'dan büyük olamaz");
+      toast.error("Dosya boyutu 5MB'dan büyük olamaz");
       return;
     }
 
     const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg'];
     if (!allowedTypes.includes(file.type)) {
-      toast('Sadece JPG ve PNG dosyaları yüklenebilir');
+      toast.error('Sadece JPG ve PNG dosyaları yüklenebilir');
       return;
     }
 
     setMainImageFile(file);
-    setMainImagePreviewUrl(URL.createObjectURL(file)); // sadece önizleme için
+    setMainImagePreviewUrl(URL.createObjectURL(file));
   };
 
   const handleRemoveImage = () => {
@@ -158,14 +159,14 @@ const BannerManagement = () => {
       setEditingOrder(null);
       fetchBanners();
 
-    
-    }catch (err) {
-  if (err.message === "413") {
-    toast.error("Yüklemeye çalıştığınız görsel dosyası çok büyük. Lütfen 5MB'dan küçük bir dosya seçin.");
-  } else {
-    toast.error(err.message || "Bir hata oluştu.");
-  }
-}
+
+    } catch (err) {
+      if (err.message === "413") {
+        toast.error("Yüklemeye çalıştığınız görsel dosyası çok büyük. Lütfen 5MB'dan küçük bir dosya seçin.");
+      } else {
+        toast.error(err.message || "Bir hata oluştu.");
+      }
+    }
 
   };
 

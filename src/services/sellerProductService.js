@@ -30,7 +30,6 @@ export const deleteProduct = async (productId) => {
   const response = await fetch(`${PRODUCTS_API}/${productId}`, {
     method: "DELETE",
     headers: {
-      "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
     },
   });
