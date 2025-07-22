@@ -4,7 +4,7 @@ const PRODUCTS_API = `${API_BASE}/products`;
 
 const getToken = () => localStorage.getItem("token");
 
-// ✅ LİSTELEME - GET
+// LİSTELEME - GET
 export const fetchMyProducts = async () => {
   const token = getToken();
 
@@ -23,7 +23,7 @@ export const fetchMyProducts = async () => {
   return await response.json();
 };
 
-// ✅ SİLME - DELETE
+// SİLME - DELETE
 export const deleteProduct = async (productId) => {
   const token = getToken();
 
@@ -42,7 +42,7 @@ export const deleteProduct = async (productId) => {
   return true;
 };
 
-// ✅ ÜRÜN EKLEME - POST (multipart/form-data uyumlu)
+// ÜRÜN EKLEME - POST (multipart/form-data uyumlu)
 export const createProduct = async (formData) => {
   const token = localStorage.getItem("token");
 
@@ -50,14 +50,11 @@ export const createProduct = async (formData) => {
   if (!(formData instanceof FormData)) {
     throw new Error("Hatalı form verisi! FormData bekleniyor.");
   }
-  for (let [key, value] of formData.entries()) {
-    console.log(key, value);
-  }
+ 
   const response = await fetch(`${API_BASE}/products`, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${token}`,
-      // ⚠️ Content-Type header'ını kaldırdık - browser otomatik ayarlayacak
     },
     body: formData,
   });
@@ -70,15 +67,14 @@ export const createProduct = async (formData) => {
   return await response.json();
 };
 
-// ✅ ÜRÜN GÜNCELLEME - PUT (multipart/form-data formatına uygun)
+// ÜRÜN GÜNCELLEME - PUT (multipart/form-data formatına uygun)
 export const updateProduct = async (id, formData) => {
   const token = getToken();
 
   const response = await fetch(`${PRODUCTS_API}/${id}`, {
     method: "PUT",
     headers: {
-      Authorization: `Bearer ${token}`,
-      // ⚠️ Content-Type header'ını kaldırdık - browser otomatik ayarlayacak
+      Authorization: `Bearer ${token}`,  
     },
     body: formData,
   });
@@ -89,5 +85,15 @@ export const updateProduct = async (id, formData) => {
     throw new Error(errorData.message || "Ürün güncellenemedi.");
   }
 
+  return await response.json();
+};
+
+export const getProductById = async (id) => {
+  const response = await fetch(`${PRODUCTS_API}/my-products/${id}`, {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem('token')}`,
+    },
+  });
+  if (!response.ok) throw new Error('Ürün alınamadı');
   return await response.json();
 };

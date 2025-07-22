@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import { getOrders } from "../../../services/ordersService"; 
 import ReviewModal from "../../../components/ReviewModal";
 import { toast } from "react-toastify";
+import { API_BASE } from "../../../config";
+
 const Orders = () => {
   const [orders, setOrders] = useState([]);
   const [activeTab, setActiveTab] = useState("all");
@@ -9,7 +11,7 @@ const Orders = () => {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState("");
-
+  const ORDER_API = `${API_BASE}/products/reviews`;
 
   const tabs = [
     { key: "all", label: "Tüm Siparişler" },
@@ -67,7 +69,7 @@ const Orders = () => {
   const handleSubmitReview = async () => {
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch("/api/products/reviews", {
+      const response = await fetch(ORDER_API, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -156,11 +158,12 @@ const Orders = () => {
                 >
                   {/* Ürün görseli + bilgiler */}
                   <div className="flex flex-col md:flex-row gap-4">
+                    {/*
                     <img
-                      src={item.additionalImages?.[0]}
+                      src={item.productImageUrl}
                       alt={item.productName}
                       className="w-20 h-20 object-cover rounded"
-                    />
+                    />*/}
                     <div>
                       <p className="font-medium">{item.productName}</p>
                       <p className="text-xs text-gray-600">
@@ -186,9 +189,10 @@ const Orders = () => {
                     </div>
                   </div>
                   <div className="flex flex-row items-end gap-x-2">
+                    {/** 
                     <button className="text-xs md:text-sm border border-blue-600 py-1 px-2 md:py-2 md:px-4 text-blue-600 font-semibold">
                       Ürün Detay
-                    </button>
+                    </button>*/}
                     {order.statusDisplayName === "Teslim Edildi" && (
                       <button
                         onClick={() => openReviewModal(item)}

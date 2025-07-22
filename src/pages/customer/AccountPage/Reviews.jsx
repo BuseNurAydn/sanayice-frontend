@@ -19,6 +19,7 @@ const Reviews = () => {
         if (!response.ok) throw new Error("Değerlendirmeler alınamadı");
         const data = await response.json();
         setReviews(data);
+        console.log(data)
       } catch (err) {
         setError(err.message);
       } finally {
@@ -65,7 +66,7 @@ const Reviews = () => {
             >
               <div className="flex flex-col md:flex-row gap-4 items-start w-full md:w-3/4">
                 <img
-                  src={review.productImage}
+                  src={review.productImageUrl}
                   alt={review.productName}
                   className="w-24 h-24 object-cover rounded-md border border-gray-100"
                 />

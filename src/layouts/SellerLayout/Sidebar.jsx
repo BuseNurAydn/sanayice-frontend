@@ -77,7 +77,7 @@ const menuItems = [
     icon: <MdViewCarousel />,
   },
   {
-    label: "Kupon Ve Kampanya Yönetimi",
+    label: "Kampanya Ve Kupon Yönetimi",
     to: "/seller/coupon_campaign_management",
     icon: <MdLocalOffer />,
   },
@@ -154,13 +154,13 @@ const Sidebar = () => {
            item.label !== "Marka Listesi" &&
            item.label !== "Satıcı Doğrulama" &&
            item.label !== "Banner Yönetimi" &&
-           item.label !== "Kupon Ve Kampanya Yönetimi" &&
+           item.label !== "Kampanya Ve Kupon Yönetimi" &&
            item.label !== "Satıcıların Kupon Ve Kampanya Listesi" &&
            item.label !== "Destek Ve Geri Bildirim Yönetimi" &&
            item.label !== "Satıcı Doğrulama Sayfası";
     } else if (role === "ROLE_MANAGER") {
       return item.label === "Satıcı Doğrulama" || item.label === "Kategoriler" ||  item.label === "Marka Listesi" || 
-             item.label === "Banner Yönetimi" || item.label === "Kupon Ve Kampanya Yönetimi" || item.label === "Satıcıların Kupon Ve Kampanya Listesi" ||  item.label === "Destek Ve Geri Bildirim Yönetimi" ||  item.label === "Satıcı Doğrulama Sayfası";
+             item.label === "Banner Yönetimi" || item.label === "Kampanya Ve Kupon Yönetimi" || item.label === "Satıcıların Kupon Ve Kampanya Listesi" ||  item.label === "Destek Ve Geri Bildirim Yönetimi" ||  item.label === "Satıcı Doğrulama Sayfası";
     } else {
       return true;
     }

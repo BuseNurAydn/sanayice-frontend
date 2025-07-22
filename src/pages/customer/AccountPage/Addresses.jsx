@@ -17,7 +17,7 @@ const Addresses = () => {
     district: "",
     postalCode: "",
     fullAddress: "",
-    isDefault: false,
+    isDefault: true,
   });
 
   //GET ADRESSES
@@ -55,15 +55,34 @@ const Addresses = () => {
     }));
   };
 
+const sanitizeFormData = (formData) => {
+  return {
+    addressTitle: formData.addressTitle.trim(),
+    recipientName: formData.recipientName.trim(),
+    phoneNumber: formData.phoneNumber.startsWith("+90")
+      ? formData.phoneNumber
+      : "+90" + formData.phoneNumber.replace(/\D/g, ""),
+    country: formData.country.trim(),
+    city: formData.city.trim(),
+    district: formData.district.trim(),
+    postalCode: formData.postalCode.trim(),
+    fullAddress: formData.fullAddress.trim(),
+    isDefault: formData.isDefault,
+  };
+};
+
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+ 
+  const cleanedData = sanitizeFormData(formData);
 
     try {
       if (editId) {
         await updateAddress(editId, formData);
         toast.success("Adres başarıyla güncellendi");
       } else {
-        await createAddress(formData);
+        await createAddress(cleanedData);
         toast.success("Adres başarıyla kaydedildi");
       }
 

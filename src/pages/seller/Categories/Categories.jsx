@@ -41,7 +41,6 @@ const Categories = () => {
       try {
         const cats = await fetchCategories();
         setCategories(cats);
-         console.log(cats)
         const subs = await fetchSubcategories();
         setSubcategories(subs);
       } catch (error) {

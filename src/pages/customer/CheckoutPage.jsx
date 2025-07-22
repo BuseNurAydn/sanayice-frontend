@@ -5,12 +5,14 @@ import { toast } from "react-toastify";
 import { createAddress, fetchAddresses } from "../../services/addressService";
 import { fetchCart, clearCart } from "../../services/cartService";
 import { useDispatch, useSelector } from 'react-redux';
+import { API_BASE } from "../../config";
 
 const CheckoutPage = () => {
   const dispatch = useDispatch();
   const cartItems = useSelector(state => state.cart.items);
   const buyNow = useSelector(state => state.buyNow);
   const navigate = useNavigate();
+  const CHECKOUT_API = `${API_BASE}/orders/confirm`;
 
   useEffect(() => {
     dispatch(fetchCart());
@@ -175,10 +177,10 @@ const CheckoutPage = () => {
         paymentMethod: formData.paymentMethod,
         paymentToken: formData.paymentMethod === 'credit-card' ? formData.paymentToken : undefined
       };
-      console.log("Sipariş bilgileri:", orderRequest);
+    
 
       const token = localStorage.getItem('token'); //  token
-      const response = await fetch('/api/orders/confirm', {
+      const response = await fetch(CHECKOUT_API, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -708,7 +710,7 @@ const CheckoutPage = () => {
       city: formData.city,
       phoneNumber: formData.phoneNumber
     };
-    console.log("addressInfo:", addressInfo);
+  
 
     const selectedShipping = shippingOptions.find(option => option.id === formData.selectedShipping);
 

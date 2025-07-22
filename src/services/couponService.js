@@ -3,17 +3,13 @@ import { API_BASE } from "../config";
 const COUPON_API = `${API_BASE}/sellers/coupons`;
 
 // ADD COUPON
-export const addCoupon = async (couponData) => {
+export const addCoupon = async (formData) => {
   const response = await fetch(COUPON_API, {
     method: 'POST',
     headers: {
-      'Content-Type': 'application/json',
        Authorization: `Bearer ${localStorage.getItem('token')}`,
     },
-     body: JSON.stringify({
-        ...couponData,
-        discountType: couponData.discountType.toUpperCase() // "percentage" → "PERCENTAGE"
-      }),
+     body: formData
   });
 
   if (!response.ok) {
@@ -44,7 +40,6 @@ export const updateCoupon = async (id, couponData) => {
   const response = await fetch(`${COUPON_API}/${id}`, {
     method: 'PUT',
     headers: {
-      'Content-Type': 'application/json',
       Authorization: `Bearer ${localStorage.getItem("token")}`
     },
     body: JSON.stringify({

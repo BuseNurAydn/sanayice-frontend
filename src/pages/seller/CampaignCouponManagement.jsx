@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Plus, Edit3, Trash2, Eye, EyeOff, BarChart3, Calendar, Percent, Users, Gift, Copy, Clock, Star, FileImage,Upload ,ShoppingCart} from "lucide-react";
+import { Plus, Edit3, Trash2, Eye, EyeOff, BarChart3, Calendar, Percent, Users, Gift, Copy, Clock, Star, FileImage, Upload, ShoppingCart } from "lucide-react";
 import AdminText from "../../shared/Text/AdminText";
 import { addCampaign, getCampaigns, updateCampaign, deleteCampaign } from "../../services/campaignService";
 import { addCoupon, getCoupons, updateCoupon, deleteCoupon } from "../../services/couponService";
@@ -27,7 +27,7 @@ const CampaignCouponManagement = () => {
     endDate: "",
     minOrderAmount: "",
     isActive: true,
-    
+
   });
 
   const [couponFormData, setCouponFormData] = useState({
@@ -102,11 +102,11 @@ const CampaignCouponManagement = () => {
     console.log(`${type}: ${message}`);
   };
 
-const formatDate = (date) => {
-  if (!date) return ""; // boşsa boş string dön
-  const d = new Date(date);
-  return isNaN(d.getTime()) ? "" : d.toISOString().split("T")[0];
-};
+  const formatDate = (date) => {
+    if (!date) return ""; // boşsa boş string dön
+    const d = new Date(date);
+    return isNaN(d.getTime()) ? "" : d.toISOString().split("T")[0];
+  };
   const generateCouponCode = () => {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
     let result = '';
@@ -132,7 +132,8 @@ const formatDate = (date) => {
         endDate: "",
         minOrderAmount: "",
         isActive: true,
-       
+        imageUrl:""
+
       });
     } else {
       setCouponFormData({
@@ -147,9 +148,11 @@ const formatDate = (date) => {
         usedCount: 0,
         minOrderAmount: "",
         targetType: "all",
-        isActive: true
+        isActive: true,
+        imageUrl:""
       });
     }
+    setMainImagePreviewUrl(null);
     setModalType(type);
     setEditingId(null);
     setIsModalOpen(true);
@@ -166,8 +169,17 @@ const formatDate = (date) => {
         endDate: item.endDate,
         minOrderAmount: Number(item.minOrderAmount),
         isActive: item.isActive,
-       
+        imageUrl: item.imageUrl || ""
       });
+      // Önizlemeye resmi getir
+      if (item.imageUrl) {
+        setMainImagePreviewUrl(item.imageUrl);
+      } else {
+        setMainImagePreviewUrl(null);
+      }
+
+      // Eğer yeni dosya seçildiyse temizle
+      setMainImageFile(null);
     } else {
       setCouponFormData({
         code: item.code,
@@ -181,13 +193,24 @@ const formatDate = (date) => {
         usedCount: Number(item.usedCount),
         minOrderAmount: Number(item.minOrderAmount),
         targetType: item.targetType,
-        isActive: item.isActive
+        isActive: item.isActive,
+        imageUrl: item.imageUrl || ""
       });
+
+      if (item.imageUrl) {
+        setMainImagePreviewUrl(item.imageUrl);
+      } else {
+        setMainImagePreviewUrl(null);
+      }
+
+      // Eğer yeni dosya seçildiyse temizle
+      setMainImageFile(null);
     }
     setModalType(type);
     setEditingId(item.id);
     setIsModalOpen(true);
   };
+
 
   const handleSave = async () => {
     try {
@@ -197,38 +220,38 @@ const formatDate = (date) => {
           return;
         }
 
-      // FormData hazırla
-      const form = new FormData();
+        // FormData hazırla
+        const form = new FormData();
 
-      const payload = {
-        name: campaignFormData.name,
-        description: campaignFormData.description,
-        discountType: campaignFormData.discountType.toUpperCase(),
-        discountValue: parseFloat(campaignFormData.discountValue),
-        startDate: formatDate(campaignFormData.startDate),
-        endDate: formatDate(campaignFormData.endDate),
-        minOrderAmount: parseFloat(campaignFormData.minOrderAmount || 0),
-        isActive: campaignFormData.isActive,
-      };
+        const payload = {
+          name: campaignFormData.name,
+          description: campaignFormData.description,
+          discountType: campaignFormData.discountType.toUpperCase(),
+          discountValue: parseFloat(campaignFormData.discountValue),
+          startDate: formatDate(campaignFormData.startDate),
+          endDate: formatDate(campaignFormData.endDate),
+          minOrderAmount: parseFloat(campaignFormData.minOrderAmount || 0),
+          isActive: campaignFormData.isActive,
+        };
 
-      form.append("campaign", JSON.stringify(payload));
+        form.append("campaign", JSON.stringify(payload));
 
-      if (mainImageFile) {
-        form.append("imageFile", mainImageFile);
-      }
+        if (mainImageFile) {
+          form.append("imageFile", mainImageFile);
+        }
 
-      if (editingId) {
-        await updateCampaign(editingId, form);
-        toast("Kampanya güncellendi!");
-      } else {
-        await addCampaign(form);
-        toast("Kampanya başarıyla eklendi!");
-      }
+        if (editingId) {
+          await updateCampaign(editingId, form);
+          toast("Kampanya güncellendi!");
+        } else {
+          await addCampaign(form);
+          toast("Kampanya başarıyla eklendi!");
+        }
 
-      const updatedCampaigns = await getCampaigns();
-      setCampaigns(updatedCampaigns);
-      setIsModalOpen(false);
-      setEditingId(null);
+        const updatedCampaigns = await getCampaigns();
+        setCampaigns(updatedCampaigns);
+        setIsModalOpen(false);
+        setEditingId(null);
 
       } else {
         if (!couponFormData.code.trim() || !couponFormData.name.trim() || !couponFormData.discountValue) {
@@ -236,14 +259,34 @@ const formatDate = (date) => {
           return;
         }
 
+        // FormData hazırla
+        const form = new FormData();
+
+        const payload = {
+          code: couponFormData.code,
+          name: couponFormData.name,
+          description: couponFormData.description,
+          discountType: couponFormData.discountType.toUpperCase(),
+          discountValue: parseFloat(couponFormData.discountValue),
+          startDate: formatDate(couponFormData.startDate),
+          endDate: formatDate(campaignFormData.endDate),
+          usageLimit: parseInt(couponFormData.usageLimit),
+          minOrderAmount: parseFloat(couponFormData.minOrderAmount || 0),
+          targetType: couponFormData.targetType.toUpperCase(),
+          isActive: couponFormData.isActive,
+        };
+
+        form.append("coupon", JSON.stringify(payload));
+
+        if (mainImageFile) {
+          form.append("imageFile", mainImageFile);
+        }
+
         if (editingId) {
-          await updateCoupon(editingId, couponFormData);
+          await updateCoupon(editingId, form);
           toast("Kupon güncellendi!");
         } else {
-          await addCoupon({
-            ...couponFormData,
-            targetType: couponFormData.targetType.toUpperCase(),
-          });
+          await addCoupon(form);
           toast("Kupon başarıyla eklendi!");
         }
 
@@ -297,82 +340,100 @@ const formatDate = (date) => {
   const totalUsage = campaigns.reduce((sum, c) => sum + c.usageCount, 0);
 
   const CampaignCard = ({ campaign }) => (
-    <div className={`group relative overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition-all duration-300 hover:shadow-xl hover:-translate-y-1 ${!campaign.isActive ? 'opacity-60' : ''}`}>
-      <div className="py-6 px-4">
-        <div className="flex items-start justify-between mb-4">
-          <div className="flex-1">
-            <div className="flex items-center gap-6 mb-2">
-              <h3 className="font-bold text-md text-gray-900">{campaign.name}</h3>
-              <span className={`px-3 py-1 text-xs font-medium rounded-full ${campaign.isActive ? 'bg-green-500 text-white' : 'bg-red-500 text-white'}`}>
-                {campaign.isActive ? 'Aktif' : 'Pasif'}
-              </span>
-            </div>
-            <p className="text-gray-600 text-sm mb-3">{campaign.description}</p>
-          </div>
-        </div>
+    <div
+      className={`group relative overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition-all duration-300 hover:shadow-xl hover:-translate-y-1 ${!campaign.isActive ? "opacity-60" : ""
+        }`}
+    >
+      {/* Resim üstte*/}
+      <div
+        className="rounded-t-2xl w-full h-48"
+        style={{
+          backgroundImage: campaign.imageUrl ? `url(${campaign.imageUrl})` : "none",
+          backgroundRepeat: "no-repeat",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+        }}
+      />
 
-        <div className="bg-gradient-to-r from-orange-50 to-red-50 rounded-xl p-4 mb-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Percent className="w-5 h-5 text-orange-600" />
-              <span className="font-bold text-2xl text-orange-600">
-                {campaign.discountType === 'percentage' ? `%${campaign.discountValue}` : `${campaign.discountValue}₺`}
-              </span>
-            </div>
-            <div className="text-right">
-              <p className="text-xs text-gray-500">Kullanım</p>
-              <p className="font-bold text-gray-900">{campaign.usageCount}</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="space-y-2 mb-4">
-          <div className="flex items-center gap-2 text-gray-600 text-sm">
-            <Calendar className="w-4 h-4" />
-            <span>{campaign.startDate} - {campaign.endDate}</span>
-          </div>
-          <div className="flex items-center gap-2 text-gray-600 text-sm">
-            <ShoppingCart className="w-4 h-4" />
-            <span>Min. sipariş: {campaign.minOrderAmount}₺</span>
-          </div>
-          <div className="flex items-center gap-2 text-gray-500 text-sm">
-            <Clock className="w-4 h-4" />
-            <span>Oluşturulma: {new Date(campaign.createdAt).toLocaleDateString('tr-TR')} </span>
-          </div>
-        </div>
-
-        <div className="flex gap-2">
-          <button
-            onClick={() => handleEdit(campaign, 'campaign')}
-            className="flex-1 flex items-center justify-center gap-1 px-4 py-2 bg-blue-50 text-blue-600 rounded-xl hover:bg-blue-100 transition-colors font-medium"
-          >
-            <Edit3 className="w-4 h-4" />
-            Düzenle
-          </button>
-          <button
-            onClick={() => toggleStatus(campaign.id, 'campaign')}
-            className={`flex-1 flex items-center justify-center gap-1 px-4 py-2 rounded-xl transition-colors font-medium ${campaign.isActive
-              ? 'bg-orange-50 text-orange-600 hover:bg-orange-100'
-              : 'bg-green-50 text-green-600 hover:bg-green-100'
+      <div className="p-4">
+        <div className="flex items-center justify-between mb-2">
+          <h3 className="font-bold text-md">{campaign.name}</h3>
+          <span
+            className={`px-3 py-1 text-xs font-medium rounded-full ${campaign.isActive ? "bg-green-500 text-white" : "bg-red-500 text-white"
               }`}
           >
-            {campaign.isActive ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-            {campaign.isActive ? 'Pasifleştir' : 'Aktifleştir'}
-          </button>
-          <button
-            onClick={() => {
-              setDeleteId(campaign.id);
-              setDeleteType('campaign');
-              setShowConfirmDialog(true);
-            }}
-            className="px-4 py-2 bg-red-50 text-red-600 rounded-xl hover:bg-red-100 transition-colors"
-          >
-            <Trash2 className="w-4 h-4" />
-          </button>
+            {campaign.isActive ? "Aktif" : "Pasif"}
+          </span>
         </div>
+        <p className="text-sm text-gray-700">{campaign.description}</p>
+      </div>
+
+      <div className="bg-gradient-to-r from-orange-50 to-red-50 rounded-xl p-4 mb-4 mx-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Percent className="w-5 h-5 text-orange-600" />
+            <span className="font-bold text-2xl text-orange-600">
+              {campaign.discountType === "percentage"
+                ? `%${campaign.discountValue}`
+                : `${campaign.discountValue}₺`}
+            </span>
+          </div>
+          <div className="text-right">
+            <p className="text-xs text-gray-500">Kullanım</p>
+            <p className="font-bold text-gray-900">{campaign.usageCount}</p>
+          </div>
+        </div>
+      </div>
+
+      <div className="space-y-2 mb-4 mx-4">
+        <div className="flex items-center gap-2 text-gray-600 text-sm">
+          <Calendar className="w-4 h-4" />
+          <span>
+            {campaign.startDate} - {campaign.endDate}
+          </span>
+        </div>
+        <div className="flex items-center gap-2 text-gray-600 text-sm">
+          <ShoppingCart className="w-4 h-4" />
+          <span>Min. sipariş: {campaign.minOrderAmount}₺</span>
+        </div>
+        <div className="flex items-center gap-2 text-gray-500 text-sm">
+          <Clock className="w-4 h-4" />
+          <span>Oluşturulma: {new Date(campaign.createdAt).toLocaleDateString("tr-TR")} </span>
+        </div>
+      </div>
+
+      <div className="flex gap-2 mx-2 mb-4">
+        <button
+          onClick={() => handleEdit(campaign, "campaign")}
+          className="flex-1 flex items-center justify-center gap-1 px-4 py-2 bg-blue-50 text-blue-600 rounded-xl hover:bg-blue-100 transition-colors font-medium"
+        >
+          <Edit3 className="w-4 h-4" />
+          Düzenle
+        </button>
+        <button
+          onClick={() => toggleStatus(campaign.id, "campaign")}
+          className={`flex-1 flex items-center justify-center gap-1 px-4 py-2 rounded-xl transition-colors font-medium ${campaign.isActive
+              ? "bg-orange-50 text-orange-600 hover:bg-orange-100"
+              : "bg-green-50 text-green-600 hover:bg-green-100"
+            }`}
+        >
+          {campaign.isActive ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+          {campaign.isActive ? "Pasifleştir" : "Aktifleştir"}
+        </button>
+        <button
+          onClick={() => {
+            setDeleteId(campaign.id);
+            setDeleteType("campaign");
+            setShowConfirmDialog(true);
+          }}
+          className="px-4 py-2 bg-red-50 text-red-600 rounded-xl hover:bg-red-100 transition-colors"
+        >
+          <Trash2 className="w-4 h-4" />
+        </button>
       </div>
     </div>
   );
+
 
   const CouponCard = ({ coupon }) => (
     <div className={`group relative overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition-all duration-300 hover:shadow-xl hover:-translate-y-1 ${!coupon.isActive ? 'opacity-60' : ''}`}>
@@ -661,44 +722,44 @@ const formatDate = (date) => {
                         placeholder="Kampanya açıklaması"
                       />
                     </div>
-                     <div>
-                  <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
-                    <FileImage className="w-4 h-4" />
-                    Görsel *
-                  </label>
-                  {/* Ana Resim */}
-                  <div
-                    className="border-2 border-dashed border-gray-300 rounded-lg p-4 hover:border-orange-500 hover:bg-orange-50 cursor-pointer w-64 mb-4"
-                    onClick={() => {
-                      const input = document.createElement("input");
-                      input.type = "file";
-                      input.accept = "image/*";
-                      input.onchange = (e) => handleMainImageUpload(e.target.files[0]);
-                      input.click();
-                    }}
-                  >
-                    <Upload className="w-6 h-6 text-gray-400 mx-auto mb-2" />
-                    <p className="text-xs text-center text-gray-600">Resim Yükle</p>
-                  </div>
-                  {mainImagePreviewUrl && (
-                    <div className="mb-4 relative w-fit">
-                      <img
-                        src={mainImagePreviewUrl}
-                        alt="Ana Resim"
-                        className="w-32 h-32 object-cover rounded border border-gray-50"
-                      />
-                      <button
-                        type="button"
-                        onClick={handleRemoveImage}
-                        className="absolute -top-2 -right-2 bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm hover:bg-red-700 cursor-pointer"
-                        title="Resmi kaldır"
+                    <div>
+                      <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
+                        <FileImage className="w-4 h-4" />
+                        Görsel *
+                      </label>
+                      {/* Ana Resim */}
+                      <div
+                        className="border-2 border-dashed border-gray-300 rounded-lg p-4 hover:border-orange-500 hover:bg-orange-50 cursor-pointer w-64 mb-4"
+                        onClick={() => {
+                          const input = document.createElement("input");
+                          input.type = "file";
+                          input.accept = "image/*";
+                          input.onchange = (e) => handleMainImageUpload(e.target.files[0]);
+                          input.click();
+                        }}
                       >
-                        &times;
-                      </button>
-                    </div>
-                  )}
+                        <Upload className="w-6 h-6 text-gray-400 mx-auto mb-2" />
+                        <p className="text-xs text-center text-gray-600">Resim Yükle</p>
+                      </div>
+                      {mainImagePreviewUrl && (
+                        <div className="mb-4 relative w-fit">
+                          <img
+                            src={mainImagePreviewUrl}
+                            alt="Ana Resim"
+                            className="w-32 h-32 object-cover rounded border border-gray-50"
+                          />
+                          <button
+                            type="button"
+                            onClick={handleRemoveImage}
+                            className="absolute -top-2 -right-2 bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm hover:bg-red-700 cursor-pointer"
+                            title="Resmi kaldır"
+                          >
+                            &times;
+                          </button>
+                        </div>
+                      )}
 
-                </div>
+                    </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div>
@@ -768,7 +829,7 @@ const formatDate = (date) => {
                           placeholder="0"
                         />
                       </div>
-                     
+
                     </div>
 
                     <div className="flex items-center">
@@ -834,43 +895,43 @@ const formatDate = (date) => {
                         placeholder="Kupon açıklaması"
                       />
                     </div>
-                     <div>
-                  <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
-                    <FileImage className="w-4 h-4" />
-                    Görsel *
-                  </label>
-                  {/* Ana Resim */}
-                  <div
-                    className="border-2 border-dashed border-gray-300 rounded-lg p-4 hover:border-orange-500 hover:bg-orange-50 cursor-pointer w-64 mb-4"
-                    onClick={() => {
-                      const input = document.createElement("input");
-                      input.type = "file";
-                      input.accept = "image/*";
-                      input.onchange = (e) => handleMainImageUpload(e.target.files[0]);
-                      input.click();
-                    }}
-                  >
-                    <Upload className="w-6 h-6 text-gray-400 mx-auto mb-2" />
-                    <p className="text-xs text-center text-gray-600">Resim Yükle</p>
-                  </div>
-                  {mainImagePreviewUrl && (
-                    <div className="mb-4 relative w-fit">
-                      <img
-                        src={mainImagePreviewUrl}
-                        alt="Ana Resim"
-                        className="w-32 h-32 object-cover rounded border border-gray-50"
-                      />
-                      <button
-                        type="button"
-                        onClick={handleRemoveImage}
-                        className="absolute -top-2 -right-2 bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm hover:bg-red-700 cursor-pointer"
-                        title="Resmi kaldır"
+                    <div>
+                      <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
+                        <FileImage className="w-4 h-4" />
+                        Görsel *
+                      </label>
+                      {/* Ana Resim */}
+                      <div
+                        className="border-2 border-dashed border-gray-300 rounded-lg p-4 hover:border-orange-500 hover:bg-orange-50 cursor-pointer w-64 mb-4"
+                        onClick={() => {
+                          const input = document.createElement("input");
+                          input.type = "file";
+                          input.accept = "image/*";
+                          input.onchange = (e) => handleMainImageUpload(e.target.files[0]);
+                          input.click();
+                        }}
                       >
-                        &times;
-                      </button>
+                        <Upload className="w-6 h-6 text-gray-400 mx-auto mb-2" />
+                        <p className="text-xs text-center text-gray-600">Resim Yükle</p>
+                      </div>
+                      {mainImagePreviewUrl && (
+                        <div className="mb-4 relative w-fit">
+                          <img
+                            src={mainImagePreviewUrl}
+                            alt="Ana Resim"
+                            className="w-32 h-32 object-cover rounded border border-gray-50"
+                          />
+                          <button
+                            type="button"
+                            onClick={handleRemoveImage}
+                            className="absolute -top-2 -right-2 bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm hover:bg-red-700 cursor-pointer"
+                            title="Resmi kaldır"
+                          >
+                            &times;
+                          </button>
+                        </div>
+                      )}
                     </div>
-                  )}
-                </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div>

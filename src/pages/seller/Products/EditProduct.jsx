@@ -1,8 +1,10 @@
 import { useLocation, useNavigate } from 'react-router-dom';
-import { useState, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import AdminText from '../../../shared/Text/AdminText';
-import TechnicalSpecInput from '../../../shared/Input/TechnicalSpecInput'
+import TechnicalSpecInput from '../../../shared/Input/TechnicalSpecInput';
 import { updateProduct } from '../../../services/sellerProductService';
+import { toast } from 'react-toastify';
+import { Upload } from "lucide-react";
 
 const EditProduct = () => {
   const navigate = useNavigate();
@@ -10,37 +12,64 @@ const EditProduct = () => {
   const product = location.state?.product;
 
   const labelStyle = 'block text-sm font-medium text-gray-700';
-  const inputStyle = 'border border-gray-300 p-2 w-full rounded outline-none'
+  const inputStyle = 'border border-gray-300 p-2 w-full rounded outline-none';
 
-  const [formData, setFormData] = useState(() => ({
+  const mainImageInputRef = useRef(null);
+  const additionalImagesInputRef = useRef(null);
+
+  const [formData, setFormData] = useState({
     price: product?.price || '',
     stockQuantity: product?.stockQuantity || '',
-    imageUrl: product?.imageUrl || '',
-    discount: product?.discount || '',
-    highlightedFeatures: product?.highlightedFeatures || ['', '', ''],
+    highlightedFeatures: product?.highlightedFeatures?.length ? product.highlightedFeatures : ['', '', ''],
     technicalSpecifications: product?.technicalSpecifications
       ? Object.entries(product.technicalSpecifications).map(([key, value]) => ({ key, value }))
       : [],
-  }));
+  });
 
-  // ✅ Eksik state'leri ekle
-  const [selectedImageFile, setSelectedImageFile] = useState(null);
-  const [previewImage, setPreviewImage] = useState(product?.imageUrl || '');
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  // main ve ek resimlerin state'leri
+  const [mainImageFile, setMainImageFile] = useState(null);
+  const [mainImageUrl, setMainImageUrl] = useState(product?.imageUrls?.[0] || '');
 
+  const [additionalImageUrls, setAdditionalImageUrls] = useState(product?.imageUrls?.slice(1) || []);
+  const [additionalImageFiles, setAdditionalImageFiles] = useState([]);
+
+  // URL'den File objesi oluşturmak için yardımcı fonksiyon
+  async function urlToFile(url, filename, mimeType) {
+    const res = await fetch(url);
+    const blob = await res.blob();
+    return new File([blob], filename, { type: mimeType });
+  }
+
+  // Component yüklendiğinde URL’leri File objesine çeviriyoruz
+  useEffect(() => {
+    async function convertImages() {
+      if (mainImageUrl && !mainImageFile) {
+        const file = await urlToFile(mainImageUrl, "main-image.jpg", "image/jpeg");
+        setMainImageFile(file);
+        setMainImageUrl('');
+      }
+
+      if (additionalImageUrls.length > 0 && additionalImageFiles.length === 0) {
+        const files = await Promise.all(
+          additionalImageUrls.map((url, i) => urlToFile(url, `additional-image-${i}.jpg`, "image/jpeg"))
+        );
+        setAdditionalImageFiles(files);
+        setAdditionalImageUrls([]);
+      }
+    }
+    convertImages();
+  }, []);
+
+  // Diğer event handlerlar
   const handleFeatureChange = (index, value) => {
     const updatedFeatures = [...formData.highlightedFeatures];
     updatedFeatures[index] = value;
-    setFormData(prev => ({
-      ...prev,
-      highlightedFeatures: updatedFeatures,
-    }));
+    setFormData(prev => ({ ...prev, highlightedFeatures: updatedFeatures }));
   };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
   const addTechSpec = () => {
@@ -53,164 +82,92 @@ const EditProduct = () => {
   const handleTechSpecChange = (index, field, value) => {
     const newSpecs = [...formData.technicalSpecifications];
     newSpecs[index][field] = value;
-    setFormData(prev => ({
-      ...prev,
-      technicalSpecifications: newSpecs,
-    }));
+    setFormData(prev => ({ ...prev, technicalSpecifications: newSpecs }));
   };
 
   const removeTechSpec = (index) => {
     const newSpecs = formData.technicalSpecifications.filter((_, i) => i !== index);
-    setFormData(prev => ({
-      ...prev,
-      technicalSpecifications: newSpecs,
-    }));
+    setFormData(prev => ({ ...prev, technicalSpecifications: newSpecs }));
   };
 
-  // ✅ Resim değiştiğinde çalışacak handler
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
+  const handleMainImageUpload = (file) => {
     if (file) {
-      // Dosya boyutu kontrolü (5MB limit)
-      if (file.size > 5 * 1024 * 1024) {
-        setError('Resim dosyası 5MB\'dan küçük olmalıdır');
-        return;
-      }
-      
-      // Dosya tipi kontrolü
-      const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
-      if (!allowedTypes.includes(file.type)) {
-        setError('Sadece JPG, PNG ve WebP formatları desteklenmektedir');
-        return;
-      }
-      
-      setSelectedImageFile(file);
-      setPreviewImage(URL.createObjectURL(file));
-      setError(''); // Hata varsa temizle
-      console.log('Yeni resim seçildi:', file.name, file.size + ' bytes');
+      setMainImageFile(file);
+      setMainImageUrl('');
     }
   };
 
-  // ✅ Resim seçimini temizle
-  const handleRemoveImage = () => {
-    setSelectedImageFile(null);
-    setPreviewImage(product?.imageUrl || ''); // Orijinal resme dön
-    
-    // File input'u temizle
-    const fileInput = document.querySelector('input[type="file"]');
-    if (fileInput) {
-      fileInput.value = '';
-    }
-    
-    console.log('Resim seçimi temizlendi, orijinal resme dönüldü');
+  const removeMainImage = () => {
+    setMainImageFile(null);
+    setMainImageUrl('');
   };
 
-  // URL'den blob oluşturup File objesine çevir
-  const urlToFile = async (url, filename) => {
-    try {
-      const response = await fetch(url);
-      const blob = await response.blob();
-      return new File([blob], filename, { type: blob.type });
-    } catch (error) {
-      console.error('URL\'den file dönüştürme hatası:', error);
-      return null;
-    }
+  const handleAdditionalImagesUpload = (files) => {
+    const filesArr = Array.from(files);
+    setAdditionalImageFiles(prev => [...prev, ...filesArr]);
   };
 
+  const removeAdditionalImageFile = (index) => {
+    setAdditionalImageFiles(prev => prev.filter((_, i) => i !== index));
+  };
+
+  // Form submit
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    const formDataToSend = new FormData();
-    
-    // ✅ Sadece formData'da bulunan alanları kullan
-    formDataToSend.append('price', parseFloat(formData.price));
-    formDataToSend.append('stockQuantity', parseInt(formData.stockQuantity));
-    formDataToSend.append('discount', formData.discount ? parseFloat(formData.discount) : 0);
-    
-    // ✅ highlightedFeatures array olarak gönder
-    formData.highlightedFeatures.forEach((feature, index) => {
-      if (feature.trim()) {
-        formDataToSend.append(`highlightedFeatures[${index}]`, feature);
-      }
-    });
-    
-    // Technical specifications - JSON string olarak gönder
+
+    if (!mainImageFile) {
+      toast.error("Ana resim yüklemek zorunludur!");
+      return;
+    }
+
     const techSpecsObject = {};
-    formData.technicalSpecifications.forEach(spec => {
-      if (spec.key && spec.value) {
-        techSpecsObject[spec.key] = spec.value;
+    formData.technicalSpecifications.forEach(({ key, value }) => {
+      if (key && value) {
+        techSpecsObject[key] = value;
       }
     });
-    formDataToSend.append('technicalSpecifications', JSON.stringify(techSpecsObject));
-    
-    // ✅ Diğer ürün özellikleri - sadece değişmeyenler
-    formDataToSend.append('name', product.name);
-    formDataToSend.append('description', product.description);
-    formDataToSend.append('brand', product.brand);
-    formDataToSend.append('modelNumber', product.modelNumber);
-    formDataToSend.append('categoryId', product.categoryId);
-    formDataToSend.append('subcategoryId', product.subcategoryId);
-    formDataToSend.append('weightGrams', product.weightGrams || 0);
-    formDataToSend.append('lengthMm', product.lengthMm || 0);
-    formDataToSend.append('widthMm', product.widthMm || 0);
-    formDataToSend.append('heightMm', product.heightMm || 0);
-    formDataToSend.append('warrantyMonths', product.warrantyMonths || 0);
-    formDataToSend.append('freeShipping', product.freeShipping || false);
-    formDataToSend.append('shippingDays', product.shippingDays || 0);
-    
-    // Additional images - array olarak gönder
-    if (product.additionalImages && product.additionalImages.length > 0) {
-      formDataToSend.append('additionalImages', JSON.stringify(product.additionalImages));
-    }
-    
-    // Resim işlemi
+
+    const updatedProduct = {
+      name: product.name,
+      description: product.description,
+      brand: product.brand,
+      modelNumber: product.modelNumber,
+      categoryId: product.categoryId,
+      subcategoryId: product.subcategoryId,
+      price: parseFloat(formData.price),
+      stockQuantity: parseInt(formData.stockQuantity),
+      highlightedFeatures: formData.highlightedFeatures.filter(f => f.trim() !== ""),
+      technicalSpecifications: techSpecsObject,
+      weightGrams: product.weightGrams,
+      lengthMm: product.lengthMm,
+      widthMm: product.widthMm,
+      heightMm: product.heightMm,
+      warrantyMonths: product.warrantyMonths,
+      freeShipping: product.freeShipping,
+      shippingDays: product.shippingDays,
+    };
+
+    const formDataToSend = new FormData();
+
+    formDataToSend.append("product", JSON.stringify(updatedProduct));
+
+    // Ana resim dosyası
+    formDataToSend.append("imageFiles", mainImageFile);
+
+    // Ek resim dosyaları
+    additionalImageFiles.forEach(file => formDataToSend.append("imageFiles", file));
+
     try {
-      if (selectedImageFile) {
-        // Yeni resim seçildiyse
-        formDataToSend.append('imageFile', selectedImageFile);
-        console.log('Yeni resim yükleniyor:', selectedImageFile.name);
-      } else if (product.imageUrl && !selectedImageFile) {
-        // Mevcut resmi koru - URL'den File yap
-        console.log('Mevcut resim korunuyor:', product.imageUrl);
-        const imageFile = await urlToFile(product.imageUrl, `image_${product.id}.jpg`);
-        if (imageFile) {
-          formDataToSend.append('imageFile', imageFile);
-          console.log('URL\'den File objesi oluşturuldu:', imageFile.name);
-        } else {
-          console.warn('Resim dosyası oluşturulamadı, resim olmadan devam ediliyor');
-        }
-      }
-    } catch (imageError) {
-      console.error('Resim işleme hatası:', imageError);
-      // Resim hatası olsa bile diğer alanları güncellemeye devam et
-    }
-    
-    // FormData içeriğini kontrol et (debug için)
-    console.log('Gönderilecek veriler:');
-    for (let [key, value] of formDataToSend.entries()) {
-      console.log(key, value);
-    }
-    
-    try {
-      setLoading(true); // Loading state'ini aktif et
       await updateProduct(product.id, formDataToSend);
-      
-      // Başarılı mesaj göster (isteğe bağlı)
-      console.log('Ürün başarıyla güncellendi');
-      
-      // Ürünler sayfasına yönlendir
+      toast.success("Ürün başarıyla güncellendi!");
       navigate('/seller/products');
-      
-    } catch (err) {
-      console.error('Ürün güncellenemedi:', err.message);
-      setError(err.message || 'Ürün güncelleme sırasında bir hata oluştu');
-    } finally {
-      setLoading(false); // Loading state'ini pasif et
+    } catch (error) {
+      toast.error("Ürün güncellenemedi, lütfen tekrar deneyin.");
     }
   };
 
   return (
-    <div className="min-h-screen py-6 px-3 md:p-6 bg-gray-50 ">
+    <div className="min-h-screen py-6 px-3 md:p-6 bg-gray-50">
       <AdminText>Ürün Düzenleme</AdminText>
 
       {/* ✅ Hata mesajı göster */}
@@ -221,13 +178,14 @@ const EditProduct = () => {
       )}
 
       <form className="space-y-4" onSubmit={handleSubmit}>
+
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
             <label className={labelStyle}>Stok Adedi</label>
-            <input 
-              type="number" 
-              name="stockQuantity" 
-              className={inputStyle} 
+            <input
+              type="number"
+              name="stockQuantity"
+              className={inputStyle}
               value={formData.stockQuantity}
               onChange={handleChange}
               disabled={loading}
@@ -236,122 +194,132 @@ const EditProduct = () => {
 
           <div>
             <label className={labelStyle}>Fiyat (₺)</label>
-            <input 
-              type="number" 
-              name="price" 
-              value={formData.price} 
+            <input
+              type="number"
+              name="price"
+              value={formData.price}
               onChange={handleChange}
               className={inputStyle}
               disabled={loading}
             />
           </div>
-
-          <div>
-            <label className={labelStyle}>İndirim (%)</label>
-            <input 
-              type="number" 
-              name="discount" 
-              value={formData.discount} 
-              onChange={handleChange}
-              className={inputStyle}
-              disabled={loading}
-            />
-          </div>
-        </div>
-
-        {/* ✅ Resim yükleme kısmı ekle */}
-        <div>
-          <label className={labelStyle}>Ürün Resmi</label>
-          
-          {/* Mevcut resmi göster */}
-          {previewImage && (
-            <div className="mb-3">
-              <img 
-                src={previewImage} 
-                alt="Ürün resmi" 
-                className="w-32 h-32 object-cover rounded border"
-              />
-              <button 
-                type="button" 
-                onClick={handleRemoveImage}
-                className="mt-2 px-3 py-1 bg-gray-200 text-gray-700 rounded text-sm hover:bg-gray-300"
-                disabled={loading}
-              >
-                Resmi Değiştir
-              </button>
-            </div>
-          )}
-          
-          {/* Dosya seçimi */}
-          <input 
-            type="file" 
-            accept="image/*" 
-            onChange={handleImageChange}
-            disabled={loading}
-            className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-          />
-          
-          {selectedImageFile && (
-            <p className="mt-1 text-sm text-gray-600">
-              Seçilen dosya: {selectedImageFile.name}
-            </p>
-          )}
         </div>
 
         <div>
           <h3 className="font-semibold mb-2">Öne Çıkan Özellikler</h3>
-          {[0, 1, 2].map((i) => (
+          {[0, 1, 2].map(i => (
             <input
               key={i}
               type="text"
               className={`${inputStyle} mb-2`}
               placeholder={`Özellik ${i + 1}`}
-              value={formData.highlightedFeatures[i]}
-              onChange={(e) => handleFeatureChange(i, e.target.value)}
-              disabled={loading}
+              value={formData.highlightedFeatures[i] || ''}
+              onChange={e => handleFeatureChange(i, e.target.value)}
             />
           ))}
         </div>
 
         <div>
           <h3 className="font-semibold mb-2">Teknik Özellikler</h3>
-
-          {formData.technicalSpecifications.map((spec, index) => (
-            <TechnicalSpecInput 
-              key={index} 
-              spec={spec} 
-              index={index} 
+          {formData.technicalSpecifications.map((spec, idx) => (
+            <TechnicalSpecInput
+              key={idx}
+              spec={spec}
+              index={idx}
               onChange={handleTechSpecChange}
               onRemove={removeTechSpec}
             />
           ))}
-
-          <button 
-            type="button" 
-            onClick={addTechSpec} 
-            className="mt-2 mb-4 px-3 py-1 bg-gray-200 rounded hover:bg-gray-300"
-            disabled={loading}
-          >
+          <button type="button" onClick={addTechSpec} className="mt-2 mb-4 px-3 py-1 bg-gray-200 rounded">
             Teknik Özellik Ekle
           </button>
         </div>
 
-        <div className="flex justify-end">
-          <button 
-            type="submit" 
-            className={`px-6 py-2 rounded-md font-semibold ${
-              loading 
-                ? 'bg-gray-400 cursor-not-allowed' 
-                : 'bg-dark-orange hover:bg-orange-600'
-            } text-white`}
-            disabled={loading}
+        <div>
+          <h3 className="font-semibold mb-2">Ürün Görselleri</h3>
+          <div className="border-b border-gray-300 mb-4" />
+
+          <div
+            className="border-2 border-dashed border-gray-300 rounded-lg p-4 hover:border-orange-500 hover:bg-orange-50 cursor-pointer w-64 mb-4 text-center"
+            onClick={() => mainImageInputRef.current?.click()}
           >
-            {loading ? 'Güncelleniyor...' : 'Güncelle'}
+            <Upload className="w-6 h-6 text-gray-400 mx-auto mb-2" />
+            <p className="text-xs text-gray-600">Ana Resim Yükle</p>
+            <input
+              ref={mainImageInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={(e) => handleMainImageUpload(e.target.files[0])}
+            />
+          </div>
+
+          {(mainImageFile) && (
+            <div className="mb-4 relative w-32 h-32 rounded overflow-hidden border border-gray-300">
+              <img
+                src={URL.createObjectURL(mainImageFile)}
+                alt="Ana Resim"
+                className="w-full h-full object-cover"
+              />
+              <button
+                type="button"
+                onClick={removeMainImage}
+                className="absolute top-0 right-0 bg-red-600 text-white rounded-full px-1 hover:bg-red-800"
+              >
+                ×
+              </button>
+            </div>
+          )}
+
+          <div
+            className="border-2 border-dashed border-gray-300 rounded-lg p-4 hover:border-orange-500 hover:bg-orange-50 cursor-pointer w-64 mb-4 text-center"
+            onClick={() => additionalImagesInputRef.current?.click()}
+          >
+            <Upload className="w-6 h-6 text-gray-400 mx-auto mb-2" />
+            <p className="text-xs text-gray-600">Ek Resim(ler) Yükle</p>
+            <input
+              ref={additionalImagesInputRef}
+              type="file"
+              accept="image/*"
+              multiple
+              className="hidden"
+              onChange={(e) => handleAdditionalImagesUpload(e.target.files)}
+            />
+          </div>
+
+          <div className="flex gap-3 flex-wrap">
+            {additionalImageFiles.map((file, i) => (
+              <div key={`file-${i}`} className="relative w-20 h-20 rounded overflow-hidden border border-gray-300">
+                <img
+                  src={URL.createObjectURL(file)}
+                  alt={`Ek Resim ${i + 1}`}
+                  className="w-full h-full object-cover"
+                />
+                <button
+                  type="button"
+                  onClick={() => removeAdditionalImageFile(i)}
+                  className="absolute top-0 right-0 bg-red-600 text-white rounded-full px-1 hover:bg-red-800"
+                >
+                  ×
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="flex justify-end">
+          <button
+            type="submit"
+            className="bg-dark-orange text-white font-semibold px-6 py-2 rounded-md"
+          >
+            Güncelle
           </button>
         </div>
       </form>
     </div>
   );
 };
-
 export default EditProduct;
+
+
+
