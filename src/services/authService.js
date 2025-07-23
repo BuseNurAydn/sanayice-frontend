@@ -1,6 +1,7 @@
 import { API_BASE } from "../config";
 
 const AUTH_API = `${API_BASE}/auth`;
+
 export const verifyEmail = async (verificationData) => {
   try {
     const response = await fetch(`${AUTH_API}/verify-email`, {
@@ -128,13 +129,32 @@ export const getMyProfile = async () => {
 export const updateMyProfile = async (profileData) => {
   const token = localStorage.getItem("token");
 
+  const formData = new FormData();
+
+  // JSON olan alanları topla
+  const user = {
+    name: profileData.name,
+    lastname: profileData.lastname,
+    phoneNumber: profileData.phoneNumber,
+    billingAddress: profileData.billingAddress,
+    shippingAddress: profileData.shippingAddress,
+  };
+
+  // JSON'u blob olarak ekle
+  formData.append("user", new Blob([JSON.stringify(user)], { type: "application/json" })
+  );
+
+  // Fotoğraf varsa onu da ekle
+  if (profileData.profileImage) {
+    formData.append("profileImage", profileData.profileImage);
+  }
+
   const response = await fetch(`${AUTH_API}/update-profile`, {
     method: "PUT",
     headers: {
-      "Content-Type": "application/json",
-       Authorization: `Bearer ${token}`,
+      Authorization: `Bearer ${token}`,
     },
-    body: JSON.stringify(profileData),
+    body: formData,
   });
 
   if (!response.ok) {
@@ -143,6 +163,7 @@ export const updateMyProfile = async (profileData) => {
 
   return response.json();
 };
+
 
 // API servislerinize eklenecek fonksiyonlar
 

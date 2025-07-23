@@ -12,8 +12,9 @@ const SellerProfile = () => {
     name: "",
     lastname: "",
     phoneNumber: "",
-    companyName: "",
-    taxId: "",
+    shippingAddress: "",
+    billingAddress: "",
+    profileImage: null,
   });
 
   useEffect(() => {
@@ -21,12 +22,14 @@ const SellerProfile = () => {
       try {
         const data = await getMyProfile();
         setProfile(data);
+        console.log(data)
         setFormData({
           name: data.name || "",
           lastname: data.lastname || "",
           phoneNumber: data.phoneNumber || "",
-          companyName: data.companyName || "",
-          taxId: data.taxId || "",
+          billingAddress: data.billingAddress || "",
+          shippingAddress: data.shippingAddress || "",
+          profileImage: null,
         });
       } catch (err) {
         console.error("Profil alınamadı:", err);
@@ -72,12 +75,27 @@ const SellerProfile = () => {
         <div className={boxStyle + ' mt-6 flex flex-col items-center'}>
           <div className="mb-6">
             <img
-              src={profile?.profileImage}
+              src={profile?.profileImageUrl}
               alt="Profil"
               className="rounded-full w-28 h-28 object-cover border-4 border-[var(--color-orange)] shadow"
             />
           </div>
+          <label className={labelStyle}>Profil Fotoğrafı</label>
+          <input
+            type="file"
+            accept="image/*"
+            className={inputStyle}
+            onChange={(e) =>
+              setFormData((prev) => ({
+                ...prev,
+                profileImage: e.target.files[0],
+              }))
+            }
+          />
+
+
           <form onSubmit={handleSubmit} className="w-full grid md:grid-cols-2 gap-6">
+
             {/* Sol taraf */}
             <div>
               <label className={labelStyle}>Adı</label>
