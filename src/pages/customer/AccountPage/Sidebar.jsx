@@ -3,7 +3,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { logout } from '../../../store/authSlice';
 import {clear} from '../../../store/cartSlice';
 import { clearFavorites } from '../../../store/favoritesSlice';
-import {FaShoppingBag,FaMapMarkerAlt,FaStar,FaUserCircle,FaSignOutAlt} from "react-icons/fa";
+import {FaShoppingBag,FaMapMarkerAlt,FaStar,FaUserCircle,FaSignOutAlt,FaUser} from "react-icons/fa";
 import { FaMessage } from "react-icons/fa6";
 
 const Sidebar = () => {
@@ -12,6 +12,7 @@ const Sidebar = () => {
   const navigate = useNavigate();
 
   const menuItems = [
+    { to: "profil", label: "Profil Bilgilerim", icon: <FaUser /> },
     { to: "orders", label: "Siparişlerim", icon: <FaShoppingBag /> },
     { to: "addresses", label: "Adres Bilgilerim", icon: <FaMapMarkerAlt /> },
     { to: "reviews", label: "Değerlendirmelerim", icon: <FaStar /> },

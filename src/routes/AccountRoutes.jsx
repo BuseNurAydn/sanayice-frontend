@@ -4,7 +4,7 @@ import Orders from "../pages/customer/AccountPage/Orders";
 import Reviews from "../pages/customer/AccountPage/Reviews";
 import Addresses from "../pages/customer/AccountPage/Addresses";
 import SupportAndComplaint from '../pages/customer/AccountPage/SupportAndComplaint';
-
+import CustomerProfile from '../pages/customer/AccountPage/Profile'
 
 
 export const accountRoutes = (
@@ -12,8 +12,7 @@ export const accountRoutes = (
     <Route path="orders" element={<Orders />} />
     <Route path="reviews" element={<Reviews />} />
     <Route path="addresses" element={<Addresses />} />
-    <Route path="support_and_complaint" element={<SupportAndComplaint />} />
-
-    
+    <Route path="profil" element={<CustomerProfile />} />
+    <Route path="support_and_complaint" element={<SupportAndComplaint/>} />
   </Route>
 );

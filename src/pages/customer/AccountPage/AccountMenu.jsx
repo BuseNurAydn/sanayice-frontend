@@ -55,6 +55,10 @@ const AccountMenu = () => {
           <p className="text-md text-[var(--color-dark-orange)] break-words text-center">{user.name}</p>
           <hr className="my-2" />
           <div className='text-sm '>
+            <Link to="/account/profil" className="py-1 hover:text-orange-600 flex flex-row gap-x-4 items-center" onClick={() => setOpen(false)}>
+            <BsBasket3/>
+            Profil Bilgilerim
+          </Link>
           <Link to="/account/orders" className="py-1 hover:text-orange-600 flex flex-row gap-x-4 items-center" onClick={() => setOpen(false)}>
             <BsBasket3/>
             Tüm Siparişlerim

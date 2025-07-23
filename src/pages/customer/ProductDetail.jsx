@@ -66,7 +66,22 @@ const ProductDetail = () => {
   if (error) return <p>Hata: {error}</p>;
   if (!product) return <p>Ürün bulunamadı.</p>;
 
-  const handleAddToCart = async () => {
+  const handleAddToCart = async (e) => {
+     e.stopPropagation();
+
+    const token = localStorage.getItem("token");
+
+    // Eğer kullanıcı giriş yapmamışsa
+    if (!token) {
+      // Ürünü localStorage'a geçici olarak kaydet
+      localStorage.setItem(
+        "pendingCartItem",
+        JSON.stringify({ productId: product.id, quantity: 1 })
+      );
+      toast.info("Lütfen giriş yapın!");
+      navigate("/auth/login");
+      return;
+    }
     try {
       await dispatch(addToCart({ productId: product.id, quantity })).unwrap();
       toast('Sepete eklendi!');

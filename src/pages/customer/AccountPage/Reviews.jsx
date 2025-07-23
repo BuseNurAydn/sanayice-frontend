@@ -1,15 +1,17 @@
-import { useState,useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { FaStar, FaEdit, FaTrashAlt, FaEye } from 'react-icons/fa';
 import { API_BASE } from "../../../config";
+import { useNavigate } from 'react-router-dom';
 
 const Reviews = () => {
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const navigate = useNavigate();
 
   const REVIEWS_API = `${API_BASE}`;
 
-   useEffect(() => {
+  useEffect(() => {
     const fetchReviews = async () => {
       try {
         const token = localStorage.getItem("token");
@@ -29,7 +31,7 @@ const Reviews = () => {
 
     fetchReviews();
   }, []);
-  
+
   const handleEditReview = (id) => {
     console.log(`Edit review with ID: ${id}`);
     // Implement logic to edit review
@@ -40,9 +42,8 @@ const Reviews = () => {
     // Implement logic to delete review
   };
 
-  const handleViewProduct = (productId) => {
-    console.log(`View product with ID: ${productId}`);
-    // Implement logic to navigate to product detail page
+  const handleViewProduct = (id) => {
+    navigate(`/product/${id}`);
   };
 
   const renderStars = (rating) => {
@@ -69,7 +70,12 @@ const Reviews = () => {
               key={review.id}
               className="border border-gray-200 rounded-lg p-4 flex flex-col md:flex-row justify-between items-start bg-white shadow-sm hover:shadow-md transition-shadow duration-200"
             >
-              <div className="flex flex-col gap-4 items-start w-full md:w-3/4">
+              <div className="flex flex-col md:flex-row items-start gap-4 w-full">
+                <img
+                  src={review.productImageUrls[0]}
+                  alt={review.productName}
+                  className="w-24 h-24 object-cover rounded-lg border border-gray-200 shadow-sm"
+                />
                 <div className="flex-1">
                   <p className="text-base text-gray-800 font-medium mb-1 break-words">
                     {review.productName}
@@ -80,7 +86,7 @@ const Reviews = () => {
                   </div>
                   <p className="text-gray-700 italic mb-2">"{review.comment}"</p>
                   <p className="text-sm text-gray-500">Tarih: {new Date(review.createdAt).toLocaleDateString()}</p>
-                  
+
                   <button
                     onClick={() => handleViewProduct(review.productId)}
                     className="mt-3 flex items-center gap-2 text-green-600 hover:text-green-800 transition-colors duration-200 bg-green-50 hover:bg-green-100 px-3 py-2 rounded-md text-sm font-medium"
@@ -90,6 +96,7 @@ const Reviews = () => {
                   </button>
                 </div>
               </div>
+              {/** 
               <div className="flex gap-3 mt-4 md:mt-0">
                 <button
                   onClick={() => handleEditReview(review.id)}
@@ -105,7 +112,7 @@ const Reviews = () => {
                 >
                   <FaTrashAlt size={20} />
                 </button>
-              </div>
+              </div>*/}
             </div>
           ))
         ) : (

@@ -52,8 +52,14 @@ const SellerProfile = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await updateMyProfile(formData);
-      toast.success("Profil başarıyla güncellendi.");
+       // 1. Form verisini gönder
+    await updateMyProfile(formData);
+
+    // 2. Güncel veriyi yeniden al
+    const updated = await getMyProfile();
+    setProfile(updated);
+
+    toast.success("Profil başarıyla güncellendi.");
     } catch (err) {
       toast.error("Profil güncellenemedi.");
     }

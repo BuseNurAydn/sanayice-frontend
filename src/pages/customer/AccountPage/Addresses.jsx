@@ -79,7 +79,7 @@ const sanitizeFormData = (formData) => {
 
     try {
       if (editId) {
-        await updateAddress(editId, formData);
+        await updateAddress(editId, cleanedData);
         toast.success("Adres başarıyla güncellendi");
       } else {
         await createAddress(cleanedData);
