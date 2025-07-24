@@ -21,6 +21,7 @@ const Products = () => {
     try {
       const data = await fetchMyProducts();
       setProducts(data);
+      console.log(data);
     } catch (error) {
       console.error('Ürünler alınırken hata oluştu:', error);
     } finally {

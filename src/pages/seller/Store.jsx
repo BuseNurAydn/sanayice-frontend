@@ -3,7 +3,7 @@ import { FaStore, FaMapMarkerAlt, FaPhone, FaEnvelope, FaSearch, FaFilter } from
 import { Link } from 'react-router-dom'; // Ürün detayına gitmek için
 import { getProducts } from "../../services/productsService";
 import { useSelector } from "react-redux";
-
+import { getMyProfile } from '../../services/authService';
 const Store = () => {
 
   const [storeInfo, setStoreInfo] = useState({
@@ -43,9 +43,23 @@ const Store = () => {
         name: user.name,
         email: user.email,
         phone: user.phone,
+       
       }));
     }
   }, [user]);
+
+   useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const data = await getMyProfile();
+        setStoreInfo(data); 
+      } catch (error) {
+        console.error("Profil bilgisi alınamadı:", error);
+      }
+    };
+
+    fetchProfile();
+  }, []);
 
   // Ürünleri filtreleme
   useEffect(() => {
@@ -73,11 +87,15 @@ const Store = () => {
       <div className="relative w-full h-64 bg-cover bg-center" style={{ backgroundImage: `url(${storeInfo?.banner})` }}>
         <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center p-4">
           <div className="text-white text-center">
-            {storeInfo.logo && (
-              <img src={storeInfo.logo} alt="Mağaza logosu"className="w-24 h-24 rounded-full mx-auto mb-4 border-4 border-white shadow-lg" />
-            )}
+            {storeInfo?.profileImageUrl && (
+        <img
+          src={storeInfo.profileImageUrl}
+          alt="Mağaza logosu"
+          className="w-24 h-24 rounded-full mx-auto mb-4 border-4 border-white shadow-lg"
+        />
+      )}
             <h1 className="text-2xl md:text-4xl font-bold">{storeInfo.name}</h1>
-            <p className="text-sm md:text-lg mt-2">{storeInfo.description}</p>
+            <p className='mt-2'>En yeni elektronik ürünler ve teknolojik aksesuarlar.</p>
           </div>
         </div>
       </div>
@@ -112,7 +130,7 @@ const Store = () => {
               onChange={(e) => setSelectedCategory(e.target.value)}
             >
               <option value="Tüm Kategoriler">Tüm Kategoriler</option>
-              {storeInfo.categories.map((category) => (
+              {storeInfo?.categories?.map((category) => (
                 <option key={category} value={category}>{category}</option>
               ))}
             </select>
@@ -127,7 +145,7 @@ const Store = () => {
             {filteredProducts.map((product) => (
               <Link to={`/seller_product/${product.id}`} key={product.id} className="block group">
                 <div className={`${boxStyle} h-96 p-4 flex flex-col items-center text-center hover:shadow-lg transition-shadow duration-300`}>
-                    <img src={product.imageUrls[0]} alt="Ürün görseli" name={product.name} className="w-full h-36 object-contain mb-4 rounded-md" />
+                  <img src={product.imageUrls[0]} alt="Ürün görseli" name={product.name} className="w-full h-36 object-contain mb-4 rounded-md" />
                   <h3 className="text-md font-semibold text-gray-900 transition-colors duration-200 line-clamp-2">{product.name}</h3>
                   <p className="text-gray-500 text-sm mt-1">{product.category}</p>
                   <p className="text-xl font-bold text-[var(--color-orange)] mt-3">₺{product.price.toLocaleString()}</p>

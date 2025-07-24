@@ -17,6 +17,7 @@ const CampaignCouponManagement = () => {
   const [activeTab, setActiveTab] = useState('campaigns');
   const [mainImageFile, setMainImageFile] = useState(null);
   const [mainImagePreviewUrl, setMainImagePreviewUrl] = useState(null);
+  const MAX_SIZE_MB = 5;
 
   const [campaignFormData, setCampaignFormData] = useState({
     name: "",
@@ -27,7 +28,6 @@ const CampaignCouponManagement = () => {
     endDate: "",
     minOrderAmount: "",
     isActive: true,
-
   });
 
   const [couponFormData, setCouponFormData] = useState({
@@ -77,19 +77,13 @@ const CampaignCouponManagement = () => {
   const handleMainImageUpload = (file) => {
     if (!file) return;
 
-    if (file.size > 5 * 1024 * 1024) {
-      toast("Dosya boyutu 5MB'dan büyük olamaz");
-      return;
-    }
-
-    const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg'];
-    if (!allowedTypes.includes(file.type)) {
-      toast('Sadece JPG ve PNG dosyaları yüklenebilir');
+    if (file.size > MAX_SIZE_MB * 1024 * 1024) {
+      alert(`Dosya boyutu ${MAX_SIZE_MB}MB'dan büyük olamaz!`);
       return;
     }
 
     setMainImageFile(file);
-    setMainImagePreviewUrl(URL.createObjectURL(file)); // sadece önizleme için
+    setMainImagePreviewUrl(URL.createObjectURL(file));
   };
 
   const handleRemoveImage = () => {
@@ -132,7 +126,7 @@ const CampaignCouponManagement = () => {
         endDate: "",
         minOrderAmount: "",
         isActive: true,
-        imageUrl:""
+        imageUrl: ""
 
       });
     } else {
@@ -149,7 +143,7 @@ const CampaignCouponManagement = () => {
         minOrderAmount: "",
         targetType: "all",
         isActive: true,
-        imageUrl:""
+        imageUrl: ""
       });
     }
     setMainImagePreviewUrl(null);
@@ -219,10 +213,10 @@ const CampaignCouponManagement = () => {
           showToast("Kampanya adı ve indirim miktarı zorunludur!", 'error');
           return;
         }
-  
+
         // FormData hazırla
         const form = new FormData();
-  
+
         const payload = {
           name: campaignFormData.name,
           description: campaignFormData.description,
@@ -233,13 +227,13 @@ const CampaignCouponManagement = () => {
           minOrderAmount: parseFloat(campaignFormData.minOrderAmount || 0),
           isActive: campaignFormData.isActive,
         };
-  
+
         form.append("campaign", JSON.stringify(payload));
-  
+
         if (mainImageFile) {
           form.append("imageFile", mainImageFile);
         }
-  
+
         if (editingId) {
           await updateCampaign(editingId, form);
           toast("Kampanya güncellendi!");
@@ -247,48 +241,56 @@ const CampaignCouponManagement = () => {
           await addCampaign(form);
           toast("Kampanya başarıyla eklendi!");
         }
-  
+
         const updatedCampaigns = await getCampaigns();
         setCampaigns(updatedCampaigns);
         setIsModalOpen(false);
         setEditingId(null);
-  
+
       } else {
-        // Kupon için validasyon - trim() ve parseFloat kontrolü ekledik
-        const discountValue = parseFloat(couponFormData.discountValue);
-        
-        if (!couponFormData.code.trim() || 
-            !couponFormData.name.trim() || 
-            !couponFormData.discountValue.trim() || 
-            isNaN(discountValue) || 
-            discountValue <= 0) {
+        // Kupon için null-check ve dönüşümler
+        if (!couponFormData) {
+          showToast("Kupon verisi eksik!", 'error');
+          return;
+        }
+
+        const discountValue = parseFloat(couponFormData.discountValue || 0);
+        const upperCode = (couponFormData.code || "").toUpperCase();
+        const upperType = (couponFormData.discountType || "percentage").toUpperCase();
+        const upperTargetType = (couponFormData.targetType || "all").toUpperCase();
+
+        if (
+          !upperCode.trim() ||
+          !couponFormData.name?.trim() ||
+          isNaN(discountValue) ||
+          discountValue <= 0
+        ) {
           showToast("Kupon kodu, isim ve geçerli bir indirim miktarı zorunludur!", 'error');
           return;
         }
-  
-        // FormData hazırla
+
         const form = new FormData();
-  
+
         const payload = {
-          code: couponFormData.code,
-          name: couponFormData.name,
-          description: couponFormData.description,
-          discountType: couponFormData.discountType.toUpperCase(),
-          discountValue: discountValue,
+          code: upperCode,
+          name: couponFormData.name.trim(),
+          description: couponFormData.description?.trim() || "",
+          discountType: upperType,
+          discountValue,
           startDate: formatDate(couponFormData.startDate),
-          endDate: formatDate(couponFormData.endDate), // Burada da hata vardı - campaignFormData yerine couponFormData olmalı
+          endDate: formatDate(couponFormData.endDate),
           usageLimit: parseInt(couponFormData.usageLimit) || 0,
           minOrderAmount: parseFloat(couponFormData.minOrderAmount || 0),
-          targetType: couponFormData.targetType.toUpperCase(),
+          targetType: upperTargetType,
           isActive: couponFormData.isActive,
         };
-  
+
         form.append("coupon", JSON.stringify(payload));
-  
+
         if (mainImageFile) {
           form.append("imageFile", mainImageFile);
         }
-  
+
         if (editingId) {
           await updateCoupon(editingId, form);
           toast("Kupon güncellendi!");
@@ -296,9 +298,11 @@ const CampaignCouponManagement = () => {
           await addCoupon(form);
           toast("Kupon başarıyla eklendi!");
         }
-  
+
         const updatedCoupons = await getCoupons();
         setCoupons(updatedCoupons);
+        setIsModalOpen(false);
+        setEditingId(null);
       }
       setIsModalOpen(false);
       setEditingId(null);
@@ -357,7 +361,7 @@ const CampaignCouponManagement = () => {
         style={{
           backgroundImage: campaign.imageUrl ? `url(${campaign.imageUrl})` : "none",
           backgroundRepeat: "no-repeat",
-          backgroundSize: "cover",
+          backgroundSize: "contain",
           backgroundPosition: "center",
         }}
       />
@@ -420,8 +424,8 @@ const CampaignCouponManagement = () => {
         <button
           onClick={() => toggleStatus(campaign.id, "campaign")}
           className={`flex-1 flex items-center justify-center gap-1 px-4 py-2 rounded-xl transition-colors font-medium ${campaign.isActive
-              ? "bg-orange-50 text-orange-600 hover:bg-orange-100"
-              : "bg-green-50 text-green-600 hover:bg-green-100"
+            ? "bg-orange-50 text-orange-600 hover:bg-orange-100"
+            : "bg-green-50 text-green-600 hover:bg-green-100"
             }`}
         >
           {campaign.isActive ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -444,6 +448,16 @@ const CampaignCouponManagement = () => {
 
   const CouponCard = ({ coupon }) => (
     <div className={`group relative overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition-all duration-300 hover:shadow-xl hover:-translate-y-1 ${!coupon.isActive ? 'opacity-60' : ''}`}>
+      {/* Resim üstte*/}
+      <div
+        className="rounded-t-2xl w-full h-48"
+        style={{
+          backgroundImage: coupon.imageUrl ? `url(${coupon.imageUrl})` : "none",
+          backgroundRepeat: "no-repeat",
+          backgroundSize: "contain",
+          backgroundPosition: "center",
+        }}
+      />
       <div className="py-6 px-4">
         <div className="flex items-start justify-between mb-4">
           <div className="flex-1">
@@ -505,7 +519,7 @@ const CampaignCouponManagement = () => {
 
         </div>
 
-        <div className="flex gap-2">
+        <div className="flex gap-0.5">
           <button
             onClick={() => handleEdit(coupon, 'coupon')}
             className="flex-1 flex items-center justify-center gap-1 px-4 py-2 bg-blue-50 text-blue-600 rounded-xl hover:bg-blue-100 transition-colors font-medium"
@@ -938,8 +952,13 @@ const CampaignCouponManagement = () => {
                           </button>
                         </div>
                       )}
+                      {/* Buraya uyarıyı koyuyorsun */}
+                      {mainImageFile && mainImageFile.size > MAX_SIZE_MB * 1024 * 1024 && (
+                        <p className="text-red-600 text-sm mt-1">
+                          Dosya boyutu çok büyük! Lütfen 5MB'dan küçük bir dosya seçin.
+                        </p>
+                      )}
                     </div>
-
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">

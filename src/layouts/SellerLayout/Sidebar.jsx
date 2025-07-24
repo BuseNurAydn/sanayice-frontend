@@ -45,7 +45,7 @@ const menuItems = [
     ],
   },
   {
-    label: "Satıcı Kampanya Yönetimi",
+    label: "Satıcı Kupon Yönetimi",
     to: "/seller/seller_campaign",
     icon: <MdVerifiedUser />,
   },

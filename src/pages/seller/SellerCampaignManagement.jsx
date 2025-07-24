@@ -1,6 +1,9 @@
 import { useState, useEffect } from "react";
-import { Plus, Edit3, Trash2, Eye, EyeOff, Gift, Copy, Calendar, Percent, Users, ShoppingCart, Clock, Star, CheckCircle, XCircle, AlertCircle } from "lucide-react";
+import { Plus, Edit3, Trash2, Eye, EyeOff, Gift, Copy, Calendar, Percent, Users, ShoppingCart, Clock, Star, CheckCircle, XCircle, FileImage, Upload } from "lucide-react";
 import AdminText from "../../shared/Text/AdminText";
+import { addCoupon, getCoupons, updateCoupon, deleteCoupon } from "../../services/couponService";
+import { toast } from "react-toastify";
+
 
 const SellerCampaignManagement = () => {
   const [coupons, setCoupons] = useState([]);
@@ -8,6 +11,10 @@ const SellerCampaignManagement = () => {
   const [editingId, setEditingId] = useState(null);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [deleteId, setDeleteId] = useState(null);
+  const [mainImageFile, setMainImageFile] = useState(null);
+  const [mainImagePreviewUrl, setMainImagePreviewUrl] = useState(null);
+  const MAX_SIZE_MB = 5;
+
 
   const [formData, setFormData] = useState({
     code: "",
@@ -18,84 +25,54 @@ const SellerCampaignManagement = () => {
     startDate: "",
     endDate: "",
     usageLimit: "",
+    usedCount: 0,
     minOrderAmount: "",
+    targetType: "all", // all, specific
     isActive: true
   });
 
-  // Mock data - Satıcının kuponları
+  //GET COUPONS
   useEffect(() => {
-    setCoupons([
-      {
-        id: 1,
-        code: "TECHWORLD20",
-        name: "Teknoloji Kuponu",
-        description: "Tüm elektronik ürünlerde geçerli",
-        discountType: "percentage",
-        discountValue: 20,
-        startDate: "2024-06-01",
-        endDate: "2024-08-31",
-        usageLimit: 100,
-        usedCount: 34,
-        minOrderAmount: 500,
-        isActive: true,
-        createdAt: "2024-05-20",
-        status: "active"
-      },
-      {
-        id: 2,
-        code: "YENIMAG50",
-        name: "Yeni Müşteri Kuponu",
-        description: "İlk alışverişinizde özel indirim",
-        discountType: "fixed",
-        discountValue: 50,
-        startDate: "2024-05-01",
-        endDate: "2024-12-31",
-        usageLimit: 200,
-        usedCount: 89,
-        minOrderAmount: 300,
-        isActive: true,
-        createdAt: "2024-04-25",
-        status: "active"
-      },
-      {
-        id: 3,
-        code: "LAPTOP15",
-        name: "Laptop İndirimi",
-        description: "Laptop kategorisinde özel fırsat",
-        discountType: "percentage",
-        discountValue: 15,
-        startDate: "2024-04-01",
-        endDate: "2024-05-31",
-        usageLimit: 50,
-        usedCount: 47,
-        minOrderAmount: 1000,
-        isActive: false,
-        createdAt: "2024-03-20",
-        status: "expired"
-      },
-      {
-        id: 4,
-        code: "SONBAHAR25",
-        name: "Sonbahar Kampanyası",
-        description: "Sonbahar sezonuna özel kupon",
-        discountType: "percentage",
-        discountValue: 25,
-        startDate: "2024-09-01",
-        endDate: "2024-11-30",
-        usageLimit: 150,
-        usedCount: 0,
-        minOrderAmount: 400,
-        isActive: false,
-        createdAt: "2024-06-10",
-        status: "scheduled"
+    const fetchCoupons = async () => {
+      try {
+        const data = await getCoupons();
+        setCoupons(data);
+      } catch (error) {
+        showToast(error.message, 'error');
       }
-    ]);
+    };
+
+    fetchCoupons();
   }, []);
+
+  // Ana resim dosyası yükleme handler'ı
+  const handleMainImageUpload = (file) => {
+    if (!file) return;
+
+    if (file.size > MAX_SIZE_MB * 1024 * 1024) {
+      alert(`Dosya boyutu ${MAX_SIZE_MB}MB'dan büyük olamaz!`);
+      return;
+    }
+
+    setMainImageFile(file);
+    setMainImagePreviewUrl(URL.createObjectURL(file));
+  };
+
+  const handleRemoveImage = () => {
+    setMainImageFile(null);
+    setMainImagePreviewUrl(null);
+    setCampaignFormData((prev) => ({ ...prev, imageUrl: "" }));
+  };
 
   const showToast = (message, type = 'success') => {
     console.log(`${type}: ${message}`);
   };
 
+  const formatDate = (date) => {
+    if (!date) return ""; // boşsa boş string dön
+    const d = new Date(date);
+    return isNaN(d.getTime()) ? "" : d.toISOString().split("T")[0];
+  };
   const generateCouponCode = () => {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
     let result = '';
@@ -124,65 +101,106 @@ const SellerCampaignManagement = () => {
       isActive: true
     });
     setEditingId(null);
+    setMainImagePreviewUrl(null);
     setIsModalOpen(true);
   };
 
-  const handleEdit = (coupon) => {
+  const handleEdit = (item) => {
     setFormData({
-      code: coupon.code,
-      name: coupon.name,
-      description: coupon.description,
-      discountType: coupon.discountType,
-      discountValue: coupon.discountValue,
-      startDate: coupon.startDate,
-      endDate: coupon.endDate,
-      usageLimit: coupon.usageLimit,
-      minOrderAmount: coupon.minOrderAmount,
-      isActive: coupon.isActive
+      code: item.code,
+      name: item.name,
+      description: item.description,
+      discountType: item.discountType,
+      discountValue: Number(item.discountValue),
+      startDate: item.startDate,
+      endDate: item.endDate,
+      usageLimit: Number(item.usageLimit),
+      usedCount: Number(item.usedCount),
+      minOrderAmount: Number(item.minOrderAmount),
+      targetType: item.targetType,
+      isActive: item.isActive,
+      imageUrl: item.imageUrl || ""
     });
-    setEditingId(coupon.id);
+
+    if (item.imageUrl) {
+      setMainImagePreviewUrl(item.imageUrl);
+    } else {
+      setMainImagePreviewUrl(null);
+    }
+    // Eğer yeni dosya seçildiyse temizle
+    setMainImageFile(null);
+    setEditingId(item.id);
     setIsModalOpen(true);
   };
 
-  const handleSave = () => {
-    if (!formData.code.trim() || !formData.name.trim() || !formData.discountValue) {
-      showToast("Kupon kodu, isim ve indirim miktarı zorunludur!", 'error');
+  const handleSave = async () => {
+    if (!formData) {
+      showToast("Kupon verisi eksik!", 'error');
       return;
     }
-    
-    if (editingId) {
-      setCoupons(prev => prev.map(coupon => 
-        coupon.id === editingId ? { 
-          ...coupon, 
-          ...formData,
-          status: coupon.status // Durum değişmez
-        } : coupon
-      ));
-      showToast("Kupon güncellendi!");
-    } else {
-      const newCoupon = {
-        ...formData,
-        id: Date.now(),
-        usedCount: 0,
-        createdAt: new Date().toISOString().split('T')[0],
-        status: "active"
-      };
-      setCoupons(prev => [...prev, newCoupon]);
-      showToast("Kupon eklendi!");
+
+    const discountValue = parseFloat(formData.discountValue || 0);
+    const upperCode = (formData.code || "").toUpperCase();
+    const upperType = (formData.discountType || "percentage").toUpperCase();
+    const upperTargetType = (formData.targetType || "all").toUpperCase();
+
+    if (
+      !upperCode.trim() ||
+      !formData.name?.trim() ||
+      isNaN(discountValue) ||
+      discountValue <= 0
+    ) {
+      showToast("Kupon kodu, isim ve geçerli bir indirim miktarı zorunludur!", 'error');
+      return;
     }
+
+    const form = new FormData();
+
+    const payload = {
+      code: upperCode,
+      name: formData.name.trim(),
+      description: formData.description?.trim() || "",
+      discountType: upperType,
+      discountValue,
+      startDate: formatDate(formData.startDate),
+      endDate: formatDate(formData.endDate),
+      usageLimit: parseInt(formData.usageLimit) || 0,
+      minOrderAmount: parseFloat(formData.minOrderAmount || 0),
+      targetType: upperTargetType,
+      isActive: formData.isActive,
+    };
+
+    form.append("coupon", JSON.stringify(payload));
+
+    if (mainImageFile) {
+      form.append("imageFile", mainImageFile);
+    }
+
+    if (editingId) {
+      await updateCoupon(editingId, form);
+      toast("Kupon güncellendi!");
+    } else {
+      await addCoupon(form);
+      toast("Kupon başarıyla eklendi!");
+    }
+
+    const updatedCoupons = await getCoupons();
+    setCoupons(updatedCoupons);
     setIsModalOpen(false);
     setEditingId(null);
   };
 
-  const handleDelete = () => {
-    setCoupons(prev => prev.filter(coupon => coupon.id !== deleteId));
-    showToast("Kupon silindi!");
+  const handleDelete = async () => {
+    await deleteCoupon(deleteId);
+    toast("Kupon silindi!");
+    const updatedCoupons = await getCoupons();
+    setCoupons(updatedCoupons);
     setShowConfirmDialog(false);
     setDeleteId(null);
   };
 
   const toggleStatus = (id) => {
-    setCoupons(prev => prev.map(coupon => 
+    setCoupons(prev => prev.map(coupon =>
       coupon.id === id ? { ...coupon, isActive: !coupon.isActive } : coupon
     ));
     showToast("Kupon durumu güncellendi!");
@@ -194,10 +212,10 @@ const SellerCampaignManagement = () => {
       expired: { bg: 'bg-red-100', text: 'text-red-700', icon: XCircle, label: 'Süresi Dolmuş' },
       scheduled: { bg: 'bg-blue-100', text: 'text-blue-700', icon: Clock, label: 'Planlanmış' }
     };
-    
+
     const config = statusConfig[status] || statusConfig.active;
     const Icon = config.icon;
-    
+
     return (
       <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium ${config.bg} ${config.text}`}>
         <Icon className="w-3 h-3" />
@@ -214,6 +232,16 @@ const SellerCampaignManagement = () => {
 
   const CouponCard = ({ coupon }) => (
     <div className={`group relative overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition-all duration-300 hover:shadow-xl hover:-translate-y-1 ${!coupon.isActive ? 'opacity-60' : ''}`}>
+      {/* Resim üstte*/}
+      <div
+        className="rounded-t-2xl w-full h-48"
+        style={{
+          backgroundImage: coupon.imageUrl ? `url(${coupon.imageUrl})` : "none",
+          backgroundRepeat: "no-repeat",
+          backgroundSize: "contain",
+          backgroundPosition: "center",
+        }}
+      />
       <div className="p-3">
         <div className="flex items-start justify-between mb-4">
           <div className="flex-1">
@@ -247,7 +275,7 @@ const SellerCampaignManagement = () => {
             <span className="font-medium">{coupon.usedCount}/{coupon.usageLimit}</span>
           </div>
           <div className="w-full bg-white/40 rounded-full h-2 mt-1">
-            <div 
+            <div
               className="bg-purple-600 h-2 rounded-full transition-all"
               style={{ width: `${Math.min((coupon.usedCount / coupon.usageLimit) * 100, 100)}%` }}
             />
@@ -265,11 +293,11 @@ const SellerCampaignManagement = () => {
           </div>
           <div className="flex items-center gap-2 text-gray-500 text-sm">
             <Clock className="w-4 h-4" />
-            <span>Oluşturulma: {coupon.createdAt}</span>
+            <span>Oluşturulma: {new Date(coupon.createdAt).toLocaleDateString()}</span>
           </div>
         </div>
-        
-        <div className="flex gap-2">
+
+        <div className="flex gap-0.5">
           <button
             onClick={() => handleEdit(coupon)}
             className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-blue-50 text-blue-600 rounded-xl hover:bg-blue-100 transition-colors font-medium"
@@ -279,11 +307,10 @@ const SellerCampaignManagement = () => {
           </button>
           <button
             onClick={() => toggleStatus(coupon.id)}
-            className={`flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-xl transition-colors font-medium ${
-              coupon.isActive 
-                ? 'bg-orange-50 text-orange-600 hover:bg-orange-100' 
-                : 'bg-green-50 text-green-600 hover:bg-green-100'
-            }`}
+            className={`flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-xl transition-colors font-medium ${coupon.isActive
+              ? 'bg-orange-50 text-orange-600 hover:bg-orange-100'
+              : 'bg-green-50 text-green-600 hover:bg-green-100'
+              }`}
           >
             {coupon.isActive ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
             {coupon.isActive ? 'Pasifleştir' : 'Aktifleştir'}
@@ -468,6 +495,49 @@ const SellerCampaignManagement = () => {
                     placeholder="Kupon açıklaması"
                   />
                 </div>
+                <div>
+                  <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
+                    <FileImage className="w-4 h-4" />
+                    Görsel *
+                  </label>
+                  {/* Ana Resim */}
+                  <div
+                    className="border-2 border-dashed border-gray-300 rounded-lg p-4 hover:border-orange-500 hover:bg-orange-50 cursor-pointer w-64 mb-4"
+                    onClick={() => {
+                      const input = document.createElement("input");
+                      input.type = "file";
+                      input.accept = "image/*";
+                      input.onchange = (e) => handleMainImageUpload(e.target.files[0]);
+                      input.click();
+                    }}
+                  >
+                    <Upload className="w-6 h-6 text-gray-400 mx-auto mb-2" />
+                    <p className="text-xs text-center text-gray-600">Resim Yükle</p>
+                  </div>
+                  {mainImagePreviewUrl && (
+                    <div className="mb-4 relative w-fit">
+                      <img
+                        src={mainImagePreviewUrl}
+                        alt="Ana Resim"
+                        className="w-32 h-32 object-cover rounded border border-gray-50"
+                      />
+                      <button
+                        type="button"
+                        onClick={handleRemoveImage}
+                        className="absolute -top-2 -right-2 bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm hover:bg-red-700 cursor-pointer"
+                        title="Resmi kaldır"
+                      >
+                        &times;
+                      </button>
+                    </div>
+                  )}
+                  {/* Buraya uyarıyı koyuyorsun */}
+                  {mainImageFile && mainImageFile.size > MAX_SIZE_MB * 1024 * 1024 && (
+                    <p className="text-red-600 text-sm mt-1">
+                      Dosya boyutu çok büyük! Lütfen 5MB'dan küçük bir dosya seçin.
+                    </p>
+                  )}
+                </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
@@ -498,31 +568,32 @@ const SellerCampaignManagement = () => {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Başlangıç Tarihi *
-                    </label>
-                    <input
-                      type="date"
-                      value={formData.startDate}
-                      onChange={(e) => setFormData(prev => ({ ...prev, startDate: e.target.value }))}
-                      className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all"
-                    />
-                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Başlangıç Tarihi *
+                        </label>
+                        <input
+                          type="date"
+                          value={formData.startDate}
+                          onChange={(e) => setFormData(prev => ({ ...prev, startDate: e.target.value }))}
+                          className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none transition-all"
+                        />
+                      </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Bitiş Tarihi *
-                    </label>
-                    <input
-                      type="date"
-                      value={formData.endDate}
-                      onChange={(e) => setFormData(prev => ({ ...prev, endDate: e.target.value }))}
-                      className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all"
-                    />
-                  </div>
-                </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Bitiş Tarihi *
+                        </label>
+                        <input
+                          type="date"
+                          value={formData.endDate}
+                          onChange={(e) => setFormData(prev => ({ ...prev, endDate: e.target.value }))}
+                          className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none transition-all"
+                        />
+                      </div>
+                    </div>
+
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
@@ -566,7 +637,8 @@ const SellerCampaignManagement = () => {
               </div>
             </div>
 
-            <div className="flex gap-3 p-6 border-t border-gray-100">
+            <div className="p-6 border-t border-gray-100">
+              <div className="flex gap-3">
               <button
                 onClick={() => setIsModalOpen(false)}
                 className="flex-1 px-6 py-3 border border-gray-200 text-gray-700 rounded-xl hover:bg-gray-50 transition-colors font-medium"
@@ -579,6 +651,7 @@ const SellerCampaignManagement = () => {
               >
                 {editingId ? 'Güncelle' : 'Ekle'}
               </button>
+              </div>
             </div>
           </div>
         </div>
@@ -594,7 +667,7 @@ const SellerCampaignManagement = () => {
               </div>
               <h3 className="text-lg font-bold text-gray-900 mb-2">Kuponu Sil</h3>
               <p className="text-gray-600 mb-6">Bu kuponu silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.</p>
-              
+
               <div className="flex gap-3">
                 <button
                   onClick={() => setShowConfirmDialog(false)}

@@ -42,11 +42,8 @@ export const updateCoupon = async (id, couponData) => {
     headers: {
       Authorization: `Bearer ${localStorage.getItem("token")}`
     },
-    body: JSON.stringify({
-      ...couponData,
-      discountType: couponData.discountType.toUpperCase(),     //  "FIXED_AMOUNT"
-      targetType: couponData.targetType.toUpperCase()          //  "VIP_CUSTOMERS"
-    })
+    body: couponData
+  
   });
 
   if (!response.ok) {
