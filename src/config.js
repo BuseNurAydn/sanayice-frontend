@@ -1,2 +1,2 @@
 
-export const API_BASE = "https://sanayice.ddns.net/api";
+export const API_BASE = "https://sanayice.com.tr/api";
