@@ -35,7 +35,9 @@ export const deleteProduct = async (productId) => {
   });
 
   if (!response.ok) {
-    throw new Error("Ürün silinemedi");
+    const error = new Error("Ürün silinemedi");
+    error.status = response.status;
+    throw error;
   }
 
   return true;

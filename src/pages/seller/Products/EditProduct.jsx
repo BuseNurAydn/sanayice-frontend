@@ -7,7 +7,7 @@ import { toast } from 'react-toastify';
 import { Upload } from "lucide-react";
 
 const EditProduct = () => {
- 
+
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -26,6 +26,7 @@ const EditProduct = () => {
     technicalSpecifications: product?.technicalSpecifications
       ? Object.entries(product.technicalSpecifications).map(([key, value]) => ({ key, value }))
       : [],
+    active: product?.active ?? true,
   });
 
   // main ve ek resimlerin state'leri
@@ -69,7 +70,7 @@ const EditProduct = () => {
           const files = await Promise.all(
             additionalImageUrls.map((url, i) => urlToFile(url, `additional-image-${i}.jpg`, "image/jpeg"))
           );
-          
+
           // Null olmayan dosyaları filtrele
           const validFiles = files.filter(file => file !== null);
           if (validFiles.length > 0) {
@@ -83,7 +84,7 @@ const EditProduct = () => {
         setError('Resimler yüklenirken bir hata oluştu');
       }
     }
-    
+
     // Product varsa dönüştürme işlemini başlat
     if (product) {
       convertImages();
@@ -127,7 +128,7 @@ const EditProduct = () => {
         setError('Ana resim dosyası 5MB\'dan küçük olmalıdır');
         return;
       }
-      
+
       // Dosya tipi kontrolü
       const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
       if (!allowedTypes.includes(file.type)) {
@@ -144,18 +145,18 @@ const EditProduct = () => {
   const removeMainImage = () => {
     setMainImageFile(null);
     setMainImageUrl('');
-    
+
     // File input'u temizle
     if (mainImageInputRef.current) {
       mainImageInputRef.current.value = '';
     }
-    
+
     console.log('Ana resim seçimi temizlendi');
   };
 
   const handleAdditionalImagesUpload = (files) => {
     const filesArr = Array.from(files);
-    
+
     // Her dosya için boyut ve tip kontrolü
     const validFiles = [];
     for (const file of filesArr) {
@@ -163,13 +164,13 @@ const EditProduct = () => {
         setError('Ek resim dosyası 5MB\'dan küçük olmalıdır');
         continue;
       }
-      
+
       const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
       if (!allowedTypes.includes(file.type)) {
         setError('Sadece JPG, PNG ve WebP formatları desteklenmektedir');
         continue;
       }
-      
+
       validFiles.push(file);
     }
 
@@ -212,6 +213,7 @@ const EditProduct = () => {
         modelNumber: product.modelNumber,
         categoryId: product.categoryId,
         subcategoryId: product.subcategoryId,
+        active: formData.active,
         price: parseFloat(formData.price),
         stockQuantity: parseInt(formData.stockQuantity),
         highlightedFeatures: formData.highlightedFeatures.filter(f => f.trim() !== ""),
@@ -234,11 +236,6 @@ const EditProduct = () => {
 
       // Ek resim dosyaları
       additionalImageFiles.forEach(file => formDataToSend.append("imageFiles", file));
-
-      // FormData içeriğini kontrol et (debug için)
-      console.log('Gönderilecek veriler:');
-      console.log('Ana resim:', mainImageFile ? mainImageFile.name : 'Yok');
-      console.log('Ek resimler:', additionalImageFiles.length, 'adet');
 
       await updateProduct(product.id, formDataToSend);
       toast.success("Ürün başarıyla güncellendi!");
@@ -291,6 +288,19 @@ const EditProduct = () => {
               disabled={loading}
             />
           </div>
+          <div className="flex items-center gap-2">
+            <label className={labelStyle}>Ürün Aktif mi?</label>
+            <input
+              type="checkbox"
+              checked={formData.active}
+              onChange={() => setFormData(prev => ({ ...prev, active: !prev.active }))}
+              disabled={loading}
+            />
+            <span className={`text-sm font-medium ${formData.active ? 'text-green-600' : 'text-red-500'}`}>
+              {formData.active ? 'Aktif' : 'Pasif'}
+            </span>
+          </div>
+
         </div>
 
         <div>
@@ -319,9 +329,9 @@ const EditProduct = () => {
               onRemove={removeTechSpec}
             />
           ))}
-          <button 
-            type="button" 
-            onClick={addTechSpec} 
+          <button
+            type="button"
+            onClick={addTechSpec}
             className="mt-2 mb-4 px-3 py-1 bg-gray-200 rounded hover:bg-gray-300"
             disabled={loading}
           >
@@ -334,9 +344,8 @@ const EditProduct = () => {
           <div className="border-b border-gray-300 mb-4" />
 
           <div
-            className={`border-2 border-dashed border-gray-300 rounded-lg p-4 hover:border-orange-500 hover:bg-orange-50 cursor-pointer w-64 mb-4 text-center ${
-              loading ? 'opacity-50 cursor-not-allowed' : ''
-            }`}
+            className={`border-2 border-dashed border-gray-300 rounded-lg p-4 hover:border-orange-500 hover:bg-orange-50 cursor-pointer w-64 mb-4 text-center ${loading ? 'opacity-50 cursor-not-allowed' : ''
+              }`}
             onClick={() => !loading && mainImageInputRef.current?.click()}
           >
             <Upload className="w-6 h-6 text-gray-400 mx-auto mb-2" />
@@ -370,9 +379,8 @@ const EditProduct = () => {
           )}
 
           <div
-            className={`border-2 border-dashed border-gray-300 rounded-lg p-4 hover:border-orange-500 hover:bg-orange-50 cursor-pointer w-64 mb-4 text-center ${
-              loading ? 'opacity-50 cursor-not-allowed' : ''
-            }`}
+            className={`border-2 border-dashed border-gray-300 rounded-lg p-4 hover:border-orange-500 hover:bg-orange-50 cursor-pointer w-64 mb-4 text-center ${loading ? 'opacity-50 cursor-not-allowed' : ''
+              }`}
             onClick={() => !loading && additionalImagesInputRef.current?.click()}
           >
             <Upload className="w-6 h-6 text-gray-400 mx-auto mb-2" />
@@ -412,11 +420,10 @@ const EditProduct = () => {
         <div className="flex justify-end">
           <button
             type="submit"
-            className={`px-6 py-2 rounded-md font-semibold ${
-              loading 
-                ? 'bg-gray-400 cursor-not-allowed' 
+            className={`px-6 py-2 rounded-md font-semibold ${loading
+                ? 'bg-gray-400 cursor-not-allowed'
                 : 'bg-dark-orange hover:bg-orange-600'
-            } text-white`}
+              } text-white`}
             disabled={loading}
           >
             {loading ? 'Güncelleniyor...' : 'Güncelle'}

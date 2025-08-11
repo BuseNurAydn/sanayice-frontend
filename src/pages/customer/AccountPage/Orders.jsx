@@ -1,13 +1,14 @@
 import { useState, useEffect } from "react";
-import { getOrders } from "../../../services/ordersService"; 
+import { getOrders } from "../../../services/ordersService";
 import ReviewModal from "../../../components/ReviewModal";
+import ProductDetailModal from "../../../components/ProductDetailModal";
 import { toast } from "react-toastify";
 import { API_BASE } from "../../../config";
 
 const Orders = () => {
   const [orders, setOrders] = useState([]);
   const [activeTab, setActiveTab] = useState("all");
-
+  const [productDetail, setProductDetail] = useState(null);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState("");
@@ -26,6 +27,7 @@ const Orders = () => {
       try {
         const data = await getOrders();
         setOrders(data);
+        console.log(data)
       } catch (error) {
         console.error("Siparişler alınamadı", error);
       }
@@ -158,12 +160,12 @@ const Orders = () => {
                 >
                   {/* Ürün görseli + bilgiler */}
                   <div className="flex flex-col md:flex-row gap-4">
-                    {/*
+
                     <img
-                      src={item.productImageUrl}
+                      src={item.imageUrls[0]}
                       alt={item.productName}
                       className="w-20 h-20 object-cover rounded"
-                    />*/}
+                    />
                     <div>
                       <p className="font-medium">{item.productName}</p>
                       <p className="text-xs text-gray-600">
@@ -189,14 +191,15 @@ const Orders = () => {
                     </div>
                   </div>
                   <div className="flex flex-row items-end gap-x-2">
-                    {/** 
-                    <button className="text-xs md:text-sm border border-blue-600 py-1 px-2 md:py-2 md:px-4 text-blue-600 font-semibold">
+                    <button
+                      onClick={() => setProductDetail(item)}
+                      className="text-xs md:text-sm border border-blue-600 py-1 px-2 md:py-2 md:px-4 text-blue-600 font-semibold cursor-pointer hover:bg-blue-100">
                       Ürün Detay
-                    </button>*/}
+                    </button>
                     {order.statusDisplayName === "Teslim Edildi" && (
                       <button
                         onClick={() => openReviewModal(item)}
-                        className="text-xs md:text-sm font-semibold border border-orange-600 py-1 px-2 md:py-2 md:px-4 text-orange-600"
+                        className="text-xs md:text-sm font-semibold border border-orange-600 py-1 px-2 md:py-2 md:px-4 text-orange-600 cursor-pointer hover:bg-orange-100"
                       >
                         Ürünü Değerlendir
                       </button>
@@ -208,7 +211,15 @@ const Orders = () => {
           </div>
         ))}
       </div>
+
       {/* MODAL */}
+      {productDetail && (
+        <ProductDetailModal
+          product={productDetail}
+          onClose={() => setProductDetail(null)}
+        />
+      )}
+
       {selectedProduct && (
         <ReviewModal
           product={selectedProduct}

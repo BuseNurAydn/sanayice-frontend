@@ -3,31 +3,24 @@ import { API_BASE } from "../config";
 const CAMPAIGN_API = `${API_BASE}/sellers/campaigns`;
 
 // ADD CAMPAİGN
- export const addCampaign = async (formData) => {
-  try {
-     
-    const response = await fetch(CAMPAIGN_API, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
-      },
-      body: 
-        formData,
-     
-    });
+export const addCampaign = async (formData) => {
+  const token = localStorage.getItem("token");
+  const response = await fetch(CAMPAIGN_API, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    body: formData,
+  });
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || "Kampanya eklenemedi");
-    }
-
-    const result = await response.json();
-    return result;
-  } catch (error) {
-    console.error("Kampanya ekleme hatası:", error.message);
+  if (!response.ok) {
+    const error = new Error("Kampanya eklenemedi");
+    error.status = response.status;
     throw error;
   }
+  return await response.json();
 };
+
 
 // GET CAMPAİGN
 export const getCampaigns = async () => {
@@ -55,8 +48,11 @@ export const updateCampaign = async (id, formData) => {
   });
 
   if (!response.ok) {
-    throw new Error("Kampanya güncellenemedi");
+    const error = new Error("Kampanya güncellenemedi.");
+    error.status = response.status;
+    throw error;
   }
+
 
   return await response.json();
 };

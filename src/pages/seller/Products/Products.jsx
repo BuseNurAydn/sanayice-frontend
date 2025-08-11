@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import AddButton from "../../../shared/Button/AddButton";
 import ConfirmDialog from "../../../components/ConfirmDialog";
 import { fetchMyProducts, deleteProduct } from '../../../services/sellerProductService';
+import { toast } from "react-toastify";
 
 const Products = () => {
   const navigate = useNavigate();
@@ -15,6 +16,7 @@ const Products = () => {
   const [loading, setLoading] = useState(true); // ⬅️ Yükleme durumu eklendi
 
   const borderStyle = "border border-gray-300 p-2";
+
 
   // Ürünleri listeleme
   const fetchProducts = async () => {
@@ -43,11 +45,15 @@ const Products = () => {
     try {
       await deleteProduct(selectedProductId);
       setProducts(products.filter((p) => p.id !== selectedProductId));
+      toast.success("Ürün başarıyla silindi");
     } catch (error) {
-      console.error('Silme hatası:', error);
+      if (error.message === "Ürün silinemedi") {
+        toast.error("Bu ürün şu anda bir müşteri tarafından kullanılıyor. Şu an silinemez.");
+      } else {
+        toast.error("Bilinmeyen bir hata oluştu.");
+      }
     } finally {
       setIsConfirmOpen(false);
-      setSelectedProductId(null);
     }
   };
 
@@ -85,9 +91,10 @@ const Products = () => {
               <th className={`${borderStyle} rounded-tl-lg w-2/12`}>Ürün Resmi</th>
               <th className={`${borderStyle} w-3/12`}>Ürün İsmi</th>
               <th className={`${borderStyle} w-2/12`}>Fiyat</th>
-              <th className={`${borderStyle} w-2/12`}>Stok Adedi</th>
+              <th className={`${borderStyle} w-1/12`}>Stok Adedi</th>
               <th className={`${borderStyle} w-2/12`}>Marka</th>
-              <th className={`${borderStyle} rounded-tr-lg w-1/12`}>İşlem</th>
+              <th className={`${borderStyle} w-2/12`}>İşlem</th>
+              <th className={`${borderStyle} rounded-tr-lg w-2/12`}>Durum</th>
             </tr>
           </thead>
           <tbody>
@@ -114,15 +121,32 @@ const Products = () => {
                   <td className={borderStyle}>{product.price}</td>
                   <td className={borderStyle}>{product.stockQuantity}</td>
                   <td className={borderStyle}>{product.brand}</td>
+
                   <td className={borderStyle}>
                     <div className="flex justify-center gap-3">
-                      <button onClick={() => handleEdit(product)} className="text-blue-600 hover:text-blue-800" title=" Ürünü Düzenle">
+                      <button
+                        onClick={() => handleEdit(product)}
+                        className="text-blue-600 hover:text-blue-800"
+                        title="Ürünü Düzenle"
+                      >
                         <FaEdit />
                       </button>
-                      <button onClick={() => handleDeleteClick(product.id)} className="text-red-600 hover:text-red-800" title="Ürünü Sil">
+                      <button
+                        onClick={() => handleDeleteClick(product.id)}
+                        className="text-red-600 hover:text-red-800"
+                        title="Ürünü Sil"
+                      >
                         <FaTrash />
                       </button>
                     </div>
+                  </td>
+
+                  <td className={borderStyle}>
+                    {product.active ? (
+                      <span className="text-green-600 font-semibold">Aktif</span>
+                    ) : (
+                      <span className="text-red-500 font-semibold">Pasif</span>
+                    )}
                   </td>
                 </tr>
               ))

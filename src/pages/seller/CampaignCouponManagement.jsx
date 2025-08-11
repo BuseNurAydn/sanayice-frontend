@@ -3,7 +3,7 @@ import { Plus, Edit3, Trash2, Eye, EyeOff, BarChart3, Calendar, Percent, Users, 
 import AdminText from "../../shared/Text/AdminText";
 import { addCampaign, getCampaigns, updateCampaign, deleteCampaign } from "../../services/campaignService";
 import { addCoupon, getCoupons, updateCoupon, deleteCoupon } from "../../services/couponService";
-import { toast } from "react-toastify";
+import { toast } from 'react-toastify';
 
 const CampaignCouponManagement = () => {
   const [campaigns, setCampaigns] = useState([]);
@@ -17,7 +17,8 @@ const CampaignCouponManagement = () => {
   const [activeTab, setActiveTab] = useState('campaigns');
   const [mainImageFile, setMainImageFile] = useState(null);
   const [mainImagePreviewUrl, setMainImagePreviewUrl] = useState(null);
-  const MAX_SIZE_MB = 5;
+  const [imageError, setImageError] = useState('');
+  const MAX_FILE_SIZE_MB = 500;
 
   const [campaignFormData, setCampaignFormData] = useState({
     name: "",
@@ -73,15 +74,22 @@ const CampaignCouponManagement = () => {
     fetchCoupons();
   }, []);
 
+  useEffect(() => {
+  if (isModalOpen) {
+    setImageError("");
+  }
+}, [isModalOpen]);
+
   // Ana resim dosyası yükleme handler'ı
   const handleMainImageUpload = (file) => {
     if (!file) return;
 
-    if (file.size > MAX_SIZE_MB * 1024 * 1024) {
-      alert(`Dosya boyutu ${MAX_SIZE_MB}MB'dan büyük olamaz!`);
+    if (file.size > MAX_FILE_SIZE_MB * 1024 * 1024) {
+      setImageError("Dosya boyutu çok büyük. Lütfen daha küçük bir dosya yükleyin.");
       return;
     }
 
+    setImageError("");
     setMainImageFile(file);
     setMainImagePreviewUrl(URL.createObjectURL(file));
   };
@@ -92,8 +100,10 @@ const CampaignCouponManagement = () => {
     setCampaignFormData((prev) => ({ ...prev, imageUrl: "" }));
   };
 
-  const showToast = (message, type = 'success') => {
-    console.log(`${type}: ${message}`);
+  const showToast = (message, type = 'info') => {
+    if (type === 'error') toast.error(message);
+    else if (type === 'success') toast.success(message);
+    else toast(message);
   };
 
   const formatDate = (date) => {
@@ -213,6 +223,10 @@ const CampaignCouponManagement = () => {
           showToast("Kampanya adı ve indirim miktarı zorunludur!", 'error');
           return;
         }
+        if (mainImageFile && mainImageFile.size > MAX_FILE_SIZE_MB * 1024 * 1024) {
+          setImageError(`Dosya boyutu ${MAX_FILE_SIZE_MB}MB'dan büyük olamaz.`);
+          return;
+        }
 
         // FormData hazırla
         const form = new FormData();
@@ -307,7 +321,13 @@ const CampaignCouponManagement = () => {
       setIsModalOpen(false);
       setEditingId(null);
     } catch (error) {
-      showToast(error.message || "Bir hata oluştu", 'error');
+      if (error.status === 413) {
+        setImageError("Dosya boyutu çok büyük. Lütfen daha küçük bir dosya yükleyin.");
+      } else if (error instanceof TypeError && error.message === "Failed to fetch") {
+        setImageError("Lütfen daha küçük bir dosya yükleyin!");
+      } else {
+        setImageError(error.message || "Bilinmeyen bir hata oluştu.");
+      }
     }
   };
 
@@ -779,7 +799,9 @@ const CampaignCouponManagement = () => {
                           </button>
                         </div>
                       )}
-
+                      {imageError && (
+                        <p className="text-sm text-red-600 mt-1">{imageError}</p>
+                      )}
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -952,12 +974,10 @@ const CampaignCouponManagement = () => {
                           </button>
                         </div>
                       )}
-                      {/* Buraya uyarıyı koyuyorsun */}
-                      {mainImageFile && mainImageFile.size > MAX_SIZE_MB * 1024 * 1024 && (
-                        <p className="text-red-600 text-sm mt-1">
-                          Dosya boyutu çok büyük! Lütfen 5MB'dan küçük bir dosya seçin.
-                        </p>
+                      {imageError && (
+                        <p className="text-sm text-red-600 mt-1">{imageError}</p>
                       )}
+
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div>

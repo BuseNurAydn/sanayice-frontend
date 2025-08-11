@@ -21,6 +21,9 @@ const Categories = () => {
   const [selectedCategoryId, setSelectedCategoryId] = useState(null);
   const [deleteType, setDeleteType] = useState("category");
   const [mainImageFile, setMainImageFile] = useState(null); // Dosyayı burada tut
+  const [mainImageUrl, setMainImageUrl] = useState('');
+  const [error, setError] = useState('');
+
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
@@ -49,6 +52,38 @@ const Categories = () => {
     };
     load();
   }, []);
+
+
+// URL'den File objesi oluşturmak için yardımcı fonksiyon
+async function urlToFile(url, filename, mimeType) {
+  try {
+    const res = await fetch(url);
+    const blob = await res.blob();
+    return new File([blob], filename, { type: mimeType });
+  } catch (error) {
+    return null;
+  }
+}
+
+// Component yüklendiğinde URL'yi File objesine çeviriyoruz
+useEffect(() => {
+  async function convertImage() {
+    try {
+      if (mainImageUrl && !mainImageFile) {
+        const file = await urlToFile(mainImageUrl, 'category-image.jpg', 'image/jpeg');
+        if (file) {
+          setMainImageFile(file);
+          setMainImageUrl('');
+        }
+      }
+    } catch (error) {
+      setError('Kategori resmi yüklenirken bir hata oluştu');
+    }
+  }
+
+  convertImage();
+}, [mainImageUrl, mainImageFile]); 
+
 
   //Ekleme sayfasına yönlendirme
   const handleAdd = () => {
@@ -81,6 +116,7 @@ const Categories = () => {
       description: category.description,
       imageUrl: category.imageUrl || ""
     });
+    setMainImageUrl(category.imageUrl || "");
     setMainImageFile(null); // Önceki dosya temizlenmeli
     setEditingId(category.id);
     setIsModalOpen(true);

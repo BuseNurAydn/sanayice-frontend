@@ -7,6 +7,7 @@ import { toast } from 'react-toastify';
 import { Upload } from "lucide-react";
 import { Navigate, useNavigate } from 'react-router-dom';
 
+
 const AddProduct = () => {
   const navigate = useNavigate();
   const boxStyle = 'border border-gray-200 md:p-4 p-2 rounded-lg shadow';
@@ -19,6 +20,9 @@ const AddProduct = () => {
   const [subcategories, setSubcategories] = useState([]);
   const [mainImageFile, setMainImageFile] = useState(null);
   const [additionalImageFiles, setAdditionalImageFiles] = useState([]);
+  const [mainImageError, setMainImageError] = useState("");
+  const [additionalImageErrors, setAdditionalImageErrors] = useState([]);
+
 
   const [formData, setFormData] = useState({
     name: "",
@@ -37,7 +41,8 @@ const AddProduct = () => {
     heightMm: "",
     warrantyMonths: "",
     freeShipping: false,
-    shippingDays: ""
+    shippingDays: "",
+    active: true,
   });
 
   useEffect(() => {
@@ -131,16 +136,17 @@ const AddProduct = () => {
 
   // Ana resim dosyası yükleme handler'ı
   const handleMainImageUpload = (file) => {
+    setMainImageError("");
     if (!file) return;
 
-    if (file.size > 5 * 1024 * 1024) {
-      toast("Dosya boyutu 5MB'dan büyük olamaz");
+    if (file.size > 500 * 1024 * 1024) {
+      setMainImageError("Dosya boyutu 500MB'dan büyük olamaz");
       return;
     }
 
     const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg'];
     if (!allowedTypes.includes(file.type)) {
-      toast('Sadece JPG ve PNG dosyaları yüklenebilir');
+      setMainImageError("Sadece JPG ve PNG dosyaları yüklenebilir");
       return;
     }
 
@@ -149,11 +155,27 @@ const AddProduct = () => {
     setFormData((prev) => ({ ...prev, imageUrl }));
   };
 
+
   // Ek resimler dosyası yükleme handler'ı (çoklu dosya)
   const handleAdditionalImagesUpload = (fileList) => {
     const files = Array.from(fileList);
-    setAdditionalImageFiles((prev) => [...prev, ...files]);
+    const newErrors = [];
+    const validFiles = [];
+
+    files.forEach((file, index) => {
+      if (file.size > 500 * 1024 * 1024) {
+        newErrors.push(`Resim ${index + 1}: Dosya boyutu 500MB'dan büyük olamaz`);
+      } else if (!['image/jpeg', 'image/png', 'image/jpg'].includes(file.type)) {
+        newErrors.push(`Resim ${index + 1}: Geçersiz dosya türü`);
+      } else {
+        validFiles.push(file);
+      }
+    });
+
+    setAdditionalImageFiles((prev) => [...prev, ...validFiles]);
+    setAdditionalImageErrors(newErrors);
   };
+
 
   // Ek resim silme fonksiyonu
   const removeAdditionalImage = (index) => {
@@ -167,27 +189,27 @@ const AddProduct = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
+
     if (!mainImageFile) {
       toast.error("Ana resim yüklemek zorunludur!");
       return;
     }
-  
+
     if (!formData.name || !formData.description || !formData.price) {
       toast.error("Gerekli alanları doldurun!");
       return;
     }
-  
+
     const safeParseInt = (val) => {
       const parsed = parseInt(val);
       return isNaN(parsed) ? null : parsed;
     };
-  
+
     const safeParseFloat = (val) => {
       const parsed = parseFloat(val);
       return isNaN(parsed) ? null : parsed;
     };
-  
+
     const productObj = {
       name: formData.name,
       description: formData.description,
@@ -197,6 +219,7 @@ const AddProduct = () => {
       price: safeParseFloat(formData.price),
       categoryId: safeParseInt(formData.categoryId),
       subcategoryId: safeParseInt(formData.subcategoryId),
+      active: formData.active,
       highlightedFeatures: formData.highlightedFeatures.filter(f => f.trim() !== ""),
       technicalSpecifications: Object.fromEntries(
         Object.entries(formData.technicalSpecifications).filter(
@@ -211,23 +234,23 @@ const AddProduct = () => {
       freeShipping: formData.freeShipping,
       shippingDays: safeParseInt(formData.shippingDays),
     };
-  
+
     // FormData oluşturma
     const form = new FormData();
-    
+
     // ✅ Backend'in beklediği "product" adında part ekle
     form.append("product", JSON.stringify(productObj));
-    
+
     // ✅ Ana resim ekleme (imageFiles array'i olarak)
     if (mainImageFile) {
       form.append("imageFiles", mainImageFile);
     }
-    
+
     // ✅ Ek resimleri ekleme
     additionalImageFiles.forEach((file) => {
       form.append("imageFiles", file);
     });
-  
+
     try {
       const result = await createProduct(form);
       toast.success("Ürün başarıyla eklendi!");
@@ -465,6 +488,17 @@ const AddProduct = () => {
                 />
                 <label htmlFor="freeShipping" className={labelStyle}>Ücretsiz Kargo</label>
               </div>
+              <div className=''>
+              <label>
+                <input
+                  type="checkbox"
+                  checked={formData.active}
+                  onChange={(e) => setFormData({ ...formData, active: e.target.checked })}
+                  
+                />
+                {formData.active ? "Aktif" : "Pasif"}
+              </label>
+             </div>
             </div>
           </div>
 
@@ -505,6 +539,9 @@ const AddProduct = () => {
                 />
               </div>
             )}
+            {mainImageError && (
+              <p className="text-red-500 text-sm mt-1">{mainImageError}</p>
+            )}
             {/* Ek Resimler */}
             <div
               className="border-2 border-dashed border-gray-300 rounded-lg p-4 hover:border-orange-500 hover:bg-orange-50 cursor-pointer w-64 mb-4"
@@ -534,6 +571,14 @@ const AddProduct = () => {
                 ))}
               </div>
             )}
+            {additionalImageErrors.length > 0 && (
+              <ul className="text-red-500 text-sm mt-2 list-disc list-inside">
+                {additionalImageErrors.map((error, idx) => (
+                  <li key={idx}>{error}</li>
+                ))}
+              </ul>
+            )}
+
           </div>
         </div>
       </form>
