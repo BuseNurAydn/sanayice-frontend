@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { FaStore, FaMapMarkerAlt, FaPhone, FaEnvelope, FaSearch, FaFilter } from 'react-icons/fa';
 import { Link } from 'react-router-dom'; // Ürün detayına gitmek için
 import { getProducts } from "../../services/productsService";
+import { fetchCategories } from '../../services/categoryService';
 import { useSelector } from "react-redux";
 import { getMyProfile } from '../../services/authService';
 const Store = () => {
@@ -23,6 +24,22 @@ const Store = () => {
   const [selectedCategory, setSelectedCategory] = useState('Tüm Kategoriler');
   const [filteredProducts, setFilteredProducts] = useState(products);
   const { user } = useSelector((state) => state.auth);
+  const [categories, setCategories] = useState([]);
+
+  useEffect(() => {
+    const loadCategories = async () => {
+      try {
+        const data = await fetchCategories();
+        setCategories(data);
+        console.log(data)
+      } catch (error) {
+        console.error("Kategoriler alınamadı:", error);
+      }
+    };
+
+    loadCategories();
+  }, []);
+
 
   //GET PRODUCTS
   useEffect(() => {
@@ -43,16 +60,16 @@ const Store = () => {
         name: user.name,
         email: user.email,
         phone: user.phone,
-       
+
       }));
     }
   }, [user]);
 
-   useEffect(() => {
+  useEffect(() => {
     const fetchProfile = async () => {
       try {
         const data = await getMyProfile();
-        setStoreInfo(data); 
+        setStoreInfo(data);
       } catch (error) {
         console.error("Profil bilgisi alınamadı:", error);
       }
@@ -61,21 +78,29 @@ const Store = () => {
     fetchProfile();
   }, []);
 
-  // Ürünleri filtreleme
-  useEffect(() => {
-    let currentProducts = products;
+// Ürünleri filtreleme
+useEffect(() => {
+  let currentProducts = products;
 
-    if (selectedCategory !== 'Tüm Kategoriler') {
-      currentProducts = currentProducts.filter(product => product.category === selectedCategory);
-    }
+  // Kategori seçimi varsa filtrele
+  if (selectedCategory !== 'Tüm Kategoriler') {
+    currentProducts = currentProducts.filter(product => {
+      // product.category objesi mi, string mi kontrol et
+      const categoryName = product.category?.name || product.category;
+      return categoryName === selectedCategory;
+    });
+  }
 
-    if (searchTerm) {
-      currentProducts = currentProducts.filter(product =>
-        product.name.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-    }
-    setFilteredProducts(currentProducts);
-  }, [searchTerm, selectedCategory, products]);
+  // Arama terimi varsa filtrele
+  if (searchTerm) {
+    currentProducts = currentProducts.filter(product =>
+      product.name?.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  }
+
+  setFilteredProducts(currentProducts);
+}, [searchTerm, selectedCategory, products]);
+
 
   // Orders bileşeninizdeki boxStyle'a benzer bir stil
   const boxStyle = 'border border-gray-200 p-6 rounded-lg shadow-sm bg-white';
@@ -88,12 +113,12 @@ const Store = () => {
         <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center p-4">
           <div className="text-white text-center">
             {storeInfo?.profileImageUrl && (
-        <img
-          src={storeInfo.profileImageUrl}
-          alt="Mağaza logosu"
-          className="w-24 h-24 rounded-full mx-auto mb-4 border-4 border-white shadow-lg"
-        />
-      )}
+              <img
+                src={storeInfo.profileImageUrl}
+                alt="Mağaza logosu"
+                className="w-24 h-24 rounded-full mx-auto mb-4 border-4 border-white shadow-lg"
+              />
+            )}
             <h1 className="text-2xl md:text-4xl font-bold">{storeInfo.name}</h1>
             <p className='mt-2'>En yeni elektronik ürünler ve teknolojik aksesuarlar.</p>
           </div>
@@ -130,8 +155,10 @@ const Store = () => {
               onChange={(e) => setSelectedCategory(e.target.value)}
             >
               <option value="Tüm Kategoriler">Tüm Kategoriler</option>
-              {storeInfo?.categories?.map((category) => (
-                <option key={category} value={category}>{category}</option>
+              {categories.map((category) => (
+                <option key={category.id} value={category.name}>
+                  {category.name}
+                </option>
               ))}
             </select>
             <FaFilter className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />

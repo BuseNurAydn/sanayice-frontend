@@ -52,8 +52,8 @@ const SubModal = ({title,subFormData,onChange,onSave,onClose,mainImageFile,setMa
 
   return (
     <div className="fixed inset-0 flex items-center justify-center z-50 bg-opacity-40">
-      <div className="bg-white rounded-lg shadow-lg w-full max-w-md p-6">
-        <h2 className="text-xl font-semibold mb-4">{title}</h2>
+      <div className="bg-white rounded-lg shadow-lg w-full md:max-w-md max-w-xs p-6 ">
+        <h2 className="text-lg md:text-xl font-semibold mb-4">{title}</h2>
 
         <input
           type="text"

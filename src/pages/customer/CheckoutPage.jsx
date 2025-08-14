@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { FaCreditCard, FaMapMarkerAlt, FaCheckCircle, FaPlus, FaTruck, FaClock, FaShieldAlt } from "react-icons/fa";
+import { HiOutlineReply } from "react-icons/hi";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { createAddress, fetchAddresses } from "../../services/addressService";
@@ -13,6 +14,9 @@ const CheckoutPage = () => {
   const buyNow = useSelector(state => state.buyNow);
   const navigate = useNavigate();
   const CHECKOUT_API = `${API_BASE}/orders/confirm`;
+  const [discountAmount, setDiscountAmount] = useState(0); // toplam indirim
+  const [appliedCoupon, setAppliedCoupon] = useState(null); // geçerli kupon veya kampanya bilgisi
+
 
   useEffect(() => {
     dispatch(fetchCart());
@@ -22,17 +26,17 @@ const CheckoutPage = () => {
 
   const displayItems = hasBuyNowItem
     ? [{
-        id: buyNow.product.id,
-        productName: buyNow.product.name,
-        quantity: buyNow.quantity,
-        unitPrice: buyNow.product.price
-      }]
+      id: buyNow.product.id,
+      productName: buyNow.product.name,
+      quantity: buyNow.quantity,
+      unitPrice: buyNow.product.price
+    }]
     : cartItems.map(item => ({
-        id: item.productId,
-        productName: item.productName,
-        quantity: item.quantity,
-        unitPrice: item.unitPrice
-      }));
+      id: item.productId,
+      productName: item.productName,
+      quantity: item.quantity,
+      unitPrice: item.unitPrice
+    }));
 
   // Mock kargo firmaları ve fiyatları
   const [shippingOptions, setShippingOptions] = useState([
@@ -111,7 +115,38 @@ const CheckoutPage = () => {
     shippingMethod: "STANDARD",
     shippingCost: 0,
     selectedShipping: "",
+    couponCode: "",
+
   });
+
+  const applyDiscountCode = async () => {
+   
+
+    try {
+      const response = await fetch(
+        `${API_BASE}/public/coupons/by-code/${formData.couponCode}`
+      );
+
+      if (!response.ok) throw new Error("Kod geçersiz veya bulunamadı.");
+
+      const data = await response.json();
+
+      const total = getTotal() + getSelectedShippingPrice();
+      const discount = data.type === "percent"
+        ? total * (data.value / 100)
+        : data.value;
+
+      setDiscountAmount(discount);
+      setAppliedCoupon(data);
+
+      toast.success(`${data.code} uygulandı! İndirim: ₺${discount.toFixed(2)}`);
+    } catch (err) {
+      setDiscountAmount(0);
+      setAppliedCoupon(null);
+      toast.error(err.message);
+    }
+  };
+
 
   const [addresses, setAddresses] = useState([]);
 
@@ -175,9 +210,9 @@ const CheckoutPage = () => {
         shippingMethod: formData.shippingMethod,
         shippingCost: parseFloat(formData.shippingCost),
         paymentMethod: formData.paymentMethod,
-        paymentToken: formData.paymentMethod === 'credit-card' ? formData.paymentToken : undefined
+        paymentToken: formData.paymentMethod === 'credit-card' ? formData.paymentToken : undefined,
+        couponCode: appliedCoupon ? appliedCoupon.code : null,
       };
-    
 
       const token = localStorage.getItem('token'); //  token
       const response = await fetch(CHECKOUT_API, {
@@ -196,7 +231,6 @@ const CheckoutPage = () => {
 
       const result = await response.json();
       toast.success("Sipariş başarıyla tamamlandı!");
-      // Yönlendirme veya state temizleme işlemleri
     } catch (error) {
       toast.error(error.message);
     }
@@ -208,8 +242,9 @@ const CheckoutPage = () => {
   const [selectedAddressId, setSelectedAddressId] = useState(addresses.find(addr => addr.isDefault)?.id || null);
   const [shippingCalculating, setShippingCalculating] = useState(false);
 
+
   const getTotal = () =>
-   // cartItems.reduce((acc, item) => acc + item.unitPrice * item.quantity, 0);
+    // cartItems.reduce((acc, item) => acc + item.unitPrice * item.quantity, 0);
     displayItems.reduce((total, item) => total + item.unitPrice * item.quantity, 0);
 
 
@@ -218,7 +253,13 @@ const CheckoutPage = () => {
     return selected ? selected.price : 0;
   };
 
-  const getFinalTotal = () => getTotal() + getSelectedShippingPrice();
+  //const getFinalTotal = () => getTotal() + getSelectedShippingPrice();
+  const getFinalTotal = () => {
+    const total = getTotal() + getSelectedShippingPrice();
+    const discountedTotal = total - discountAmount;
+    return discountedTotal > 0 ? discountedTotal : 0;
+  };
+
 
   // Kargo fiyatlarını hesapla (API simülasyonu)
   const calculateShippingRates = async (address) => {
@@ -344,7 +385,7 @@ const CheckoutPage = () => {
   };
 
   const handleBackToCart = () => {
-    alert("Sepete dönülüyor...");
+    navigate('/cart')
   };
 
   const renderStepIndicator = () => (
@@ -710,7 +751,7 @@ const CheckoutPage = () => {
       city: formData.city,
       phoneNumber: formData.phoneNumber
     };
-  
+
 
     const selectedShipping = shippingOptions.find(option => option.id === formData.selectedShipping);
 
@@ -769,6 +810,9 @@ const CheckoutPage = () => {
             {formData.paymentMethod === 'cash-on-delivery' && 'Kapıda Ödeme'}
           </p>
         </div>
+
+
+
       </div>
     );
   };
@@ -777,32 +821,69 @@ const CheckoutPage = () => {
     const selectedShipping = shippingOptions.find(option => option.id === formData.selectedShipping);
 
     return (
-      <div className="bg-gray-50 rounded-lg p-6 sticky top-4">
-        <h3 className="text-lg font-semibold mb-4">Sipariş Özeti</h3>
+      <div>
+        <div className="bg-gray-50 rounded-lg p-4 sticky top-4">
+          <h3 className="text-lg font-semibold mb-4">Sipariş Özeti</h3>
 
-        <div className="space-y-2 mb-4">
-          {displayItems.map((item) => (
-            <div key={item.id} className="flex justify-between text-sm">
-              <span>{item.productName} x{item.quantity}</span>
-              <span>₺{(item.unitPrice * item.quantity).toLocaleString()}</span>
+          <div className="space-y-2 mb-4">
+            {displayItems.map((item) => (
+              <div key={item.id} className="flex justify-between text-sm">
+                <span>{item.productName} x{item.quantity}</span>
+                <span>₺{(item.unitPrice * item.quantity).toLocaleString()}</span>
+              </div>
+            ))}
+          </div>
+
+          <div className="border-t pt-4 space-y-2">
+            <div className="flex justify-between">
+              <span>Ara Toplam:</span>
+              <span>₺{getTotal().toLocaleString()}</span>
             </div>
-          ))}
+            <div className="flex justify-between">
+              <span>Kargo ({selectedShipping?.name || 'Seçilmedi'}):</span>
+              <span>₺{getSelectedShippingPrice().toFixed(2)}</span>
+            </div>
+            {discountAmount > 0 && (
+              <div className="flex justify-between text-green-600">
+                <span>İndirim:</span>
+                <span>-₺{discountAmount.toFixed(2)}</span>
+              </div>
+            )}
+            <div className="flex justify-between font-bold text-lg border-t pt-2">
+              <span>Toplam:</span>
+              <span className="text-orange-600">₺{getFinalTotal().toLocaleString()}</span>
+            </div>
+          </div>
+        </div>
+       
+        <div className="flex flex-col bg-gray-50 rounded-lg p-4 sticky top-4 mt-4">
+          <label>Kupon Kodu Giriniz:</label>
+          <div className="flex gap-2">
+            <input
+              type="text"
+              name="couponCode"
+              value={formData.couponCode}
+              onChange={handleInputChange}
+              placeholder="Kupon kodu girin"
+              className="flex-1 outline-none border border-gray-400 bg-gray-50 py-1 px-2 rounded-lg"
+            />
+            <button
+              type="button"
+              onClick={applyDiscountCode}
+              className="bg-orange-400 hover:bg-orange-600 text-white px-4 py-1 rounded-lg cursor-pointer"
+            >
+              Kullan
+            </button>
+          </div>
+
+          {discountAmount > 0 && (
+            <div className="text-green-600 mt-2">
+              İndirim: -₺{discountAmount.toFixed(2)}
+            </div>
+          )}
         </div>
 
-        <div className="border-t pt-4 space-y-2">
-          <div className="flex justify-between">
-            <span>Ara Toplam:</span>
-            <span>₺{getTotal().toLocaleString()}</span>
-          </div>
-          <div className="flex justify-between">
-            <span>Kargo ({selectedShipping?.name || 'Seçilmedi'}):</span>
-            <span>₺{getSelectedShippingPrice().toFixed(2)}</span>
-          </div>
-          <div className="flex justify-between font-bold text-lg border-t pt-2">
-            <span>Toplam:</span>
-            <span className="text-orange-600">₺{getFinalTotal().toLocaleString()}</span>
-          </div>
-        </div>
+
       </div>
     );
   };
@@ -813,8 +894,9 @@ const CheckoutPage = () => {
         <h1 className="text-2xl font-bold">Sipariş Tamamla</h1>
         <button
           onClick={handleBackToCart}
-          className="text-orange-500 hover:text-orange-700 underline"
+          className="text-orange-500 hover:text-orange-600 border border-orange-600 py-1 px-2 rounded-l-lg hover:bg-orange-100 cursor-pointer flex"
         >
+          <HiOutlineReply className="w-5 h-5 mr-2" />
           Sepete Dön
         </button>
       </div>

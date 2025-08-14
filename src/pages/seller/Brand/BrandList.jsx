@@ -108,7 +108,7 @@ const BrandList = () => {
           <AdminText>Marka Yönetimi</AdminText>
           <Link 
             to="/seller/add_brand" 
-            className="bg-[var(--color-dark-orange)] text-white px-4 py-2 rounded hover:bg-orange-600 transition-colors flex items-center gap-2"
+            className="bg-[var(--color-dark-orange)] text-white md:px-4 md:py-2 py-1 px-2 rounded hover:bg-orange-600 transition-colors flex items-center gap-2"
           >
             <Plus size={20} />
             Yeni Marka Ekle

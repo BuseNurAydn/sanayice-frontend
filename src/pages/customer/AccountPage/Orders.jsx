@@ -99,12 +99,12 @@ const Orders = () => {
       <h2 className="text-xl md:text-2xl font-bold text-gray-800 mb-6">Siparişlerim</h2> {/* Başlık eklendi */}
 
       {/* Sekmeler */}
-      <div className="flex flex-wrap gap-4 md:gap-8 border-b border-gray-200 pb-4 mb-6"> {/* Daha fazla boşluk, responsive düzen */}
+      <div className="flex flex-wrap gap-4 md:gap-8 border-b border-gray-200 mb-6">
         {tabs.map((tab) => (
           <button
             key={tab.key}
             onClick={() => setActiveTab(tab.key)}
-            className={`pb-2 text-sm font-semibold transition-colors duration-200 ${activeTab === tab.key
+            className={`pb-2 text-sm font-semibold transition-colors duration-200 cursor-pointer ${activeTab === tab.key
               ? "text-orange-600 border-b-2 border-orange-600"
               : "text-gray-500 hover:text-orange-600"
               }`}

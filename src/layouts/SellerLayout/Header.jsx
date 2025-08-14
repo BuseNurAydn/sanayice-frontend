@@ -31,7 +31,7 @@ const Header = () => {
         />
       </Link>
       <div className="flex items-center space-x-3 pr-2">
-        <Link to="#" className={iconStyle}><BsBellFill /></Link>
+        {/*<Link to="#" className={iconStyle}><BsBellFill /></Link>*/}
 
         <div
           className="relative"

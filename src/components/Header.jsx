@@ -86,7 +86,7 @@ const Header = ({ categories = [] }) => {
 
   return (
     <header className="bg-white shadow-sm py-4 sticky top-0 z-30">
-      <div className="container mx-auto px-4 2xl:px-30 flex items-center justify-between">
+      <div className="container mx-auto px-4 md:px-0 2xl:px-30 flex items-center justify-between">
 
         {/* Hamburger Menü (Mobilde) */}
         <div className="md:hidden">
@@ -280,7 +280,7 @@ const Header = ({ categories = [] }) => {
                       <Link
                         to={`/category/${cat.id}`}
                         onClick={() => setMenuOpen(false)}
-                        className="text-gray-800 text-[10px] font-semibold"
+                        className="text-gray-800 text-[12px] font-semibold"
                       >
                         {cat.name}
                       </Link>

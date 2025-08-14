@@ -26,7 +26,11 @@ const CartPage = () => {
       <main className="flex-1 container mx-auto px-6 py-12">
         {/* Başlık Bölümü */}
         <div className="text-center mb-12">
-          <h1 className="text-2xl md:text-4xl font-bold text-gray-800 mb-4">Sepetim</h1>
+
+          <h1 className="text-2xl md:text-4xl font-bold text-gray-800 mb-4">
+            Sepetim ({cartItems.length} ürün)
+          </h1>
+
           <div className="w-24 h-1 bg-gradient-to-r from-orange-400 to-pink-400 mx-auto mt-4 rounded-full"></div>
         </div>
         {cartItems.length === 0 ? (
@@ -122,13 +126,13 @@ const CartPage = () => {
             <div className="flex justify-end gap-4 mt-6 md:flex-row flex-col">
               <button
                 onClick={handleContinueShopping}
-                className="px-4 py-2 border border-gray-400 rounded hover:bg-gray-100"
+                className="px-4 py-2 border border-gray-400 rounded hover:bg-gray-200 cursor-pointer"
               >
                 Alışverişe Devam Et
               </button>
               <button
                 onClick={handleCheckout}
-                className="px-4 py-2 bg-orange-500 text-white rounded hover:bg-orange-600"
+                className="px-4 py-2 bg-orange-500 text-white rounded hover:bg-orange-600 cursor-pointer"
               >
                 Alışverişi Tamamla
               </button>
@@ -137,13 +141,43 @@ const CartPage = () => {
                   dispatch(clearCart());
                   toast.success("Sepet temizlendi");
                 }}
-                className="px-4 py-2 border bg-red-600 text-white rounded"
+                className="px-4 py-2 border bg-red-600 hover:bg-red-700 text-white rounded cursor-pointer"
               >
                 Sepeti Sil
               </button>
             </div>
           </>
         )}
+
+        {/* Önerilen Ürünler */}
+        <div className="mt-12">
+          <h2 className="text-xl font-bold text-gray-800 mb-4">Size Önerilen Ürünler</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+            {[
+              { id: 1, name: "Kahve Makinesi", price: 999, img: "https://via.placeholder.com/200" },
+              { id: 2, name: "Bluetooth Kulaklık", price: 599, img: "https://via.placeholder.com/200" },
+              { id: 3, name: "Akıllı Saat", price: 1299, img: "https://via.placeholder.com/200" },
+              { id: 4, name: "Tost Makinesi", price: 799, img: "https://via.placeholder.com/200" }
+            ].map(product => (
+              <div
+                key={product.id}
+                className="bg-white border border-gray-200 rounded-lg shadow p-4 flex flex-col items-center"
+              >
+                <img src={product.img} alt={product.name} className="w-32 h-32 object-cover mb-4" />
+                <h3 className="font-semibold text-gray-800">{product.name}</h3>
+                <p className="text-orange-500 font-bold">₺{product.price.toLocaleString()}</p>
+                <button
+                  onClick={() => {
+                    toast.success(`${product.name} sepete eklendi`);
+                  }}
+                  className="mt-2 bg-orange-500 text-white px-4 py-1 rounded hover:bg-orange-600"
+                >
+                  Sepete Ekle
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
       </main>
     </div>
   );

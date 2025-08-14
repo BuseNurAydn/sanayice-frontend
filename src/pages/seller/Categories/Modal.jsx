@@ -52,7 +52,7 @@ const handleMainImageUpload = (file) => {
 
   return (
     <div className="fixed inset-0 flex items-center justify-center z-50 bg-opacity-50">
-      <div className="bg-white rounded-lg shadow-lg w-full max-w-md p-6">
+      <div className="bg-white rounded-lg shadow-lg w-full md:max-w-md max-w-xs p-6">
         <h2 className="text-xl font-semibold mb-4">{title}</h2>
 
         <input

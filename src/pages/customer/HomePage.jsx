@@ -136,7 +136,7 @@ const HomePage = () => {
   return (
     <div className="bg-gray-50">
       <nav className="bg-white shadow-md border-b relative hidden md:block">
-        <div className="container mx-auto px-6">
+        <div className="container mx-auto">
           {/* Menü Satırı */}
           <div className="flex justify-start space-x-8 py-5">
             {categories.map((category) => (
