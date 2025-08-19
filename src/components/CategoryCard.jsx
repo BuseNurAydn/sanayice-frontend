@@ -12,24 +12,20 @@ const CategoryCard = ({ category }) => {
         <div
             key={category.id}
             onClick={handleNavigate}
-            className="relative rounded-3xl overflow-hidden h-60 shadow-xl group cursor-pointer transform hover:scale-105 hover:-translate-y-1 transition-all duration-300"
+            className="relative rounded-xl overflow-hidden shadow-xl group cursor-pointer transform hover:scale-105 hover:-translate-y-1 transition-all duration-300 w-full h-[185.5px]"
             style={{
-                backgroundImage: `url(${category.imageUrl})`,
-                backgroundSize: 'contain',
+                height: "185.5px",
+                backgroundSize: 'cover',
                 backgroundPosition: 'center'
             }}
         >
             <div className="absolute inset-0 bg-gradient-to-br from-black/30 to-black/60 group-hover:from-black/50 group-hover:to-black/80 transition-all duration-300" />
 
-            {/* Etiket */}
-            <span className="absolute top-4 left-4 bg-white text-gray-800 text-xs font-semibold px-3 py-1 rounded-full shadow-md">
-                {category.name.split(" ")[0]}
-            </span>
-
+            
             {/* İçerik */}
-            <div className="relative z-10 p-6 flex flex-col h-full justify-end">
-                <h3 className="md:text-2xl text-lg font-bold text-white mb-2 drop-shadow-md">{category.name}</h3>
-                <p className="text-white text-sm mb-3 opacity-90 line-clamp-2">{category.description}</p>
+            <div className="relative z-10 p-6 flex flex-col h-full justify-center">
+                <h3 className="md:text-xl text-lg font-bold text-white mb-2 drop-shadow-md">{category.name}</h3>
+              
 
                 <button
                     onClick={(e) => {

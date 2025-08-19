@@ -14,30 +14,27 @@ import ScrollToTop from "./components/ScrollToTop";
 function App() {
 //Sayfa yenilendiğinde Redux state sıfırlanır. Bunun önüne geçmek için useEffect kullanarak localStorage’dan bilgiyi Redux’a tekrar yükledim
 
- const dispatch = useDispatch();
+  const dispatch = useDispatch();
 
- useEffect(() => {
-  const token = localStorage.getItem("token");
-  const user = localStorage.getItem("user");
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    const user = localStorage.getItem("user");
 
-  if (token && user) {
-    dispatch(setCredentials({
-      token,
-      user: JSON.parse(user)
-    }));
-  } else {
-    dispatch(logout());
-  }
-}, [dispatch]);
+    if (token && user) {
+      dispatch(setCredentials({
+        token,
+        user: JSON.parse(user)
+      }));
+    } else {
+      dispatch(logout());
+    }
+  }, [dispatch]);
 
   return (
-     
-     <>
-     
-      {/* Diğer bileşenlerin */}
+    <>
       <ToastContainer
         position="top-right"
-        autoClose={3000}      // 3 saniye sonra kaybolur
+        autoClose={3000}
         hideProgressBar={false}
         newestOnTop={false}
         closeOnClick
@@ -46,24 +43,23 @@ function App() {
         draggable
         pauseOnHover
       />
-    <Router>
-      <ScrollToTop />
-      <Routes>
 
-        {/* Müşteri panelleri */}
-        <Route path="/*" element={<CustomerRouters />} />
+      <Router>
+        <ScrollToTop />
+        <Routes>
+          {/* Müşteri panelleri */}
+          <Route path="/*" element={<CustomerRouters />} />
 
-        {/* Satıcı panelleri */}
-        <Route path="/seller/*" element={<SellerRoutes />} />
+          {/* Satıcı panelleri */}
+          <Route path="/seller/*" element={<SellerRoutes />} />
 
-        {/* Giriş ve kayıt sayfaları */}
-        <Route path="/auth/*" element={<AuthRoutes />}/>
-
-          
-      </Routes>
-    </Router>
+          {/* Giriş ve kayıt sayfaları */}
+          <Route path="/auth/*" element={<AuthRoutes />} />
+        </Routes>
+      </Router>
     </>
   );
 }
 
 export default App;
+

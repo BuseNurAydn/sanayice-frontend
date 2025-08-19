@@ -2,7 +2,9 @@ import { useNavigate, Link } from "react-router-dom";
 import { useSelector } from 'react-redux';
 import { useDispatch } from "react-redux";
 import Logo from "../../src/assets/png/Logo2.png";
-import { FaShoppingCart } from "react-icons/fa";
+import { FaShoppingCart} from "react-icons/fa";
+
+import { FaRegHeart } from "react-icons/fa6";
 import { RxTriangleDown, RxTriangleUp } from "react-icons/rx";
 import AccountMenu from "../pages/customer/AccountPage/AccountMenu";
 import { useEffect, useState } from 'react'
@@ -207,18 +209,7 @@ const Header = ({ categories = [] }) => {
             onClick={() => navigate("/favorite")}
             aria-label="Favorilerim"
           >
-            <svg
-              width={20}
-              height={20}
-              fill="none"
-              stroke="currentColor"
-              className="text-gray-700"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M10 18l-1.45-1.32C4.4 12.36 2 10.28 2 7.5 2 5.42 3.42 4 5.5 4c1.54 0 3.04 1.04 3.57 2.36h1.87C13.46 5.04 14.96 4 16.5 4 18.58 4 20 5.42 20 7.5c0 2.78-2.4 4.86-6.55 9.18L10 18z" />
-            </svg>
+            <FaRegHeart size={24} />
             {favoriteCount > 0 && (
               <span className="absolute -top-1 -right-1 bg-pink-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
                 {favoriteCount}
@@ -240,11 +231,21 @@ const Header = ({ categories = [] }) => {
               </span>
             )}
           </button>
+          
 
           {/* Hesabım */}
           <div className="block">
             <AccountMenu />
           </div>
+
+           <button
+            onClick={() => navigate('/auth/signUp/seller')}
+            className=" border-slate-700 bg-gray-50 border-2 text-white p-2 md:px-6 md:py-3 rounded-xl md:font-semibold font-medium transition-colors duration-200 transform hover:scale-105 relative flex items-center space-x-1 md:space-x-2 cursor-pointer "
+            aria-label="Sepetim"
+          >
+            <span className="hidden md:inline text-[var(--color-dark-orange)]">Satıcı Ol</span>
+           
+          </button>
         </div>
 
         {/* Menü */}

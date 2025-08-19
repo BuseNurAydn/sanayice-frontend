@@ -63,7 +63,7 @@ const SubModal = ({title,subFormData,onChange,onSave,onClose,mainImageFile,setMa
           onChange={onChange}
           className="w-full border border-gray-300 rounded px-3 py-2 mb-4 outline-none"
         />
-
+{/** 
         <textarea
           name="description"
           placeholder="Açıklama"
@@ -96,7 +96,7 @@ const SubModal = ({title,subFormData,onChange,onSave,onClose,mainImageFile,setMa
             </button>
           </div>
         )}
-
+*/}
         <div className="flex justify-end space-x-2">
           <button
             onClick={onClose}

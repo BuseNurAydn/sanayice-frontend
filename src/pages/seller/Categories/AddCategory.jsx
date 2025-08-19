@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import AdminText from '../../../shared/Text/AdminText';
 import { addCategory } from '../../../services/categoryService';
 import { Upload } from "lucide-react";
+import {toast} from "react-toastify"
 
 const AddCategory = () => {
 
