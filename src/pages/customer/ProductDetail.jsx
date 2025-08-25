@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect,useRef } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { API_BASE } from "../../config";
 import { useDispatch, useSelector } from "react-redux";
@@ -48,6 +48,7 @@ const dummyRelatedProducts = [
   },
 ];
 
+
 const ProductDetail = () => {
   const { id } = useParams();
   const [sliderIndex, setSliderIndex] = useState(0);
@@ -58,6 +59,8 @@ const ProductDetail = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [reviews, setReviews] = useState([])
+  const relatedScrollRef = useRef(null);
+  const suggestedScrollRef = useRef(null);
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -86,7 +89,6 @@ const ProductDetail = () => {
         if (!response.ok) throw new Error("Ürün bulunamadı");
         const data = await response.json();
         setProduct(data);
-        console.log(data)
       } catch (err) {
         setError(err.message);
       } finally {
@@ -180,7 +182,50 @@ const ProductDetail = () => {
     if (!text) return '';
     return text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
   };
+  const scroll = (ref, direction) => {
+    if (ref.current) {
+      const scrollAmount = 280;
+      ref.current.scrollBy({
+        left: direction === 'left' ? -scrollAmount : scrollAmount,
+        behavior: 'smooth'
+      });
+    }
+  };
 
+  const NavButton = ({ direction, onClick, disabled = false }) => (
+    <button
+      onClick={onClick}
+      disabled={disabled}
+      className={`absolute ${direction === 'left' ? 'left-2' : 'right-2'} top-1/2 transform -translate-y-1/2 
+        w-12 h-12 bg-white shadow-lg rounded-full flex items-center justify-center z-10
+        ${disabled ? 'opacity-50 cursor-not-allowed' : 'hover:bg-orange-50 hover:shadow-xl hover:scale-105'}
+        transition-all duration-200 border border-gray-200 group`}
+    >
+      {direction === 'left' ? (
+        <svg width={20} height={20} fill="none" stroke="currentColor" className="text-gray-600 group-hover:text-orange-600">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 18l-6-6 6-6" />
+        </svg>
+      ) : (
+        <svg width={20} height={20} fill="none" stroke="currentColor" className="text-gray-600 group-hover:text-orange-600">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 18l6-6-6-6" />
+        </svg>
+      )}
+    </button>
+  );
+
+  const ScrollSection = ({ children, scrollRef }) => (
+    <div className="relative">
+      <NavButton direction="left" onClick={() => scroll(scrollRef, 'left')} />
+      <NavButton direction="right" onClick={() => scroll(scrollRef, 'right')} />
+      <div
+        ref={scrollRef}
+        className="flex gap-5 overflow-x-auto pb-4 scrollbar-hide scroll-smooth"
+        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+      >
+        {children}
+      </div>
+    </div>
+  );
 
   function renderStars(rating) {
     const fullStars = Math.max(0, Math.min(Math.floor(rating || 0), 5));
@@ -360,7 +405,7 @@ const ProductDetail = () => {
                 <button
                   onClick={handleAddToCart}
                   disabled={product.stockQuantity === 0}
-                  className="flex-1 flex items-center justify-center gap-2 bg-orange-500 hover:bg-orange-600 disabled:bg-gray-400 text-white py-2 px-4 md:py-2 md:px-4 rounded-xl md:font-semibold md:text-lg text-sm transition-all duration-200 transform cursor-pointer"
+                  className="flex-1 flex items-center justify-center gap-1 md:gap-2 bg-orange-500 hover:bg-orange-600 disabled:bg-gray-400 text-white py-1 px-2 md:py-2 md:px-4 rounded-xl md:font-semibold md:text-lg text-sm transition-all duration-200 transform cursor-pointer"
                 >
                   <MdAddShoppingCart className="text-2xl" /> Sepete Ekle
                 </button>
@@ -368,7 +413,7 @@ const ProductDetail = () => {
                 <button
                   onClick={handleBuyNow}
                   disabled={product.stockQuantity === 0}
-                  className="flex-1 flex items-center justify-center gap-2 bg-[var(--color-dark-blue)] hover:bg-gray-800 disabled:bg-gray-400 text-white  py-2 px-3 md:py-2 md:px-4 rounded-xl md:font-semibold md:text-lg text-sm transition-all duration-200 transform cursor-pointer"
+                  className="flex-1 flex items-center justify-center gap-1 md:gap-2 bg-[var(--color-dark-blue)] hover:bg-gray-800 disabled:bg-gray-400 text-white  py-2 px-3 md:py-2 md:px-4 rounded-xl md:font-semibold md:text-lg text-sm transition-all duration-200 transform cursor-pointer"
                 >
                   <FaCreditCard className="text-lg" /> Hemen Al
                 </button>
@@ -528,20 +573,21 @@ const ProductDetail = () => {
         {/* Benzer Ürünler */}
         <div className="mt-12">
           <h3 className="text-xl font-bold mb-6">Buna bakanların aldıkları</h3>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-6">
+         <ScrollSection scrollRef={relatedScrollRef}>
             {dummyRelatedProducts.map((item) => (
               <ProductCard key={item.id} product={item} />
             ))}
-          </div>
+          </ScrollSection>
         </div>
-       
+
         <div className="mt-12">
           <h3 className="text-xl font-bold mb-6">Bunlar da ilgini çekebilir</h3>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-6">
+          <ScrollSection scrollRef={suggestedScrollRef}>
             {dummyRelatedProducts.map((item) => (
               <ProductCard key={item.id} product={item} />
             ))}
-          </div>
+          </ScrollSection>
+
         </div>
       </main >
     </div >
