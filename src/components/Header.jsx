@@ -2,8 +2,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { useSelector } from 'react-redux';
 import { useDispatch } from "react-redux";
 import Logo from "../../src/assets/png/Logo2.png";
-import { FaShoppingCart} from "react-icons/fa";
-
+import { FaShoppingCart, FaStore} from "react-icons/fa";
 import { FaRegHeart } from "react-icons/fa6";
 import { RxTriangleDown, RxTriangleUp } from "react-icons/rx";
 import AccountMenu from "../pages/customer/AccountPage/AccountMenu";
@@ -120,8 +119,8 @@ const Header = ({ categories = [] }) => {
         </div>
 
         {/* Search Bar */}
-        <div className="flex-1 max-w-full md:max-w-2xl mx-0 md:mx-6 w-full">
-          <div className="flex items-center relative w-full md:max-w-2xl mx-0 md:mx-6">
+        <div className="flex-1 max-w-full md:max-w-2xl mx-0 md:mx-8 w-full">
+          <div className="flex items-center relative w-full md:max-w-2xl mx-0 md:mx-4">
             {/* Arama ikonu */}
             <button
               className="absolute right-3 top-1/2 transform -translate-y-1/2 z-10 text-gray-700"
@@ -205,11 +204,11 @@ const Header = ({ categories = [] }) => {
         <div className="flex items-center gap-2 md:gap-4 flex-shrink-0">
           {/* Favoriler Butonu */}
           <button
-            className="relative md:bg-gray-100 md:hover:bg-gray-200 p-2 md:p-3 rounded-xl transition-colors duration-200 transform hover:scale-105 cursor-pointer"
+            className="relative md:bg-gray-100 md:hover:bg-gray-200 p-2 rounded-lg transition-colors duration-200 transform hover:scale-105 cursor-pointer"
             onClick={() => navigate("/favorite")}
             aria-label="Favorilerim"
           >
-            <FaRegHeart size={24} />
+            <FaRegHeart size={20} />
             {favoriteCount > 0 && (
               <span className="absolute -top-1 -right-1 bg-pink-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
                 {favoriteCount}
@@ -220,10 +219,10 @@ const Header = ({ categories = [] }) => {
           {/* Sepet Butonu */}
           <button
             onClick={() => navigate('/cart')}
-            className="md:bg-orange-500 md:hover:bg-orange-600 text-white p-2 md:px-6 md:py-3 rounded-xl md:font-semibold font-medium transition-colors duration-200 transform hover:scale-105 relative flex items-center space-x-1 md:space-x-2 cursor-pointer "
+            className="md:bg-orange-500 md:hover:bg-orange-600 text-white p-2 md:px-4 md:py-2 rounded-lg md:font-semibold font-medium transition-colors duration-200 transform hover:scale-105 relative flex items-center space-x-1 md:space-x-2 cursor-pointer "
             aria-label="Sepetim"
           >
-            <FaShoppingCart className="md:mr-2 text-blue-700 md:text-white w-5 h-5" />
+            <FaShoppingCart className="md:mr-2 text-orange-600 md:text-white w-4 h-4" />
             <span className="hidden md:inline">Sepetim</span>
             {totalQuantity > 0 && (
               <span className="absolute -top-1 -right-2 bg-red-500 text-white text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full">
@@ -240,10 +239,11 @@ const Header = ({ categories = [] }) => {
 
            <button
             onClick={() => navigate('/auth/signUp/seller')}
-            className=" border-slate-700 bg-gray-50 border-2 text-white p-2 md:px-6 md:py-3 rounded-xl md:font-semibold font-medium transition-colors duration-200 transform hover:scale-105 relative flex items-center space-x-1 md:space-x-2 cursor-pointer "
-            aria-label="Sepetim"
+            className=" gradient-background text-white p-1 md:px-4 md:py-2 rounded-lg md:font-semibold font-medium transition-colors duration-200 transform hover:scale-105 relative flex items-center space-x-1 md:space-x-2 cursor-pointer "
+            aria-label="satıcıOl"
           >
-            <span className="hidden md:inline text-[var(--color-dark-orange)]">Satıcı Ol</span>
+             <FaStore className="w-4 h-4 md:mr-2 text-orange-600 md:text-white" />
+            <span className="hidden md:inline">Satıcı Ol</span>
            
           </button>
         </div>

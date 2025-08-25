@@ -3,7 +3,38 @@ import { changeQuantity, removeCart, clearCart } from "../../services/cartServic
 import { useNavigate } from "react-router-dom";
 import { FaRegTrashCan } from "react-icons/fa6";
 import { toast } from "react-toastify";
+import ProductCard from "../../components/ProductCard";
 
+const dummyData = [
+      {
+        id: 1,
+        name: "Kahve Makinesi",
+        brand: "Arzum",
+        price: 999,
+        imageUrls: ["https://via.placeholder.com/200"],
+      },
+      {
+        id: 2,
+        name: "Bluetooth Kulaklık",
+        brand: "Sony",
+        price: 599,
+        imageUrls: ["https://via.placeholder.com/200"],
+      },
+      {
+        id: 3,
+        name: "Akıllı Saat",
+        brand: "Apple",
+        price: 1299,
+        imageUrls: ["https://via.placeholder.com/200"],
+      },
+      {
+        id: 4,
+        name: "Tost Makinesi",
+        brand: "Philips",
+        price: 799,
+        imageUrls: ["https://via.placeholder.com/200"],
+      }
+]
 const CartPage = () => {
   const cartItems = useSelector((state) => state.cart.items);
   const dispatch = useDispatch();
@@ -150,31 +181,11 @@ const CartPage = () => {
         )}
 
         {/* Önerilen Ürünler */}
-        <div className="mt-12">
-          <h2 className="text-xl font-bold text-gray-800 mb-4">Size Önerilen Ürünler</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
-            {[
-              { id: 1, name: "Kahve Makinesi", price: 999, img: "https://via.placeholder.com/200" },
-              { id: 2, name: "Bluetooth Kulaklık", price: 599, img: "https://via.placeholder.com/200" },
-              { id: 3, name: "Akıllı Saat", price: 1299, img: "https://via.placeholder.com/200" },
-              { id: 4, name: "Tost Makinesi", price: 799, img: "https://via.placeholder.com/200" }
-            ].map(product => (
-              <div
-                key={product.id}
-                className="bg-white border border-gray-200 rounded-lg shadow p-4 flex flex-col items-center"
-              >
-                <img src={product.img} alt={product.name} className="w-32 h-32 object-cover mb-4" />
-                <h3 className="font-semibold text-gray-800">{product.name}</h3>
-                <p className="text-orange-500 font-bold">₺{product.price.toLocaleString()}</p>
-                <button
-                  onClick={() => {
-                    toast.success(`${product.name} sepete eklendi`);
-                  }}
-                  className="mt-2 bg-orange-500 text-white px-4 py-1 rounded hover:bg-orange-600"
-                >
-                  Sepete Ekle
-                </button>
-              </div>
+       <div className="mt-12">
+          <h3 className="text-xl font-bold mb-6">Önerilen Ürünler</h3>
+          <div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-5 gap-6">
+            {dummyData.map((item) => (
+              <ProductCard key={item.id} product={item} />
             ))}
           </div>
         </div>

@@ -5,11 +5,12 @@ import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import ProductCard from "../../components/ProductCard";
-import { getProducts } from "../../services/productsService";
-import { fetchActiveBrands } from "../../services/brandservice"; 
+import { getProducts, getProductsByCategoryId } from "../../services/productsService";
+import { fetchActiveBrands } from "../../services/brandservice";
 import { fetchCategories } from "../../services/categoryService";
 import { getAllPublicBanners } from "../../services/bannerService";
 import CategoriesSection from '../../components/CategoriesSection';
+import CategorySection from '../../components/CategorySection';
 import AddSlider from "../../components/addSlider";
 
 const NextArrow = ({ onClick }) => (
@@ -57,8 +58,8 @@ const HomePage = () => {
   const rightBanners = [
     { imageUrl: "https://images.hepsiburada.net/banners/s/1/640-200/gra-199064-slider133997371828354751.jpg/format:webp" },
     { imageUrl: "https://images.hepsiburada.net/banners/s/1/640-200/gra-199031-slider133997241731061103.jpg/format:webp" },
-    { imageUrl: "" },
-    { imageUrl: "" },
+    { imageUrl: "https://images.hepsiburada.net/banners/s/1/640-200/gra-199480-slider133995577722430043.jpg/format:webp" },
+    { imageUrl: "https://images.hepsiburada.net/banners/s/1/640-200/gra-199000-slider-1133995369139444842.jpg/format:webp" },
   ];
 
   // Sayaç 
@@ -137,14 +138,28 @@ const HomePage = () => {
     const loadCategories = async () => {
       setLoading(true);
       try {
-        const data = await fetchCategories();
-        setCategories(data);
+        const categoryData = await fetchCategories();
+
+        // Her kategori için ürünleri çektim
+        const categoriesWithProducts = await Promise.all(
+          categoryData.map(async (cat) => {
+            try {
+              const products = await getProductsByCategoryId(cat.id);
+              return { ...cat, products, banners: [] }; 
+            } catch {
+              return { ...cat, products: [], banners: [] };
+            }
+          })
+        );
+
+        setCategories(categoriesWithProducts);
       } catch (err) {
-        setError(err.message || "Bir hata oluştu");
+        console.error("Kategori veya ürünler yüklenemedi:", err);
       } finally {
         setLoading(false);
       }
     };
+
     loadCategories();
   }, []);
 
@@ -232,67 +247,125 @@ const HomePage = () => {
     </div>
   );
 
+  if (loading) return <div className="text-center py-20">Yükleniyor...</div>;
   return (
     <div className="bg-gray-50">
-      <nav className="bg-white shadow-md border-b relative hidden md:block">
+      <nav className="bg-white shadow-sm border-b border-gray-300 relative hidden md:block">
         <div className="container mx-auto md:px-0 2xl:px-32">
-          {/* Menü Satırı */}
-          <div className="flex flex-wrap justify-start py-5">
-            {categories.map((category) => (
-              <div
-                key={category.id}
-                className="relative group"
-                onMouseEnter={() => setActiveCategory(category.id)}
-                onMouseLeave={() => setActiveCategory(null)}
-              >
-                <Link
-                  to={`/category/${category.id}`}
-                  className="text-sm font-medium text-gray-700 hover:text-orange-600 transition-all duration-300 py-2 px-4 rounded-lg hover:bg-orange-50 relative flex items-center gap-1 "
-                >
-                  {category.name}
-                  {category.subcategories?.length > 0 && (
-                    <svg
-                      className="w-3 h-3 transition-transform duration-300 group-hover:rotate-180"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
+          <div className="py-5">
+
+            {/* 1. Satır */}
+            <div className="flex justify-center gap-4">
+              {categories.slice(0, 6).map((category, index) => {
+                const alignRight = index >= 4; // Son 2 kategori sağa yaslanacak
+                return (
+                  <div key={category.id} className="relative group">
+                    <Link
+                      to={`/category/${category.id}`}
+                      className="text-sm font-medium text-gray-700 hover:text-orange-600 transition-all duration-300 py-2 px-4 rounded-lg hover:bg-orange-50 flex items-center gap-1"
                     >
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                    </svg>
-                  )}
-                  <span className="absolute bottom-0 left-1/2 w-0 h-0.5 bg-orange-600 transition-all duration-300 group-hover:w-full group-hover:left-0"></span>
-                </Link>
-
-                {/* Alt Kategoriler Dropdown */}
-                {activeCategory === category.id && category.subcategories?.length > 0 && (
-                  <div className="absolute left-0 top-full bg-white shadow-2xl border border-gray-200 rounded-2xl min-w-[320px] py-5 px-6 z-50 animate-dropdown">
-                    <div className="space-y-1">
-                      {category.subcategories.map((sub) => (
-                        <Link
-                          key={sub.id}
-                          to={`/category/${category.id}`}
-                          className="flex items-center gap-3 text-sm text-gray-700 hover:text-orange-600 hover:bg-gradient-to-r hover:from-orange-50 hover:to-orange-100 px-4 py-3 rounded-xl transition-all duration-300 group"
+                      {category.name}
+                      {category.subcategories?.length > 0 && (
+                        <svg
+                          className="w-3 h-3 transition-transform duration-300 group-hover:rotate-180"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
                         >
-                          <div className="w-2 h-2 bg-orange-200 rounded-full group-hover:bg-orange-500 transition-colors duration-300"></div>
-                          <span className="font-medium">{sub.name}</span>
-                          <svg
-                            className="w-4 h-4 ml-auto opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                          </svg>
-                        </Link>
-                      ))}
-                    </div>
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                        </svg>
+                      )}
+                    </Link>
 
-                    {/* Dropdown Arrow */}
-                    <div className="absolute -top-2 left-8 w-4 h-4 bg-white border-t border-l border-gray-200 rotate-45"></div>
+                    {/* Alt Kategoriler */}
+                    {category.subcategories?.length > 0 && (
+                      <div
+                        className={`absolute top-full bg-white shadow-2xl border border-gray-200 rounded-2xl w-[480px] p-6 z-50 opacity-0 invisible group-hover:opacity-100 group-hover:visible group-hover:translate-y-2 transform scale-95 group-hover:scale-100 transition-all duration-300 ease-out
+                    ${alignRight ? "right-0" : "left-0"}`}
+                      >
+                        <div className="flex">
+                          {/* Sol Taraf - Alt Kategoriler */}
+                          <div className="grid grid-cols-2 gap-6 flex-1">
+                            {category.subcategories.map((sub) => (
+                              <div key={sub.id}>
+                                <Link
+                                  to={`/subcategory/${sub.id}`}
+                                  className="block text-xs font-semibold text-gray-800 hover:text-orange-600 mb-2"
+                                >
+                                  {sub.name}
+                                </Link>
+                              </div>
+                            ))}
+                          </div>
+
+                          {/* Dropdown Arrow */}
+                          <div
+                            className={`absolute -top-2 w-4 h-4 bg-white border-t border-l border-gray-200 rotate-45
+                        ${alignRight ? "right-8" : "left-8"}`}
+                          ></div>
+                        </div>
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
-            ))}
+                );
+              })}
+            </div>
+
+            {/* 2. Satır */}
+            <div className="flex justify-center gap-8 mt-3">
+              {categories.slice(7).map((category, index) => {
+                const alignRight = index >= 3; // sondaki 2 kategori sağa yaslanacak
+                return (
+                  <div key={category.id} className="relative group">
+                    <Link
+                      to={`/category/${category.id}`}
+                      className="text-sm font-medium text-gray-700 hover:text-orange-600 transition-all duration-300 py-2 px-4 rounded-lg hover:bg-orange-50 flex items-center gap-1"
+                    >
+                      {category.name}
+                      {category.subcategories?.length > 0 && (
+                        <svg
+                          className="w-3 h-3 transition-transform duration-300 group-hover:rotate-180"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                        </svg>
+                      )}
+                    </Link>
+
+                    {/* Alt Kategoriler */}
+                    {category.subcategories?.length > 0 && (
+                      <div
+                        className={`absolute top-full bg-white shadow-2xl border border-gray-200 rounded-2xl w-[400px] p-6 z-50 opacity-0 invisible group-hover:opacity-100 group-hover:visible group-hover:translate-y-2 transform scale-95 group-hover:scale-100 transition-all duration-300 ease-out
+                    ${alignRight ? "right-0" : "left-0"}`}
+                      >
+                        <div className="flex">
+                          <div className="grid grid-cols-2 gap-6 flex-1">
+                            {category.subcategories.map((sub) => (
+                              <div key={sub.id}>
+                                <Link
+                                  to={`/subcategory/${sub.id}`}
+                                  className="block text-xs font-semibold text-gray-800 hover:text-orange-600 mb-2"
+                                >
+                                  {sub.name}
+                                </Link>
+                              </div>
+                            ))}
+                          </div>
+
+                          <div
+                            className={`absolute -top-2 w-4 h-4 bg-white border-t border-l border-gray-200 rotate-45
+                        ${alignRight ? "right-8" : "left-8"}`}
+                          ></div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+
           </div>
         </div>
       </nav>
@@ -366,42 +439,6 @@ const HomePage = () => {
           </div>
         </section>
 
-        {/*
-        {/* Markalar 
-        <section className="mb-12">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="font-bold text-lg md:text-2xl text-gray-900">Popüler Markalar</h2>
-            <button className="text-[var(--color-dark-orange)] font-semibold">Tümünü Gör →</button>
-          </div>
-          <ScrollSection scrollRef={brandsScrollRef}>
-            {brands.map((brand) => (
-              <div
-                key={brand.id}
-                className="bg-white border border-gray-300 rounded-xl shadow-sm flex flex-col items-center min-w-[160px] p-6 hover:shadow-md transition-all duration-300 cursor-pointer group"
-              >
-                <div className="w-24 h-24 flex items-center justify-center bg-gray-50 rounded-full mb-4 border group-hover:bg-gray-100 transition-colors duration-200 overflow-hidden">
-                  {brand.imageUrl ? (
-                    <img
-                      src={brand.imageUrl}
-                      alt={brand.name}
-                      className="w-full h-full object-contain"
-                    />
-                  ) : (
-                    <span className="text-gray-600 font-bold text-lg">
-                      {brand.name.charAt(0)}
-                    </span>
-                  )}
-                </div>
-                <span className="font-medium text-gray-700 text-sm text-center">
-                  {brand.name}
-                </span>
-              </div>
-            ))}
-          </ScrollSection>
-        </section>
-        */}
-
-
         {/* Öne Çıkan Ürünler */}
         <section className="mb-12">
           <div className="flex items-center justify-between mb-6">
@@ -456,79 +493,14 @@ const HomePage = () => {
           <AddSlider />
         </section>
 
-         {/* Yeni Ürünler */}
-        <section className="mb-12">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h2 className="font-bold text-lg md:text-2xl text-gray-900">Elektrik ve Elektronik Malzemeleri</h2>
-             
-            </div>
-            <button className="text-[var(--color-dark-orange)] font-semibold">Tümünü Gör →</button>
-          </div>
-          <ScrollSection scrollRef={newProductsScrollRef}>
-            {products.map(product => (
-              <ProductCard key={product.id} product={product} />
-            ))}
-          </ScrollSection>
+        {/* Her kategori bölümü için */}
+        {categories.map((category) => (
+          <CategorySection key={category.id} category={category} />
+        ))}
 
-          {/* Reklam Alanı */}
-          <AddSlider />
-        </section>
 
         {/*Kategori Kartları */}
         <CategoriesSection categories={categories} />
-
-        ,
-        <div className="bg-white py-6">
-          <div className="max-w-8xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 text-center">
-
-            {/* Güvenli Alışveriş */}
-            <div className="flex flex-col items-center gap-2">
-              <div className="text-purple-600 text-3xl">
-                {/* İkon */}
-                <svg xmlns="http://www.w3.org/2000/svg" className="w-16 h-16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2l4-4" />
-                </svg>
-              </div>
-              <h4 className="font-bold text-gray-900">Güvenli Alışveriş</h4>
-              <p className="text-gray-600 text-sm">İyzico ile birlikte güvenli ödeme</p>
-            </div>
-
-            {/* Kolay İade */}
-            <div className="flex flex-col items-center gap-2">
-              <div className="text-purple-600 text-3xl">
-                <svg xmlns="http://www.w3.org/2000/svg" className="w-16 h-16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v6h6M20 20v-6h-6" />
-                </svg>
-              </div>
-              <h4 className="font-bold text-gray-900">Kolay İade</h4>
-              <p className="text-gray-600 text-sm">14 gün içinde ücretsiz iade imkanı</p>
-            </div>
-
-            {/* Ücretsiz Kargo */}
-            <div className="flex flex-col items-center gap-2">
-              <div className="text-purple-600 text-3xl">
-                <svg xmlns="http://www.w3.org/2000/svg" className="w-16 h-16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18v10H3V10z" />
-                </svg>
-              </div>
-              <h4 className="font-bold text-gray-900">Ücretsiz Kargo</h4>
-              <p className="text-gray-600 text-sm">200 TL ve üzeri ücretsiz kargo</p>
-            </div>
-
-            {/* Hızlı Teslimat */}
-            <div className="flex flex-col items-center gap-2">
-              <div className="text-purple-600 text-3xl">
-                <svg xmlns="http://www.w3.org/2000/svg" className="w-16 h-16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12h18M3 6h18M3 18h18" />
-                </svg>
-              </div>
-              <h4 className="font-bold text-gray-900">Hızlı Teslimat</h4>
-              <p className="text-gray-600 text-sm">Güvenilir ve hızlı satıcılarla hızlı teslim</p>
-            </div>
-
-          </div>
-        </div>
 
       </main>
 

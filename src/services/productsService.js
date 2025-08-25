@@ -31,4 +31,19 @@ export const getProductsByCategoryId = async (categoryId) => {
   return await response.json();
 };
 
+//Alt Kategoriye ait ürünler için
+export const getProductsBySubCategoryId = async (subId) => {
+  const token = localStorage.getItem("token");
+
+  const response = await fetch(`${PRODUCTS_API}/subcategories/${subId}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) throw new Error("Ürünler alınamadı");
+
+  return await response.json();
+};
+
 

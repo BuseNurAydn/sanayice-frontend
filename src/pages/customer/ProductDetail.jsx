@@ -2,11 +2,51 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { API_BASE } from "../../config";
 import { useDispatch, useSelector } from "react-redux";
-import { FaHeart, FaRegHeart } from "react-icons/fa";
+import { FaHeart, FaRegHeart, FaCreditCard } from "react-icons/fa";
+import { MdAddShoppingCart } from "react-icons/md";
 import { addToCart } from "../../services/cartService";
 import { toast } from "react-toastify";
 import { setBuyNowItem } from "../../store/buyNowSlice";
+import ProductCard from "../../components/ProductCard";
 import { addToFavorites, fetchFavorites, removeFavorites } from "../../services/favoritesService";
+
+const dummyRelatedProducts = [
+  {
+    id: 101,
+    name: "Gaming Mouse",
+    brand: "Logitech",
+    price: 899,
+    imageUrls: ["/images/mouse.png"],
+  },
+  {
+    id: 102,
+    name: "Mekanik Klavye",
+    brand: "Razer",
+    price: 1499,
+    imageUrls: ["/images/keyboard.png"],
+  },
+  {
+    id: 103,
+    name: "Kulaklık",
+    brand: "SteelSeries",
+    price: 1299,
+    imageUrls: ["/images/headset.png"],
+  },
+  {
+    id: 104,
+    name: "Laptop Standı",
+    brand: "Xiaomi",
+    price: 499,
+    imageUrls: ["/images/stand.png"],
+  },
+  {
+    id: 105,
+    name: "Kamera",
+    brand: "Xiaomi",
+    price: 1000,
+    imageUrls: ["/images/kamera.png"],
+  },
+];
 
 const ProductDetail = () => {
   const { id } = useParams();
@@ -46,6 +86,7 @@ const ProductDetail = () => {
         if (!response.ok) throw new Error("Ürün bulunamadı");
         const data = await response.json();
         setProduct(data);
+        console.log(data)
       } catch (err) {
         setError(err.message);
       } finally {
@@ -169,7 +210,7 @@ const ProductDetail = () => {
   return (
     <div className=" bg-gray-50">
       {/* Breadcrumb */}
-      <div className="bg-white border-b">
+      <div className="bg-white border-b border-gray-300">
         <div className="max-w-7xl mx-auto px-4 py-3">
           <nav className="text-sm text-gray-600">
             <Link to="/" className="hover:text-orange-600 cursor-pointer text-sm">
@@ -188,17 +229,17 @@ const ProductDetail = () => {
         </div>
       </div>
       <main className="max-w-7xl mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-12">
+        <div className="grid grid-cols-1 lg:grid-cols-[400px_1fr] gap-8 mb-8">
           {/* Sol: Görseller */}
           <div className="space-y-4">
             {/* Ana görsel + slider */}
-            <div className="relative bg-white rounded-2xl p-8 shadow-sm border">
+            <div className="relative bg-white rounded-2xl p-4 md:p-6 shadow-sm border border-gray-300 max-w-xs md:max-w-md">
               <div className="aspect-square flex items-center justify-center">
                 {images?.length > 0 ? (
                   <img
                     src={images[sliderIndex]}
                     alt={product?.name || "Ürün resmi"}
-                    className="max-w-full max-h-full object-contain transition-all duration-300"
+                    className="max-w-[50%] max-h-[50%] object-contain transition-all duration-300"
                   />
                 ) : (
                   <div>Resim bulunamadı.</div>
@@ -244,28 +285,14 @@ const ProductDetail = () => {
             </div>
           </div>
           {/* Sağ: Ürün Bilgileri */}
-          <div className="space-y-6">
+          <div className="space-y-6 custom-font">
             {/* Başlık ve Favori */}
             <div className="flex items-start justify-between">
               <div>
-                <p className="text-sm text-gray-500 font-medium mb-1">{product.brand}</p>
-                <h1 className="text-xl md:text-3xl font-bold text-gray-900 leading-tight">{product.name}</h1>
+                <p className="text-sm text-[var(--color-orange)] font-semibold mb-2">{product.brand}</p>
+                <h1 className="text-md md:text-lg font-bold text-gray-900 leading-tight">{product.name}</h1>
                 {/*<p className="text-sm text-gray-500 mt-1">SKU: {product?.sku}</p>*/}
               </div>
-              {/* Favori ikonu */}
-              <button
-                onClick={handleFavoriteClick}
-                className={`p-3 rounded-full border-2 transition-all duration-200 ${favorite
-                  ? "bg-red-50 border-red-200 text-red-500"
-                  : "bg-white border-gray-200 text-gray-400 hover:border-gray-300 hover:text-red-400"
-                  }`}
-              >
-                {isFavorite ? (
-                  <FaHeart className="text-orange-500" />
-                ) : (
-                  <FaRegHeart className="text-gray-400 hover:text-orange-500" />
-                )}
-              </button>
             </div>
 
             {/* Değerlendirme */}
@@ -285,7 +312,7 @@ const ProductDetail = () => {
                     ₺{product?.oldPrice.toLocaleString()}
                   </span>
                 )}
-                <span className="text-3xl font-bold text-orange-600"> ₺{product?.price.toLocaleString()} </span>
+                <span className="text-3xl font-bold text-[var(--color-dark-blue)]"> {product?.price.toLocaleString()} TL </span>
               </div>
               <div className="flex items-center gap-3">
                 {product?.discount && (
@@ -316,12 +343,12 @@ const ProductDetail = () => {
                 <div className="flex items-center border border-gray-300 rounded-lg">
                   <button
                     onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                    className="px-3 py-2 hover:bg-gray-100 transition-colors cursor-pointer"
+                    className="px-3 py-2 hover:bg-gray-100 hover:text-[var(--color-dark-orange)] text-xl transition-colors cursor-pointer"
                   > - </button>
                   <span className="px-4 py-2 min-w-12 text-center">{quantity}</span>
                   <button
                     onClick={() => setQuantity(Math.min(product.stockQuantity, quantity + 1))}
-                    className="px-3 py-2 hover:bg-gray-100 transition-colors cursor-pointer"
+                    className="px-3 py-2 hover:bg-gray-100 hover:text-[var(--color-dark-orange)] text-xl  transition-colors cursor-pointer"
                   >
                     +
                   </button>
@@ -333,16 +360,30 @@ const ProductDetail = () => {
                 <button
                   onClick={handleAddToCart}
                   disabled={product.stockQuantity === 0}
-                  className="flex-1 bg-orange-500 hover:bg-orange-600 disabled:bg-gray-400 text-white py-2 px-4 md:py-4 md:px-6 rounded-xl md:font-semibold md:text-lg text-sm transition-all duration-200 transform hover:scale-105 disabled:transform-none disabled:cursor-not-allowed"
+                  className="flex-1 flex items-center justify-center gap-2 bg-orange-500 hover:bg-orange-600 disabled:bg-gray-400 text-white py-2 px-4 md:py-2 md:px-4 rounded-xl md:font-semibold md:text-lg text-sm transition-all duration-200 transform cursor-pointer"
                 >
-                  Sepete Ekle
+                  <MdAddShoppingCart className="text-2xl" /> Sepete Ekle
                 </button>
+
                 <button
                   onClick={handleBuyNow}
                   disabled={product.stockQuantity === 0}
-                  className="flex-1 bg-gray-900 hover:bg-gray-800 disabled:bg-gray-400 text-white py-2 px-4 md:py-4 md:px-6 rounded-xl md:font-semibold md:text-lg text-sm transition-all duration-200 transform hover:scale-105 disabled:transform-none disabled:cursor-not-allowed"
+                  className="flex-1 flex items-center justify-center gap-2 bg-[var(--color-dark-blue)] hover:bg-gray-800 disabled:bg-gray-400 text-white  py-2 px-3 md:py-2 md:px-4 rounded-xl md:font-semibold md:text-lg text-sm transition-all duration-200 transform cursor-pointer"
                 >
-                  Hemen Al
+                  <FaCreditCard className="text-lg" /> Hemen Al
+                </button>
+                <button
+                  onClick={handleFavoriteClick}
+                  className={`p-4 rounded-lg border-2 transition-all duration-200 cursor-pointer hover:bg-orange-50 ${favorite
+                    ? "bg-red-50 border-red-200 text-red-500"
+                    : "bg-white border-gray-200 text-gray-400 hover:border-gray-300 hover:text-red-400"
+                    }`}
+                >
+                  {isFavorite ? (
+                    <FaHeart className="text-orange-500" />
+                  ) : (
+                    <FaRegHeart className="text-gray-400 hover:text-orange-500" />
+                  )}
                 </button>
               </div>
             </div>
@@ -363,6 +404,7 @@ const ProductDetail = () => {
                   Hızlı teslimat: {product?.shipping?.estimatedDays ?? "bilgi yok"}
                 </span>
               </div>
+
               {/** 
             <div className="flex items-center gap-3">
               <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -371,12 +413,28 @@ const ProductDetail = () => {
               <span className="text-green-800">{product?.warranty}</span>
             </div>*/}
             </div>
+            {/* Ürün Bilgileri */}
+            {product?.highlightedFeatures?.length > 0 && (
+              <div className="mt-6">
+                <h4 className="text-sm font-semibold text-gray-700 mb-2">Ürün Bilgileri</h4>
+                <div className="flex flex-wrap gap-2">
+                  {product.highlightedFeatures.map((feature, idx) => (
+                    <span
+                      key={idx}
+                      className="bg-orange-50 text-gray-800 text-sm px-3 py-2 rounded-md"
+                    >
+                      {feature}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
         {/* Detay Sekmeleri */}
-        <div className="bg-white rounded-2xl shadow-sm border overflow-hidden">
-          <div className="border-b">
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-300 overflow-hidden">
+          <div className="border-b border-gray-300">
             <div className="flex">
               {["description", "specifications", "reviews"].map((tab) => (
                 <button
@@ -465,6 +523,24 @@ const ProductDetail = () => {
                 )}
               </div>
             )}
+          </div>
+        </div>
+        {/* Benzer Ürünler */}
+        <div className="mt-12">
+          <h3 className="text-xl font-bold mb-6">Buna bakanların aldıkları</h3>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-6">
+            {dummyRelatedProducts.map((item) => (
+              <ProductCard key={item.id} product={item} />
+            ))}
+          </div>
+        </div>
+       
+        <div className="mt-12">
+          <h3 className="text-xl font-bold mb-6">Bunlar da ilgini çekebilir</h3>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-6">
+            {dummyRelatedProducts.map((item) => (
+              <ProductCard key={item.id} product={item} />
+            ))}
           </div>
         </div>
       </main >

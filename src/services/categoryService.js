@@ -54,6 +54,21 @@ export const getCategoryById = async (id) => {
   return await response.json();
 };
 
+// TIKLANAN ALT KATEGORİYİ GETİR
+export const getSubCategoryById = async (id) => {
+  const token = getToken();
+
+  const response = await fetch(`${CATEGORY_API}/subcategories/${id}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) throw new Error("Kategori verisi alınamadı");
+
+  return await response.json();
+};
+
 // KATEGORİ / ALT KATEGORİ SİLME
 export const deleteCategory = async (id, type = "category") => {
   const token = getToken();

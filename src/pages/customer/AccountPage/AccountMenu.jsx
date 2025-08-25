@@ -32,7 +32,7 @@ const AccountMenu = () => {
   if (!user) {
     return (
       <button
-        className="md:bg-black md:hover:bg-gray-800 text-white md:px-6 md:py-3 rounded-xl font-semibold transition-colors duration-200  transform hover:scale-105  cursor-pointer flex flex-row gap-x-2 items-center"
+        className="md:bg-black md:hover:bg-gray-800 text-white md:px-4 md:py-2 rounded-xl font-semibold transition-colors duration-200  transform hover:scale-105  cursor-pointer flex flex-row gap-x-2 items-center"
         onClick={() => navigate("/auth/login")}>
        <FaUser className="text-lg text-orange-600 md:text-white w-4 h-4" />
       <span className="hidden md:inline">Giriş / Kayıt Ol</span>
@@ -45,7 +45,7 @@ const AccountMenu = () => {
       onMouseEnter={() => setOpen(true)}
       onMouseLeave={() => setOpen(false)}
       >
-      <Link to="/account" onClick={toggleMenu}  className="md:bg-[var(--color-dark-blue)] rounded-xl md:px-6 md:py-3 text-white transition-colors duration-200 transform hover:scale-105 cursor-pointer flex flex-row gap-x-2 items-center">
+      <Link to="/account" onClick={toggleMenu}  className="md:bg-[var(--color-dark-blue)] rounded-lg md:px-4 md:py-2 text-white transition-colors duration-200 transform hover:scale-105 cursor-pointer flex flex-row gap-x-2 items-center">
        <FaUser className="text-lg text-orange-600 md:text-white w-4 h-4" />
       <span className="hidden md:inline-block">Hesabım</span>
       </Link>

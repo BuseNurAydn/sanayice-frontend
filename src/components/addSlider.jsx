@@ -3,7 +3,7 @@ import Slider from "react-slick";
 const addBanners = [
   { imageUrl: "https://images.hepsiburada.net/banners/s/1/416-182/gra-199032-appbanner_(1)133988626548332271.jpg/format:webp", linkUrl: "#" },
   { imageUrl: "https://images.hepsiburada.net/banners/s/1/416-182/gra-199032-appbanner_(1)133988626548332271.jpg/format:webp", linkUrl: "#" },
-  { imageUrl: "", linkUrl: "#" },
+  { imageUrl: "https://images.hepsiburada.net/banners/s/1/416-182/gra-199032-appbanner_(1)133988626548332271.jpg/format:webp", linkUrl: "#" },
 ];
 
 const AddSlider = () => {

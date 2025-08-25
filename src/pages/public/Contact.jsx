@@ -88,19 +88,19 @@ const Contact = () => {
           <h3 className="text-xl font-semibold text-gray-700 mt-6 mb-3">Bizi Takip Edin</h3>
           <div className="flex space-x-4 text-2xl">
             {/* Facebook Link */}
-            <a href="#" target="_blank" rel="noopener noreferrer" className="text-gray-600 hover:text-orange-600 transition-colors duration-200">
+            <a href="https://www.facebook.com/sanayice/" target="_blank" rel="noopener noreferrer" className="text-gray-600 hover:text-orange-600 transition-colors duration-200">
               <FaFacebook />
             </a>
             {/* Instagram Link */}
-            <a href="#" target="_blank" rel="noopener noreferrer" className="text-gray-600 hover:text-orange-600 transition-colors duration-200">
+            <a href="https://www.instagram.com/sanayice" target="_blank" rel="noopener noreferrer" className="text-gray-600 hover:text-orange-600 transition-colors duration-200">
               <AiFillInstagram />
             </a>
             {/* YouTube Link */}
-            <a href="#" target="_blank" rel="noopener noreferrer" className="text-gray-600 hover:text-orange-600 transition-colors duration-200">
+            <a href="https://www.youtube.com/@sanayicecom" target="_blank" rel="noopener noreferrer" className="text-gray-600 hover:text-orange-600 transition-colors duration-200">
               <IoLogoYoutube />
             </a>
             {/* LinkedIn Link */}
-            <a href="#" target="_blank" rel="noopener noreferrer" className="text-gray-600 hover:text-orange-600 transition-colors duration-200">
+            <a href="https://www.linkedin.com/company/sanayice/" target="_blank" rel="noopener noreferrer" className="text-gray-600 hover:text-orange-600 transition-colors duration-200">
               <FaLinkedin />
             </a>
           </div>
@@ -208,24 +208,6 @@ const Contact = () => {
               {isSubmitting ? 'Gönderiliyor...' : 'Mesajı Gönder'}
             </button>
           </form>
-        </div>
-      </div>
-
-      {/* Map Section */}
-      <div className="mt-10">
-        <h3 className="text-xl font-semibold text-gray-700 mb-4 text-center">Konumumuz</h3>
-        <div className="rounded-lg overflow-hidden border border-gray-200 shadow-sm">
-          {/* Google Maps iframe - Replace the `src` with your actual location's embed code */}
-          <iframe
-            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3125.8645063063544!2d27.20455351532822!3d38.46197177964177!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x14bbd8b8e0e0e0e1%3A0x1234567890abcdef!2zS2F6xLFtIERpcmlrIE1haC4!5e0!3m2!1str!2str!4v1678901234567!5m2!1str!2str"
-            width="100%"
-            height="450"
-            style={{ border: 0 }}
-            allowFullScreen=""
-            loading="lazy"
-            referrerPolicy="no-referrer-when-downgrade"
-            title="Sanayice Konumu"
-          ></iframe>
         </div>
       </div>
     </div>

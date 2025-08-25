@@ -60,3 +60,27 @@
 .animate-slide-in {
   animation: slide-in 0.3s ease-out forwards;
 }
+
+.gradient-background {
+  background: linear-gradient(360deg,#f27a1a,#ffae00);
+  background-size: 180% 180%;
+  animation: gradient-animation 12s ease infinite;
+}
+
+@keyframes gradient-animation {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+@media (max-width: 767px) {
+  .gradient-background {
+    background: transparent;
+    animation: none;
+  }
+}

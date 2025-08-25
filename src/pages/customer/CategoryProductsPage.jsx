@@ -3,10 +3,10 @@ import { useParams } from "react-router-dom";
 import ProductCard from "../../components/ProductCard";
 import { toast } from "react-toastify";
 import { FaFilter } from "react-icons/fa";
-import { getCategoryById } from "../../services/categoryService";
-import { getProductsByCategoryId } from "../../services/productsService";
+import { getCategoryById, getSubCategoryById } from "../../services/categoryService";
+import { getProductsByCategoryId, getProductsBySubCategoryId } from "../../services/productsService";
 
-function CategoryProductsPage() {
+function CategoryProductsPage({ type = "category" }) {
     const { id } = useParams();
     const [products, setProducts] = useState([]);
     const [filteredProducts, setFilteredProducts] = useState([]);
@@ -19,31 +19,44 @@ function CategoryProductsPage() {
     const [isSortOpen, setIsSortOpen] = useState(false);
     const [sortBy, setSortBy] = useState("");
 
+    // Kategori veya Subcategory bilgisi getir
     useEffect(() => {
-        const fetchCategory = async () => {
+        const fetchData = async () => {
             try {
-                const data = await getCategoryById(id);
-                setCategoryData(data);
-                setSubcategories(data.subcategories || []);
+                if (type === "category") {
+                    const data = await getCategoryById(id);
+                    setCategoryData(data);
+                    setSubcategories(data.subcategories || []);
+                } else {
+                    const data = await getSubCategoryById(id);
+                    setCategoryData(data);
+                    setSubcategories([]);
+                }
             } catch (err) {
                 toast.error(err.message);
             }
         };
-        fetchCategory();
-    }, [id]);
+        fetchData();
+    }, [id, type]);
 
+    // Ürünleri getir
     useEffect(() => {
         const fetchProducts = async () => {
             try {
-                const data = await getProductsByCategoryId(id);
+                let data = [];
+                if (type === "category") {
+                    data = await getProductsByCategoryId(id);
+                } else {
+                    data = await getProductsBySubCategoryId(id);
+                }
                 setProducts(data);
                 setFilteredProducts(data);
             } catch (err) {
-                toast.error(err.message);
+                toast.error("Ürünler alınamadı");
             }
         };
         fetchProducts();
-    }, [id]);
+    }, [id, type]);
 
     useEffect(() => {
         let result = [...products];
@@ -135,7 +148,7 @@ function CategoryProductsPage() {
 
                 {/* Sırala Butonu */}
                 <button
-                    onClick={() => setIsSortOpen(true)} 
+                    onClick={() => setIsSortOpen(true)}
                     className="bg-orange-400 text-white py-2 px-4 rounded-md font-semibold flex-1 flex items-center justify-center gap-2 cursor-pointer"
                 >
                     <span>Sırala</span>
@@ -169,8 +182,8 @@ function CategoryProductsPage() {
                                     setIsSortOpen(false);
                                 }}
                                 className={`w-full text-left px-4 py-2 rounded-md mb-2 transition ${sortBy === option.value
-                                        ? "bg-orange-100 text-orange-700"
-                                        : "bg-gray-100 text-gray-800 hover:bg-orange-50"
+                                    ? "bg-orange-100 text-orange-700"
+                                    : "bg-gray-100 text-gray-800 hover:bg-orange-50"
                                     }`}
                             >
                                 {option.label}

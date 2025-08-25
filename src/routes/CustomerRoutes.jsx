@@ -23,8 +23,8 @@ const CustomerRoutes = () => {
                 <Route path="/" element={<HomePage />} />
                 <Route path="product/:id" element={<ProductDetail />} /> 
                 <Route path="favorite" element={<FavoritePage />} /> 
-                <Route path="category/:id" element={<CategoryProductsPage />} />
-                <Route path="subcategory/:id" element={<CategoryProductsPage />} />
+                <Route path="category/:id" element={<CategoryProductsPage type="category"  />} />
+                <Route path="subcategory/:id" element={<CategoryProductsPage type="subcategory" />} />
                 <Route path="cart" element={<CartPage />} />
                 <Route path="contact" element={<Contact />}></Route>
                 <Route path="checkout" element={<CheckoutPage />}></Route>
