@@ -6,23 +6,23 @@ const AuthTabs = () => {
   const isLogin = location.pathname === "/auth/login";
 
   return (
-    <div className="flex w-full rounded-t-[2rem] overflow-hidden border-b border-neutral-300">
+    <div className="flex w-full rounded-t-lg overflow-hidden border-b border-neutral-300">
       <Link
         to="/auth/login"
-        className={`w-1/2 text-center py-6 font-bold text-xl md:text-2xl transition-colors ${
+        className={`w-1/2 text-center py-6 font-semibold text-lg md:text-xl transition-colors ${
           isLogin
-            ? "bg-white text-[var(--color-light-orange)]"
-            : "bg-gray-100 text-gray-500 hover:text-[var(--color-light-orange)]"
+            ? "bg-white text-[var(--color-light-orange)] border-b-2 border-[var(--color-light-orange)]"
+            : "text-gray-400 hover:text-[var(--color-light-orange)]"
         }`}
       >
         Giriş Yap
       </Link>
       <Link
         to="/auth/signUp"
-        className={`w-1/2 text-center py-6 font-bold text-xl md:text-2xl transition-colors ${
+        className={`w-1/2 text-center py-6 font-semibold text-lg md:text-xl transition-colors ${
           !isLogin
-            ? "bg-white text-[var(--color-light-orange)]"
-            : "bg-gray-100 text-gray-500 hover:text-[var(--color-light-orange)] "
+             ? "bg-white text-[var(--color-light-orange)] border-b-2 border-[var(--color-light-orange)]"
+            : "text-gray-400 hover:text-[var(--color-light-orange)]"
         }`}
       >
         Üye Ol

@@ -406,7 +406,7 @@ const CampaignCouponManagement = () => {
             <span className="font-bold text-2xl text-orange-600">
               {campaign.discountType === "percentage"
                 ? `%${campaign.discountValue}`
-                : `${campaign.discountValue}₺`}
+                : `${campaign.discountValue} TL`}
             </span>
           </div>
           <div className="text-right">
@@ -425,7 +425,7 @@ const CampaignCouponManagement = () => {
         </div>
         <div className="flex items-center gap-2 text-gray-600 text-sm">
           <ShoppingCart className="w-4 h-4" />
-          <span>Min. sipariş: {campaign.minOrderAmount}₺</span>
+          <span>Min. sipariş: {campaign.minOrderAmount} TL</span>
         </div>
         <div className="flex items-center gap-2 text-gray-500 text-sm">
           <Clock className="w-4 h-4" />
@@ -494,9 +494,9 @@ const CampaignCouponManagement = () => {
         <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl p-4 mb-4">
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-2">
-              <Gift className="w-5 h-5 text-purple-600" />
-              <span className="font-bold text-xl text-purple-600">
-                {coupon.discountType === 'percentage' ? `%${coupon.discountValue}` : `${coupon.discountValue}₺`}
+              <Gift className="w-5 h-5 text-[var(--color-orange)]" />
+              <span className="font-bold text-xl text-[var(--color-orange)]">
+                {coupon.discountType === 'percentage' ? `%${coupon.discountValue}` : `${coupon.discountValue} TL`}
               </span>
             </div>
             <button
@@ -513,7 +513,7 @@ const CampaignCouponManagement = () => {
           </div>
           <div className="w-full bg-white/40 rounded-full h-2 mt-1">
             <div
-              className="bg-purple-600 h-2 rounded-full transition-all"
+              className="bg-[var(--color-orange)] h-2 rounded-full transition-all"
               style={{ width: `${(coupon.usedCount / coupon.usageLimit) * 100}%` }}
             />
           </div>
@@ -526,7 +526,7 @@ const CampaignCouponManagement = () => {
           </div>
           <div className="flex items-center gap-2 text-gray-600 text-sm">
             <ShoppingCart className="w-4 h-4" />
-            <span>Min. sipariş: {coupon.minOrderAmount}₺</span>
+            <span>Min. sipariş: {coupon.minOrderAmount} TL</span>
           </div>
           <div className="flex items-center gap-2 text-gray-600 text-sm">
             <Users className="w-4 h-4" />
@@ -584,14 +584,14 @@ const CampaignCouponManagement = () => {
           <div className="flex gap-3">
             <button
               onClick={() => handleAdd('campaign')}
-              className="flex items-center gap-2 md:px-6 md:py-3 px-2 py-1 bg-orange-600 text-white rounded-xl hover:bg-orange-700 transition-colors font-medium shadow-lg"
+              className="flex items-center gap-2 md:px-6 md:py-3 px-2 py-1 bg-[var(--color-dark-orange)] cursor-pointer text-white rounded-xl  transition-colors font-medium shadow-lg"
             >
               <Plus className="w-5 h-5" />
               Yeni Kampanya
             </button>
             <button
               onClick={() => handleAdd('coupon')}
-              className="flex items-center gap-2 px-6 py-3 bg-purple-600 text-white rounded-xl hover:bg-purple-700 transition-colors font-medium shadow-lg"
+              className="flex items-center gap-2 px-6 py-3 bg-[var(--color-orange)] text-white rounded-xl cursor-pointer transition-colors font-medium shadow-lg"
             >
               <Gift className="w-5 h-5" />
               Yeni Kupon
@@ -905,7 +905,7 @@ const CampaignCouponManagement = () => {
                           <button
                             type="button"
                             onClick={() => setCouponFormData(prev => ({ ...prev, code: generateCouponCode() }))}
-                            className="px-4 py-3 bg-purple-100 text-purple-600 rounded-xl hover:bg-purple-200 transition-colors"
+                            className="px-4 py-3 bg-orange-100 text-orange-600 rounded-xl hover:bg-orange-200 transition-colors"
                           >
                             Oluştur
                           </button>
@@ -1094,7 +1094,7 @@ const CampaignCouponManagement = () => {
               <div className="flex gap-3">
                 <button
                   onClick={handleSave}
-                  className={`flex-1 px-6 py-3 text-white rounded-xl hover:opacity-90 transition-colors font-medium ${modalType === 'campaign' ? 'bg-orange-600' : 'bg-purple-600'
+                  className={`flex-1 px-6 py-3 text-white rounded-xl hover:opacity-90 transition-colors font-medium ${modalType === 'campaign' ? 'bg-orange-600' : 'bg-orange-500'
                     }`}
                 >
                   {editingId ? "Güncelle" : "Kaydet"}

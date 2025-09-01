@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import AuthLayout from '../AuthLayout';
-import { Link } from 'react-router-dom';
+import PasswordInput from '../../../shared/Input/PasswordInput';
 import Input from '../../../shared/Input/Input';
 import OrangeButton from '../../../shared/Button/OrangeButton';
 import { BsExclamationLg } from "react-icons/bs";
@@ -45,9 +45,9 @@ const SignUp = () => {
   const [messageType, setMessageType] = useState("info");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const info = 'text-center font-medium custom-font text-[10px] text-black bg-[var(--color-orange)] opacity-80 rounded-lg flex items-center px-1';
+  const info = 'text-center font-medium custom-font text-[10px] text-black bg-[var(--color-orangeTwo)] opacity-80 rounded-md flex items-center px-1';
 
-  const openModal = () => setIsModalOpen(true);   
+  const openModal = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);
 
   // Component mount olduğunda bekleyen doğrulama var mı kontrol et
@@ -55,12 +55,12 @@ const SignUp = () => {
     const pendingVerification = localStorage.getItem('pendingEmailVerification');
     if (pendingVerification) {
       const verificationData = JSON.parse(pendingVerification);
-      
+
       // Eğer verificationData varsa ve 24 saat geçmemişse
       const now = new Date().getTime();
       const verificationTime = new Date(verificationData.timestamp).getTime();
       const hoursPassed = (now - verificationTime) / (1000 * 60 * 60);
-      
+
       if (hoursPassed < 24) {
         setFormData(prev => ({
           ...prev,
@@ -319,7 +319,7 @@ const SignUp = () => {
               <MdAccessTime className="w-6 h-6" />
               <div className="font-semibold">Bekleyen E-posta Doğrulaması</div>
             </div>
-            
+
             <div className="text-sm text-orange-700">
               <p className="mb-2">
                 <strong>{formData.email}</strong> adresine gönderilen doğrulama kodunu henüz onaylamadınız.
@@ -339,7 +339,7 @@ const SignUp = () => {
 
           {/* Aksiyon butonları */}
           <div className="space-y-3">
-            <OrangeButton 
+            <OrangeButton
               onClick={handlePendingVerification}
               className="w-full"
             >
@@ -400,9 +400,9 @@ const SignUp = () => {
               />
             </div>
 
-            <OrangeButton 
-              type="submit" 
-              className="w-3/4 mx-auto" 
+            <OrangeButton
+              type="submit"
+              className="w-3/4 mx-auto"
               disabled={isVerifying}
             >
               {isVerifying ? 'Doğrulanıyor...' : 'E-postayı Doğrula'}
@@ -415,17 +415,16 @@ const SignUp = () => {
               type="button"
               onClick={handleResendCode}
               disabled={countdown > 0 || isResending}
-              className={`px-4 py-2 rounded-lg transition-colors ${
-                countdown > 0 || isResending
+              className={`px-4 py-2 rounded-lg transition-colors ${countdown > 0 || isResending
                   ? 'text-gray-400 cursor-not-allowed bg-gray-100'
                   : 'text-[var(--color-orange)] hover:bg-orange-50 hover:underline'
-              }`}
+                }`}
             >
               {isResending
                 ? 'Gönderiliyor...'
                 : countdown > 0
-                ? `Tekrar gönder (${countdown}s)`
-                : 'Kodu tekrar gönder'
+                  ? `Tekrar gönder (${countdown}s)`
+                  : 'Kodu tekrar gönder'
               }
             </button>
           </div>
@@ -451,7 +450,7 @@ const SignUp = () => {
   // Normal kayıt formu
   return (
     <AuthLayout>
-      <form onSubmit={handleSubmit} className="space-y-6 flex flex-col p-6">
+      <form onSubmit={handleSubmit} className="space-y-6 flex flex-col px-4 md:px-8 py-8">
         {/* mesaj kutusu */}
         {message && (
           <div className={`text-sm mb-2 ${messageStyles[messageType]}`}>
@@ -465,47 +464,47 @@ const SignUp = () => {
           Yeni Üyelerimize özel kuponlarımızla!
         </div>
 
-        <div className="flex space-x-8">
-          <Input 
-            type="text" 
-            name="name" 
-            placeholder="Ad" 
-            onChange={handleChange} 
-            value={formData.name} 
-            className="w-1/2" 
+        <div className="flex space-x-4">
+          <Input
+            type="text"
+            name="name"
+            placeholder="Ad"
+            onChange={handleChange}
+            value={formData.name}
+            className="w-1/2"
           />
-          <Input 
-            type="text" 
-            name="lastname" 
-            placeholder="Soyad" 
-            onChange={handleChange} 
-            value={formData.lastname} 
-            className="w-1/2" 
+          <Input
+            type="text"
+            name="lastname"
+            placeholder="Soyad"
+            onChange={handleChange}
+            value={formData.lastname}
+            className="w-1/2"
           />
         </div>
 
-        <Input 
-          type="email" 
-          name="email" 
-          placeholder="E-posta adresi" 
-          value={formData.email} 
-          onChange={handleChange} 
+        <Input
+          type="email"
+          name="email"
+          placeholder="E-posta adresi"
+          value={formData.email}
+          onChange={handleChange}
         />
 
         <div className="flex gap-4">
-          <Input 
-            type="text" 
-            value="TR (+90)" 
-            disabled 
-            className="w-1/3" 
+          <Input
+            type="text"
+            value="TR (+90)"
+            disabled
+            className="w-1/3"
           />
-          <Input 
-            type="tel" 
-            name="phoneNumber" 
-            placeholder="Telefon Numarası" 
-            value={formData.phoneNumber} 
-            onChange={handleChange} 
-            className="w-2/3" 
+          <Input
+            type="tel"
+            name="phoneNumber"
+            placeholder="Telefon Numarası"
+            value={formData.phoneNumber}
+            onChange={handleChange}
+            className="w-2/3"
           />
         </div>
 
@@ -514,33 +513,33 @@ const SignUp = () => {
           E-posta adresinizi doğrulaman için size kod göndereceğiz.
         </div>
 
-        <Input 
-          type="password" 
-          name="password" 
-          placeholder="Şifre" 
-          value={formData.password} 
-          onChange={handleChange} 
+        {/* Şifre */}
+        <PasswordInput
+          name="password"
+          placeholder="Şifre"
+          value={formData.password}
+          onChange={handleChange}
         />
 
-        <Input 
-          type="password" 
-          name="confirmPassword" 
+        {/* Şifre Tekrar */}
+        <PasswordInput
+          name="confirmPassword"
           placeholder="Şifreyi Tekrar Girin"
-          value={formData.confirmPassword} 
-          onChange={handleChange} 
+          value={formData.confirmPassword}
+          onChange={handleChange}
         />
 
-        <div className="space-y-4 text-sm text-[var(--color-dark-blue)] font-medium custom-font">
+        <div className="space-y-4 text-xs text-[var(--color-dark-blue)] custom-font">
           <label className="flex items-start gap-2">
-            <input 
-              type="checkbox" 
+            <input
+              type="checkbox"
               name="acceptTerms"
               checked={formData.acceptTerms}
-              onChange={handleChange} 
-              className="accent-[var(--color-dark-orange)] mt-1" 
+              onChange={handleChange}
+              className="accent-[var(--color-dark-orange)]"
             />
             <span>
-              <span 
+              <span
                 className="text-[var(--color-light-orange)] cursor-pointer hover:underline"
                 onClick={openModal}
               >
@@ -549,29 +548,29 @@ const SignUp = () => {
             </span>
           </label>
           <label className="flex items-start gap-2">
-            <input 
-              type="checkbox" 
+            <input
+              type="checkbox"
               name="allowMarketing"
               checked={formData.allowMarketing}
-              onChange={handleChange} 
-              className="accent-[var(--color-dark-orange)] mt-1" 
+              onChange={handleChange}
+              className="accent-[var(--color-dark-orange)] mt-1"
             />
             <span>Kampanyalardan haberdar olmak istiyorum.</span>
           </label>
         </div>
 
-        <OrangeButton 
-          type="submit" 
-          className="w-3/4 mx-auto" 
+        <OrangeButton
+          type="submit"
+          className="w-3/4 mx-auto"
           disabled={isSubmitting}
         >
-         {isSubmitting ? 'Gönderiliyor...' : 'Üye Ol'}
+          {isSubmitting ? 'Gönderiliyor...' : 'Üye Ol'}
         </OrangeButton>
       </form>
 
-      <div 
-        onClick={handleClick} 
-        className="w-full text-center text-base text-white bg-[var(--color-dark-orange)] font-bold p-3 custom-font rounded-b-[2rem] mt-6 cursor-pointer"
+      <div
+        onClick={handleClick}
+        className="w-full text-center text-sm text-white bg-[var(--color-dark-orange)] font-semibold p-3 custom-font rounded-b-lg mt-6 cursor-pointer"
       >
         Ürünlerini pazarlamaya ne dersin?<br />
         O zaman sen de bize katıl.
@@ -581,7 +580,7 @@ const SignUp = () => {
       {isModalOpen && (
         <div className="fixed inset-0 bg-transparent backdrop-filter backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-white bg-opacity-25 rounded-2xl shadow-xl w-full max-w-3xl max-h-[80vh] overflow-hidden">
-      
+
             {/* Header */}
             <div className="flex justify-between items-center px-6 py-4 border-b">
               <h2 className="text-2xl font-semibold">Üyelik Sözleşmesi</h2>
@@ -596,7 +595,7 @@ const SignUp = () => {
             {/* Content */}
             <div className="px-6 py-4 overflow-y-auto space-y-6 text-sm leading-relaxed">
               <h3 className="font-bold text-lg">ÜYE KULLANICI SÖZLEŞMESİ</h3>
-              
+
               <section className="space-y-3">
                 <h4 className="font-semibold">TARAFLAR</h4>
                 <p>
@@ -618,7 +617,7 @@ const SignUp = () => {
                   Sözleşme'nin ayrılmaz birer parçası kabul edilecektir.
                 </p>
               </section>
-              
+
               <section className="space-y-3">
                 <h4 className="font-semibold">TANIMLAR</h4>
                 <p>

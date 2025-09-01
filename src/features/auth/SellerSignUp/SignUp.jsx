@@ -7,7 +7,7 @@ import { BsExclamationLg } from "react-icons/bs";
 import { MdEmail, MdAccessTime } from "react-icons/md";
 import { IoWarningOutline } from "react-icons/io5";
 import { useDispatch } from 'react-redux';
-import { setCredentials } from '../../../store/authSlice';
+import PasswordInput from "../../../shared/Input/PasswordInput";
 import { registerSeller, verifyEmail, resendVerificationCode } from '../../../services/authService';
 
 const SignUp = () => {
@@ -48,7 +48,7 @@ const SignUp = () => {
     const [messageType, setMessageType] = useState("info");
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    const openModal = () => setIsModalOpen(true);   
+    const openModal = () => setIsModalOpen(true);
     const closeModal = () => setIsModalOpen(false);
 
     // Component mount olduğunda bekleyen satıcı doğrulaması var mı kontrol et
@@ -56,12 +56,12 @@ const SignUp = () => {
         const pendingVerification = localStorage.getItem('pendingSellerEmailVerification');
         if (pendingVerification) {
             const verificationData = JSON.parse(pendingVerification);
-            
+
             // Eğer verificationData varsa ve 24 saat geçmemişse
             const now = new Date().getTime();
             const verificationTime = new Date(verificationData.timestamp).getTime();
             const hoursPassed = (now - verificationTime) / (1000 * 60 * 60);
-            
+
             if (hoursPassed < 24) {
                 setFormData(prev => ({
                     ...prev,
@@ -202,10 +202,10 @@ const SignUp = () => {
 
             // Bekleyen doğrulama bilgisini kaydet
             savePendingVerification(
-                formData.email, 
-                formData.name, 
-                formData.lastname, 
-                formData.companyName, 
+                formData.email,
+                formData.name,
+                formData.lastname,
+                formData.companyName,
                 formData.taxId
             );
 
@@ -332,7 +332,7 @@ const SignUp = () => {
                             <MdAccessTime className="w-6 h-6" />
                             <div className="font-semibold">Bekleyen Satıcı Doğrulaması</div>
                         </div>
-                        
+
                         <div className="text-sm text-orange-700">
                             <p className="mb-2">
                                 <strong>{formData.email}</strong> adresine gönderilen doğrulama kodunu henüz onaylamadınız.
@@ -355,7 +355,7 @@ const SignUp = () => {
 
                     {/* Aksiyon butonları */}
                     <div className="space-y-3">
-                        <OrangeButton 
+                        <OrangeButton
                             onClick={handlePendingVerification}
                             className="w-full"
                         >
@@ -417,9 +417,9 @@ const SignUp = () => {
                             />
                         </div>
 
-                        <OrangeButton 
-                            type="submit" 
-                            className="w-3/4 mx-auto" 
+                        <OrangeButton
+                            type="submit"
+                            className="w-3/4 mx-auto"
                             disabled={isVerifying}
                         >
                             {isVerifying ? 'Doğrulanıyor...' : 'Satıcı Başvurusunu Doğrula'}
@@ -432,23 +432,22 @@ const SignUp = () => {
                             type="button"
                             onClick={handleResendCode}
                             disabled={countdown > 0 || isResending}
-                            className={`px-4 py-2 rounded-lg transition-colors ${
-                                countdown > 0 || isResending
+                            className={`px-4 py-2 rounded-lg transition-colors ${countdown > 0 || isResending
                                     ? 'text-gray-400 cursor-not-allowed bg-gray-100'
                                     : 'text-[var(--color-orange)] hover:bg-orange-50 hover:underline'
-                            }`}
+                                }`}
                         >
                             {isResending
                                 ? 'Gönderiliyor...'
                                 : countdown > 0
-                                ? `Tekrar gönder (${countdown}s)`
-                                : 'Kodu tekrar gönder'
+                                    ? `Tekrar gönder (${countdown}s)`
+                                    : 'Kodu tekrar gönder'
                             }
                         </button>
                     </div>
 
                     <div className="text-center">
-                    
+
                     </div>
                 </div>
             </AuthLayout>
@@ -458,7 +457,7 @@ const SignUp = () => {
     // Normal satıcı kayıt formu
     return (
         <AuthLayout>
-            <form onSubmit={handleSubmit} className="space-y-6 flex flex-col p-6">
+            <form onSubmit={handleSubmit} className="space-y-6 flex flex-col px-4 md:px-8 pt-4 pb-8">
                 {/* mesaj kutusu */}
                 {message && (
                     <div className={`text-sm mb-2 ${messageStyles[messageType]}`}>
@@ -466,7 +465,7 @@ const SignUp = () => {
                     </div>
                 )}
 
-                <div className="flex space-x-8">
+                <div className="flex space-x-4">
                     <Input type="text" name="name" placeholder="Ad" value={formData.name} onChange={handleChange} className="w-1/2" />
                     <Input type="text" name="lastname" placeholder="Soyad" value={formData.lastname} onChange={handleChange} className="w-1/2" />
                 </div>
@@ -483,13 +482,23 @@ const SignUp = () => {
                     E-posta adresinizi doğrulaman için size kod göndereceğiz.
                 </div>
 
-                <Input type="password" name="password" placeholder="Şifre" value={formData.password} onChange={handleChange} />
-                
-                <Input type="password" name="confirmPassword" placeholder="Şifreyi Tekrar Girin"
-                    value={formData.confirmPassword} onChange={handleChange}
+                {/* Şifre */}
+                <PasswordInput
+                    name="password"
+                    placeholder="Şifre"
+                    value={formData.password}
+                    onChange={handleChange}
                 />
 
-                <div className="flex space-x-8">
+                {/* Şifre Tekrar */}
+                <PasswordInput
+                    name="confirmPassword"
+                    placeholder="Şifreyi Tekrar Girin"
+                    value={formData.confirmPassword}
+                    onChange={handleChange}
+                />
+
+                <div className="flex space-x-4">
                     <Input type="text" name="companyName" placeholder="Firma Adı" value={formData.companyName} onChange={handleChange} className="w-1/2" />
                     <Input type="text" name="taxId" placeholder="Vergi Numarası" value={formData.taxId} onChange={handleChange} className="w-1/2" />
                 </div>
@@ -505,7 +514,7 @@ const SignUp = () => {
                         className="mt-1"
                     />
                     <label htmlFor="acceptTerms" className="text-sm text-gray-700 leading-5">
-                        <span 
+                        <span
                             className="text-[var(--color-light-orange)] cursor-pointer hover:underline"
                             onClick={openModal}
                         >
@@ -519,16 +528,13 @@ const SignUp = () => {
                 </OrangeButton>
             </form>
 
-            <div className="w-full text-center text-base text-white bg-[var(--color-dark-orange)] font-bold p-3 custom-font rounded-b-[2rem] mt-6">
-                Ürünlerini pazarlamaya ne dersin?<br />
-                O zaman sen de bize katıl.
-            </div>
+
 
             {/* Satıcı Sözleşmesi Modal */}
             {isModalOpen && (
                 <div className="fixed inset-0 bg-transparent backdrop-filter backdrop-blur-sm flex items-center justify-center z-50 p-4">
                     <div className="bg-white bg-opacity-25 rounded-2xl shadow-xl w-full max-w-3xl max-h-[80vh] overflow-hidden">
-                
+
                         {/* Header */}
                         <div className="flex justify-between items-center px-6 py-4 border-b">
                             <h2 className="text-2xl font-semibold">Satıcı Sözleşmesi</h2>
@@ -543,7 +549,7 @@ const SignUp = () => {
                         {/* Content */}
                         <div className="px-6 py-4 overflow-y-auto space-y-6 text-sm leading-relaxed">
                             <h3 className="font-bold text-lg">SATICI ÜYELİK SÖZLEŞMESİ</h3>
-                            
+
                             <section className="space-y-3">
                                 <h4 className="font-semibold">TARAFLAR</h4>
                                 <p>
@@ -565,7 +571,7 @@ const SignUp = () => {
                                     Sözleşme'nin ayrılmaz birer parçası kabul edilecektir.
                                 </p>
                             </section>
-                            
+
                             <section className="space-y-3">
                                 <h4 className="font-semibold">TANIMLAR</h4>
                                 <p>

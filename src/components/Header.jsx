@@ -1,7 +1,7 @@
 import { useNavigate, Link } from "react-router-dom";
 import { useSelector } from 'react-redux';
 import { useDispatch } from "react-redux";
-import Logo from "../../src/assets/png/Logo2.png";
+import sanayice from "../../src/assets/png/sanayice.png";
 import { FaShoppingCart, FaStore} from "react-icons/fa";
 import { FaRegHeart } from "react-icons/fa6";
 import { RxTriangleDown, RxTriangleUp } from "react-icons/rx";
@@ -111,9 +111,9 @@ const Header = ({ categories = [] }) => {
         {/* Logo */}
         <div className="flex items-center gap-3 flex-shrink-0">
           <img
-            src={Logo}
+            src={sanayice}
             alt="Logo"
-            className="h-10 w-auto cursor-pointer"
+            className="h-14 w-auto cursor-pointer"
             onClick={() => navigate('/')}
           />
         </div>
@@ -222,7 +222,7 @@ const Header = ({ categories = [] }) => {
             className="md:bg-orange-500 md:hover:bg-orange-600 text-white p-2 md:px-4 md:py-2 rounded-lg md:font-semibold font-medium transition-colors duration-200 transform hover:scale-105 relative flex items-center space-x-1 md:space-x-2 cursor-pointer "
             aria-label="Sepetim"
           >
-            <FaShoppingCart className="md:mr-2 text-orange-600 md:text-white w-4 h-4" />
+            <FaShoppingCart className="md:mr-2 text-[var(--color-orangeTwo)] md:text-white w-4 h-4" />
             <span className="hidden md:inline">Sepetim</span>
             {totalQuantity > 0 && (
               <span className="absolute -top-1 -right-2 bg-red-500 text-white text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full">

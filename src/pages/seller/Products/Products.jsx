@@ -13,7 +13,7 @@ const Products = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [selectedProductId, setSelectedProductId] = useState(null);
-  const [loading, setLoading] = useState(true); // ⬅️ Yükleme durumu eklendi
+  const [loading, setLoading] = useState(true); // Yükleme durumu eklendi
 
   const borderStyle = "border border-gray-300 p-2";
 

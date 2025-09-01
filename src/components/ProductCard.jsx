@@ -82,7 +82,7 @@ const ProductCard = ({ product }) => {
   return (
     <div
       onClick={handleClick}
-      className="bg-white border border-gray-200 rounded-xl shadow p-4 min-w-[198px] max-h-[330px] flex flex-col hover:shadow-lg transition-all duration-300 cursor-pointer relative"
+      className="bg-white border border-gray-200 rounded-xl shadow p-4 min-w-[224px] max-h-[330px] flex flex-col hover:shadow-lg transition-all duration-300 cursor-pointer relative"
       tabIndex={0}
       onKeyDown={(e) => { if (e.key === "Enter") handleClick(); }}
     >

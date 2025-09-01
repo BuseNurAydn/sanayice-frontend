@@ -7,6 +7,7 @@ import { CiMail } from 'react-icons/ci';
 import Input from '../../../shared/Input/Input';
 import OrangeButton from '../../../shared/Button/OrangeButton';
 import GrayButton from '../../../shared/Button/GrayButton';
+import PasswordInput from '../../../shared/Input/PasswordInput';
 import { useNavigate, Link } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { setCredentials } from '../../../store/authSlice';
@@ -24,7 +25,7 @@ const Login = () => {
     const [successMessage, setSuccessMessage] = useState('');
     const [isPhoneLogin, setIsPhoneLogin] = useState(false);
 
-    const handleInputChange = (e) => {
+    const handleChange = (e) => {
         const { name, value } = e.target;
         setLoginData((prev) => ({
             ...prev,
@@ -99,31 +100,35 @@ const Login = () => {
             )}
 
             {/* E-Posta Girişi */}
-            <Input type="email" placeholder="E-posta adresi" name="email" value={loginData.email} onChange={handleInputChange} />
+            <Input type="email" placeholder="E-posta adresi" name="email" value={loginData.email} onChange={handleChange} />
             {errors.email && (
                 <p className="text-red-500 text-sm mt-1">{errors.email}</p>
             )}
 
-            <Input type="password" placeholder="Şifre" className="mt-4" name="password" value={loginData.password}
-                onChange={handleInputChange} />
+            <PasswordInput
+                name="password"
+                placeholder="Şifre"
+                value={loginData.password}
+                onChange={handleChange}
+            />
             {errors.password && (
                 <p className="text-red-500 text-sm mt-1">{errors.password}</p>
             )}
 
-            <Link to="/auth/forgot-password" className="custom-font font-medium text-[var(--color-light-orange)]">
-                Şifremi Unuttum   
+            <Link to="/auth/forgot-password" className="custom-font font-medium text-sm text-[var(--color-light-orange)]">
+                Şifremi Unuttum
             </Link>
 
             <OrangeButton type="submit" onClick={handleLogin}> Giriş Yap </OrangeButton>
 
-           {/** <GrayButton type="button" onClick={toggleLoginMethod}>
+            {/** <GrayButton type="button" onClick={toggleLoginMethod}>
                 <BsTelephone className="w-5 h-5" />
                 Telefon Numarası ile Giriş Yap
-            </GrayButton>*/} 
+            </GrayButton>*/}
         </>
     );
 
-   {/* const renderPhoneLogin = () => (
+    {/* const renderPhoneLogin = () => (
         <>
             Telefon Girişi
             <Input type="tel" placeholder="Telefon Numarası" />
@@ -152,18 +157,18 @@ const Login = () => {
 
     return (
         <AuthLayout>
-            <form className="space-y-6 flex flex-col p-4 mt-8">
+            <form className="space-y-6 flex flex-col px-4 md:px-8 py-4 mt-8">
                 {renderEmailLogin()}
                 {/*{isPhoneLogin ? renderPhoneLogin() : renderEmailLogin()}*/}
-      
+
                 {/** <SocialLogin />*/}
-      
+
                 <div className="text-center text-xs text-green-600">
                     Güvenli alışveriş
                 </div>
             </form>
         </AuthLayout>
-    );   
+    );
 };
 
 export default Login;

@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Modal from "./Modal";
 import ConfirmDialog from "../../../components/ConfirmDialog";
-import { FaChevronDown, FaChevronUp, FaTrash, FaEdit } from "react-icons/fa";
+import { FaChevronDown, FaChevronUp, FaTrash, FaEdit, FaPlus } from "react-icons/fa";
 import { FcPlus } from "react-icons/fc";
 import AdminText from "../../../shared/Text/AdminText";
 import AddButton from "../../../shared/Button/AddButton";
@@ -54,35 +54,35 @@ const Categories = () => {
   }, []);
 
 
-// URL'den File objesi oluşturmak için yardımcı fonksiyon
-async function urlToFile(url, filename, mimeType) {
-  try {
-    const res = await fetch(url);
-    const blob = await res.blob();
-    return new File([blob], filename, { type: mimeType });
-  } catch (error) {
-    return null;
-  }
-}
-
-// Component yüklendiğinde URL'yi File objesine çeviriyoruz
-useEffect(() => {
-  async function convertImage() {
+  // URL'den File objesi oluşturmak için yardımcı fonksiyon
+  async function urlToFile(url, filename, mimeType) {
     try {
-      if (mainImageUrl && !mainImageFile) {
-        const file = await urlToFile(mainImageUrl, 'category-image.jpg', 'image/jpeg');
-        if (file) {
-          setMainImageFile(file);
-          setMainImageUrl('');
-        }
-      }
+      const res = await fetch(url);
+      const blob = await res.blob();
+      return new File([blob], filename, { type: mimeType });
     } catch (error) {
-      setError('Kategori resmi yüklenirken bir hata oluştu');
+      return null;
     }
   }
 
-  convertImage();
-}, [mainImageUrl, mainImageFile]); 
+  // Component yüklendiğinde URL'yi File objesine çeviriyoruz
+  useEffect(() => {
+    async function convertImage() {
+      try {
+        if (mainImageUrl && !mainImageFile) {
+          const file = await urlToFile(mainImageUrl, 'category-image.jpg', 'image/jpeg');
+          if (file) {
+            setMainImageFile(file);
+            setMainImageUrl('');
+          }
+        }
+      } catch (error) {
+        setError('Kategori resmi yüklenirken bir hata oluştu');
+      }
+    }
+
+    convertImage();
+  }, [mainImageUrl, mainImageFile]);
 
 
   //Ekleme sayfasına yönlendirme
@@ -132,82 +132,82 @@ useEffect(() => {
   };
 
   // Kategori Güncelle
-const handleSave = async () => {
-  try {
-    const form = new FormData();
+  const handleSave = async () => {
+    try {
+      const form = new FormData();
 
-    form.append("category", JSON.stringify({
-      name: formData.name,
-      description: formData.description
-    }));
+      form.append("category", JSON.stringify({
+        name: formData.name,
+        description: formData.description
+      }));
 
-    if (mainImageFile) {
-      form.append("imageFile", mainImageFile);
-    }
+      if (mainImageFile) {
+        form.append("imageFile", mainImageFile);
+      }
 
-    // Güncellenen kategoriyi backend’e gönder
-    const updatedCategory = await updateCategory(editingId, form);
+      // Güncellenen kategoriyi backend’e gönder
+      const updatedCategory = await updateCategory(editingId, form);
 
-    // Modal kapat ve state sıfırla
-    setIsModalOpen(false);
-    setEditingId(null);
-    setMainImageFile(null);
+      // Modal kapat ve state sıfırla
+      setIsModalOpen(false);
+      setEditingId(null);
+      setMainImageFile(null);
 
-    // Listeyi yeniden fetch etmek yerine mevcut state üzerinde güncelle
-    setCategories((prev) =>
-      prev.map((cat) =>
-        cat.id === editingId
-          ? { ...cat, ...formData, imageUrl: updatedCategory?.imageUrl || cat.imageUrl }
-          : cat
-      )
-    );
-  } catch (error) {
-    console.error(error);
-  }
-};
-
-
-// Alt Kategori Güncelle/Ekle
-const handleSubSave = async () => {
-  try {
-    const form = new FormData();
-    form.append(
-      "subcategory",
-      JSON.stringify({
-        name: subFormData.name,
-        description: subFormData.description,
-        categoryId: selectedCategoryId,
-      })
-    );
-
-    if (mainImageFile) {
-      form.append("imageFile", mainImageFile);
-    }
-
-    // Alt kategori kaydet/güncelle
-    const savedSub = await saveSubcategory(editingId ? editingId : null, form);
-
-    setIsSubModalOpen(false);
-    setEditingId(null);
-
-    // Alt kategori listesi güncelle
-    if (editingId) {
-      // Güncelleme
-      setSubcategories((prev) =>
-        prev.map((sub) =>
-          sub.id === editingId
-            ? { ...sub, ...subFormData, imageUrl: savedSub?.imageUrl || sub.imageUrl }
-            : sub
+      // Listeyi yeniden fetch etmek yerine mevcut state üzerinde güncelle
+      setCategories((prev) =>
+        prev.map((cat) =>
+          cat.id === editingId
+            ? { ...cat, ...formData, imageUrl: updatedCategory?.imageUrl || cat.imageUrl }
+            : cat
         )
       );
-    } else {
-      // Yeni ekleme
-      setSubcategories((prev) => [...prev, savedSub]);
+    } catch (error) {
+      console.error(error);
     }
-  } catch (error) {
-    console.error("Alt kategori kaydında hata:", error);
-  }
-};
+  };
+
+
+  // Alt Kategori Güncelle/Ekle
+  const handleSubSave = async () => {
+    try {
+      const form = new FormData();
+      form.append(
+        "subcategory",
+        JSON.stringify({
+          name: subFormData.name,
+          description: subFormData.description,
+          categoryId: selectedCategoryId,
+        })
+      );
+
+      if (mainImageFile) {
+        form.append("imageFile", mainImageFile);
+      }
+
+      // Alt kategori kaydet/güncelle
+      const savedSub = await saveSubcategory(editingId ? editingId : null, form);
+
+      setIsSubModalOpen(false);
+      setEditingId(null);
+
+      // Alt kategori listesi güncelle
+      if (editingId) {
+        // Güncelleme
+        setSubcategories((prev) =>
+          prev.map((sub) =>
+            sub.id === editingId
+              ? { ...sub, ...subFormData, imageUrl: savedSub?.imageUrl || sub.imageUrl }
+              : sub
+          )
+        );
+      } else {
+        // Yeni ekleme
+        setSubcategories((prev) => [...prev, savedSub]);
+      }
+    } catch (error) {
+      console.error("Alt kategori kaydında hata:", error);
+    }
+  };
 
   // Sub Kategori - İnput değişikliklerini dinleme
   const handleSubChange = (e) => {
@@ -217,11 +217,11 @@ const handleSubSave = async () => {
       [name]: value,
     }));
   };
-  
+
 
   // Alt kategoriyi düzenleme
   const handleEditSub = (sub) => {
-    console.log("Editlenen alt kategori:", sub); 
+    console.log("Editlenen alt kategori:", sub);
     setSubFormData({
       name: sub.name,
       description: sub.description,
@@ -237,7 +237,9 @@ const handleSubSave = async () => {
     <div className="min-h-screen px-3 py-6 md:p-6  bg-gray-50">
       <div className="flex justify-between items-center mb-6">
         <AdminText>Kategoriler</AdminText>
-        <AddButton onClick={handleAdd}>Yeni Kategori Ekle</AddButton>
+        <AddButton onClick={handleAdd}>
+          <FaPlus size={12} /> Yeni Kategori Ekle
+        </AddButton>
       </div>
       <div className="space-y-4">
         {categories.map((category) => (
@@ -340,7 +342,7 @@ const handleSubSave = async () => {
         />
       )}
       {isSubModalOpen && (
-        <SubModal  title={editingId ? "Alt Kategoriyi Güncelle" : "Alt Kategori Ekle"} subFormData={subFormData} onChange={handleSubChange} onSave={handleSubSave} setMainImageFile={setMainImageFile} setSubFormData={setSubFormData} mainImageFile={mainImageFile}
+        <SubModal title={editingId ? "Alt Kategoriyi Güncelle" : "Alt Kategori Ekle"} subFormData={subFormData} onChange={handleSubChange} onSave={handleSubSave} setMainImageFile={setMainImageFile} setSubFormData={setSubFormData} mainImageFile={mainImageFile}
           onClose={() => setIsSubModalOpen(false)} />
       )}
     </div>

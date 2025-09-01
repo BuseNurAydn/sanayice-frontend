@@ -256,9 +256,9 @@ const SellerCampaignManagement = () => {
         <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl p-4 mb-4">
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-2">
-              <Gift className="w-5 h-5 text-purple-600" />
-              <span className="font-bold text-xl text-purple-600">
-                {coupon.discountType === 'percentage' ? `%${coupon.discountValue}` : `${coupon.discountValue}₺`}
+              <Gift className="w-5 h-5 text-[var(--color-orange)]" />
+              <span className="font-bold text-xl text-[var(--color-orange)]">
+                {coupon.discountType === 'percentage' ? `%${coupon.discountValue}` : `${coupon.discountValue}TL`}
               </span>
             </div>
             <button
@@ -289,7 +289,7 @@ const SellerCampaignManagement = () => {
           </div>
           <div className="flex items-center gap-2 text-gray-600 text-sm">
             <ShoppingCart className="w-4 h-4" />
-            <span>Min. sipariş: {coupon.minOrderAmount}₺</span>
+            <span>Min. sipariş: {coupon.minOrderAmount} TL</span>
           </div>
           <div className="flex items-center gap-2 text-gray-500 text-sm">
             <Clock className="w-4 h-4" />
@@ -341,7 +341,7 @@ const SellerCampaignManagement = () => {
             </div>
             <button
               onClick={handleAdd}
-              className="flex items-center gap-2 md:px-6 md:py-3 px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl hover:shadow-lg transition-all duration-300 font-medium"
+              className="flex items-center gap-2 md:px-6 md:py-3 px-4 py-2 bg-gradient-to-r from-[var(--color-orange)] to-[var(--color-dark-orange)] cursor-pointer text-white rounded-xl hover:shadow-lg transition-all duration-300 font-medium"
             >
               <Plus className="w-5 h-5" />
               Yeni Kupon Ekle
@@ -419,7 +419,7 @@ const SellerCampaignManagement = () => {
             <p className="text-gray-600 mb-6">İlk kuponunuzu oluşturarak başlayın.</p>
             <button
               onClick={handleAdd}
-              className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl hover:shadow-lg transition-all duration-300 font-medium"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[var(--color-orange)] to-[var(--color-dark-orange)] cursor-pointer text-white rounded-xl hover:shadow-lg transition-all duration-300 font-medium"
             >
               <Plus className="w-5 h-5" />
               İlk Kuponu Ekle
@@ -444,7 +444,7 @@ const SellerCampaignManagement = () => {
               </button>
             </div>
 
-            <div className="p-6 overflow-y-auto max-h-[calc(90vh-140px)]">
+            <div className="p-6 overflow-y-auto max-h-[calc(90vh-180px)]">
               <div className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
@@ -462,7 +462,7 @@ const SellerCampaignManagement = () => {
                       <button
                         type="button"
                         onClick={() => setFormData(prev => ({ ...prev, code: generateCouponCode() }))}
-                        className="px-4 py-3 bg-purple-100 text-purple-600 rounded-xl hover:bg-purple-200 transition-colors"
+                        className="px-4 py-3 bg-orange-50 text-orange-500 rounded-xl hover:bg-purple-200 transition-colors"
                       >
                         Oluştur
                       </button>
@@ -611,7 +611,7 @@ const SellerCampaignManagement = () => {
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Min. Sipariş Tutarı (₺)
+                      Min. Sipariş Tutarı (TL)
                     </label>
                     <input
                       type="number"
@@ -647,7 +647,7 @@ const SellerCampaignManagement = () => {
               </button>
               <button
                 onClick={handleSave}
-                className="flex-1 px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl hover:shadow-lg transition-all duration-300 font-medium"
+                className="flex-1 px-6 py-3 bg-gradient-to-r from-[var(--color-orange)] to-[var(--color-dark-orange)] cursor-pointer text-white rounded-xl hover:shadow-lg transition-all duration-300 font-medium"
               >
                 {editingId ? 'Güncelle' : 'Ekle'}
               </button>

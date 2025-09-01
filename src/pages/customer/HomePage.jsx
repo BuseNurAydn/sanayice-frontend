@@ -255,8 +255,8 @@ const HomePage = () => {
           <div className="py-5">
 
             {/* 1. Satır */}
-            <div className="flex justify-center gap-4">
-              {categories.slice(0, 6).map((category, index) => {
+            <div className="flex justify-center">
+              {categories.slice(0, 7).map((category, index) => {
                 const alignRight = index >= 4; // Son 2 kategori sağa yaslanacak
                 return (
                   <div key={category.id} className="relative group">

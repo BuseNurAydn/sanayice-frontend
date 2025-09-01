@@ -140,6 +140,7 @@ const SellerRoutes = () => {
                         </RoleProtectedRoute>
                     }
                 />
+                {/** 
                  <Route
                     path="add_brand"
                     element={
@@ -155,7 +156,7 @@ const SellerRoutes = () => {
                             <BrandList />
                         </RoleProtectedRoute>
                     }
-                />
+                />*/}
                 <Route
                     path="support_management"
                     element={

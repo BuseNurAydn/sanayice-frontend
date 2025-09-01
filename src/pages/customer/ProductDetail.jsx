@@ -1,14 +1,19 @@
-import { useState, useEffect,useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { API_BASE } from "../../config";
 import { useDispatch, useSelector } from "react-redux";
 import { FaHeart, FaRegHeart, FaCreditCard } from "react-icons/fa";
+import { GoChevronRight } from "react-icons/go";
+import { FaGifts } from "react-icons/fa6";
 import { MdAddShoppingCart } from "react-icons/md";
+import { TiMessages } from "react-icons/ti";
 import { addToCart } from "../../services/cartService";
 import { toast } from "react-toastify";
 import { setBuyNowItem } from "../../store/buyNowSlice";
 import ProductCard from "../../components/ProductCard";
+import { ReviewIcon } from "./ReviewIcon";
 import { addToFavorites, fetchFavorites, removeFavorites } from "../../services/favoritesService";
+import SellerQuestions from "../../components/SellerQuestions";
 
 const dummyRelatedProducts = [
   {
@@ -61,10 +66,13 @@ const ProductDetail = () => {
   const [reviews, setReviews] = useState([])
   const relatedScrollRef = useRef(null);
   const suggestedScrollRef = useRef(null);
-
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [adding, setAdding] = useState(false);
+  const [questions, setQuestions] = useState([]);
+  const [newQuestion, setNewQuestion] = useState("");
+  const tabsRef = useRef(null);
+
 
   const favorites = useSelector(state => state.favorites.items);
   const isFavorite = favorites.some(fav => fav.productId === product.id);
@@ -75,6 +83,7 @@ const ProductDetail = () => {
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
+
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -89,6 +98,7 @@ const ProductDetail = () => {
         if (!response.ok) throw new Error("Ürün bulunamadı");
         const data = await response.json();
         setProduct(data);
+
       } catch (err) {
         setError(err.message);
       } finally {
@@ -178,6 +188,14 @@ const ProductDetail = () => {
     navigate('/checkout');
   };
 
+  const handleAskQuestion = (e) => {
+    e.preventDefault();
+    if (!newQuestion.trim()) return;
+    const newQ = { question: newQuestion, answer: null };
+    setQuestions((prev) => [...prev, newQ]);
+    setNewQuestion("");
+  };
+
   const htext = (text) => {
     if (!text) return '';
     return text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
@@ -256,7 +274,7 @@ const ProductDetail = () => {
     <div className=" bg-gray-50">
       {/* Breadcrumb */}
       <div className="bg-white border-b border-gray-300">
-        <div className="max-w-7xl mx-auto px-4 py-3">
+        <div className="max-w-7xl mx-auto px-6 py-3">
           <nav className="text-sm text-gray-600">
             <Link to="/" className="hover:text-orange-600 cursor-pointer text-sm">
               Ana Sayfa
@@ -273,12 +291,12 @@ const ProductDetail = () => {
           </nav>
         </div>
       </div>
-      <main className="max-w-7xl mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-[400px_1fr] gap-8 mb-8">
+      <main className="max-w-7xl mx-auto px-1 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-[400px_1fr_300px] gap-2 mb-8">
           {/* Sol: Görseller */}
-          <div className="space-y-4">
+          <div className="space-y-4 px-4">
             {/* Ana görsel + slider */}
-            <div className="relative bg-white rounded-2xl p-4 md:p-6 shadow-sm border border-gray-300 max-w-xs md:max-w-md">
+            <div className="relative bg-white rounded-2xl p-4 md:p-6 shadow-sm border border-gray-300 max-w-sm md:max-w-md">
               <div className="aspect-square flex items-center justify-center">
                 {images?.length > 0 ? (
                   <img
@@ -329,8 +347,9 @@ const ProductDetail = () => {
               ))}
             </div>
           </div>
-          {/* Sağ: Ürün Bilgileri */}
-          <div className="space-y-6 custom-font">
+
+          {/* orta: Ürün Bilgileri */}
+          <div className="space-y-8 custom-font px-4 md:px-0 ">
             {/* Başlık ve Favori */}
             <div className="flex items-start justify-between">
               <div>
@@ -354,7 +373,7 @@ const ProductDetail = () => {
               <div className="flex items-center gap-4 mb-2">
                 {product?.oldPrice && (
                   <span className="text-xl text-gray-400 line-through">
-                    ₺{product?.oldPrice.toLocaleString()}
+                    {product?.oldPrice.toLocaleString()} TL
                   </span>
                 )}
                 <span className="text-3xl font-bold text-[var(--color-dark-blue)]"> {product?.price.toLocaleString()} TL </span>
@@ -373,16 +392,10 @@ const ProductDetail = () => {
               </div>
             </div>
 
-            {/* Stok Durumu */}
-            <div className="flex items-center gap-2">
-              <div className={`w-3 h-3 rounded-full ${product?.stockQuantity > 0 ? 'bg-green-500' : 'bg-red-500'}`}></div>
-              <span className={`font-medium ${product?.stockQuantity > 0 ? 'text-green-600' : 'text-red-600'}`}>
-                {product?.stockQuantity > 0 ? `Stokta (${product?.stockQuantity} adet)` : 'Stokta yok'}
-              </span>
-            </div>
+
 
             {/* Miktar ve Butonlar */}
-            <div className="space-y-4">
+            <div className="space-y-8">
               <div className="flex items-center gap-4">
                 <label className="font-medium text-gray-700">Miktar:</label>
                 <div className="flex items-center border border-gray-300 rounded-lg">
@@ -399,6 +412,14 @@ const ProductDetail = () => {
                   </button>
 
                 </div>
+              </div>
+
+              {/* Stok Durumu */}
+              <div className="flex items-center gap-2">
+                <div className={`w-3 h-3 rounded-full ${product?.stockQuantity > 0 ? 'bg-green-500' : 'bg-red-500'}`}></div>
+                <span className={`font-medium ${product?.stockQuantity > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                  {product?.stockQuantity > 0 ? `Stokta (${product?.stockQuantity} adet)` : 'Stokta yok'}
+                </span>
               </div>
 
               <div className="flex gap-4">
@@ -460,7 +481,7 @@ const ProductDetail = () => {
             </div>
             {/* Ürün Bilgileri */}
             {product?.highlightedFeatures?.length > 0 && (
-              <div className="mt-6">
+              <div className="m-6">
                 <h4 className="text-sm font-semibold text-gray-700 mb-2">Ürün Bilgileri</h4>
                 <div className="flex flex-wrap gap-2">
                   {product.highlightedFeatures.map((feature, idx) => (
@@ -475,112 +496,221 @@ const ProductDetail = () => {
               </div>
             )}
           </div>
+          {/* Sağ: Satıcı Kartı */}
+          <div className="relative px-4">
+            <div className="bg-white rounded-lg shadow-md border border-gray-300 p-4 space-y-4">
+
+              {/* Mağazaya Git Butonu */}
+              <Link to={`/satici/${product.sellerId}`}
+                className="absolute -top-4 left-1/2 -translate-x-1/2 bg-orange-500 text-white px-4 py-2 rounded-full font-semibold text-sm shadow-md hover:bg-orange-600 transition cursor-pointer flex items-center justify-center gap-1"
+              >
+                Mağazaya Git <GoChevronRight />
+              </Link>
+
+              {/* Mağaza Adı ve Puan */}
+              <div className="bg-orange-50 px-4 py-2 flex items-center justify-between mt-4 rounded-lg">
+                <div>
+                  <h3 className="text-lg font-bold text-gray-900">
+                    {product.sellerCompanyName || "Mağaza Adı"}
+                  </h3>
+
+                </div>
+                <div className="flex items-center gap-1 bg-green-50 px-2 py-1 rounded-lg">
+                  <span className="text-sm font-semibold text-green-700">4.8</span>
+                </div>
+              </div>
+
+              {/* Takip Et*/}
+              <div>
+                <button
+                  onClick={() => handleFollowSeller(product?.seller?.id)}
+                  className="flex items-center justify-center gap-2 cursor-pointer px-1 py-2 text-sm font-medium rounded-lg hover:text-[var(--color-orangeTwo)] transition "
+                >
+                  <FaGifts className="text-lg text-gray-600 hover:text-[var(--color-orangeTwo)]" /> Takip Et
+                </button>
+              </div>
+
+              {/* Satıcıya Sor */}
+              <button
+                onClick={() => {
+                  setActiveTab("qa");
+                  setTimeout(() => {
+                    tabsRef.current?.scrollIntoView({
+                      behavior: "smooth",
+                      block: "start",
+                    });
+                  }, 150);
+                }}
+                className="px-1 py-2 text-sm font-medium rounded-lg hover:text-[var(--color-orangeTwo)] transition flex items-center justify-center gap-2 cursor-pointer"
+              >
+                <TiMessages className="text-lg text-gray-600 hover:text-[var(--color-orangeTwo)]" /> Satıcıya Sor
+              </button>
+            </div>
+          </div>
         </div>
 
         {/* Detay Sekmeleri */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-300 overflow-hidden">
-          <div className="border-b border-gray-300">
-            <div className="flex">
-              {["description", "specifications", "reviews"].map((tab) => (
-                <button
-                  key={tab}
-                  onClick={() => setActiveTab(tab)}
-                  className={`px-8 py-4 font-semibold transition-colors ${activeTab === tab
-                    ? "text-orange-600 border-b-2 border-orange-600"
-                    : "text-gray-600 hover:text-gray-900"
-                    }`}
-                >
-                  {tab === "description" && "Açıklama"}
-                  {tab === "specifications" && "Özellikler"}
-                  {tab === "reviews" && "Değerlendirmeler"}
-                </button>
-              ))}
+        <div className="px-4">
+          <div
+            ref={tabsRef}
+            className="scroll-target bg-white rounded-2xl shadow-sm border border-gray-300 overflow-hidden"
+          >
+            {/* Tab Butonları */}
+            <div className="border-b border-gray-300">
+              <div className="flex overflow-x-auto no-scrollbar">
+                {["description", "specifications", "reviews", "qa"].map((tab) => (
+                  <button
+                    key={tab}
+                    onClick={() => setActiveTab(tab)}
+                    className={`flex-shrink-0 px-4 md:px-8 py-3 md:py-4 font-semibold transition-colors ${activeTab === tab
+                      ? "text-orange-600 border-b-2 border-orange-600"
+                      : "text-gray-600 hover:text-gray-900"
+                      }`}
+                  >
+                    {tab === "description" && "Açıklama"}
+                    {tab === "specifications" && "Özellikler"}
+                    {tab === "reviews" && (
+                      <ReviewIcon count={reviews?.length || 0} />
+                    )}
+                    {tab === "qa" && "Soru & Cevap"}
+                  </button>
+                ))}
+              </div>
             </div>
-          </div>
 
-          <div className="p-8">
-            {activeTab === "description" && (
-              <div className="space-y-6">
-                <div>
-                  <h3 className="md:text-xl text-lg font-bold mb-4">Ürün Açıklaması</h3>
-                  <p className="text-gray-700 leading-relaxed mb-6">{product.description}</p>
-                </div>
-                <div>
-                  <h4 className="md:text-lg text-md font-semibold mb-3">Öne Çıkan Özellikler</h4>
-                  <ul className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    {product.highlightedFeatures.map((feature, idx) => (
-                      <li key={idx} className="flex items-start gap-3">
-                        <svg className="w-5 h-5 text-orange-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                        </svg>
-                        <span className="text-gray-700">{feature}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-            )}
-
-            {activeTab === "specifications" && (
-              <div>
-                <h3 className="md:text-xl text-lg font-bold mb-4">Teknik Özellikler</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {Object.entries(product.technicalSpecifications).map(([key, value]) => (
-                    <div key={key} className="border-b border-gray-200 pb-3">
-                      <dt className="font-semibold text-gray-900 mb-1">{key}</dt>
-                      <dd className="text-gray-600">{value}</dd>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {activeTab === "reviews" && (
-              <div>
-                <div className="flex items-center justify-between mb-6">
-                  <h3 className="md:text-xl text-lg font-bold">Müşteri Değerlendirmeleri</h3>
-                  <div className="flex items-center gap-4">
-                    <div className="flex items-center gap-2">
-                      {renderStars(product.rating)}
-                      <span className="font-semibold">{product.rating}</span>
-                    </div>
-                    <span className="text-gray-500">({reviews.length} değerlendirme)</span>
+            {/* Tab İçeriği */}
+            <div className="px-4 md:p-8">
+              {activeTab === "description" && (
+                <div className="space-y-6 py-8">
+                  <div>
+                    <h3 className="text-lg md:text-xl font-bold mb-4">
+                      Ürün Açıklaması
+                    </h3>
+                    <p className="text-gray-700 leading-relaxed mb-6">
+                      {product.description}
+                    </p>
+                  </div>
+                  <div>
+                    <h4 className="text-md md:text-lg font-semibold mb-3">
+                      Öne Çıkan Özellikler
+                    </h4>
+                    <ul className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      {product.highlightedFeatures.map((feature, idx) => (
+                        <li key={idx} className="flex items-start gap-3">
+                          <svg
+                            className="w-5 h-5 text-orange-500 mt-0.5 flex-shrink-0"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M5 13l4 4L19 7"
+                            />
+                          </svg>
+                          <span className="text-gray-700">{feature}</span>
+                        </li>
+                      ))}
+                    </ul>
                   </div>
                 </div>
+              )}
 
-                {reviews.length === 0 ? (
-                  <p className="text-gray-500 italic">Bu ürüne ait henüz bir değerlendirme yok.</p>
-                ) : (
-                  <div className="space-y-6">
-                    {reviews.map((review, idx) => (
-                      <div key={idx} className="border-b border-gray-200 pb-6 last:border-b-0">
-                        <div className="flex items-start justify-between mb-3">
-                          <div>
-                            <h4 className="font-semibold text-gray-900">{review.userName}</h4>
-                            <p className="text-sm text-gray-500">{new Date(review.createdAt).toLocaleDateString()}</p>
-                          </div>
-                          {renderStars(review.rating)}
+              {activeTab === "specifications" && (
+                <div className="space-y-6 py-8">
+                  <h3 className="text-lg md:text-xl font-bold mb-4">
+                    Teknik Özellikler
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {Object.entries(product.technicalSpecifications).map(
+                      ([key, value]) => (
+                        <div
+                          key={key}
+                          className="border-b border-gray-200 pb-3"
+                        >
+                          <dt className="font-semibold text-gray-900 mb-1">
+                            {key}
+                          </dt>
+                          <dd className="text-gray-600">{value}</dd>
                         </div>
-                        <p className="text-gray-700 leading-relaxed">{review.comment}</p>
-                      </div>
-                    ))}
+                      )
+                    )}
                   </div>
-                )}
-              </div>
-            )}
+                </div>
+              )}
+
+              {activeTab === "reviews" && (
+                <div className="space-y-6 py-8">
+                  <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
+                    <h3 className="text-lg md:text-xl font-bold">
+                      Müşteri Değerlendirmeleri
+                    </h3>
+                    <div className="flex items-center gap-4">
+                      <div className="flex items-center gap-2">
+                        {renderStars(product.rating)}
+                        <span className="font-semibold">{product.rating}</span>
+                      </div>
+                      <span className="text-gray-500">
+                        ({reviews.length} değerlendirme)
+                      </span>
+                    </div>
+                  </div>
+
+                  {reviews.length === 0 ? (
+                    <p className="text-gray-500 italic">
+                      Bu ürüne ait henüz bir değerlendirme yok.
+                    </p>
+                  ) : (
+                    <div className="space-y-6">
+                      {reviews.map((review, idx) => (
+                        <div
+                          key={idx}
+                          className="border-b border-gray-200 pb-6 last:border-b-0"
+                        >
+                          <div className="flex flex-col md:flex-row md:items-start md:justify-between mb-3 gap-2">
+                            <div>
+                              <h4 className="font-semibold text-gray-900">
+                                {review.userName}
+                              </h4>
+                              <p className="text-sm text-gray-500">
+                                {new Date(
+                                  review.createdAt
+                                ).toLocaleDateString()}
+                              </p>
+                            </div>
+                            {renderStars(review.rating)}
+                          </div>
+                          <p className="text-gray-700 leading-relaxed">
+                            {review.comment}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {activeTab === "qa" && (
+                <div className="space-y-6 py-8">
+                  <SellerQuestions autoOpenForm={true} />
+                </div>
+              )}
+            </div>
           </div>
         </div>
         {/* Benzer Ürünler */}
-        <div className="mt-12">
+        <div className="mt-12 p-4 md:px-4">
           <h3 className="text-xl font-bold mb-6">Buna bakanların aldıkları</h3>
-         <ScrollSection scrollRef={relatedScrollRef}>
+          <ScrollSection scrollRef={relatedScrollRef}>
             {dummyRelatedProducts.map((item) => (
               <ProductCard key={item.id} product={item} />
             ))}
           </ScrollSection>
         </div>
 
-        <div className="mt-12">
+        <div className="mt-12 p-4 md:px-4">
           <h3 className="text-xl font-bold mb-6">Bunlar da ilgini çekebilir</h3>
           <ScrollSection scrollRef={suggestedScrollRef}>
             {dummyRelatedProducts.map((item) => (

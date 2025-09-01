@@ -14,7 +14,7 @@ import CategoriesPage from '../pages/customer/CategoriesPage';
 import PrivacyPolicy from '../pages/public/PrivacyPolicy';
 import ReturnPolicy from '../pages/public/ReturnPolicy';
 import TermsOfUse from '../pages/public/TermsOfUse';
-
+import SellerPage from '../pages/customer/SellerPage';
 
 const CustomerRoutes = () => {
     return (
@@ -34,6 +34,8 @@ const CustomerRoutes = () => {
                 <Route path="return_policy" element={<ReturnPolicy />} />
                 <Route path="terms_of_use" element={<TermsOfUse />} />
                 <Route path="categories" element={<CategoriesPage />} />
+                 <Route path="satici/:id" element={<SellerPage/>} />
+
 
             {accountRoutes}
             </Route> 

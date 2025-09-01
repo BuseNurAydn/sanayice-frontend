@@ -1,6 +1,7 @@
 import AdminText from "../../shared/Text/AdminText";
 import { useState, useEffect } from "react";
-import { FaBoxes, FaChartLine, FaDollarSign, FaShoppingCart, FaStore, FaEye } from "react-icons/fa";
+import { FaBoxes, FaChartLine, FaShoppingCart, FaStore} from "react-icons/fa";
+import { BsBarChartLineFill } from "react-icons/bs";
 import { Link } from 'react-router-dom';
 import { fetchDashboardStats, fetchRecentOrders, fetchPopulerProducts } from "../../services/dashboardService";
 
@@ -91,10 +92,10 @@ const Dashboard = () => {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-6">
         <div className={`${boxStyle} flex items-center justify-between`}>
           <div>
-            <div className="text-xl font-bold text-[var(--color-orange)]">₺{stats.totalRevenue?.toLocaleString()}</div>
+            <div className="text-xl font-bold text-[var(--color-orange)]">{stats.totalRevenue?.toLocaleString()} TL</div>
             <div className="text-sm text-gray-600">Toplam Ciro</div>
           </div>
-          <FaDollarSign className="text-2xl md:text-4xl text-green-500 opacity-70" />
+          <BsBarChartLineFill className="text-2xl md:text-4xl text-green-500 opacity-70" />
         </div>
         <div className={`${boxStyle} flex items-center justify-between`}>
           <div>
@@ -142,7 +143,7 @@ const Dashboard = () => {
                     <tr key={order.orderId}>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">#{order.orderId}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{order.customerName}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">₺{order.totalAmount.toLocaleString()}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{order.totalAmount.toLocaleString()} TL</td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(order.status)}`}>
                           {order.status}
@@ -234,7 +235,7 @@ const Dashboard = () => {
                     <p className="font-medium text-gray-900">{product.productName}</p>
                     <p className="text-sm text-gray-600">Satış: {product.totalSales} | Stok: {product.stockQuantity}</p>
                   </div>
-                  <span className="font-semibold text-[var(--color-orange)]">₺{product.price.toLocaleString()}</span>
+                  <span className="font-semibold text-[var(--color-orange)]">{product.price.toLocaleString()} TL</span>
                 </div>
               ))}
             </div>

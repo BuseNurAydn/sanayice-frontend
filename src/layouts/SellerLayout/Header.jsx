@@ -1,4 +1,4 @@
-import Logo from '../../assets/png/Logo2.png'
+import sanayice from '../../assets/png/sanayice.png'
 import { BsBellFill } from "react-icons/bs";
 import { FaUser, FaRegUser } from "react-icons/fa";
 import { Link, useNavigate } from 'react-router-dom'
@@ -25,9 +25,9 @@ const Header = () => {
     <header className='bg-[var(--color-light)] p-2 pl-12 md:pl-4 flex justify-between'>
       <Link to={user?.role === "ROLE_SELLER" ? '/seller/vertification' : '/seller/seller-verification'}>
         <img
-          src={Logo}
+          src={sanayice}
           alt="Logo"
-          className="cursor-pointer h-10 w-auto"
+          className="cursor-pointer h-14 w-auto"
         />
       </Link>
       <div className="flex items-center space-x-3 pr-2">

@@ -149,7 +149,7 @@ const Orders = () => {
             <div className="text-sm text-gray-600">Teslim Edildi</div>
           </div>
           <div className={boxStyle + " text-center"}>
-            <div className="text-2xl font-bold text-[var(--color-orange)]">₺{stats.totalRevenue.toLocaleString()}</div>
+            <div className="text-xl font-bold text-[var(--color-orange)]">{stats.totalRevenue.toLocaleString()} TL</div>
             <div className="text-sm text-gray-600">Toplam Gelir</div>
           </div>
         </div>
@@ -212,7 +212,7 @@ const Orders = () => {
                         <div key={index} className="flex justify-between text-sm">
                           <span>{product.productName} x {product.quantity}</span>
                           <span className="font-medium">
-                            ₺{Number(product.totalPrice || 0).toLocaleString("tr-TR")}
+                            {Number(product.totalPrice || 0).toLocaleString("tr-TR")} TL
                           </span>
                         </div>
                       ))}
@@ -221,7 +221,7 @@ const Orders = () => {
                       <div className="flex justify-between font-semibold">
                         <span>Toplam:</span>
                         <span className="text-[var(--color-orange)]">
-                          ₺{order.orderItems.reduce((acc, p) => acc + p.unitPrice * p.quantity, 0).toLocaleString()}
+                          {order.orderItems.reduce((acc, p) => acc + p.unitPrice * p.quantity, 0).toLocaleString()} TL
                         </span>
                       </div>
                     </div>
@@ -355,13 +355,13 @@ const Orders = () => {
                           <p className="text-sm text-gray-600">Adet: {product.quantity}</p>
                         </div>
                         <div className="text-right">
-                          <p className="font-medium">₺{product.totalPrice.toLocaleString()}</p>
+                          <p className="font-medium">{product.totalPrice.toLocaleString()} TL</p>
                         </div>
                       </div>
                     ))}
                     <div className="p-3 bg-gray-50 font-semibold flex justify-between">
                       <span>Toplam Tutar:</span>
-                      <span className="text-[var(--color-orange)]"> ₺{selectedOrder.orderItems?.reduce((acc, p) => acc + p.unitPrice * p.quantity, 0).toLocaleString()}</span>
+                      <span className="text-[var(--color-orange)]"> {selectedOrder.orderItems?.reduce((acc, p) => acc + p.unitPrice * p.quantity, 0).toLocaleString()} TL</span>
                     </div>
                   </div>
                 </div>

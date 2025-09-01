@@ -98,3 +98,13 @@ export const getProductById = async (id) => {
   if (!response.ok) throw new Error('Ürün alınamadı');
   return await response.json();
 };
+
+export const getProductsBySeller = async (sellerId) => {
+  const response = await fetch(`${PRODUCTS_API}/seller/${sellerId}`, {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+  });
+  if (!response.ok) throw new Error("Satıcı ürünleri alınamadı");
+  return await response.json();
+};

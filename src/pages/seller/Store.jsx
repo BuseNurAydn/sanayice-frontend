@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { FaStore, FaMapMarkerAlt, FaPhone, FaEnvelope, FaSearch, FaFilter } from 'react-icons/fa';
+import { FaStore, FaMapMarkerAlt, FaEye, FaEnvelope, FaSearch, FaFilter } from 'react-icons/fa';
 import { Link } from 'react-router-dom'; // Ürün detayına gitmek için
 import { getProducts } from "../../services/productsService";
 import { fetchCategories } from '../../services/categoryService';
@@ -31,7 +31,6 @@ const Store = () => {
       try {
         const data = await fetchCategories();
         setCategories(data);
-        console.log(data)
       } catch (error) {
         console.error("Kategoriler alınamadı:", error);
       }
@@ -70,6 +69,7 @@ const Store = () => {
       try {
         const data = await getMyProfile();
         setStoreInfo(data);
+        console.log(data)
       } catch (error) {
         console.error("Profil bilgisi alınamadı:", error);
       }
@@ -78,28 +78,28 @@ const Store = () => {
     fetchProfile();
   }, []);
 
-// Ürünleri filtreleme
-useEffect(() => {
-  let currentProducts = products;
+  // Ürünleri filtreleme
+  useEffect(() => {
+    let currentProducts = products;
 
-  // Kategori seçimi varsa filtrele
-  if (selectedCategory !== 'Tüm Kategoriler') {
-    currentProducts = currentProducts.filter(product => {
-      // product.category objesi mi, string mi kontrol et
-      const categoryName = product.category?.name || product.category;
-      return categoryName === selectedCategory;
-    });
-  }
+    // Kategori seçimi varsa filtrele
+    if (selectedCategory !== 'Tüm Kategoriler') {
+      currentProducts = currentProducts.filter(product => {
+        // product.category objesi mi, string mi kontrol et
+        const categoryName = product.category?.name || product.category;
+        return categoryName === selectedCategory;
+      });
+    }
 
-  // Arama terimi varsa filtrele
-  if (searchTerm) {
-    currentProducts = currentProducts.filter(product =>
-      product.name?.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-  }
+    // Arama terimi varsa filtrele
+    if (searchTerm) {
+      currentProducts = currentProducts.filter(product =>
+        product.name?.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
 
-  setFilteredProducts(currentProducts);
-}, [searchTerm, selectedCategory, products]);
+    setFilteredProducts(currentProducts);
+  }, [searchTerm, selectedCategory, products]);
 
 
   // Orders bileşeninizdeki boxStyle'a benzer bir stil
@@ -110,7 +110,7 @@ useEffect(() => {
     <div className="min-h-screen bg-gray-50 pb-10">
       {/* Mağaza Bannerı */}
       <div className="relative w-full h-64 bg-cover bg-center" style={{ backgroundImage: `url(${storeInfo?.banner})` }}>
-        <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center p-4">
+        <div className="absolute inset-0 bg-[var(--color-dark-blue)] bg-opacity-40 flex items-center justify-center p-4">
           <div className="text-white text-center">
             {storeInfo?.profileImageUrl && (
               <img
@@ -119,8 +119,8 @@ useEffect(() => {
                 className="w-24 h-24 rounded-full mx-auto mb-4 border-4 border-white shadow-lg"
               />
             )}
-            <h1 className="text-2xl md:text-4xl font-bold">{storeInfo.name}</h1>
-            <p className='mt-2'>En yeni elektronik ürünler ve teknolojik aksesuarlar.</p>
+            <h1 className="text-2xl md:text-3xl font-bold">{storeInfo.name}</h1>
+            <p className='mt-2 text-sm '>En yeni elektronik ürünler ve teknolojik aksesuarlar.</p>
           </div>
         </div>
       </div>
@@ -128,7 +128,7 @@ useEffect(() => {
       {/* Mağaza Bilgileri ve İletişim */}
       <div className="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8 mt-8">
         <div className={`${boxStyle} mb-8`}>
-          <h2 className="text-lg md:text-2xl font-semibold text-gray-800 mb-4">Mağaza Bilgileri</h2>
+          <h2 className="text-lg md:text-xl font-semibold text-gray-800 mb-4">Mağaza Bilgileri</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-700">
             {/**  <p className="flex items-center gap-2"><FaMapMarkerAlt className="text-[var(--color-orange)]" /> Adres: {storeInfo.address || "Adres bilgisi bulunamadı."}</p>
             <p className="flex items-center gap-2"><FaPhone className="text-[var(--color-orange)]" /> Telefon:  {storeInfo.phone || "Telefon bilgisi bulunamadı."}</p>*/}
@@ -166,21 +166,42 @@ useEffect(() => {
         </div>
 
         {/* Ürünler Grid */}
-        <h2 className="text-xl md:text-2xl font-semibold text-gray-800 mb-6">Ürünlerimiz ({filteredProducts.length})</h2>
+        <h2 className="text-xl md:text-xl font-semibold text-gray-800 mb-6">Ürünlerimiz ({filteredProducts.length})</h2>
         {filteredProducts.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {filteredProducts.map((product) => (
-              <Link to={`/seller_product/${product.id}`} key={product.id} className="block group">
-                <div className={`${boxStyle} h-96 p-4 flex flex-col items-center text-center hover:shadow-lg transition-shadow duration-300`}>
-                  <img src={product.imageUrls[0]} alt="Ürün görseli" name={product.name} className="w-full h-36 object-contain mb-4 rounded-md" />
-                  <h3 className="text-md font-semibold text-gray-900 transition-colors duration-200 line-clamp-2">{product.name}</h3>
-                  <p className="text-gray-500 text-sm mt-1">{product.category}</p>
-                  <p className="text-xl font-bold text-[var(--color-orange)] mt-3">₺{product.price.toLocaleString()}</p>
-                  {/***  <button className="mt-4 bg-[var(--color-orange)] text-white px-4 py-2 rounded-md hover:bg-orange-500 transition-colors duration-200 text-sm w-full cursor-pointer">
-                    Ürünü Görüntüle
-                  </button>*/}
+              <div
+                key={product.id}
+                className="bg-white rounded-lg shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden flex flex-col"
+              >
+                {/* Ürün Resmi */}
+                <div className="h-32 flex items-center justify-center p-4">
+                  <img
+                    src={product.imageUrls[0]}
+                    alt={product.name}
+                    className="h-full object-contain group-hover:scale-105 transition-transform duration-300"
+                  />
                 </div>
-              </Link>
+
+                {/* Ürün Bilgileri */}
+                <div className="p-4 flex flex-col flex-1">
+                  <h3 className="text-sm font-semibold text-gray-900 line-clamp-2 mb-1">
+                    {product.name}
+                  </h3>
+                  <p className="text-gray-500 text-xs mb-2">{product.category}</p>
+
+                  <p className="text-base font-bold text-[var(--color-orange)] mb-4">
+                    {product.price.toLocaleString()} TL
+                  </p>
+
+                  <Link
+                    to={`/product/${product.id}`}
+                    className="flex items-center justify-center gap-2 mt-auto bg-[var(--color-orange)] text-white text-sm py-2 rounded-lg text-center font-medium hover:bg-[var(--color-dark-orange)] transition-colors"
+                  >
+                    <FaEye /> Ürünü Gör
+                  </Link>
+                </div>
+              </div>
             ))}
           </div>
         ) : (

@@ -292,7 +292,7 @@ function CategoryProductsPage({ type = "category" }) {
                                 step={100}
                                 value={maxPrice}
                                 onChange={(e) => setMaxPrice(Number(e.target.value))}
-                                className="w-full"
+                                className="w-full accent-[var(--color-dark-orange)]"
                             />
                             <p className="text-sm mt-1">
                                 Maksimum: {maxPrice.toLocaleString()} TL

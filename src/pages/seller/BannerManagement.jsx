@@ -298,7 +298,7 @@ const BannerManagement = () => {
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
           <div>
-            <AdminText>Banner Yönetimi</AdminText>
+            <AdminText>Slider Yönetimi</AdminText>
             <p className="text-gray-600">Web sitenizin banner içeriklerini yönetin</p>
           </div>
           <button
@@ -306,7 +306,7 @@ const BannerManagement = () => {
             className="flex items-center gap-2 md:px-6 md:py-3 px-4 py-2 bg-orange-400 text-white rounded-xl hover:bg-orange-600 transition-colors font-medium shadow-lg cursor-pointer"
           >
             <Plus className="w-5 h-5" />
-            Yeni Banner
+            Yeni Slider
           </button>
         </div>
 
@@ -315,7 +315,7 @@ const BannerManagement = () => {
           <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-600 text-sm font-medium">Toplam Banner</p>
+                <p className="text-gray-600 text-sm font-medium">Toplam Slider</p>
                 <p className=" text-2xl md:text-3xl font-bold text-gray-900 mt-1">{banners.length}</p>
               </div>
               <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
@@ -327,7 +327,7 @@ const BannerManagement = () => {
           <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-600 text-sm font-medium">Aktif Banner</p>
+                <p className="text-gray-600 text-sm font-medium">Aktif Slider</p>
                 <p className="text-2xl md:text-3xl font-bold text-green-600 mt-1">{activeBanners.length}</p>
               </div>
               <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
@@ -339,7 +339,7 @@ const BannerManagement = () => {
           <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-600 text-sm font-medium">Pasif Banner</p>
+                <p className="text-gray-600 text-sm font-medium">Pasif Slider</p>
                 <p className="text-2xl md:text-3xl font-bold text-red-600 mt-1">{inactiveBanners.length}</p>
               </div>
               <div className="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center">
@@ -395,7 +395,7 @@ const BannerManagement = () => {
             <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <FileImage className="w-12 h-12 text-gray-400" />
             </div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">Banner Bulunmuyor</h3>
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">Slider Bulunmuyor</h3>
             <p className="text-gray-600">Bu kategoride henüz banner bulunmuyor.</p>
           </div>
         )}
