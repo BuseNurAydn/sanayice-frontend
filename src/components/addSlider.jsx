@@ -40,7 +40,7 @@ const AddSlider = () => {
     <div className="my-8 overflow-hidden">
       <Slider {...settings}>
         {addBanners.map((banner, i) => (
-          <div key={i} className="px-4">
+          <div key={i} className="pr-4">
             <a href={banner.linkUrl} target="_blank" rel="noopener noreferrer">
               <img
                 src={banner.imageUrl}

@@ -10,10 +10,10 @@ const Orders = () => {
   const [selectedOrder, setSelectedOrder] = useState(null);
   const { user } = useSelector((state) => state.auth);
 
-  const boxStyle = 'border border-gray-200 p-6 rounded-lg shadow bg-white';
+  const boxStyle = 'border border-gray-200 p-6 rounded-lg shadow bg-white cursor-pointer hover:bg-orange-50';
   const buttonStyle = "bg-[var(--color-orange)] text-white px-4 py-2 rounded-lg font-semibold hover:opacity-90 transition-opacity";
   const inputStyle = 'border-gray-200 outline-none border px-3 py-2 rounded-lg bg-gray-50';
-  
+
   const [userInfo, setUserInfo] = useState({
     name: "",
     email: "",
@@ -128,23 +128,33 @@ const Orders = () => {
 
         {/* İstatistik Kartları */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4 mt-6">
-          <div className={boxStyle + " text-center"}>
+          <div className={boxStyle + " text-center"}
+            onClick={() => setSelectedStatus("all")}
+          >
             <div className="text-2xl font-bold text-[var(--color-orange)]">{stats.total}</div>
             <div className="text-sm text-gray-600">Toplam Sipariş</div>
           </div>
-          <div className={boxStyle + " text-center"}>
+          <div className={boxStyle + " text-center"}
+            onClick={() => setSelectedStatus("PENDING")}
+          >
             <div className="text-2xl font-bold text-yellow-600">{stats.pending}</div>
             <div className="text-sm text-gray-600">Beklemede</div>
           </div>
-          <div className={boxStyle + " text-center"}>
+          <div className={boxStyle + " text-center"}
+            onClick={() => setSelectedStatus("CONFIRMED")}
+          >
             <div className="text-2xl font-bold text-blue-600">{stats.confirmed}</div>
             <div className="text-sm text-gray-600">Onaylı</div>
           </div>
-          <div className={boxStyle + " text-center"}>
+          <div className={boxStyle + " text-center"}
+            onClick={() => setSelectedStatus("SHIPPED")}
+          >
             <div className="text-2xl font-bold text-purple-600">{stats.shipped}</div>
             <div className="text-sm text-gray-600">Kargoda</div>
           </div>
-          <div className={boxStyle + " text-center"}>
+          <div className={boxStyle + " text-center"}
+            onClick={() => setSelectedStatus("DELIVERED")}
+          >
             <div className="text-2xl font-bold text-green-600">{stats.delivered}</div>
             <div className="text-sm text-gray-600">Teslim Edildi</div>
           </div>
@@ -324,7 +334,7 @@ const Orders = () => {
                   <div>
                     <h3 className="font-medium text-gray-900 mb-2">Sipariş Bilgileri</h3>
                     <p className="text-sm text-gray-600">Sipariş No: <span className="text-gray-900">{selectedOrder.orderNumber}</span></p>
-                  <p className="text-sm text-gray-600">Tarih: <span className="text-gray-900">{new Date(selectedOrder.orderDate).toLocaleDateString()}</span></p>
+                    <p className="text-sm text-gray-600">Tarih: <span className="text-gray-900">{new Date(selectedOrder.orderDate).toLocaleDateString()}</span></p>
                     <p className="text-sm text-gray-600">Durum:
                       <span className={`ml-2 px-2 py-1 rounded text-xs ${getStatusColor(selectedOrder.overallStatus)}`}>
                         {getStatusText(selectedOrder.overallStatus)}

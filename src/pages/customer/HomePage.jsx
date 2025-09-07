@@ -47,14 +47,10 @@ const HomePage = () => {
   const [banners, setBanners] = useState([]);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  // Dummy banner listesi 
-  const leftBanners = [
-    { imageUrl: "https://images.hepsiburada.net/banners/s/1/640-200/gra-199064-slider133997371828354751.jpg/format:webp" },
-    { imageUrl: "https://images.hepsiburada.net/banners/s/1/640-200/gra-199031-slider133997241731061103.jpg/format:webp" },
-    { imageUrl: "https://images.hepsiburada.net/banners/s/1/640-200/gra-199480-slider133995577722430043.jpg/format:webp" },
-    { imageUrl: "https://images.hepsiburada.net/banners/s/1/640-200/gra-199000-slider-1133995369139444842.jpg/format:webp" },
-  ];
+  
+  const leftBanners = banners;
 
+  // Dummy banner listesi 
   const rightBanners = [
     { imageUrl: "https://images.hepsiburada.net/banners/s/1/640-200/gra-199064-slider133997371828354751.jpg/format:webp" },
     { imageUrl: "https://images.hepsiburada.net/banners/s/1/640-200/gra-199031-slider133997241731061103.jpg/format:webp" },
@@ -84,7 +80,7 @@ const HomePage = () => {
         settings: {
           slidesToShow: 1,
           slidesToScroll: 1,
-          infinite: true,
+           infinite: leftBanners.length > 1,
           dots: false,
         },
       },
@@ -94,7 +90,7 @@ const HomePage = () => {
           slidesToShow: 1,
           slidesToScroll: 1,
           arrows: true,
-          infinite: true,
+           infinite: leftBanners.length > 1,
         },
       },
     ],
