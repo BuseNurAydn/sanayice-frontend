@@ -19,6 +19,7 @@ import SellerCampaignManagement from '../pages/seller/SellerCampaignManagement';
 import SellerDocumentUpload from '../pages/seller/SellerDocumentUpload';
 import AddBrand from '../pages/seller/Brand/AddBrand';
 import BrandList from '../pages/seller/Brand/BrandList';
+import ProductApproval from '../pages/seller/ProductApproval';
 
 const SellerRoutes = () => {
     return (
@@ -157,6 +158,14 @@ const SellerRoutes = () => {
                         </RoleProtectedRoute>
                     }
                 />*/}
+                <Route
+                    path="product_control"
+                    element={
+                        <RoleProtectedRoute allowedRoles={['ROLE_MANAGER']}>
+                            <ProductApproval />
+                        </RoleProtectedRoute>
+                    }
+                />
                 <Route
                     path="support_management"
                     element={
