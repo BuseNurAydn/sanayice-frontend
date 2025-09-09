@@ -236,3 +236,28 @@ export const resetPassword = async (resetData) => {
   }
 };
 
+// SELLER FOLLOW
+export const followSeller = async (sellerId) => {
+  const token = localStorage.getItem("token");
+
+  try {
+    const response = await fetch(`${AUTH_API}/follow`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+         Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ sellerId }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || "Satıcıyı takip ederken hata oluştu");
+    }
+
+    return data;
+  } catch (error) {
+    throw error;
+  }
+};

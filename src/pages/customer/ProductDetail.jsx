@@ -14,6 +14,7 @@ import ProductCard from "../../components/ProductCard";
 import { ReviewIcon } from "./ReviewIcon";
 import { addToFavorites, fetchFavorites, removeFavorites } from "../../services/favoritesService";
 import SellerQuestions from "../../components/SellerQuestions";
+import { followSeller } from "../../services/authService";
 
 const dummyRelatedProducts = [
   {
@@ -72,7 +73,7 @@ const ProductDetail = () => {
   const [questions, setQuestions] = useState([]);
   const [newQuestion, setNewQuestion] = useState("");
   const tabsRef = useRef(null);
-
+  const [isFollowing, setIsFollowing] = useState(false);
 
   const favorites = useSelector(state => state.favorites.items);
   const isFavorite = favorites.some(fav => fav.productId === product.id);
@@ -84,6 +85,15 @@ const ProductDetail = () => {
     window.scrollTo(0, 0);
   }, []);
 
+  //Fallow
+  const handleFollowSeller = async (sellerId) => {
+    try {
+      const response = await followSeller(sellerId);
+      setIsFollowing(response.isFollowing); 
+    } catch (err) {
+      console.error("Takip etme hatası:", err.message);
+    }
+  };
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -526,7 +536,8 @@ const ProductDetail = () => {
                   onClick={() => handleFollowSeller(product?.seller?.id)}
                   className="flex items-center justify-center gap-2 cursor-pointer px-1 py-2 text-sm font-medium rounded-lg hover:text-[var(--color-orangeTwo)] transition "
                 >
-                  <FaGifts className="text-lg text-gray-600 hover:text-[var(--color-orangeTwo)]" /> Takip Et
+                  <FaGifts className="text-lg text-gray-600 hover:text-[var(--color-orangeTwo)]" /> 
+                  {isFollowing ? "Takip Ediliyor" : "Takip Et"}
                 </button>
               </div>
 
