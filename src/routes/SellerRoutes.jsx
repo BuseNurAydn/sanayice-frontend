@@ -20,6 +20,7 @@ import SellerDocumentUpload from '../pages/seller/SellerDocumentUpload';
 import AddBrand from '../pages/seller/Brand/AddBrand';
 import BrandList from '../pages/seller/Brand/BrandList';
 import ProductApproval from '../pages/seller/ProductApproval';
+import SellerQuestionsPage from '../pages/seller/SellerQuestionsPage';
 
 const SellerRoutes = () => {
     return (
@@ -94,6 +95,14 @@ const SellerRoutes = () => {
                     element={
                         <RoleProtectedRoute allowedRoles={['ROLE_SELLER']}>
                             <SellerCampaignManagement />
+                        </RoleProtectedRoute>
+                    }
+                />
+                  <Route
+                    path="sellerQuestionsPage"
+                    element={
+                        <RoleProtectedRoute allowedRoles={['ROLE_SELLER']}>
+                            <SellerQuestionsPage />
                         </RoleProtectedRoute>
                     }
                 />
