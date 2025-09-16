@@ -99,7 +99,7 @@ const SellerRoutes = () => {
                     }
                 />
                   <Route
-                    path="sellerQuestionsPage"
+                    path="satici-sorulari"
                     element={
                         <RoleProtectedRoute allowedRoles={['ROLE_SELLER']}>
                             <SellerQuestionsPage />

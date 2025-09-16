@@ -29,7 +29,7 @@ const menuItems = [
   },
   {
     label: "Ürünler İçin Soru Cevap Kısmı",
-    to: "/seller/sellerQuestionsPage",
+    to: "/satici/satici-sorulari",
     icon: <MdStorefront />,
   },
   {

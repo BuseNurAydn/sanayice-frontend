@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { HashRouter as Router, Routes, Route } from 'react-router-dom';
 import SellerRoutes from './routes/SellerRoutes';
 import AuthRoutes from './routes/AuthRoutes';
 import CustomerRouters from './routes/CustomerRoutes';
@@ -12,8 +12,6 @@ import { setCredentials, logout } from './store/authSlice';
 import ScrollToTop from "./components/ScrollToTop";
 
 function App() {
-//Sayfa yenilendiğinde Redux state sıfırlanır. Bunun önüne geçmek için useEffect kullanarak localStorage’dan bilgiyi Redux’a tekrar yükledim
-
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -62,4 +60,3 @@ function App() {
 }
 
 export default App;
-
