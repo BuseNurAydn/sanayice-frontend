@@ -357,12 +357,12 @@ const ProductDetail = () => {
           </nav>
         </div>
       </div>
-      <main className="max-w-7xl mx-auto px-1 py-8">
+      <main className="max-w-7xl mx-auto px-1 md:py-8 py-4">
         <div className="grid grid-cols-1 lg:grid-cols-[400px_1fr_300px] gap-2 mb-8">
           {/* Sol: Görseller */}
           <div className="space-y-4 px-4">
             {/* Ana görsel + slider */}
-            <div className="relative bg-white rounded-2xl p-4 md:p-6 shadow-sm border border-gray-300 max-w-sm md:max-w-md">
+            <div className="relative bg-white rounded-2xl p-4 md:p-6 shadow-sm border border-gray-300 max-w-xs md:max-w-md">
               <div className="aspect-square flex items-center justify-center">
                 {images?.length > 0 ? (
                   <img
