@@ -23,7 +23,7 @@ const Header = () => {
 
   return (
     <header className='bg-[var(--color-light)] p-2 pl-12 md:pl-4 flex justify-between'>
-      <Link to={user?.role === "ROLE_SELLER" ? '/seller/vertification' : '/seller/seller-verification'}>
+      <Link to={user?.role === "ROLE_SELLER" ? '/satici/dogrulama' : '/satici/satici-dogrulama'}>
         <img
           src={sanayice}
           alt="Logo"

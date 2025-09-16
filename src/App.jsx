@@ -1,4 +1,4 @@
-import { HashRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import SellerRoutes from './routes/SellerRoutes';
 import AuthRoutes from './routes/AuthRoutes';
 import CustomerRouters from './routes/CustomerRoutes';
@@ -6,13 +6,14 @@ import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { useEffect } from 'react';
+import { useEffect ,useState} from 'react';
 import { useDispatch } from 'react-redux';
 import { setCredentials, logout } from './store/authSlice'; 
 import ScrollToTop from "./components/ScrollToTop";
 
 function App() {
   const dispatch = useDispatch();
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -26,37 +27,23 @@ function App() {
     } else {
       dispatch(logout());
     }
+
+    setLoading(false);
   }, [dispatch]);
 
+  if (loading) return null;
+
   return (
-    <>
-      <ToastContainer
-        position="top-right"
-        autoClose={3000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-      />
-
-      <Router>
-        <ScrollToTop />
-        <Routes>
-          {/* Müşteri panelleri */}
-          <Route path="/*" element={<CustomerRouters />} />
-
-          {/* Satıcı panelleri */}
-          <Route path="/satici/*" element={<SellerRoutes />} />
-
-          {/* Giriş ve kayıt sayfaları */}
-          <Route path="/giris-kaydol/*" element={<AuthRoutes />} />
-        </Routes>
-      </Router>
-    </>
+    <Router>
+      <ScrollToTop />
+      <Routes>
+        <Route path="/*" element={<CustomerRouters />} />
+        <Route path="/satici/*" element={<SellerRoutes />} />
+        <Route path="/giris-kaydol/*" element={<AuthRoutes />} />
+      </Routes>
+    </Router>
   );
 }
+
 
 export default App;

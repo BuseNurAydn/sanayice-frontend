@@ -415,7 +415,7 @@ const ProductDetail = () => {
           </div>
 
           {/* orta: Ürün Bilgileri */}
-          <div className="space-y-8 custom-font px-4 md:px-0 ">
+          <div className="space-y-4 md:space-y-8 custom-font px-4 md:px-0 ">
             {/* Başlık ve Favori */}
             <div className="flex items-start justify-between">
               <div>
@@ -458,8 +458,6 @@ const ProductDetail = () => {
               </div>
             </div>
 
-
-
             {/* Miktar ve Butonlar */}
             <div className="space-y-8">
               <div className="flex items-center gap-4">
@@ -478,7 +476,7 @@ const ProductDetail = () => {
                   </button>
 
                 </div>
-              </div>
+              </div> 
 
               {/* Stok Durumu */}
               <div className="flex items-center gap-2">
@@ -487,8 +485,9 @@ const ProductDetail = () => {
                   {product?.stockQuantity > 0 ? `Stokta (${product?.stockQuantity} adet)` : 'Stokta yok'}
                 </span>
               </div>
-
-              <div className="flex gap-4">
+               
+              {/**Mobil */}
+              <div className="fixed bottom-0 left-0 w-full bg-white border-t border-gray-200 p-4 flex flex-row gap-2 z-50 md:hidden">
                 <button
                   onClick={handleAddToCart}
                   disabled={product.stockQuantity === 0}
@@ -518,7 +517,39 @@ const ProductDetail = () => {
                   )}
                 </button>
               </div>
+
+         {/**Desktop */}
             </div>
+                 <div className="gap-4 hidden md:flex">
+                <button
+                  onClick={handleAddToCart}
+                  disabled={product.stockQuantity === 0}
+                  className="flex-1 flex items-center justify-center gap-1 md:gap-2 bg-orange-500 hover:bg-orange-600 disabled:bg-gray-400 text-white py-1 px-2 md:py-2 md:px-4 rounded-xl md:font-semibold md:text-lg text-sm transition-all duration-200 transform cursor-pointer"
+                >
+                  <MdAddShoppingCart className="text-2xl" /> Sepete Ekle
+                </button>
+
+                <button
+                  onClick={handleBuyNow}
+                  disabled={product.stockQuantity === 0}
+                  className="flex-1 flex items-center justify-center gap-1 md:gap-2 bg-[var(--color-dark-blue)] hover:bg-gray-800 disabled:bg-gray-400 text-white  py-2 px-3 md:py-2 md:px-4 rounded-xl md:font-semibold md:text-lg text-sm transition-all duration-200 transform cursor-pointer"
+                >
+                  <FaCreditCard className="text-lg" /> Hemen Al
+                </button>
+                <button
+                  onClick={handleFavoriteClick}
+                  className={`p-4 rounded-lg border-2 transition-all duration-200 cursor-pointer hover:bg-orange-50 ${favorite
+                    ? "bg-red-50 border-red-200 text-red-500"
+                    : "bg-white border-gray-200 text-gray-400 hover:border-gray-300 hover:text-red-400"
+                    }`}
+                >
+                  {isFavorite ? (
+                    <FaHeart className="text-orange-500" />
+                  ) : (
+                    <FaRegHeart className="text-gray-400 hover:text-orange-500" />
+                  )}
+                </button>
+              </div>
 
             {/* Kargo ve Garanti Bilgileri */}
             <div className="bg-green-50 rounded-xl p-4 space-y-3">

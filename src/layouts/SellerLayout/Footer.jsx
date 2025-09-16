@@ -1,5 +1,4 @@
 import { Link } from 'react-router-dom';
-import Logo from '../../assets/png/Logo2.png';
 import GooglePlay from '../../assets/svg/playstore.svg';
 import AppStore from '../../assets/png/AppStore.jpg';
 import { FaFacebook, FaWhatsapp } from "react-icons/fa";
