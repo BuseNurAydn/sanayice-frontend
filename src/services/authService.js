@@ -47,9 +47,6 @@ export const resendVerificationCode = async (resendData) => {
   }
 };
 
-
-
-
 export const login = async (loginData) => {
   try {
     const response = await fetch(`${AUTH_API}/login`, {
@@ -236,6 +233,40 @@ export const resetPassword = async (resetData) => {
   }
 };
 
+export const isFollowingSeller = async (sellerId) => {
+  const token = localStorage.getItem("token");
+
+  const res = await fetch(`${AUTH_API}/is-following/${sellerId}`, {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!res.ok) {
+    throw new Error("Takip durumu alınamadı");
+  }
+
+  return await res.json(); // true / false
+};
+
+//GET FOLLOWİNG
+export const getFollowing = async () => {
+  const token = localStorage.getItem("token");
+
+  const response = await fetch(`${AUTH_API}/following`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error("Takipçi bilgisi alınamadı");
+  }
+
+  return response.json();
+};
+
 // SELLER FOLLOW
 export const followSeller = async (sellerId) => {
   const token = localStorage.getItem("token");
@@ -245,17 +276,108 @@ export const followSeller = async (sellerId) => {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-         Authorization: `Bearer ${token}`,
+        Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({ sellerId }),
     });
 
-    const data = await response.json();
+    const text = await response.text();
+    let data;
+
+    try {
+      data = JSON.parse(text);
+    } catch {
+      data = { message: text }; // string message
+    }
 
     if (!response.ok) {
       throw new Error(data.message || "Satıcıyı takip ederken hata oluştu");
     }
 
+    return data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+// SELLER UNFOLLOW
+export const unfollowSeller = async (sellerId) => {
+  const token = localStorage.getItem("token");
+
+  try {
+    const response = await fetch(`${AUTH_API}/unfollow/${sellerId}`, {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    const text = await response.text();
+    let data;
+
+    try {
+      data = JSON.parse(text);
+    } catch {
+      data = { message: text };
+    }
+
+    if (!response.ok) {
+      throw new Error(data.message || "Satıcıyı takipten çıkarken hata oluştu");
+    }
+
+    return data;
+  } catch (error) {
+    throw error;
+  }
+};
+// SELLER RATE
+export const rateSeller = async ({ sellerId, rating, comment }) => {
+  const token = localStorage.getItem("token");
+
+  try {
+    const response = await fetch(`${AUTH_API}/rate-seller`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        sellerId,
+        rating,
+        comment,
+      }),
+    });
+
+    const data = await response.text(); // JSON yerine text
+
+    if (!response.ok) {
+      console.error("Rate Seller Error:", data);
+      throw new Error(data || "Satıcıyı değerlendirirken hata oluştu");
+    }
+
+    return { message: data };
+  } catch (error) {
+    throw error;
+  }
+};
+
+// Satıcıya ait yorumları çek
+export const getSellerRatings = async (sellerId) => {
+  const token = localStorage.getItem("token");
+
+  try {
+    const response = await fetch(`${AUTH_API}/seller-ratings/${sellerId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      const text = await response.text();
+      throw new Error(text || "Yorumlar alınamadı");
+    }
+
+    const data = await response.json();
     return data;
   } catch (error) {
     throw error;

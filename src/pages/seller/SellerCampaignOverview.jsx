@@ -375,7 +375,7 @@ const SellerCampaignOverview = () => {
           </div>
           <div className="flex items-center gap-2 text-gray-600 text-sm">
             <ShoppingCart className="w-4 h-4" />
-            <span>Min. sipariş: {coupon.minOrderAmount}₺</span>
+            <span>Min. sipariş: {coupon.minOrderAmount} TL</span>
           </div>
         </div>
       </div>

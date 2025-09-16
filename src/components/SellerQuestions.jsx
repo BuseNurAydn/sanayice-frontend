@@ -119,7 +119,6 @@ const SellerQuestions = ({ autoOpenForm = false }) => {
       {showAskForm && (
         <div className="w-full mt-4 max-w-4xl">
           <form onSubmit={handleAskQuestion} className="space-y-3">
-            <p className="font-medium text-gray-700">Size hangi konuda yardımcı olabiliriz?</p>
             <select
               value={topic}
               onChange={(e) => setTopic(e.target.value)}

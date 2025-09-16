@@ -26,7 +26,7 @@ const ProductCard = ({ product }) => {
       // Giriş yoksa, sadece ürün id'sini string olarak sakla
       localStorage.setItem("pendingFavoriteItem", product.id.toString());
       toast.info("Lütfen giriş yapın!");
-      navigate("/auth/login");
+      navigate("/giris-kaydol/giris-yap");
       return;
     }
     setAdding(true);
@@ -60,7 +60,7 @@ const ProductCard = ({ product }) => {
         JSON.stringify({ productId: product.id, quantity: 1 })
       );
       toast.info("Lütfen giriş yapın!");
-      navigate("/auth/login");
+      navigate("/giris-kaydol/giris-yap");
       return;
     }
     setAdding(true);
@@ -76,7 +76,7 @@ const ProductCard = ({ product }) => {
 
   //detay sayfasına gitme
   const handleClick = () => {
-    navigate(`/product/${product.id}`);
+    navigate(`/urun/${product.id}`);
   };
 
   return (

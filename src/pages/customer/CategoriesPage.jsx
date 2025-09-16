@@ -147,7 +147,7 @@ const CategoriesPage = () => {
                         {category.subcategories.slice(0, 6).map((sub) => (
                           <Link
                             key={sub.id}
-                            to={`/subcategory/${sub.id}`}
+                            to={`/alt-kategori/${sub.id}`}
                             className="flex items-center gap-3 text-sm text-gray-600 hover:text-orange-600 hover:bg-orange-50 px-4 py-3 rounded-xl transition-all duration-200 group/sub"
                           >
                             <div className="w-2 h-2 bg-gradient-to-r from-orange-400 to-orange-500 rounded-full group-hover/sub:scale-125 transition-transform"></div>

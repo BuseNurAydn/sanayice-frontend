@@ -238,23 +238,20 @@ const AddProduct = () => {
     // FormData oluşturma
     const form = new FormData();
 
-    // ✅ Backend'in beklediği "product" adında part ekle
     form.append("product", JSON.stringify(productObj));
 
-    // ✅ Ana resim ekleme (imageFiles array'i olarak)
     if (mainImageFile) {
       form.append("imageFiles", mainImageFile);
     }
 
-    // ✅ Ek resimleri ekleme
     additionalImageFiles.forEach((file) => {
       form.append("imageFiles", file);
     });
 
     try {
       const result = await createProduct(form);
-      toast.success("Ürün başarıyla eklendi!");
-      navigate(`/seller/products`);
+      toast.success("Ürün başarıyla ona gönderildi!");
+      navigate(`/satici/urunlerim`);
       handleClear();
       setMainImageFile(null);
       setAdditionalImageFiles([]);
@@ -584,7 +581,7 @@ const AddProduct = () => {
       </form>
       {/* Butonlar */}
       <div className="mt-8 flex flex-col md:flex-row gap-4 justify-center">
-        <button type="submit" className={buttonStyle} onClick={handleSubmit}>Ürünü Kaydet</button>
+        <button type="submit" className={buttonStyle} onClick={handleSubmit}>Onaya Gönder</button>
         <button type="button" className={buttonStyle} onClick={handleClear}>Temizle</button>
       </div>
     </div>

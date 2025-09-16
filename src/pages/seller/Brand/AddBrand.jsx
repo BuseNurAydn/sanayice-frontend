@@ -82,7 +82,7 @@ const AddBrand = () => {
     try {
       await addBrand(form);
       toast.success("Marka başarıyla eklendi!");
-      navigate('/seller/brand_list');
+      navigate('/satici/markalar');
       handleClear();
       setMainImageFile(null);
     } catch (error) {

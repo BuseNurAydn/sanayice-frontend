@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Eye, Check, X, Search, Clock, Package, AlertTriangle, FileText } from 'lucide-react';
 import { toast } from 'react-toastify';
+import { getWaitingApprovalProducts, approveProduct, rejectProduct } from '../../services/managerProductService';
 
 const ProductApproval = () => {
   const [products, setProducts] = useState([]);
@@ -14,82 +15,44 @@ const ProductApproval = () => {
   const [rejectionReason, setRejectionReason] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // Mock data - gerçek uygulamada API'den gelecek
-  const mockProducts = [
-    {
-      id: 1,
-      name: "iPhone 15 Pro",
-      brand: "Apple",
-      price: 45000,
-      stockQuantity: 50,
-      category: "Elektronik",
-      description: "Yeni nesil iPhone 15 Pro, A17 Pro çipli",
-      imageUrls: ["https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=300", "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=300"],
-      status: "PENDING",
-      actionType: "CREATE",
-      submittedDate: "2024-08-20T10:30:00",
-      sellerName: "TechStore",
-      sellerId: 1,
-      sellerEmail: "info@techstore.com",
-      rejectionReason: null
-    },
-    {
-      id: 2,
-      name: "Samsung Galaxy S24",
-      brand: "Samsung",
-      price: 38000,
-      stockQuantity: 30,
-      category: "Elektronik",
-      description: "Samsung'un en yeni amiral gemisi telefonu",
-      imageUrls: ["https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?w=300"],
-      status: "APPROVED",
-      actionType: "UPDATE",
-      submittedDate: "2024-08-19T14:20:00",
-      sellerName: "MobilDünya",
-      sellerId: 2,
-      sellerEmail: "info@mobil.com",
-      rejectionReason: null
-    },
-    {
-      id: 3,
-      name: "Macbook Air M2",
-      brand: "Apple",
-      price: 28000,
-      stockQuantity: 15,
-      category: "Bilgisayar",
-      description: "13 inç Macbook Air M2 çipli",
-      imageUrls: ["https://images.unsplash.com/photo-1541807084-5c52b6b3adef?w=300"],
-      status: "REJECTED",
-      actionType: "CREATE",
-      submittedDate: "2024-08-18T09:15:00",
-      sellerName: "AppleStore",
-      sellerId: 3,
-      sellerEmail: "info@applestore.com",
-      rejectionReason: "Ürün açıklaması yetersiz ve resimler kalitesiz."
-    },
-    {
-      id: 4,
-      name: "Nike Air Max 270",
-      brand: "Nike",
-      price: 2500,
-      stockQuantity: 100,
-      category: "Spor Ayakkabı",
-      description: "Erkek koşu ayakkabısı, çok rahat",
-      imageUrls: ["https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=300"],
-      status: "PENDING",
-      actionType: "UPDATE",
-      submittedDate: "2024-08-20T16:45:00",
-      sellerName: "SportWorld",
-      sellerId: 4,
-      sellerEmail: "info@sportworld.com",
-      rejectionReason: null
-    }
-  ];
-
   useEffect(() => {
-    // Gerçek uygulamada API çağrısı yapılacak
-    setProducts(mockProducts);
+    const fetchWaitingProducts = async () => {
+      try {
+        setLoading(true);
+        const data = await getWaitingApprovalProducts();
+        setProducts(data);
+        console.log(data)
+      } catch (err) {
+        toast.error(err.message || "Ürünler alınamadı");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchWaitingProducts();
   }, []);
+
+
+  const handleApprove = async (productId) => {
+    try {
+      await approveProduct(productId);
+      toast.success("Ürün başarıyla onaylandı");
+
+      // Status güncelle
+      setProducts((prev) =>
+        prev.map((p) =>
+          p.id === productId ? { ...p, approvalStatus: "APPROVED" } : p
+        )
+      );
+      setSelectedProduct(null);
+    } catch (err) {
+      toast.error(err.message);
+    }
+  };
+
+  const handleReject = (productId) => {
+    setConfirmDialog({ open: true, type: 'reject', productId });
+  };
+
 
   useEffect(() => {
     let filtered = products;
@@ -113,9 +76,9 @@ const ProductApproval = () => {
     setFilteredProducts(filtered);
   }, [searchTerm, statusFilter, sellerFilter, products]);
 
-  const getStatusBadge = (status) => {
-    switch (status) {
-      case 'PENDING':
+  const getStatusBadge = (approvalStatus) => {
+    switch (approvalStatus) {
+      case 'BEKLIYOR':
         return (
           <span className="inline-flex items-center px-2 py-1 text-xs font-semibold text-yellow-800 bg-yellow-100 rounded-full">
             <Clock className="w-4 h-4 mr-1" />
@@ -165,20 +128,12 @@ const ProductApproval = () => {
     setModalOpen(true);
   };
 
-  const approve = (productId) => {
-    setConfirmDialog({ open: true, type: 'approve', productId });
-  };
-
-  const reject = (productId) => {
-    setConfirmDialog({ open: true, type: 'reject', productId });
-  };
-
   const confirmApprove = async () => {
     try {
       setLoading(true);
-      // API çağrısı yapılacak
-      setProducts(products.map(p => 
-        p.id === confirmDialog.productId 
+     
+      setProducts(products.map(p =>
+        p.id === confirmDialog.productId
           ? { ...p, status: 'APPROVED' }
           : p
       ));
@@ -191,37 +146,41 @@ const ProductApproval = () => {
     }
   };
 
-  const confirmReject = async () => {
-    if (!rejectionReason.trim()) {
-      toast.error("Lütfen reddetme gerekçesini giriniz.");
-      return;
-    }
+ const confirmReject = async () => {
+  if (!rejectionReason.trim()) {
+    toast.error("Lütfen reddetme gerekçesini giriniz.");
+    return;
+  }
 
-    try {
-      setLoading(true);
-      // API çağrısı yapılacak
-      setProducts(products.map(p => 
-        p.id === confirmDialog.productId 
-          ? { ...p, status: 'REJECTED', rejectionReason }
-          : p
-      ));
-      toast.success("Ürün başarıyla reddedildi!");
-      setConfirmDialog({ open: false, type: null, productId: null });
-      setRejectionReason("");
-    } catch (error) {
-      toast.error("Reddetme işlemi başarısız oldu!");
-    } finally {
-      setLoading(false);
-    }
-  };
+  try {
+    setLoading(true);
+  
+    await rejectProduct(confirmDialog.productId, rejectionReason);
+    toast.success("Ürün başarıyla reddedildi!");
+
+    setProducts(products.map(p => 
+      p.id === confirmDialog.productId 
+        ? { ...p, approvalStatus: 'REJECTED', rejectionReason }
+        : p
+    ));
+
+    setConfirmDialog({ open: false, type: null, productId: null });
+    setRejectionReason("");
+  } catch (error) {
+    toast.error(error.message || "Reddetme işlemi başarısız oldu!");
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   // Benzersiz satıcıları al
   const uniqueSellers = [...new Map(products.map(p => [p.sellerId, { id: p.sellerId, name: p.sellerName }])).values()];
 
   const statistics = {
-    pending: products.filter(p => p.status === 'PENDING').length,
-    approved: products.filter(p => p.status === 'APPROVED').length,
-    rejected: products.filter(p => p.status === 'REJECTED').length,
+    pending: products.filter(p => p.approvalStatus === 'BEKLIYOR').length,
+    approved: products.filter(p => p.approvalStatus === 'APPROVED').length,
+    rejected: products.filter(p => p.approvalStatus === 'REJECTED').length,
     total: products.length
   };
 
@@ -337,12 +296,12 @@ const ProductApproval = () => {
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ürün</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Satıcı</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fiyat</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">İşlem Tipi</th>
+                <th className="px-8 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Satıcı</th>
+                <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fiyat</th>
+                <th className="px-8 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">İşlem Tipi</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Durum</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tarih</th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">İşlemler</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">İşlemler</th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
@@ -350,8 +309,8 @@ const ProductApproval = () => {
                 <tr key={product.id || index} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
-                      <img 
-                        src={product.imageUrls[0]} 
+                      <img
+                        src={product.imageUrls[0]}
                         alt={product.name}
                         className="w-12 h-12 object-cover rounded-lg mr-4"
                       />
@@ -361,24 +320,24 @@ const ProductApproval = () => {
                       </div>
                     </div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
+                  <td className="px-8 py-4 whitespace-nowrap">
                     <div>
                       <div className="text-sm text-gray-900">{product.sellerName}</div>
-                      <div className="text-sm text-gray-500">{product.sellerEmail}</div>
+                      <div className="text-sm text-gray-500">{product.sellerCompanyName}</div>
                     </div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">₺{product.price?.toLocaleString()}</div>
+                  <td className="px-2 py-4 whitespace-nowrap">
+                    <div className="text-sm text-gray-900">{product.price?.toLocaleString()} TL</div>
                     <div className="text-sm text-gray-500">Stok: {product.stockQuantity}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     {getActionTypeBadge(product.actionType)}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    {getStatusBadge(product.status)}
+                    {getStatusBadge(product.approvalStatus)}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {new Date(product.submittedDate).toLocaleDateString('tr-TR', {
+                    {new Date(product.submitDate).toLocaleDateString('tr-TR', {
                       day: '2-digit',
                       month: '2-digit',
                       year: 'numeric',
@@ -395,18 +354,19 @@ const ProductApproval = () => {
                         <Eye className="w-4 h-4 mr-1" />
                         İncele
                       </button>
-                      
-                      {product.status === 'PENDING' && (
+
+                      {product.approvalStatus === 'BEKLIYOR' && (
                         <>
                           <button
-                            onClick={() => reject(product.id)}
+                            onClick={() => setConfirmDialog({ open: true, type: 'reject', productId: product.id })}
                             className="inline-flex items-center px-2 py-1 border border-red-300 rounded-md text-xs font-medium text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500"
                           >
                             <X className="w-4 h-4 mr-1" />
                             Reddet
                           </button>
+
                           <button
-                            onClick={() => approve(product.id)}
+                            onClick={() => handleApprove(product.id)}
                             className="inline-flex items-center px-2 py-1 border border-transparent rounded-md text-xs font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500"
                           >
                             <Check className="w-4 h-4 mr-1" />
@@ -420,7 +380,7 @@ const ProductApproval = () => {
               ))}
             </tbody>
           </table>
-          
+
           {filteredProducts.length === 0 && (
             <div className="text-center py-12">
               <Package className="w-12 h-12 text-gray-400 mx-auto mb-4" />
@@ -469,7 +429,7 @@ const ProductApproval = () => {
                       <div className="grid grid-cols-2 gap-4">
                         <div>
                           <label className="block text-sm font-medium text-gray-500">Fiyat</label>
-                          <p className="mt-1 text-sm text-gray-900">₺{selectedProduct.price?.toLocaleString()}</p>
+                          <p className="mt-1 text-sm text-gray-900">{selectedProduct.price?.toLocaleString()} TL</p>
                         </div>
                         <div>
                           <label className="block text-sm font-medium text-gray-500">Stok</label>
@@ -478,7 +438,7 @@ const ProductApproval = () => {
                       </div>
                       <div>
                         <label className="block text-sm font-medium text-gray-500">Kategori</label>
-                        <p className="mt-1 text-sm text-gray-900">{selectedProduct.category}</p>
+                        <p className="mt-1 text-sm text-gray-900">{selectedProduct.categoryName}</p>
                       </div>
                       <div>
                         <label className="block text-sm font-medium text-gray-500">Açıklama</label>
@@ -496,8 +456,8 @@ const ProductApproval = () => {
                         <p className="mt-1 text-sm text-gray-900">{selectedProduct.sellerName}</p>
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-500">E-posta</label>
-                        <p className="mt-1 text-sm text-gray-900">{selectedProduct.sellerEmail}</p>
+                        <label className="block text-sm font-medium text-gray-500">Şirket Adı</label>
+                        <p className="mt-1 text-sm text-gray-900">{selectedProduct.sellerCompanyName}</p>
                       </div>
                     </div>
                   </div>
@@ -510,8 +470,8 @@ const ProductApproval = () => {
                     <div className="grid grid-cols-2 gap-4">
                       {selectedProduct.imageUrls.map((imageUrl, index) => (
                         <div key={index} className="aspect-square rounded-lg overflow-hidden border border-gray-200">
-                          <img 
-                            src={imageUrl} 
+                          <img
+                            src={imageUrl}
                             alt={`${selectedProduct.name} ${index + 1}`}
                             className="w-full h-full object-cover"
                           />
@@ -530,12 +490,12 @@ const ProductApproval = () => {
                       </div>
                       <div className="flex items-center justify-between">
                         <span className="text-sm font-medium text-gray-500">Durum:</span>
-                        {getStatusBadge(selectedProduct.status)}
+                        {getStatusBadge(selectedProduct.approvalStatus)}
                       </div>
                       <div>
                         <label className="block text-sm font-medium text-gray-500">Gönderilme Tarihi</label>
                         <p className="mt-1 text-sm text-gray-900">
-                          {new Date(selectedProduct.submittedDate).toLocaleDateString('tr-TR', {
+                          {new Date(selectedProduct.submitDate).toLocaleDateString('tr-TR', {
                             day: '2-digit',
                             month: '2-digit',
                             year: 'numeric',
@@ -550,7 +510,7 @@ const ProductApproval = () => {
               </div>
 
               {/* Red Nedeni */}
-              {selectedProduct.status === 'REJECTED' && selectedProduct.rejectionReason && (
+              {selectedProduct.approvalStatus === 'REJECTED' && selectedProduct.rejectionReason && (
                 <div className="mt-6 p-4 bg-red-50 border border-red-200 rounded-lg">
                   <h4 className="text-sm font-medium text-red-800 mb-2 flex items-center">
                     <AlertTriangle className="w-4 h-4 mr-2" />
@@ -561,16 +521,17 @@ const ProductApproval = () => {
               )}
 
               {/* Modal İşlem Butonları */}
-              {selectedProduct.status === 'PENDING' && (
+              {selectedProduct.approvalStatus === 'BEKLIYOR' && (
                 <div className="mt-6 flex justify-end gap-3 border-t border-gray-200 pt-6">
                   <button
-                    onClick={() => reject(selectedProduct.id)}
+                    onClick={() => setConfirmDialog({ open: true, type: 'reject', productId: selectedProduct.id })}
                     className="px-4 py-2 border border-red-300 rounded-md text-sm font-medium text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500"
                   >
                     Reddet
                   </button>
+
                   <button
-                    onClick={() => approve(selectedProduct.id)}
+                    onClick={() => handleApprove(selectedProduct.id)}
                     className="px-4 py-2 border border-transparent rounded-md text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500"
                   >
                     Onayla
@@ -622,11 +583,10 @@ const ProductApproval = () => {
               </button>
               <button
                 onClick={confirmDialog.type === 'approve' ? confirmApprove : confirmReject}
-                className={`px-4 py-2 rounded-md text-sm font-medium text-white ${
-                  confirmDialog.type === 'approve'
-                    ? 'bg-green-600 hover:bg-green-700'
-                    : 'bg-red-600 hover:bg-red-700'
-                } disabled:opacity-50`}
+                className={`px-4 py-2 rounded-md text-sm font-medium text-white ${confirmDialog.type === 'approve'
+                  ? 'bg-green-600 hover:bg-green-700'
+                  : 'bg-red-600 hover:bg-red-700'
+                  } disabled:opacity-50`}
                 disabled={loading}
               >
                 {loading ? (

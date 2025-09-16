@@ -162,7 +162,7 @@ const Dashboard = () => {
             <p className="text-gray-500 text-center py-4">Henüz yeni sipariş bulunmamaktadır.</p>
           )}
           <div className="mt-4 text-right">
-            <Link to="/seller/orders">
+            <Link to="/satici/siparislerim">
               <button className={buttonStyle + " md:px-6 md:py-2"}>
                 Tüm Siparişleri Görüntüle
               </button>
@@ -196,7 +196,7 @@ const Dashboard = () => {
                   <p className="text-sm text-yellow-600">Hemen onaylamanız gerekiyor.</p>
                 </div>
                 <Link
-                  to="/seller/orders"
+                  to="/satici/siparislerim"
                   className="text-yellow-700 hover:text-yellow-900 text-sm font-medium"
                 >
                   Git
@@ -206,12 +206,12 @@ const Dashboard = () => {
 
             {/* Hızlı Eylem Butonları */}
             <div className="grid grid-cols-1 gap-3 pt-4 border-t border-gray-200">
-              <Link to={`/seller/products/add`}>
+              <Link to={`/satici/urun/ekleme`}>
                 <button className={`${buttonStyle} w-full bg-indigo-600 hover:bg-indigo-700 flex items-center justify-center`}>
                   <FaBoxes className="mr-2" /> Yeni Ürün Ekle
                 </button>
               </Link>
-              <Link to={`/seller/store`}>
+              <Link to={`/satici/magazam`}>
                 <button className={`${buttonStyle} w-full bg-gray-600 hover:bg-gray-700 flex items-center justify-center`}>
                   <FaStore className="mr-2" /> Mağazamı Görüntüle
                 </button>

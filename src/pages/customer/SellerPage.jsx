@@ -1,14 +1,17 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import ProductCard from "../../components/ProductCard";
-import { getProducts } from "../../services/productsService";
-
+import { getActiveProductsBySeller } from "../../services/productsService";
+import SellerReviews from "./SellerReviews";
+import { followSeller, isFollowingSeller, unfollowSeller, getFollowing } from "../../services/authService";
+import { toast } from "react-toastify";
 
 const SellerPage = () => {
     const { id } = useParams();
     const [products, setProducts] = useState([]);
     const [filteredProducts, setFilteredProducts] = useState([]);
     const [sellerInfo, setSellerInfo] = useState(null);
+    const [isFollowing, setIsFollowing] = useState(false);
     const [activeTab, setActiveTab] = useState("allProducts");
     const [loading, setLoading] = useState(true);
 
@@ -20,45 +23,61 @@ const SellerPage = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const allProducts = await getProducts();
-                const sellerProducts = allProducts.filter(
-                    (p) => p.sellerId.toString() === id
-                );
+                setLoading(true);
 
+                // Satıcının aktif ürünleri
+                const sellerProducts = await getActiveProductsBySeller(id);
                 setProducts(sellerProducts);
                 setFilteredProducts(sellerProducts);
 
-                if (sellerProducts.length > 0) {
-                    const firstProduct = sellerProducts[0];
-                    setSellerInfo({
-                        sellerName: firstProduct.sellerName,
-                        sellerCompanyName: firstProduct.sellerCompanyName,
-                        profileImageUrl: firstProduct.profileImageUrl,
-                        score: firstProduct.score ?? 0,
-                        followers: firstProduct.followers ?? 0,
-                        reviews: firstProduct.reviews ?? 0,
-                        shippingDays: firstProduct.shippingDays,
-                        shippingAddress: firstProduct.shippingAddress,
-                        responseTime: firstProduct.responseTime ?? "Bilinmiyor",
-                        memberSince: firstProduct.memberSince ?? "Bilinmiyor",
-                        phoneNumber: firstProduct.phoneNumber,
-                        email: firstProduct.email,
-                        taxId: firstProduct.taxId,
-                    });
-                    console.log("firstProduct", firstProduct);
+                // Satıcı bilgileri
+                const allFollowing = await getFollowing();
+                const sellerData = allFollowing.find(f => f.sellerId.toString() === id);
+                if (sellerData) {
+                    setSellerInfo(sellerData);
+                    const followingStatus = await isFollowingSeller(sellerData.sellerId);
+                    setIsFollowing(followingStatus);
                 }
 
-
-            } catch (error) {
-                console.error("Satıcı ürünleri alınamadı", error);
+            } catch (err) {
+                console.error("Veri alınamadı:", err);
+                toast.error("Satıcı veya ürünler alınamadı.");
             } finally {
                 setLoading(false);
             }
         };
+
         fetchData();
     }, [id]);
 
-    // Filtreleme işlemi
+  const handleFollowSeller = async (sellerId) => {
+    if (!sellerId) return toast.error("Satıcı bilgisi bulunamadı!");
+
+    try {
+        if (isFollowing) {
+            await unfollowSeller(sellerId);
+            setIsFollowing(false);
+            setSellerInfo(prev => ({
+                ...prev,
+                followerCount: prev.followerCount - 1
+            }));
+            toast.info("Satıcı takipten çıkarıldı");
+        } else {
+            await followSeller(sellerId);
+            setIsFollowing(true);
+            setSellerInfo(prev => ({
+                ...prev,
+                followerCount: prev.followerCount + 1
+            }));
+            toast.success("Satıcı takip edildi");
+        }
+    } catch (err) {
+        toast.error(err.message || "Takip işlemi sırasında hata oluştu");
+    }
+};
+
+
+    // Filtreleme
     useEffect(() => {
         let result = [...products];
 
@@ -73,10 +92,10 @@ const SellerPage = () => {
         setFilteredProducts(result);
     }, [selectedCategory, maxPrice, minRating, products]);
 
-
     const tabs = [
         { key: "allProducts", label: "Tüm ürünler" },
         { key: "profile", label: "Satıcı profili" },
+        { key: "rate", label: "Satıcı Değerlendirmeleri" }
     ];
 
     if (loading) return <p className="text-center py-20">Yükleniyor...</p>;
@@ -84,6 +103,7 @@ const SellerPage = () => {
     return (
         <div className="min-h-screen bg-gray-50">
 
+            {/* Breadcrumb */}
             <div className="bg-white">
                 <div className="max-w-7xl mx-auto px-4 md:px-6 py-3">
                     <nav className="text-sm text-gray-600">
@@ -92,7 +112,7 @@ const SellerPage = () => {
                         <Link className="hover:text-orange-600 cursor-pointer text-xs">Mağaza</Link>
                         <span className="mx-2">/</span>
                         <span className="text-gray-900 font-medium text-sm">
-                            {sellerInfo?.sellerCompanyName}
+                            {sellerInfo?.companyName}
                         </span>
                     </nav>
                 </div>
@@ -105,35 +125,32 @@ const SellerPage = () => {
 
             {/* Profil Bilgileri */}
             <div className="max-w-7xl mx-auto px-4 md:px-6 relative">
-                <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 -mt-12 sm:-mt-10">
-                    {sellerInfo && (
-                        <>
-                            <img
-                                src={sellerInfo?.profileImageUrl}
-                                alt="logo"
-                                className="w-24 h-24 md:w-28 md:h-28 rounded-full border-4 border-white shadow-md"
-                            />
-                            <div className="flex-1 text-gray-900 text-center sm:text-left gap-6 mt-4 md:mt-10">
-                                <h1 className="text-xl md:text-2xl font-bold">
-                                    {sellerInfo.sellerCompanyName}
-                                </h1>
-                                <div className="flex flex-wrap justify-center sm:justify-start gap-3 mt-2 text-sm text-gray-600">
-                                    <span className="bg-[var(--color-dark-orange)] text-white px-2 py-1 rounded-lg font-semibold">
-                                        {sellerInfo?.score ?? 0}
-                                    </span>
-                                    <span>{sellerInfo?.followers ?? 0} takipçi</span>
-                                    <span>{products.length} ürün</span>
-                                    <span>{sellerInfo?.reviews ?? 0} değerlendirme</span>
-                                </div>
+                {sellerInfo && (
+                    <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 -mt-12 sm:-mt-10">
+                        <img
+                            src={sellerInfo.profileImageUrl}
+                            alt={sellerInfo.sellerName}
+                            className="w-24 h-24 md:w-28 md:h-28 rounded-full border-4 border-white shadow-md"
+                        />
+                        <div className="flex-1 text-gray-900 text-center sm:text-left gap-6 mt-4 md:mt-10">
+                            <h1 className="text-xl md:text-2xl font-bold">{sellerInfo.companyName}</h1>
+                            <div className="flex flex-wrap justify-center sm:justify-start gap-3 mt-2 text-sm text-gray-600">
+                                <span className="bg-[var(--color-dark-orange)] text-white px-3 py-1 rounded-full font-semibold text-sm">{sellerInfo.averageRating}</span>
+                                <span>{sellerInfo.followerCount} takipçi</span>
+                                <span>{products.length} ürün</span>
+                                <span>{sellerInfo.ratingCount} değerlendirme</span>
                             </div>
-                            <div className="md:mt-12 mt-4">
-                                <button className="bg-[var(--color-dark-orange)] text-white px-4 py-2 rounded-lg font-semibold shadow-md w-full sm:w-auto">
-                                    Takip Et
-                                </button>
-                            </div>
-                        </>
-                    )}
-                </div>
+                        </div>
+                        <div className="md:mt-12 mt-4">
+                            <button
+                                onClick={() => handleFollowSeller(sellerInfo.sellerId)}
+                                className="bg-orange-500 text-white px-4 py-2 rounded-lg font-semibold shadow-md w-full sm:w-auto cursor-pointer hover:bg-orange-600"
+                            >
+                                {isFollowing ? "Takip Ediliyor" : "Takip Et"}
+                            </button>
+                        </div>
+                    </div>
+                )}
             </div>
 
             {/* Sekmeler */}
@@ -158,10 +175,11 @@ const SellerPage = () => {
             <div className="max-w-7xl mx-auto px-6 py-12">
                 {activeTab === "allProducts" && (
                     <div className="flex flex-col md:flex-row gap-6">
-                        {/* Sol filtre */}
+                        {/* Sol filtreleme */}
                         <div className="flex flex-col gap-4 w-full md:w-1/4 bg-white p-6 rounded shadow-md">
                             <h2 className="text-lg font-semibold mb-4">Filtrele</h2>
 
+                            {/* Kategoriler */}
                             <div className="mb-4">
                                 <h3 className="font-semibold mb-2">Kategoriler</h3>
                                 <div className="flex flex-col gap-2 max-h-48 overflow-y-auto">
@@ -183,6 +201,8 @@ const SellerPage = () => {
                                     ))}
                                 </div>
                             </div>
+
+                            {/* Fiyat */}
                             <div className="mb-4">
                                 <h3 className="font-semibold mb-2">Fiyat Aralığı</h3>
                                 <input
@@ -193,52 +213,31 @@ const SellerPage = () => {
                                     value={maxPrice}
                                     onChange={(e) => setMaxPrice(Number(e.target.value))}
                                     className="w-full"
-
                                 />
                                 <p className="text-sm mt-1">Maksimum: {maxPrice.toLocaleString()} TL</p>
                             </div>
 
+                            {/* Değerlendirme */}
                             <div>
                                 <h3 className="font-semibold mb-2">Değerlendirme</h3>
-                                <div className="flex flex-col gap-3">
-                                    <label className="flex items-center gap-2">
+                                {[4.5, 4, 2].map(r => (
+                                    <label key={r} className="flex items-center gap-2">
                                         <input
                                             type="checkbox"
-                                            checked={minRating === 4.5}
-                                            onChange={() => setMinRating(minRating === 4.5 ? 0 : 4.5)}
+                                            checked={minRating === r}
+                                            onChange={() => setMinRating(minRating === r ? 0 : r)}
                                         />
                                         <span className="flex items-center gap-1">
-                                            <span className="text-yellow-400">★ ★ ★ ★ ★</span>
-                                            <span className="text-gray-700 text-sm">4.5 ve üzeri</span>
+                                            <span className="text-yellow-400">
+                                                {"★".repeat(Math.floor(r))}{"☆".repeat(5 - Math.floor(r))}
+                                            </span>
+                                            <span className="text-gray-700 text-sm">{r} ve üzeri</span>
                                         </span>
                                     </label>
-
-                                    <label className="flex items-center gap-2">
-                                        <input
-                                            type="checkbox"
-                                            checked={minRating === 4}
-                                            onChange={() => setMinRating(minRating === 4 ? 0 : 4)}
-                                        />
-                                        <span className="flex items-center gap-1">
-                                            <span className="text-yellow-400">★ ★ ★ ★ ☆</span>
-                                            <span className="text-gray-700 text-sm">4 ve üzeri</span>
-                                        </span>
-                                    </label>
-
-                                    <label className="flex items-center gap-2">
-                                        <input
-                                            type="checkbox"
-                                            checked={minRating === 2}
-                                            onChange={() => setMinRating(minRating === 2 ? 0 : 2)}
-                                        />
-                                        <span className="flex items-center gap-1">
-                                            <span className="text-yellow-400">★ ★ ☆ ☆ ☆</span>
-                                            <span className="text-gray-700 text-sm">2 ve üzeri</span>
-                                        </span>
-                                    </label>
-                                </div>
+                                ))}
                             </div>
                         </div>
+
                         {/* Sağ ürünler */}
                         <div className="flex-1">
                             {filteredProducts.length === 0 ? (
@@ -253,7 +252,8 @@ const SellerPage = () => {
                         </div>
                     </div>
                 )}
-                {activeTab === "profile" && (
+
+                {activeTab === "profile"  && (
                     <>
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
                             {[
@@ -288,8 +288,11 @@ const SellerPage = () => {
                         </div>
                     </>
                 )}
+
+                {activeTab === "rate" && <SellerReviews sellerId={id} />}
             </div>
         </div>
     );
 };
+
 export default SellerPage;

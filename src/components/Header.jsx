@@ -205,7 +205,7 @@ const Header = ({ categories = [] }) => {
           {/* Favoriler Butonu */}
           <button
             className="relative md:bg-gray-100 md:hover:bg-gray-200 p-2 rounded-lg transition-colors duration-200 transform hover:scale-105 cursor-pointer"
-            onClick={() => navigate("/favorite")}
+            onClick={() => navigate("/favorilerim")}
             aria-label="Favorilerim"
           >
             <FaRegHeart size={20} />
@@ -218,7 +218,7 @@ const Header = ({ categories = [] }) => {
 
           {/* Sepet Butonu */}
           <button
-            onClick={() => navigate('/cart')}
+            onClick={() => navigate('/sepetim')}
             className="md:bg-orange-500 md:hover:bg-orange-600 text-white p-2 md:px-4 md:py-2 rounded-lg md:font-semibold font-medium transition-colors duration-200 transform hover:scale-105 relative flex items-center space-x-1 md:space-x-2 cursor-pointer "
             aria-label="Sepetim"
           >
@@ -238,7 +238,7 @@ const Header = ({ categories = [] }) => {
           </div>
 
            <button
-            onClick={() => navigate('/auth/signUp/seller')}
+            onClick={() => navigate('/giris-kaydol/satici/uye-ol')}
             className=" gradient-background text-white p-1 md:px-4 md:py-2 rounded-lg md:font-semibold font-medium transition-colors duration-200 transform hover:scale-105 relative flex items-center space-x-1 md:space-x-2 cursor-pointer "
             aria-label="satıcıOl"
           >
@@ -279,7 +279,7 @@ const Header = ({ categories = [] }) => {
                   <li key={cat.id}>
                     <div className="flex justify-between items-center py-2 px-1 rounded-lg hover:bg-orange-50 transition-colors duration-200 cursor-pointer">
                       <Link
-                        to={`/category/${cat.id}`}
+                        to={`/kategori/${cat.id}`}
                         onClick={() => setMenuOpen(false)}
                         className="text-gray-800 text-[12px] font-semibold"
                       >
@@ -308,7 +308,7 @@ const Header = ({ categories = [] }) => {
                         {cat.subcategories.map((sub) => (
                           <li key={sub.id}>
                             <Link
-                              to={`/category/${cat.id}`}
+                              to={`/kategori/${cat.id}`}
                               onClick={() => setMenuOpen(false)}
                               className="text-gray-600 hover:text-orange-500 text-xs font-medium block transition-colors duration-200"
                             >

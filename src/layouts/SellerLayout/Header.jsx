@@ -18,7 +18,7 @@ const Header = () => {
   const handleLogout = () => {
     localStorage.removeItem('token');
     dispatch(logout());
-    navigate('/auth/login');
+    navigate('/giris-kaydol/giris-yap');
   };
 
   return (
@@ -47,7 +47,7 @@ const Header = () => {
               <p className="text-center text-[var(--color-dark-orange)] font-medium">{user.name}</p>
               <hr className="my-2" />
               <div className="text-sm space-y-2">
-                <Link to="/seller/seller_profile" className="flex flex-row gap-x-4 items-center py-1 hover:text-orange-600">
+                <Link to="/satici/satici-profil" className="flex flex-row gap-x-4 items-center py-1 hover:text-orange-600">
                   <FaRegUser />
                   Profilim
                 </Link>

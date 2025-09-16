@@ -90,7 +90,7 @@ const SellerDocumentUpload = () => {
       const apiBelgeler = await res.json();
       const merged = mergeBelgeler(sabitBelgeler, apiBelgeler);
       setBelgeler(merged);
-      console.log(apiBelgeler)
+    
     } catch (err) {
       toast("Belgeler yüklenirken hata oluştu");
     }

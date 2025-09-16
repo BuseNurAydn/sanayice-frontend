@@ -69,12 +69,12 @@ const Login = () => {
             setTimeout(() => {
                 //Role göre yönlendirme
                 if (data.roles[0] == 'ROLE_SELLER') {
-                    navigate('/seller/vertification');
+                    navigate('/satici/dogrulama');
                 } else if (data.roles[0] == 'ROLE_CUSTOMER') {
                     navigate('/');
                 }
                 else {
-                    navigate('/seller/categories')
+                    navigate('/satici/kategoriler')
                 }
             }, 1500); // 1.5 saniye bekleyip yönlendir
 
@@ -115,7 +115,7 @@ const Login = () => {
                 <p className="text-red-500 text-sm mt-1">{errors.password}</p>
             )}
 
-            <Link to="/auth/forgot-password" className="custom-font font-medium text-sm text-[var(--color-light-orange)]">
+            <Link to="/giris-kaydol/sifremiunuttum" className="custom-font font-medium text-sm text-[var(--color-light-orange)]">
                 Şifremi Unuttum
             </Link>
 

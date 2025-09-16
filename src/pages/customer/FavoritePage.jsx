@@ -154,7 +154,7 @@ const FavoritePage = () => {
                         </span>
                         {item.oldPrice && (
                           <span className="text-sm text-gray-400 line-through">
-                            ₺{item.oldPrice.toLocaleString()}
+                            {item.oldPrice.toLocaleString()} TL
                           </span>
                         )}
                       </div>

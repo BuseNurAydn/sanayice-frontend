@@ -5,14 +5,15 @@ import Reviews from "../pages/customer/AccountPage/Reviews";
 import Addresses from "../pages/customer/AccountPage/Addresses";
 import SupportAndComplaint from '../pages/customer/AccountPage/SupportAndComplaint';
 import CustomerProfile from '../pages/customer/AccountPage/Profile'
-
+import FollowingList from '../pages/customer/AccountPage/FollowingList';
 
 export const accountRoutes = (
-  <Route path="account" element={<Account />}>
-    <Route path="orders" element={<Orders />} />
-    <Route path="reviews" element={<Reviews />} />
-    <Route path="addresses" element={<Addresses />} />
-    <Route path="profil" element={<CustomerProfile />} />
-    <Route path="support_and_complaint" element={<SupportAndComplaint/>} />
+  <Route path="hesabim" element={<Account />}>
+    <Route path="siparislerim" element={<Orders />} />
+    <Route path="degerlendirmelerim" element={<Reviews />} />
+    <Route path="adreslerim" element={<Addresses />} />
+    <Route path="profilim" element={<CustomerProfile />} />
+    <Route path="destek-sikayet" element={<SupportAndComplaint/>} />
+    <Route path="takip-edilenler" element={<FollowingList />} />
   </Route>
 );

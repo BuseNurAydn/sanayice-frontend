@@ -236,7 +236,7 @@ const SignUp = () => {
       setMessageType('success');
 
       setTimeout(() => {
-        navigate('/auth/login');
+        navigate('/giris-kaydol/giris-yap');
       }, 2000);
 
     } catch (error) {
@@ -299,7 +299,7 @@ const SignUp = () => {
   };
 
   const handleClick = () => {
-    navigate('/auth/signUp/seller');
+    navigate('/giris-kaydol/satici/uye-ol');
   };
 
   const messageStyles = {

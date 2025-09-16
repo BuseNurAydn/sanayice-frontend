@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
 import { FaTrash, FaEdit, FaSearch, FaFileExcel, FaFilter, FaPlus } from "react-icons/fa";
+import { Check } from 'lucide-react';
 import { GoChevronRight, GoChevronLeft } from "react-icons/go";
 import { useNavigate } from "react-router-dom";
-import { fetchMyProducts, deleteProduct } from "../../../services/sellerProductService";
+import { fetchMyApprovedProducts, deleteProduct } from "../../../services/sellerProductService";
 import ConfirmDialog from "../../../components/ConfirmDialog";
 import { toast } from "react-toastify";
-import * as XLSX from "xlsx"; // Excel için
+import * as XLSX from "xlsx";
 import AdminText from "../../../shared/Text/AdminText";
 import AddButton from "../../../shared/Button/AddButton";
 
@@ -26,11 +27,10 @@ const Products = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const data = await fetchMyProducts();
+        const data = await fetchMyApprovedProducts();
         setProducts(data);
-        console.log(data)
       } catch (error) {
-        toast.error("Ürünler alınamadı");
+        toast.error("Onaylı ürünler alınamadı");
       }
     };
     fetchData();
@@ -57,16 +57,26 @@ const Products = () => {
       setIsConfirmOpen(false);
     }
   };
+
   const handleEdit = (product) => {
-    navigate(`/seller/products/edit/${product.id}`, { state: { product } });
+    navigate(`/satici/urun/duzenleme/${product.id}`, { state: { product } });
   };
 
   // Excel indir
-  const handleExportExcel = () => {
-    const ws = XLSX.utils.json_to_sheet(products);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Ürünler");
-    XLSX.writeFile(wb, "urunler.xlsx");
+  const handleExportExcel = async () => {
+    try {
+      const approvedProducts = await fetchMyApprovedProducts();
+      if (approvedProducts.length === 0) {
+        toast.info("Onaylı ürün bulunamadı!");
+        return;
+      }
+      const ws = XLSX.utils.json_to_sheet(approvedProducts);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Onaylı Ürünler");
+      XLSX.writeFile(wb, "urunler.xlsx");
+    } catch (error) {
+      toast.error("Excel indirilemedi!");
+    }
   };
 
   // Tab filtreleme
@@ -88,12 +98,24 @@ const Products = () => {
     );
   });
 
-  // Sayfalama için veriler
+  // Sayfalama
   const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
   const paginatedProducts = filteredProducts.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
+
+  const getStatusBadge = (approvalStatus) => {
+    if (approvalStatus === "ONAYLANDI") {
+      return (
+        <span className="inline-flex items-center px-2 py-1 text-xs font-semibold text-green-800 bg-green-100 rounded-full">
+          <Check className="w-4 h-4 mr-1 " />
+          Onaylandı
+        </span>
+      );
+    }
+    return null;
+  };
 
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
@@ -112,7 +134,7 @@ const Products = () => {
           <FaSearch className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" />
         </div>
 
-        <AddButton onClick={() => navigate('/seller/products/add')}>
+        <AddButton onClick={() => navigate('/satici/urun/ekleme')}>
           <FaPlus />
           Ürün Ekle
         </AddButton>
@@ -120,7 +142,7 @@ const Products = () => {
 
       {/* Tab menü */}
       <div className="flex gap-1 md:gap-4 border-b border-gray-200 mb-8 custom-font text-xs md:text-sm pt-8">
-        {[
+        {[ 
           { key: "all", label: "Tüm Ürünler", count: products.length },
           { key: "active", label: "Satışta Olanlar", count: products.filter((p) => p.active).length },
           { key: "inactive", label: "Satışta Olmayanlar", count: products.filter((p) => !p.active).length },
@@ -128,14 +150,11 @@ const Products = () => {
         ].map((tab) => (
           <button
             key={tab.key}
-            onClick={() => {
-              setActiveTab(tab.key);
-              setCurrentPage(1);
-            }}
+            onClick={() => { setActiveTab(tab.key); setCurrentPage(1); }}
             className={`pb-4 px-4 ${activeTab === tab.key
               ? "border-b-2 border-[var(--color-orange)] text-[var(--color-orange)] font-semibold"
               : "text-gray-600"
-              }`}
+            }`}
           >
             {tab.label} ({tab.count})
           </button>
@@ -211,8 +230,8 @@ const Products = () => {
         <table className="w-full border-collapse">
           <thead className="bg-gray-50 [&>tr>th]:border-b [&>tr>th]:border-gray-200">
             <tr>
-              {["Ürün Bilgisi", "Kategori Adı", "Model Numarası", "Marka", "Fiyat", "Stok", "Durum", "İşlem"].map((head) => (
-                <th key={head} className="p-3 text-left text-sm font-medium text-gray-600">
+              {["Ürün Bilgisi", "Kategori Adı", "Model Numarası", "Marka", "Fiyat", "Stok", "Durum","İşlem", "Onay"].map((head) => (
+                <th key={head} className="px-2 py-3 text-left text-sm font-medium text-gray-600">
                   {head}
                 </th>
               ))}
@@ -225,7 +244,7 @@ const Products = () => {
                   key={product.id}
                   className="hover:bg-gray-50 transition-colors border-b border-gray-200 last:border-none cursor-pointer"
                 >
-                  <td className="p-2 text-sm text-gray-700">
+                  <td className="p-2 text-xs text-gray-700">
                     <div className="flex items-center gap-4">
                       <img
                         src={product.imageUrls[0]}
@@ -235,12 +254,12 @@ const Products = () => {
                       <span>{product.name}</span>
                     </div>
                   </td>
-                  <td className="p-2 text-sm text-gray-700">{product.categoryName}</td>
-                  <td className="p-2 text-sm text-gray-700">{product.modelNumber}</td>
-                  <td className="p-2 text-sm text-gray-700">{product.brand}</td>
-                  <td className="p-2 text-sm text-gray-700">{product.price} TL</td>
-                  <td className="p-2 text-sm text-gray-700">{product.stockQuantity}</td>
-                  <td className="p-2 text-sm">
+                  <td className="p-2 text-xs text-gray-700">{product.categoryName}</td>
+                  <td className="p-2 text-xs text-gray-700">{product.modelNumber}</td>
+                  <td className="p-2 text-xs text-gray-700">{product.brand}</td>
+                  <td className="p-2 text-xs text-gray-700">{product.price} TL</td>
+                  <td className="p-2 text-xs text-gray-700">{product.stockQuantity}</td>
+                  <td className="p-2 text-xs">
                     {product.active ? (
                       <span className="text-green-600 font-semibold">Aktif</span>
                     ) : (
@@ -263,11 +282,14 @@ const Products = () => {
                       </button>
                     </div>
                   </td>
+                  <td className="p-2 text-xs">
+                    {getStatusBadge(product.approvalStatus)}
+                  </td>
                 </tr>
               ))
             ) : (
               <tr>
-                <td colSpan={8} className="text-center p-6 text-gray-400">
+                <td colSpan={9} className="text-center p-6 text-gray-400">
                   Ürün bulunamadı
                 </td>
               </tr>
@@ -284,7 +306,6 @@ const Products = () => {
           <FaFileExcel /> Excel İndir
         </button>
       </div>
-
       {/* Silme Onay Dialogu */}
       {isConfirmOpen && (
         <ConfirmDialog
@@ -297,3 +318,4 @@ const Products = () => {
   );
 };
 export default Products;
+

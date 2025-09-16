@@ -2,13 +2,11 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { useState, useRef, useEffect } from 'react';
 import AdminText from '../../../shared/Text/AdminText';
 import TechnicalSpecInput from '../../../shared/Input/TechnicalSpecInput';
-import { updateProduct } from '../../../services/sellerProductService';
 import { toast } from 'react-toastify';
 import { Upload } from "lucide-react";
+import { updateProduct, toggleProductStatus } from '../../../services/sellerProductService';
 
 const EditProduct = () => {
-
-
   const navigate = useNavigate();
   const location = useLocation();
   const product = location.state?.product;
@@ -29,18 +27,14 @@ const EditProduct = () => {
     active: product?.active ?? true,
   });
 
-  // main ve ek resimlerin state'leri
   const [mainImageFile, setMainImageFile] = useState(null);
   const [mainImageUrl, setMainImageUrl] = useState(product?.imageUrls?.[0] || '');
-
   const [additionalImageUrls, setAdditionalImageUrls] = useState(product?.imageUrls?.slice(1) || []);
   const [additionalImageFiles, setAdditionalImageFiles] = useState([]);
 
-  // Eksik state'leri ekle
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  // URL'den File objesi oluşturmak için yardımcı fonksiyon
   async function urlToFile(url, filename, mimeType) {
     try {
       const res = await fetch(url);
@@ -52,32 +46,22 @@ const EditProduct = () => {
     }
   }
 
-  // Component yüklendiğinde URL'leri File objesine çeviriyoruz
   useEffect(() => {
     async function convertImages() {
       try {
-        // Ana resim URL'sini File'a çevir
         if (mainImageUrl && !mainImageFile) {
           const file = await urlToFile(mainImageUrl, "main-image.jpg", "image/jpeg");
-          if (file) {
-            setMainImageFile(file);
-            setMainImageUrl('');
-          }
+          if (file) setMainImageFile(file);
+          setMainImageUrl('');
         }
 
-        // Ek resimlerin URL'lerini File'lara çevir
         if (additionalImageUrls.length > 0 && additionalImageFiles.length === 0) {
           const files = await Promise.all(
             additionalImageUrls.map((url, i) => urlToFile(url, `additional-image-${i}.jpg`, "image/jpeg"))
           );
-
-          // Null olmayan dosyaları filtrele
-          const validFiles = files.filter(file => file !== null);
-          if (validFiles.length > 0) {
-            setAdditionalImageFiles(validFiles);
-            setAdditionalImageUrls([]);
-
-          }
+          const validFiles = files.filter(f => f !== null);
+          if (validFiles.length > 0) setAdditionalImageFiles(validFiles);
+          setAdditionalImageUrls([]);
         }
       } catch (error) {
         console.error('Resim dönüştürme sırasında hata:', error);
@@ -85,13 +69,9 @@ const EditProduct = () => {
       }
     }
 
-    // Product varsa dönüştürme işlemini başlat
-    if (product) {
-      convertImages();
-    }
+    if (product) convertImages();
   }, [product, mainImageUrl, mainImageFile, additionalImageUrls, additionalImageFiles.length]);
 
-  // Diğer event handlerlar
   const handleFeatureChange = (index, value) => {
     const updatedFeatures = [...formData.highlightedFeatures];
     updatedFeatures[index] = value;
@@ -123,87 +103,71 @@ const EditProduct = () => {
 
   const handleMainImageUpload = (file) => {
     if (file) {
-      // Dosya boyutu kontrolü (5MB limit)
       if (file.size > 5 * 1024 * 1024) {
         setError('Ana resim dosyası 5MB\'dan küçük olmalıdır');
         return;
       }
-
-      // Dosya tipi kontrolü
       const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
       if (!allowedTypes.includes(file.type)) {
         setError('Sadece JPG, PNG ve WebP formatları desteklenmektedir');
         return;
       }
-
       setMainImageFile(file);
       setMainImageUrl('');
-      setError(''); // Hata varsa temizle
+      setError('');
     }
   };
 
   const removeMainImage = () => {
     setMainImageFile(null);
     setMainImageUrl('');
-
-    // File input'u temizle
-    if (mainImageInputRef.current) {
-      mainImageInputRef.current.value = '';
-    }
-
-    console.log('Ana resim seçimi temizlendi');
+    if (mainImageInputRef.current) mainImageInputRef.current.value = '';
   };
 
   const handleAdditionalImagesUpload = (files) => {
     const filesArr = Array.from(files);
-
-    // Her dosya için boyut ve tip kontrolü
     const validFiles = [];
     for (const file of filesArr) {
-      if (file.size > 5 * 1024 * 1024) {
-        setError('Ek resim dosyası 5MB\'dan küçük olmalıdır');
-        continue;
-      }
-
+      if (file.size > 5 * 1024 * 1024) continue;
       const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
-      if (!allowedTypes.includes(file.type)) {
-        setError('Sadece JPG, PNG ve WebP formatları desteklenmektedir');
-        continue;
-      }
-
+      if (!allowedTypes.includes(file.type)) continue;
       validFiles.push(file);
     }
-
-    if (validFiles.length > 0) {
-      setAdditionalImageFiles(prev => [...prev, ...validFiles]);
-      setError(''); // Hata varsa temizle
-      console.log('Yeni ek resimler eklendi:', validFiles.length, 'adet');
-    }
+    if (validFiles.length > 0) setAdditionalImageFiles(prev => [...prev, ...validFiles]);
   };
 
   const removeAdditionalImageFile = (index) => {
     setAdditionalImageFiles(prev => prev.filter((_, i) => i !== index));
-    console.log('Ek resim silindi, index:', index);
   };
 
-  // Form submit
+  const handleToggleStatus = async (id) => {
+    try {
+      const updated = await toggleProductStatus(id); // backend’den dönen product
+      if(updated.active !== undefined){
+        setFormData(prev => ({ ...prev, active: updated.active }));
+      }
+      toast.success("Ürün durumu başarıyla güncellendi!");
+    } catch (error) {
+      console.error("Durum güncellenemedi:", error);
+      toast.error("Ürün durumu güncellenemedi!");
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
+    setError('');
 
     if (!mainImageFile) {
       toast.error("Ana resim yüklemek zorunludur!");
+      setLoading(false);
       return;
     }
-
-    setLoading(true);
-    setError('');
 
     try {
       const techSpecsObject = {};
       formData.technicalSpecifications.forEach(({ key, value }) => {
-        if (key && value) {
-          techSpecsObject[key] = value;
-        }
+        if (key && value) techSpecsObject[key] = value;
       });
 
       const updatedProduct = {
@@ -228,24 +192,23 @@ const EditProduct = () => {
       };
 
       const formDataToSend = new FormData();
-
       formDataToSend.append("product", JSON.stringify(updatedProduct));
-
-      // Ana resim dosyası
       formDataToSend.append("imageFiles", mainImageFile);
-
-      // Ek resim dosyaları
       additionalImageFiles.forEach(file => formDataToSend.append("imageFiles", file));
 
-      await updateProduct(product.id, formDataToSend);
-      toast.success("Ürün başarıyla güncellendi!");
-      navigate('/seller/products');
+      const result = await updateProduct(product.id, formDataToSend);
 
+      // Backend’den dönen active değerini senkronize et
+      if(result.active !== undefined){
+        setFormData(prev => ({ ...prev, active: result.active }));
+      }
+
+      toast.success("Ürün onaya gönderildi!");
+      navigate('/satici/urunlerim');
     } catch (error) {
-      console.error('Ürün güncellenemedi:', error);
-      const errorMessage = error.message || 'Ürün güncelleme sırasında bir hata oluştu';
-      setError(errorMessage);
-      toast.error("Ürün güncellenemedi, lütfen tekrar deneyin.");
+      console.error('Ürün onaya gönderilemedi:', error);
+      setError(error.message || 'Onaya gönderme sırasında bir hata oluştu');
+      toast.error("Ürün onaya gönderilemedi!");
     } finally {
       setLoading(false);
     }
@@ -254,13 +217,6 @@ const EditProduct = () => {
   return (
     <div className="min-h-screen py-6 px-3 md:p-6 bg-gray-50">
       <AdminText>Ürün Düzenleme</AdminText>
-
-      {/* Hata mesajı göster */}
-      {error && (
-        <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
-          {error}
-        </div>
-      )}
 
       <form className="space-y-4" onSubmit={handleSubmit}>
 
@@ -278,7 +234,7 @@ const EditProduct = () => {
           </div>
 
           <div>
-            <label className={labelStyle}>Fiyat (₺)</label>
+            <label className={labelStyle}>Fiyat (TL)</label>
             <input
               type="number"
               name="price"
@@ -288,19 +244,30 @@ const EditProduct = () => {
               disabled={loading}
             />
           </div>
+
           <div className="flex items-center gap-2">
             <label className={labelStyle}>Ürün Aktif mi?</label>
             <input
               type="checkbox"
               checked={formData.active}
-              onChange={() => setFormData(prev => ({ ...prev, active: !prev.active }))}
               disabled={loading}
+              onChange={async () => {
+                const newStatus = !formData.active;
+                setFormData(prev => ({ ...prev, active: newStatus }));
+                try {
+                  setLoading(true);
+                  await handleToggleStatus(product.id);
+                } catch (error) {
+                  setFormData(prev => ({ ...prev, active: !newStatus }));
+                } finally {
+                  setLoading(false);
+                }
+              }}
             />
             <span className={`text-sm font-medium ${formData.active ? 'text-green-600' : 'text-red-500'}`}>
               {formData.active ? 'Aktif' : 'Pasif'}
             </span>
           </div>
-
         </div>
 
         <div>
@@ -343,9 +310,9 @@ const EditProduct = () => {
           <h3 className="font-semibold mb-2">Ürün Görselleri</h3>
           <div className="border-b border-gray-300 mb-4" />
 
+          {/* Ana resim */}
           <div
-            className={`border-2 border-dashed border-gray-300 rounded-lg p-4 hover:border-orange-500 hover:bg-orange-50 cursor-pointer w-64 mb-4 text-center ${loading ? 'opacity-50 cursor-not-allowed' : ''
-              }`}
+            className={`border-2 border-dashed border-gray-300 rounded-lg p-4 hover:border-orange-500 hover:bg-orange-50 cursor-pointer w-64 mb-4 text-center ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
             onClick={() => !loading && mainImageInputRef.current?.click()}
           >
             <Upload className="w-6 h-6 text-gray-400 mx-auto mb-2" />
@@ -360,7 +327,7 @@ const EditProduct = () => {
             />
           </div>
 
-          {(mainImageFile) && (
+          {mainImageFile && (
             <div className="mb-4 relative w-32 h-32 rounded overflow-hidden border border-gray-300">
               <img
                 src={URL.createObjectURL(mainImageFile)}
@@ -378,9 +345,9 @@ const EditProduct = () => {
             </div>
           )}
 
+          {/* Ek resimler */}
           <div
-            className={`border-2 border-dashed border-gray-300 rounded-lg p-4 hover:border-orange-500 hover:bg-orange-50 cursor-pointer w-64 mb-4 text-center ${loading ? 'opacity-50 cursor-not-allowed' : ''
-              }`}
+            className={`border-2 border-dashed border-gray-300 rounded-lg p-4 hover:border-orange-500 hover:bg-orange-50 cursor-pointer w-64 mb-4 text-center ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
             onClick={() => !loading && additionalImagesInputRef.current?.click()}
           >
             <Upload className="w-6 h-6 text-gray-400 mx-auto mb-2" />
@@ -420,13 +387,10 @@ const EditProduct = () => {
         <div className="flex justify-end">
           <button
             type="submit"
-            className={`px-6 py-2 rounded-md font-semibold ${loading
-                ? 'bg-gray-400 cursor-not-allowed'
-                : 'bg-dark-orange hover:bg-orange-600'
-              } text-white`}
+            className={`px-6 py-2 rounded-md font-semibold ${loading ? 'bg-gray-400 cursor-not-allowed' : 'bg-dark-orange hover:bg-orange-600'} text-white`}
             disabled={loading}
           >
-            {loading ? 'Güncelleniyor...' : 'Güncelle'}
+            {loading ? 'Onaya Gönderiliyor...' : 'Onaya Gönder'}
           </button>
         </div>
       </form>

@@ -251,7 +251,7 @@ const SignUp = () => {
             setMessageType('success');
 
             setTimeout(() => {
-                navigate('/auth/login');
+                navigate('/giris-kaydol/giris-yap');
             }, 2000);
 
         } catch (error) {

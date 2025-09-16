@@ -87,7 +87,7 @@ const Categories = () => {
 
   //Ekleme sayfasına yönlendirme
   const handleAdd = () => {
-    navigate("/seller/categories/add"); // Kategori ekleme sayfama yönlendirme
+    navigate("/satici/kategori/ekle"); // Kategori ekleme sayfama yönlendirme
   };
 
   //Silme

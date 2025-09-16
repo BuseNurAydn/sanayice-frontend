@@ -23,7 +23,7 @@ const CategoryMenu = ({ categories }) => {
         {categories.map((cat) => (
           <div key={cat.id} className="relative group">
             <Link
-              to={`/category/${cat.id}`}
+              to={`/kategori/${cat.id}`}
               className="px-4 py-2 text-gray-700 hover:text-orange-600 transition"
             >
               {cat.name}
@@ -33,7 +33,7 @@ const CategoryMenu = ({ categories }) => {
                 {cat.subcategories.map((sub) => (
                   <Link
                     key={sub.id}
-                    to={`/category/${cat.id}`}
+                    to={`/kategori/${cat.id}`}
                     className="block px-4 py-2 hover:bg-orange-50 hover:text-orange-600"
                   >
                     {sub.name}
@@ -92,7 +92,7 @@ const CategoryMenu = ({ categories }) => {
                   {cat.subcategories.map((sub) => (
                     <Link
                       key={sub.id}
-                      to={`/category/${cat.id}`}
+                      to={`/kategori/${cat.id}`}
                       className="block px-3 py-1 rounded hover:bg-orange-50 text-gray-600"
                       onClick={() => setMobileMenuOpen(false)}
                     >

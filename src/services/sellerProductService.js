@@ -108,3 +108,50 @@ export const getProductsBySeller = async (sellerId) => {
   if (!response.ok) throw new Error("Satıcı ürünleri alınamadı");
   return await response.json();
 };
+
+
+export const submitForApprovalProduct = async (id) => {
+  const token = localStorage.getItem('token');
+
+  const response = await fetch(`${PRODUCTS_API}/${id}/submit-for-approval`, {
+    method: 'PUT',
+    headers: {
+      Authorization: `Bearer ${token}`, 
+    },
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.message || 'Onaya gönderme hatası');
+  }
+
+  return response.json();
+};
+
+// ONAYLI ÜRÜNLERİ LİSTELE - GET
+export const fetchMyApprovedProducts = async () => {
+  const token = getToken();
+
+  const response = await fetch(`${PRODUCTS_API}/my-products/approved`, {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error("Onaylı ürünler alınamadı");
+  }
+
+  return await response.json();
+};
+
+export const toggleProductStatus = async (id) => {
+  const token = getToken();
+  const response = await fetch(`${PRODUCTS_API}/${id}/toggle-status`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}` },
+  });
+ 
+  return await response.json();
+};

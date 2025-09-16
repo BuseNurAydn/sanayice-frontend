@@ -385,7 +385,7 @@ const CheckoutPage = () => {
   };
 
   const handleBackToCart = () => {
-    navigate('/cart')
+    navigate('/sepetim')
   };
 
   const renderStepIndicator = () => (
@@ -796,7 +796,7 @@ const CheckoutPage = () => {
                 </div>
               </div>
               <span className="font-bold text-orange-600">
-                ₺{selectedShipping?.price.toFixed(2)}
+                {selectedShipping?.price.toFixed(2)} TL
               </span>
             </div>
           </div>
@@ -837,21 +837,21 @@ const CheckoutPage = () => {
           <div className="border-t pt-4 space-y-2">
             <div className="flex justify-between">
               <span>Ara Toplam:</span>
-              <span>₺{getTotal().toLocaleString()}</span>
+              <span>{getTotal().toLocaleString()} TL</span>
             </div>
             <div className="flex justify-between">
               <span>Kargo ({selectedShipping?.name || 'Seçilmedi'}):</span>
-              <span>₺{getSelectedShippingPrice().toFixed(2)}</span>
+              <span>{getSelectedShippingPrice().toFixed(2)} TL</span>
             </div>
             {discountAmount > 0 && (
               <div className="flex justify-between text-green-600">
                 <span>İndirim:</span>
-                <span>-₺{discountAmount.toFixed(2)}</span>
+                <span>- TL{discountAmount.toFixed(2)}</span>
               </div>
             )}
             <div className="flex justify-between font-bold text-lg border-t pt-2">
               <span>Toplam:</span>
-              <span className="text-orange-600">₺{getFinalTotal().toLocaleString()}</span>
+              <span className="text-orange-600">{getFinalTotal().toLocaleString()} TL</span>
             </div>
           </div>
         </div>
@@ -878,7 +878,7 @@ const CheckoutPage = () => {
 
           {discountAmount > 0 && (
             <div className="text-green-600 mt-2">
-              İndirim: -₺{discountAmount.toFixed(2)}
+              İndirim: - TL{discountAmount.toFixed(2)}
             </div>
           )}
         </div>

@@ -32,18 +32,8 @@ const Reviews = () => {
     fetchReviews();
   }, []);
 
-  const handleEditReview = (id) => {
-    console.log(`Edit review with ID: ${id}`);
-    // Implement logic to edit review
-  };
-
-  const handleDeleteReview = (id) => {
-    console.log(`Delete review with ID: ${id}`);
-    // Implement logic to delete review
-  };
-
   const handleViewProduct = (id) => {
-    navigate(`/product/${id}`);
+    navigate(`/urun/${id}`);
   };
 
   const renderStars = (rating) => {

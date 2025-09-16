@@ -33,7 +33,7 @@ const AccountMenu = () => {
     return (
       <button
         className="md:bg-black md:hover:bg-gray-800 text-white md:px-4 md:py-2 rounded-xl font-semibold transition-colors duration-200  transform hover:scale-105  cursor-pointer flex flex-row gap-x-2 items-center"
-        onClick={() => navigate("/auth/login")}>
+        onClick={() => navigate("/giris-kaydol/giris-yap")}>
        <FaUser className="text-lg text-orange-600 md:text-white w-4 h-4" />
       <span className="hidden md:inline">Giriş / Kayıt Ol</span>
       </button>
@@ -45,7 +45,7 @@ const AccountMenu = () => {
       onMouseEnter={() => setOpen(true)}
       onMouseLeave={() => setOpen(false)}
       >
-      <Link to="/account" onClick={toggleMenu}  className="md:bg-[var(--color-dark-blue)] rounded-lg md:px-4 md:py-2 text-white transition-colors duration-200 transform hover:scale-105 cursor-pointer flex flex-row gap-x-2 items-center">
+      <Link to="/hesabim" onClick={toggleMenu}  className="md:bg-[var(--color-dark-blue)] rounded-lg md:px-4 md:py-2 text-white transition-colors duration-200 transform hover:scale-105 cursor-pointer flex flex-row gap-x-2 items-center">
        <FaUser className="text-lg text-orange-600 md:text-white w-4 h-4" />
       <span className="hidden md:inline-block">Hesabım</span>
       </Link>
@@ -55,23 +55,27 @@ const AccountMenu = () => {
           <p className="text-md text-[var(--color-dark-orange)] break-words text-center">{user.name}</p>
           <hr className="my-2" />
           <div className='text-sm '>
-            <Link to="/account/profil" className="py-1 hover:text-orange-600 flex flex-row gap-x-4 items-center" onClick={() => setOpen(false)}>
+            <Link to="/hesabim/profilim" className="py-1 hover:text-orange-600 flex flex-row gap-x-4 items-center" onClick={() => setOpen(false)}>
             <BsBasket3/>
             Profil Bilgilerim
           </Link>
-          <Link to="/account/orders" className="py-1 hover:text-orange-600 flex flex-row gap-x-4 items-center" onClick={() => setOpen(false)}>
+          <Link to="/hesabim/siparislerim" className="py-1 hover:text-orange-600 flex flex-row gap-x-4 items-center" onClick={() => setOpen(false)}>
             <BsBasket3/>
             Tüm Siparişlerim
           </Link>
-          <Link to="/account/addresses" className="py-1 hover:text-orange-600 flex flex-row gap-x-4 items-center" onClick={() => setOpen(false)}>
+          <Link to="/hesabim/adreslerim" className="py-1 hover:text-orange-600 flex flex-row gap-x-4 items-center" onClick={() => setOpen(false)}>
             <RiCoupon3Line />
             Adres Bilgilerim
           </Link>
-          <Link to="/account/reviews" className=" flex flex-row gap-x-4 items-center py-1 hover:text-orange-600" onClick={() => setOpen(false)}>
+          <Link to="/hesabim/degerlendirmelerim" className=" flex flex-row gap-x-4 items-center py-1 hover:text-orange-600" onClick={() => setOpen(false)}>
             <FaRegUser/>
             Değerlendirmelerim
           </Link>
-          <Link to="/account/support_and_complaint" className=" flex flex-row gap-x-4 items-center py-1 hover:text-orange-600" onClick={() => setOpen(false)}>
+           <Link to="/hesabim/takip-edilenler" className=" flex flex-row gap-x-4 items-center py-1 hover:text-orange-600" onClick={() => setOpen(false)}>
+            <FaRegUser/>
+            Takip Edilenler
+          </Link>
+          <Link to="/hesabim/destek-sikayet" className=" flex flex-row gap-x-4 items-center py-1 hover:text-orange-600" onClick={() => setOpen(false)}>
             <BsChatSquareDots />
             Destek ve Şikayet
           </Link> 

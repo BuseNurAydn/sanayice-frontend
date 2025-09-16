@@ -3,12 +3,12 @@ import { Link, useLocation } from "react-router-dom";
 
 const AuthTabs = () => {
  const location = useLocation();
-  const isLogin = location.pathname === "/auth/login";
+  const isLogin = location.pathname === "/giris-kaydol/giris-yap";
 
   return (
     <div className="flex w-full rounded-t-lg overflow-hidden border-b border-neutral-300">
       <Link
-        to="/auth/login"
+        to="/giris-kaydol/giris-yap"
         className={`w-1/2 text-center py-6 font-semibold text-lg md:text-xl transition-colors ${
           isLogin
             ? "bg-white text-[var(--color-light-orange)] border-b-2 border-[var(--color-light-orange)]"
@@ -18,7 +18,7 @@ const AuthTabs = () => {
         Giriş Yap
       </Link>
       <Link
-        to="/auth/signUp"
+        to="/giris-kaydol/uye-ol"
         className={`w-1/2 text-center py-6 font-semibold text-lg md:text-xl transition-colors ${
           !isLogin
              ? "bg-white text-[var(--color-light-orange)] border-b-2 border-[var(--color-light-orange)]"

@@ -7,10 +7,10 @@ import ForgotPassword from '../features/auth/ForgotPassword/ForgotPassword';
 const AuthRoutes = () => {
   return (
      <Routes>
-        <Route path="login" element={<Login />} />
-        <Route path="signUp" element={<SignUp />} />
-        <Route path='signUp/seller' element={<SellerSignUp/>}/>
-        <Route path="forgot-password" element={<ForgotPassword />} />
+        <Route path="giris-yap" element={<Login />} />
+        <Route path="uye-ol" element={<SignUp />} />
+        <Route path='satici/uye-ol' element={<SellerSignUp/>}/>
+        <Route path="sifremiunuttum" element={<ForgotPassword />} />
       </Routes>
   )
 }

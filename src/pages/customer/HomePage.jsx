@@ -12,7 +12,7 @@ import { getAllPublicBanners } from "../../services/bannerService";
 import CategoriesSection from '../../components/CategoriesSection';
 import CategorySection from '../../components/CategorySection';
 import AddSlider from "../../components/addSlider";
-
+import Discover from "../../components/Discover";
 const NextArrow = ({ onClick }) => (
   <div
     onClick={onClick}
@@ -47,17 +47,10 @@ const HomePage = () => {
   const [banners, setBanners] = useState([]);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
+  const [leftBanners, setLeftBanners] = useState([]);
+  const [rightBanners, setRightBanners] = useState([]);
+
   
-  const leftBanners = banners;
-
-  // Dummy banner listesi 
-  const rightBanners = [
-    { imageUrl: "https://images.hepsiburada.net/banners/s/1/640-200/gra-199064-slider133997371828354751.jpg/format:webp" },
-    { imageUrl: "https://images.hepsiburada.net/banners/s/1/640-200/gra-199031-slider133997241731061103.jpg/format:webp" },
-    { imageUrl: "https://images.hepsiburada.net/banners/s/1/640-200/gra-199480-slider133995577722430043.jpg/format:webp" },
-    { imageUrl: "https://images.hepsiburada.net/banners/s/1/640-200/gra-199000-slider-1133995369139444842.jpg/format:webp" },
-  ];
-
   // Sayaç 
   const [leftIndex, setLeftIndex] = useState(1);
   const [rightIndex, setRightIndex] = useState(1);
@@ -185,18 +178,22 @@ const HomePage = () => {
   }, []);
 
   // GET BANNERS
-  useEffect(() => {
-    const fetchBanners = async () => {
-      try {
-        const data = await getAllPublicBanners();
-        setBanners(data);
-      } catch (error) {
-        console.error("Bannerlar yüklenemedi:", error.message);
-      }
-    };
+ useEffect(() => {
+  const fetchBanners = async () => {
+    try {
+      const data = await getAllPublicBanners();
+      setBanners(data);
 
-    fetchBanners();
-  }, []);
+      // İlk 4 sol slider, sonraki 4 sağ slider
+      setLeftBanners(data.slice(0, 4));
+      setRightBanners(data.slice(4, 8));
+    } catch (error) {
+      console.error("Bannerlar yüklenemedi:", error.message);
+    }
+  };
+
+  fetchBanners();
+}, []);
 
   const scroll = (ref, direction) => {
     if (ref.current) {
@@ -215,7 +212,7 @@ const HomePage = () => {
       className={`absolute ${direction === 'left' ? 'left-2' : 'right-2'} top-1/2 transform -translate-y-1/2 
         w-12 h-12 bg-white shadow-lg rounded-full flex items-center justify-center z-10
         ${disabled ? 'opacity-50 cursor-not-allowed' : 'hover:bg-orange-50 hover:shadow-xl hover:scale-105'}
-        transition-all duration-200 border border-gray-200 group`}
+        transition-all duration-200 border border-gray-200 group hidden md:flex`}
     >
       {direction === 'left' ? (
         <svg width={20} height={20} fill="none" stroke="currentColor" className="text-gray-600 group-hover:text-orange-600">
@@ -257,7 +254,7 @@ const HomePage = () => {
                 return (
                   <div key={category.id} className="relative group">
                     <Link
-                      to={`/category/${category.id}`}
+                      to={`/kategori/${category.id}`}
                       className="text-sm font-medium text-gray-700 hover:text-orange-600 transition-all duration-300 py-2 px-4 rounded-lg hover:bg-orange-50 flex items-center gap-1"
                     >
                       {category.name}
@@ -285,7 +282,7 @@ const HomePage = () => {
                             {category.subcategories.map((sub) => (
                               <div key={sub.id}>
                                 <Link
-                                  to={`/subcategory/${sub.id}`}
+                                  to={`/alt-kategori/${sub.id}`}
                                   className="block text-xs font-semibold text-gray-800 hover:text-orange-600 mb-2"
                                 >
                                   {sub.name}
@@ -314,7 +311,7 @@ const HomePage = () => {
                 return (
                   <div key={category.id} className="relative group">
                     <Link
-                      to={`/category/${category.id}`}
+                      to={`/kategori/${category.id}`}
                       className="text-sm font-medium text-gray-700 hover:text-orange-600 transition-all duration-300 py-2 px-4 rounded-lg hover:bg-orange-50 flex items-center gap-1"
                     >
                       {category.name}
@@ -341,7 +338,7 @@ const HomePage = () => {
                             {category.subcategories.map((sub) => (
                               <div key={sub.id}>
                                 <Link
-                                  to={`/subcategory/${sub.id}`}
+                                  to={`/alt-kategori/${sub.id}`}
                                   className="block text-xs font-semibold text-gray-800 hover:text-orange-600 mb-2"
                                 >
                                   {sub.name}
@@ -365,7 +362,9 @@ const HomePage = () => {
           </div>
         </div>
       </nav>
-
+   <div className="bg-white">
+      <Discover />
+   </div>
       {/* CSS Animasyonları */}
       <style>{`
         @keyframes dropdown {
@@ -496,7 +495,7 @@ const HomePage = () => {
 
 
         {/*Kategori Kartları */}
-        <CategoriesSection categories={categories} />
+      {/**  <CategoriesSection categories={categories} /> */} 
 
       </main>
 

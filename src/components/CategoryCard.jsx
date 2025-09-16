@@ -5,7 +5,7 @@ const CategoryCard = ({ category }) => {
     const navigate = useNavigate();
 
     const handleNavigate = () => {
-        navigate(`category/${category.id}`);
+        navigate(`kategori/${category.id}`);
     };
 
     return (

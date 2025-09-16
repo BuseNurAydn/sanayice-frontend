@@ -31,8 +31,8 @@ const Footer = () => {
           <h3 className="font-bold mb-2 text-[var(--color-dark)]">Kurumsal</h3>
           <div className="flex gap-2">
             <ul className="space-y-4 text-sm">
-              <li><Link to="/about_us">Hakkımızda</Link></li>
-              <li><Link to="/contact">İletişim</Link></li>
+              <li><Link to="/hakkimizda">Hakkımızda</Link></li>
+              <li><Link to="/iletisim">İletişim</Link></li>
             </ul>
           </div>
         </div>
@@ -64,16 +64,16 @@ const Footer = () => {
         <div>
           <h3 className="font-bold mb-2 text-[var(--color-dark)]">Sözleşmeler</h3>
           <ul className="space-y-4 text-sm">
-            <li><Link to="/privacy_policy">Gizlilik Politikası</Link></li>
-            <li><Link to="/terms_of_use">Kullanım Koşulları</Link></li>
-            <li><Link to="/return_policy">İptal ve İade Koşulları</Link></li>
+            <li><Link to="/gizlilik-politikasi">Gizlilik Politikası</Link></li>
+            <li><Link to="/kullanim-sozlesmesi">Kullanım Koşulları</Link></li>
+            <li><Link to="/iptal-iade">İptal ve İade Koşulları</Link></li>
           </ul>
         </div>
 
         <div>
           <h3 className="font-bold mb-2 text-[var(--color-dark)]">Önemli Linkler</h3>
           <ul className="space-y-4 text-sm">
-            <li><Link to="/auth/signUp/seller">Satıcı Olmak İstiyorum</Link></li>
+            <li><Link to="/giris-kaydol/satici/uye-ol">Satıcı Olmak İstiyorum</Link></li>
           </ul>
         </div>
 

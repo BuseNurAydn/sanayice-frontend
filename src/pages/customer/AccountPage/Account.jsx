@@ -5,8 +5,8 @@ function Account() {
   const location = useLocation();
 
   // Direkt /account yoluna gelindiyse orders sayfasına yönlendir
-  if (location.pathname === '/account') {
-    return <Navigate to="/account/orders" replace />;
+  if (location.pathname === '/hesabim') {
+    return <Navigate to="/hesabim/siparislerim" replace />;
   }
 
   return (

@@ -41,7 +41,7 @@ const BannerManagement = () => {
   });
 
   // Ana resim dosyası yükleme handler'ı
- const handleMainImageUpload = (file) => {
+  const handleMainImageUpload = (file) => {
     console.log('handleMainImageUpload çağrıldı', file);
     if (!file) return;
 
@@ -99,10 +99,11 @@ const BannerManagement = () => {
   // handleSave fonksiyonu
   const handleSave = async () => {
 
-    if (!mainImageFile) {
-      toast.error("Ana resim yüklemek zorunludur!");
-      return;
-    }
+   // Yeni ekleme sırasında resim zorunlu
+  if (!editingId && !mainImageFile) {
+    toast.error("Ana resim yüklemek zorunludur!");
+    return;
+  }
 
     if (!formData.title || !formData.description || !formData.linkUrl || !formData.buttonText || !formData.active || !formData.order) {
       toast.error("Gerekli alanları doldurun!");
@@ -128,7 +129,7 @@ const BannerManagement = () => {
     if (mainImageFile) {
       form.append("imageFile", mainImageFile);
     }
-
+   
     try {
       if (editingId) {
         await updateBanner(editingId, form);
@@ -137,8 +138,6 @@ const BannerManagement = () => {
         if (editingOrder !== payload.order) {
           await updateBannerOrder(editingId, payload.order);
         }
-
-
         toast.success("Banner başarıyla güncellendi!");
       } else {
         await addBanner(form);
@@ -158,7 +157,6 @@ const BannerManagement = () => {
       setEditingId(null);
       setEditingOrder(null);
       fetchBanners();
-
 
     } catch (err) {
       if (err.message === "413") {
@@ -180,6 +178,8 @@ const BannerManagement = () => {
       active: true,
       order: banners.length + 1
     });
+    setMainImageFile(null);
+    setMainImagePreviewUrl(null);
     setEditingId(null);
     setIsModalOpen(true);
   };
@@ -225,13 +225,13 @@ const BannerManagement = () => {
             #{banner.order}
           </span>
         </div>
-        <div className="absolute bottom-4 left-4 right-4">
-          <h3 className="text-white font-bold text-lg mb-1 line-clamp-1">{banner.title}</h3>
-          <p className="text-white/90 text-sm line-clamp-2">{banner.description}</p>
-        </div>
       </div>
 
       <div className="p-4">
+         <div className="">
+          <h3 className="text-[var(--color-dark-orange)] font-bold text-sm mb-1 line-clamp-1">{banner.title}</h3>
+          <p className="text-black text-xs line-clamp-2 pb-2">{banner.description}</p>
+        </div>
         <div className="space-y-3 mb-4">
           {banner.linkUrl && (
             <div className="flex items-center gap-2 text-gray-600">
@@ -408,7 +408,7 @@ const BannerManagement = () => {
             <div className="p-6 border-b border-gray-100">
               <div className="flex justify-between items-center">
                 <h2 className="text-2xl font-bold text-gray-900">
-                  {editingId ? "Banner Güncelle" : "Yeni Banner Ekle"}
+                  {editingId ? "Slider Güncelle" : "Yeni Slider Ekle"}
                 </h2>
                 <button
                   onClick={() => setIsModalOpen(false)}

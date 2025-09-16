@@ -51,10 +51,10 @@ function App() {
           <Route path="/*" element={<CustomerRouters />} />
 
           {/* Satıcı panelleri */}
-          <Route path="/seller/*" element={<SellerRoutes />} />
+          <Route path="/satici/*" element={<SellerRoutes />} />
 
           {/* Giriş ve kayıt sayfaları */}
-          <Route path="/auth/*" element={<AuthRoutes />} />
+          <Route path="/giris-kaydol/*" element={<AuthRoutes />} />
         </Routes>
       </Router>
     </>

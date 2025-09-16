@@ -59,7 +59,7 @@ const ForgotPassword = () => {
     };
 
     const handleBackToLogin = () => {
-        navigate('/auth/login');
+        navigate('/giris-kaydol/giris-yap');
     };
 
     const validateStep1 = () => {
@@ -188,7 +188,7 @@ const ForgotPassword = () => {
             setSuccessMessage(response + ' Giriş sayfasına yönlendiriliyorsunuz...');
             
             setTimeout(() => {
-                navigate('/auth/login');
+                navigate('/giris-kaydol/giris-yap');
             }, 2000);
         } catch (error) {
             setErrors({ general: error.message || 'Şifre güncellenemedi. Lütfen tekrar deneyin.' });

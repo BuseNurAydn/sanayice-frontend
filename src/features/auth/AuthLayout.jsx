@@ -6,7 +6,7 @@ const AuthLayout = ({ children }) => {
     const location = useLocation();
 
   // Satıcı kayıt sayfası dışında tabları göster
-  const isSellerSignUp = location.pathname === "/auth/signUp/seller";
+  const isSellerSignUp = location.pathname === "/giris-kaydol/satici/uye-ol";
   const hideTabs = isSellerSignUp;
 
   return (

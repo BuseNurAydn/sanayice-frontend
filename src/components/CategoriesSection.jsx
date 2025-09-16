@@ -7,7 +7,7 @@ const CategoriesSection = ({ categories }) => {
       <div className="flex items-center justify-between mb-6">
         <h2 className="font-bold md:text-2xl text-lg text-gray-900">Kategoriler</h2>
         <Link 
-          to="/categories" 
+          to="/kategoriler" 
           className="text-[var(--color-dark-orange)] font-semibold transition-colors duration-200 flex items-center gap-1 group"
         >
           Tümünü Gör 

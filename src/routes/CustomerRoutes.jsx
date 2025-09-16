@@ -21,21 +21,20 @@ const CustomerRoutes = () => {
         <Routes>
             <Route element={<CustomerLayout />}>
                 <Route path="/" element={<HomePage />} />
-                <Route path="product/:id" element={<ProductDetail />} /> 
-                <Route path="favorite" element={<FavoritePage />} /> 
-                <Route path="category/:id" element={<CategoryProductsPage type="category"  />} />
-                <Route path="subcategory/:id" element={<CategoryProductsPage type="subcategory" />} />
-                <Route path="cart" element={<CartPage />} />
-                <Route path="contact" element={<Contact />}></Route>
-                <Route path="checkout" element={<CheckoutPage />}></Route>
-                <Route path="profile" element={<Profile />} />
-                <Route path="about_us" element={<AboutUs />} />
-                <Route path="privacy_policy" element={<PrivacyPolicy />} />
-                <Route path="return_policy" element={<ReturnPolicy />} />
-                <Route path="terms_of_use" element={<TermsOfUse />} />
-                <Route path="categories" element={<CategoriesPage />} />
-                 <Route path="satici/:id" element={<SellerPage/>} />
-
+                <Route path="urun/:id" element={<ProductDetail />} /> 
+                <Route path="favorilerim" element={<FavoritePage />} /> 
+                <Route path="kategori/:id" element={<CategoryProductsPage type="category"  />} />
+                <Route path="alt-kategori/:id" element={<CategoryProductsPage type="subcategory" />} />
+                <Route path="sepetim" element={<CartPage />} />
+                <Route path="iletisim" element={<Contact />}></Route>
+                <Route path="siparis-tamamla" element={<CheckoutPage />}></Route>
+                <Route path="profilim" element={<Profile />} />
+                <Route path="hakkimizda" element={<AboutUs />} />
+                <Route path="gizlilik-politikasi" element={<PrivacyPolicy />} />
+                <Route path="iptal-iade" element={<ReturnPolicy />} />
+                <Route path="kullanim-sozlesmesi" element={<TermsOfUse />} />
+                <Route path="kategoriler" element={<CategoriesPage />} />
+                 <Route path="magaza/:id" element={<SellerPage/>} />
 
             {accountRoutes}
             </Route> 

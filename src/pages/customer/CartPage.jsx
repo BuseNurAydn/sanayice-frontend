@@ -57,7 +57,7 @@ const CartPage = () => {
 
   const handleCheckout = () => {
     // Checkout sayfasına yönlendirme
-    navigate("/checkout");
+    navigate("/siparis-tamamla");
   };
 
   const handleContinueShopping = () => {

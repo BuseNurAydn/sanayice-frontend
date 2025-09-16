@@ -119,8 +119,18 @@ const Store = () => {
                 className="w-24 h-24 rounded-full mx-auto mb-4 border-4 border-white shadow-lg"
               />
             )}
-            <h1 className="text-2xl md:text-3xl font-bold">{storeInfo.name}</h1>
-            <p className='mt-2 text-sm '>En yeni elektronik ürünler ve teknolojik aksesuarlar.</p>
+            <div className='flex  justify-center items-center gap-2'>
+              <h1 className="text-2xl md:text-3xl font-bold">{storeInfo.name}</h1>
+              <span className="bg-green-200 text-black px-3 py-1.5 rounded-full font-semibold text-sm">
+                {storeInfo.averageRating}
+              </span>
+            </div>
+            <p className='my-3 text-sm '>En yeni elektronik ürünler ve teknolojik aksesuarlar.</p>
+
+            {/* Takipçi sayısı */}
+            <span className="bg-[var(--color-dark-orange)] text-white px-3 py-1 rounded font-semibold text-sm">
+              {storeInfo.followerCount} takipçi
+            </span>
           </div>
         </div>
       </div>
@@ -195,7 +205,7 @@ const Store = () => {
                   </p>
 
                   <Link
-                    to={`/product/${product.id}`}
+                    to={`/urun/${product.id}`}
                     className="flex items-center justify-center gap-2 mt-auto bg-[var(--color-orange)] text-white text-sm py-2 rounded-lg text-center font-medium hover:bg-[var(--color-dark-orange)] transition-colors"
                   >
                     <FaEye /> Ürünü Gör

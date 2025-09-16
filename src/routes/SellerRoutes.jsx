@@ -34,7 +34,7 @@ const SellerRoutes = () => {
             >
                 {/* Yalnızca ROLE_SELLER */}
                 <Route
-                    path="dashboard"
+                    path="yonetim-paneli"
                     element={
                         <RoleProtectedRoute allowedRoles={['ROLE_SELLER']}>
                             <Dashboard />
@@ -42,7 +42,7 @@ const SellerRoutes = () => {
                     }
                 />
                 <Route
-                    path="store"
+                    path="magazam"
                     element={
                         <RoleProtectedRoute allowedRoles={['ROLE_SELLER']}>
                             <Store />
@@ -50,7 +50,7 @@ const SellerRoutes = () => {
                     }
                 />
                 <Route
-                    path="products"
+                    path="urunlerim"
                     element={
                         <RoleProtectedRoute allowedRoles={['ROLE_SELLER']}>
                             <Products />
@@ -58,7 +58,7 @@ const SellerRoutes = () => {
                     }
                 />
                 <Route
-                    path="products/add"
+                    path="urun/ekleme"
                     element={
                         <RoleProtectedRoute allowedRoles={['ROLE_SELLER']}>
                             <AddProduct />
@@ -66,7 +66,7 @@ const SellerRoutes = () => {
                     }
                 />
                 <Route
-                    path="products/edit/:id"
+                    path="urun/duzenleme/:id"
                     element={
                         <RoleProtectedRoute allowedRoles={['ROLE_SELLER']}>
                             <EditProduct />
@@ -74,7 +74,7 @@ const SellerRoutes = () => {
                     }
                 />
                 <Route
-                    path="orders"
+                    path="siparislerim"
                     element={
                         <RoleProtectedRoute allowedRoles={['ROLE_SELLER']}>
                             <Orders />
@@ -82,7 +82,7 @@ const SellerRoutes = () => {
                     }
                 />
                 <Route
-                    path="seller_profile"
+                    path="satici-profil"
                     element={
                         <RoleProtectedRoute allowedRoles={['ROLE_SELLER','ROLE_MANAGER']}>
                             <SellerProfile />
@@ -90,7 +90,7 @@ const SellerRoutes = () => {
                     }
                 />
                 <Route
-                    path="seller_campaign"
+                    path="satici-kupon"
                     element={
                         <RoleProtectedRoute allowedRoles={['ROLE_SELLER']}>
                             <SellerCampaignManagement />
@@ -98,7 +98,7 @@ const SellerRoutes = () => {
                     }
                 />
                 <Route
-                    path="vertification"
+                    path="dogrulama"
                     element={
                         <RoleProtectedRoute allowedRoles={['ROLE_SELLER']}>
                             <SellerDocumentUpload />
@@ -109,7 +109,7 @@ const SellerRoutes = () => {
 
                 {/* ROLE_MANAGER */}
                 <Route
-                    path="seller-verification"
+                    path="satici-dogrulama"
                     element={
                         <RoleProtectedRoute allowedRoles={['ROLE_MANAGER']}>
                             <SellerVerification />
@@ -117,7 +117,7 @@ const SellerRoutes = () => {
                     }
                 />
                 <Route
-                    path="banner_management"
+                    path="slider-yonetimi"
                     element={
                         <RoleProtectedRoute allowedRoles={['ROLE_MANAGER']}>
                             <BannerManagement />
@@ -125,7 +125,7 @@ const SellerRoutes = () => {
                     }
                 />
                   <Route
-                    path="coupon_campaign_management"
+                    path="kampanya-kupon-yonetimi"
                     element={
                         <RoleProtectedRoute allowedRoles={['ROLE_MANAGER']}>
                             <CampaignCouponManagement />
@@ -134,7 +134,7 @@ const SellerRoutes = () => {
                 />
                 
                   <Route
-                    path="seller_coupon_campaign_management"
+                    path="satici-kupon-kampanya-yonetimi"
                     element={
                         <RoleProtectedRoute allowedRoles={['ROLE_MANAGER']}>
                             <SellerCampaignOverview />
@@ -159,7 +159,7 @@ const SellerRoutes = () => {
                     }
                 />*/}
                 <Route
-                    path="product_control"
+                    path="urun-kontrol"
                     element={
                         <RoleProtectedRoute allowedRoles={['ROLE_MANAGER']}>
                             <ProductApproval />
@@ -167,7 +167,7 @@ const SellerRoutes = () => {
                     }
                 />
                 <Route
-                    path="support_management"
+                    path="destek-yonetimi"
                     element={
                         <RoleProtectedRoute allowedRoles={['ROLE_MANAGER']}>
                             <SupportManagerDashboard />
@@ -178,7 +178,7 @@ const SellerRoutes = () => {
 
                 {/* ROLE_MANAGER */}
                 <Route
-                    path="categories"
+                    path="kategoriler"
                     element={
                         <RoleProtectedRoute allowedRoles={['ROLE_MANAGER']}>
                             <Categories />
@@ -186,7 +186,7 @@ const SellerRoutes = () => {
                     }
                 />
                 <Route
-                    path="categories/add"
+                    path="kategori/ekleme"
                     element={
                         <RoleProtectedRoute allowedRoles={['ROLE_MANAGER']}>
                             <AddCategory />

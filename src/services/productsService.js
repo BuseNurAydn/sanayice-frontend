@@ -46,4 +46,11 @@ export const getProductsBySubCategoryId = async (subId) => {
   return await response.json();
 };
 
+// SATICIYA AİT AKTİF ÜRÜNLER
+export const getActiveProductsBySeller = async (sellerId) => {
+  const response = await fetch(`${PRODUCTS_API}/seller/${sellerId}/store/active`);
+  
+  if (!response.ok) throw new Error("Satıcının ürünleri alınamadı");
 
+  return response.json();
+};

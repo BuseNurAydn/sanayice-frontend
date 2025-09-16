@@ -71,7 +71,7 @@ const AddCategory = () => {
 
     try {
       await addCategory(form);
-      navigate('/seller/categories');
+      navigate('/satici/kategoriler');
       handleClear();
       setMainImageFile(null);
     } catch (error) {

@@ -2,9 +2,8 @@ import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { API_BASE } from "../../config";
 import { useDispatch, useSelector } from "react-redux";
-import { FaHeart, FaRegHeart, FaCreditCard } from "react-icons/fa";
+import { FaHeart, FaRegHeart, FaCreditCard, FaUserPlus, FaUserCheck } from "react-icons/fa";
 import { GoChevronRight } from "react-icons/go";
-import { FaGifts } from "react-icons/fa6";
 import { MdAddShoppingCart } from "react-icons/md";
 import { TiMessages } from "react-icons/ti";
 import { addToCart } from "../../services/cartService";
@@ -14,7 +13,7 @@ import ProductCard from "../../components/ProductCard";
 import { ReviewIcon } from "./ReviewIcon";
 import { addToFavorites, fetchFavorites, removeFavorites } from "../../services/favoritesService";
 import SellerQuestions from "../../components/SellerQuestions";
-import { followSeller } from "../../services/authService";
+import { followSeller, isFollowingSeller, unfollowSeller, getSellerRatings } from "../../services/authService";
 
 const dummyRelatedProducts = [
   {
@@ -74,6 +73,8 @@ const ProductDetail = () => {
   const [newQuestion, setNewQuestion] = useState("");
   const tabsRef = useRef(null);
   const [isFollowing, setIsFollowing] = useState(false);
+  const [sellerReviews, setSellerReviews] = useState([]);
+  const [sellerAverage, setSellerAverage] = useState(0);
 
   const favorites = useSelector(state => state.favorites.items);
   const isFavorite = favorites.some(fav => fav.productId === product.id);
@@ -85,15 +86,67 @@ const ProductDetail = () => {
     window.scrollTo(0, 0);
   }, []);
 
-  //Fallow
+  //satıcının değerlendirmesi
+  useEffect(() => {
+    const fetchSellerRatings = async () => {
+      if (!product?.sellerId) return;
+
+      try {
+        const data = await getSellerRatings(product.sellerId);
+        setSellerReviews(data);
+
+        // Ortalama puan
+        const avg =
+          data.length > 0
+            ? data.reduce((acc, r) => acc + r.rating, 0) / data.length
+            : 0;
+        setSellerAverage(avg.toFixed(1));
+      } catch (err) {
+        console.error("Satıcı yorumları alınamadı:", err);
+      }
+    };
+
+    fetchSellerRatings();
+  }, [product?.sellerId]);
+
+  // follow / unfollow toggle
   const handleFollowSeller = async (sellerId) => {
+    if (!sellerId) {
+      toast.error("Satıcı bilgisi bulunamadı!");
+      return;
+    }
     try {
-      const response = await followSeller(sellerId);
-      setIsFollowing(response.isFollowing); 
+      if (isFollowing) {
+        // zaten takip ediliyorsa -> unfollow
+        await unfollowSeller(sellerId);
+        setIsFollowing(false);
+        toast.info("Satıcı takipten çıkarıldı");
+      } else {
+        // takip edilmiyorsa -> follow
+        await followSeller(sellerId);
+        setIsFollowing(true);
+        toast.success("Satıcı takip edildi");
+      }
     } catch (err) {
-      console.error("Takip etme hatası:", err.message);
+      console.error("Takip toggle hatası:", err.message);
+      toast.error(err.message || "Takip işlemi sırasında hata oluştu");
     }
   };
+
+  useEffect(() => {
+    const checkFollowing = async () => {
+      if (!product?.sellerId) return;
+
+      try {
+        const result = await isFollowingSeller(product.sellerId);
+        setIsFollowing(result); // true / false
+      } catch (err) {
+        console.error("Takip kontrolü hatası:", err);
+      }
+    };
+
+    checkFollowing();
+  }, [product?.sellerId]);
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -108,6 +161,7 @@ const ProductDetail = () => {
         if (!response.ok) throw new Error("Ürün bulunamadı");
         const data = await response.json();
         setProduct(data);
+
 
       } catch (err) {
         setError(err.message);
@@ -147,7 +201,7 @@ const ProductDetail = () => {
       // Giriş yoksa, sadece ürün id'sini string olarak sakla
       localStorage.setItem("pendingFavoriteItem", product.id.toString());
       toast.info("Lütfen giriş yapın!");
-      navigate("/auth/login");
+      navigate("/giris-kaydol/giris-yap");
       return;
     }
     setAdding(true);
@@ -181,7 +235,7 @@ const ProductDetail = () => {
         JSON.stringify({ productId: product.id, quantity: 1 })
       );
       toast.info("Lütfen giriş yapın!");
-      navigate("/auth/login");
+      navigate("/giris-kaydol/giris-yap");
       return;
     }
     try {
@@ -195,7 +249,7 @@ const ProductDetail = () => {
 
   const handleBuyNow = () => {
     dispatch(setBuyNowItem({ product, quantity }));
-    navigate('/checkout');
+    navigate('/siparis-tamamla');
   };
 
   const handleAskQuestion = (e) => {
@@ -280,8 +334,10 @@ const ProductDetail = () => {
       </div>
     );
   }
+
   return (
     <div className=" bg-gray-50">
+
       {/* Breadcrumb */}
       <div className="bg-white border-b border-gray-300">
         <div className="max-w-7xl mx-auto px-6 py-3">
@@ -291,7 +347,7 @@ const ProductDetail = () => {
             </Link>
             <span className="mx-2">/</span>
             <Link
-              to={`/category/${product.categoryId}`}
+              to={`/kategori/${product.categoryId}`}
               className="hover:text-orange-600 cursor-pointer text-xs"
             >
               {htext(product.categoryName)}
@@ -508,38 +564,49 @@ const ProductDetail = () => {
           </div>
           {/* Sağ: Satıcı Kartı */}
           <div className="relative px-4">
-            <div className="bg-white rounded-lg shadow-md border border-gray-300 p-4 space-y-4">
+            <div className="bg-white rounded-xl shadow-lg border border-orange-200 p-4 space-y-4">
 
               {/* Mağazaya Git Butonu */}
-              <Link to={`/satici/${product.sellerId}`}
-                className="absolute -top-4 left-1/2 -translate-x-1/2 bg-orange-500 text-white px-4 py-2 rounded-full font-semibold text-sm shadow-md hover:bg-orange-600 transition cursor-pointer flex items-center justify-center gap-1"
+              <Link
+                to={`/magaza/${product.sellerId}`}
+                className="absolute -top-5 left-1/2 -translate-x-1/2 bg-orange-500 text-white px-5 py-2 rounded-full font-semibold text-sm shadow-md hover:bg-orange-600 transition flex items-center justify-center gap-1"
               >
                 Mağazaya Git <GoChevronRight />
               </Link>
 
               {/* Mağaza Adı ve Puan */}
-              <div className="bg-orange-50 px-4 py-2 flex items-center justify-between mt-4 rounded-lg">
-                <div>
+              <div className="flex items-center justify-between gap-4 mt-6 bg-orange-50 p-4 rounded-lg">
+                <div className="flex flex-col">
                   <h3 className="text-lg font-bold text-gray-900">
                     {product.sellerCompanyName || "Mağaza Adı"}
                   </h3>
-
+                  <p className="text-sm text-gray-600">{sellerReviews.length} değerlendirme</p>
                 </div>
-                <div className="flex items-center gap-1 bg-green-50 px-2 py-1 rounded-lg">
-                  <span className="text-sm font-semibold text-green-700">4.8</span>
+
+                <div className="flex items-center gap-1 bg-green-100 px-3 py-1 rounded-full">
+                  <span className="text-sm font-semibold text-green-700">
+                    {Number(sellerAverage || 0).toFixed(1)}
+                  </span>
+                  <svg className="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" />
+                  </svg>
                 </div>
               </div>
 
-              {/* Takip Et*/}
-              <div>
-                <button
-                  onClick={() => handleFollowSeller(product?.seller?.id)}
-                  className="flex items-center justify-center gap-2 cursor-pointer px-1 py-2 text-sm font-medium rounded-lg hover:text-[var(--color-orangeTwo)] transition "
-                >
-                  <FaGifts className="text-lg text-gray-600 hover:text-[var(--color-orangeTwo)]" /> 
-                  {isFollowing ? "Takip Ediliyor" : "Takip Et"}
-                </button>
-              </div>
+              {/* Takip Et */}
+              <button
+                onClick={() => handleFollowSeller(product.sellerId)}
+                disabled={!product?.sellerId}
+                className={`flex items-center justify-center gap-2 w-full py-2 text-sm font-medium rounded-lg transition cursor-pointer
+                  ${isFollowing ? "bg-gray-100 text-gray-700" : "bg-orange-50 hover:text-orange-600 hover:bg-orange-100"}`}
+              >
+                {isFollowing ? (
+                  <FaUserCheck className="text-lg text-green-600" />
+                ) : (
+                  <FaUserPlus className="text-lg text-gray-600 hover:text-orange-600" />
+                )}
+                {isFollowing ? "Takip Ediliyor" : "Takip Et"}
+              </button>
 
               {/* Satıcıya Sor */}
               <button
@@ -552,12 +619,14 @@ const ProductDetail = () => {
                     });
                   }, 150);
                 }}
-                className="px-1 py-2 text-sm font-medium rounded-lg hover:text-[var(--color-orangeTwo)] transition flex items-center justify-center gap-2 cursor-pointer"
+                className="flex items-center justify-center gap-2 w-full py-2 text-sm font-medium rounded-lg bg-gray-50 hover:bg-gray-100 transition hover:text-orange-600 cursor-pointer"
               >
-                <TiMessages className="text-lg text-gray-600 hover:text-[var(--color-orangeTwo)]" /> Satıcıya Sor
+                <TiMessages className="text-lg text-gray-600 hover:text-orange-600" /> Satıcıya Sor
               </button>
+
             </div>
           </div>
+
         </div>
 
         {/* Detay Sekmeleri */}

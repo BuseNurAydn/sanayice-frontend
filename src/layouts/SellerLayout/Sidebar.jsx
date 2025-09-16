@@ -14,57 +14,62 @@ import { API_BASE } from "../../config";
 const menuItems = [
   {
     label: "Hesabımı Doğrulama",
-    to: "/seller/vertification",
+    to: "/satici/dogrulama",
     icon: <MdVerifiedUser />,
   },
   {
     label: "Satış Yönetim Paneli",
-    to: "/seller/dashboard",
+    to: "/satici/yonetim-paneli",
     icon: <BsFileBarGraphFill />,
   },
   {
     label: "Mağazam",
-    to: "/seller/store",
+    to: "/satici/magazam",
     icon: <MdStorefront />,
   },
   {
     label: "Siparişler",
-    to: "/seller/orders",
+    to: "/satici/siparislerim",
     icon: <BsHandbagFill />,
   },
   {
     label: "Ürünler",
-    to: "/seller/products",
+    to: "/satici/urunlerim",
     icon: <AiFillProduct />,
     subMenu: [
       {
         label: "Ürün Ekleme",
-        to: "/seller/products/add",
+        to: "/satici/urun/ekleme",
         icon: <FaPlus />,
       }
     ],
   },
   {
     label: "Satıcı Kupon Yönetimi",
-    to: "/seller/seller_campaign",
+    to: "/satici/satici-kupon",
     icon: <MdVerifiedUser />,
   },
   {
     label: "Satıcı Doğrulama Sayfası",
-    to: "/seller/seller-verification",
+    to: "/satici/satici-dogrulama",
     icon: <MdVerifiedUser />,
   },
   {
     label: "Kategoriler",
-    to: "/seller/categories",
+    to: "/satici/kategoriler",
     icon: <BiSolidCategory />,
     subMenu: [
       {
         label: "Kategori Ekleme",
-        to: "/seller/categories/add",
+        to: "/satici/kategori/ekleme",
         icon: <FaPlus />,
       }
     ],
+  },
+    {
+    label: "Ürün Onaylama",
+    to: "/satici/urun-kontrol",
+    icon: <MdVerifiedUser />,
   },
   {/** 
   {
@@ -74,12 +79,12 @@ const menuItems = [
   }*/},
   {
     label: "Slider Yönetimi",
-    to: "/seller/banner_management",
+    to: "/satici/slider-yonetimi",
     icon: <MdViewCarousel />,
   },
   {
     label: "Kampanya Ve Kupon Yönetimi",
-    to: "/seller/coupon_campaign_management",
+    to: "/satici/kampanya-kupon-yonetimi",
     icon: <MdLocalOffer />,
   },
   // {
@@ -89,7 +94,7 @@ const menuItems = [
   // },
   {
     label: "Destek Ve Geri Bildirim Yönetimi",
-    to: "/seller/support_management",
+    to: "/satici/destek-yonetimi",
     icon: <MdSupport />,
   },
 ];
@@ -154,13 +159,14 @@ const Sidebar = () => {
     return item.label !== "Kategoriler" &&
            item.label !== "Marka Listesi" &&
            item.label !== "Satıcı Doğrulama" &&
+           item.label !== "Ürün Onaylama" &&
            item.label !== "Slider Yönetimi" &&
            item.label !== "Kampanya Ve Kupon Yönetimi" &&
            item.label !== "Satıcıların Kupon Ve Kampanya Listesi" &&
            item.label !== "Destek Ve Geri Bildirim Yönetimi" &&
            item.label !== "Satıcı Doğrulama Sayfası";
     } else if (role === "ROLE_MANAGER") {
-      return item.label === "Satıcı Doğrulama" || item.label === "Kategoriler" ||  item.label === "Marka Listesi" || 
+      return item.label === "Satıcı Doğrulama" || item.label ==="Ürün Onaylama" || item.label === "Kategoriler" ||  item.label === "Marka Listesi" || 
              item.label === "Slider Yönetimi" || item.label === "Kampanya Ve Kupon Yönetimi" || item.label === "Satıcıların Kupon Ve Kampanya Listesi" ||  item.label === "Destek Ve Geri Bildirim Yönetimi" ||  item.label === "Satıcı Doğrulama Sayfası";
     } else {
       return true;
