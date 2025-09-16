@@ -353,7 +353,7 @@ const ProductDetail = () => {
               {htext(product.categoryName)}
             </Link>
             <span className="mx-2">/</span>
-            <span className="text-gray-900 font-medium text-sm">{product.name}</span>
+            <span className="text-gray-900 font-medium text-xs">{product.name}</span>
           </nav>
         </div>
       </div>

@@ -172,7 +172,7 @@ const Sidebar = () => {
            item.label !== "Satıcı Doğrulama Sayfası";
 
     } else if (role === "ROLE_MANAGER") {
-      return item.label === "Satıcı Doğrulama" || item.label === "Kategoriler" ||  item.label === "Marka Listesi"   ||
+      return item.label === "Satıcı Doğrulama" || item.label==="Ürün Onaylama" || item.label === "Kategoriler" ||  item.label === "Marka Listesi"   ||
              item.label === "Slider Yönetimi"  || item.label === "Kampanya Ve Kupon Yönetimi" || item.label === "Satıcıların Kupon Ve Kampanya Listesi" ||   item.label === "Destek Ve Geri Bildirim Yönetimi" ||  item.label === "Satıcı Doğrulama Sayfası";
     } else {
       return true;
