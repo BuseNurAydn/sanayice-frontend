@@ -1,66 +1,53 @@
 import { useState, useEffect } from "react";
 import { FaEnvelopeOpenText } from "react-icons/fa";
+import { getProductQuestions, askProductQuestion } from "../services/productsService";
+import { toast } from "react-toastify";
 
-const SellerQuestions = ({ autoOpenForm = false }) => {
-  const [questions, setQuestions] = useState([
-    {
-      question: "Ürün orijinal mi?",
-      answer: {
-        text: "Ürün orijinaldir.",
-        seller: "CNS GROUP",
-        date: "26 Ağustos  56 dakika önce",
-      },
-    },
-  ]);
-
+const SellerQuestions = ({ productId, autoOpenForm = false }) => {
+  const [questions, setQuestions] = useState([]);
   const [showAskForm, setShowAskForm] = useState(false);
   const [topic, setTopic] = useState("");
   const [description, setDescription] = useState("");
-  const [replyText, setReplyText] = useState("");
-  const [replyingIndex, setReplyingIndex] = useState(null);
+  const [loading, setLoading] = useState(false);
 
+  //Soruları çekme
   useEffect(() => {
     if (autoOpenForm) setShowAskForm(true);
-  }, [autoOpenForm]);
+    const fetchQuestions = async () => {
+      setLoading(true);
+      const data = await getProductQuestions(productId);
+      setQuestions(data);
+      setLoading(false);
+    };
+    fetchQuestions();
+  }, [productId, autoOpenForm]);
 
-  const handleAskQuestion = (e) => {
+  //Soru sorma
+  const handleAskQuestion = async (e) => {
     e.preventDefault();
     if (!topic || !description) return;
 
     const fullQuestion = `${topic}: ${description}`;
-    setQuestions([...questions, { question: fullQuestion, answer: null }]);
-    setTopic("");
-    setDescription("");
-    setShowAskForm(false);
-  };
 
-  const handleReply = (index) => {
-    if (!replyText) return;
-
-    const updatedQuestions = [...questions];
-    updatedQuestions[index].answer = {
-      text: replyText,
-      seller: "CNS GROUP",
-      date: new Date().toLocaleString("tr-TR", {
-        day: "2-digit",
-        month: "long",
-        hour: "2-digit",
-        minute: "2-digit",
-      }),
-    };
-
-    setQuestions(updatedQuestions);
-    setReplyText("");
-    setReplyingIndex(null);
+    try {
+      const newQuestion = await askProductQuestion(productId, fullQuestion);
+      setQuestions([...questions, newQuestion]);
+      setTopic("");
+      setDescription("");
+      setShowAskForm(false);
+      toast.success("Soru gönderildi");
+    } catch (err) {
+      toast.error("Soru gönderilemedi");
+    }
   };
 
   return (
     <div className="transition-all duration-500 ease-in-out max-w-6xl">
-     
-
       {/* Sorular */}
-      <div className="flex-1 max-w-4xl relative">
-        {questions.length === 0 ? (
+      <div className="flex-1 max-w-4xl relative space-y-4">
+        {loading ? (
+          <p>Yükleniyor...</p>
+        ) : questions.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-2">
             <FaEnvelopeOpenText className="text-6xl text-gray-400" />
             <p className="text-gray-500 italic">Henüz bir soru bulunmuyor.</p>
@@ -68,47 +55,23 @@ const SellerQuestions = ({ autoOpenForm = false }) => {
         ) : (
           questions.map((q, idx) => (
             <div key={idx} className="pb-2">
-              <p className="font-medium text-gray-900">{q.question}</p>
+              <p className="font-medium text-gray-900">{q.questionText}</p>
 
-              {q.answer ? (
+              {q.answerText ? (
                 <div className="mt-1 border border-gray-200 rounded-lg p-3 bg-gray-50">
-                  <p className="text-gray-800">{q.answer.text}</p>
+                  <p className="text-gray-800">{q.answerText}</p>
                   <p className="text-sm text-gray-500 mt-1">
-                    <span className="font-semibold text-blue-600">{q.answer.seller}</span> satıcısı cevapladı
+                    <span className="font-semibold text-blue-600">
+                      {q.sellerName || "Satıcı"}
+                    </span>{" "}
+                    tarafından cevaplandı
                   </p>
-                  <p className="text-xs text-gray-400 mt-1">{q.answer.date}</p>
-                </div>
-              ) : replyingIndex === idx ? (
-                <div className="mt-1 space-y-2">
-                  <textarea
-                    value={replyText}
-                    onChange={(e) => setReplyText(e.target.value)}
-                    placeholder="Cevabınızı yazın..."
-                    className="border border-gray-200 rounded-lg px-4 py-2 w-full outline-none"
-                    rows={3}
-                  />
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => handleReply(idx)}
-                      className="bg-[var(--color-dark-orange)] text-white px-4 py-2 rounded-lg font-medium"
-                    >
-                      Cevapla
-                    </button>
-                    <button
-                      onClick={() => setReplyingIndex(null)}
-                      className="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded-lg font-medium"
-                    >
-                      İptal
-                    </button>
-                  </div>
+                  <p className="text-xs text-gray-400 mt-1">{q.createdAt}</p>
                 </div>
               ) : (
-                <button
-                  onClick={() => setReplyingIndex(idx)}
-                  className="mt-1 border text-[var(--color-dark-blue)] px-4 py-2 rounded-lg cursor-pointer font-medium"
-                >
-                  Cevap Yaz
-                </button>
+                <p className="text-sm text-gray-500 italic mt-1">
+                  Henüz cevaplanmadı
+                </p>
               )}
             </div>
           ))
@@ -146,8 +109,9 @@ const SellerQuestions = ({ autoOpenForm = false }) => {
           </form>
         </div>
       )}
-       {/* Üstteki Satıcıya Sor butonu */}
-      <div className="flex justify-end">
+
+      {/* Üstteki Satıcıya Sor butonu */}
+      <div className="flex justify-end mt-2">
         <button
           onClick={() => setShowAskForm(true)}
           className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 rounded-lg font-medium"
@@ -160,5 +124,3 @@ const SellerQuestions = ({ autoOpenForm = false }) => {
 };
 
 export default SellerQuestions;
-
-

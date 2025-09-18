@@ -2,7 +2,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { useSelector } from 'react-redux';
 import { useDispatch } from "react-redux";
 import sanayice from "../../src/assets/png/sanayice.png";
-import { FaShoppingCart, FaStore} from "react-icons/fa";
+import { FaShoppingCart, FaStore } from "react-icons/fa";
 import { FaRegHeart } from "react-icons/fa6";
 import { RxTriangleDown, RxTriangleUp } from "react-icons/rx";
 import AccountMenu from "../pages/customer/AccountPage/AccountMenu";
@@ -17,7 +17,7 @@ const Header = ({ categories = [] }) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [menuOpen, setMenuOpen] = useState(false); // Hamburger menü durumu
-
+  const user = useSelector(state => state.auth.user); // redux store
 
   const [shouldRenderMenu, setShouldRenderMenu] = useState(false); // Menü DOM'da mı
   const [menuVisible, setMenuVisible] = useState(false);           // Menü görünür mü (translate-x-0)
@@ -230,22 +230,24 @@ const Header = ({ categories = [] }) => {
               </span>
             )}
           </button>
-          
+
 
           {/* Hesabım */}
           <div className="block">
             <AccountMenu />
           </div>
 
-           <button
-            onClick={() => navigate('/giris-kaydol/satici/uye-ol')}
-            className=" gradient-background text-white p-1 md:px-4 md:py-2 rounded-lg md:font-semibold font-medium transition-colors duration-200 transform hover:scale-105 relative flex items-center space-x-1 md:space-x-2 cursor-pointer "
-            aria-label="satıcıOl"
-          >
-             <FaStore className="w-4 h-4 md:mr-2 text-orange-600 md:text-white" />
-            <span className="hidden md:inline">Satıcı Ol</span>
-           
-          </button>
+          {/* Satıcı Ol / Giriş Butonu */}
+          {!user && (
+            <button
+              onClick={() => navigate('/giris-kaydol/satici/uye-ol')}
+              className=" gradient-background text-white p-1 md:px-4 md:py-2 rounded-lg md:font-semibold font-medium transition-colors duration-200 transform hover:scale-105 relative flex items-center space-x-1 md:space-x-2 cursor-pointer "
+              aria-label="satıcıOl"
+            >
+              <FaStore className="w-4 h-4 md:mr-2 text-orange-600 md:text-white" />
+              <span className="hidden md:inline">Satıcı Ol / Giriş</span>
+            </button>
+          )}
         </div>
 
         {/* Menü */}

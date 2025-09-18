@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { FiSearch, FiFilter, FiEye, FiCheck, FiX, FiClock, FiMessageCircle, FiPackage, FiTrendingUp, FiCalendar } from 'react-icons/fi';
 import { BsThreeDots, BsChevronDown } from 'react-icons/bs';
+import { getMyProductQuestions, rejectProductQuestion, answerProductQuestion } from '../../services/sellerProductService';
+import AdminText from '../../shared/Text/AdminText';
 
 const SellerQuestionsPage = () => {
+  const [products, setProducts] = useState([]);
   const [questions, setQuestions] = useState([]);
   const [filteredQuestions, setFilteredQuestions] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -13,71 +16,81 @@ const SellerQuestionsPage = () => {
   const [answerText, setAnswerText] = useState('');
   const [loading, setLoading] = useState(false);
 
-  // Mock data - gerçek uygulamada API'den gelecek
-  const mockQuestions = [
-    {
-      id: 1,
-      productId: 101,
-      productName: "iPhone 15 Pro Max",
-      productImage: "https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=100&h=100&fit=crop",
-      customerName: "Ahmet Yılmaz",
-      questionText: "Bu ürünün garanti süresi kaç yıl? Uluslararası garanti var mı?",
-      status: "BEKLIYOR",
-      createdAt: "2024-01-15T10:30:00Z",
-      answerText: null
-    },
-    {
-      id: 2,
-      productId: 102,
-      productName: "Samsung Galaxy S24",
-      productImage: "https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?w=100&h=100&fit=crop",
-      customerName: "Zeynep Kaya",
-      questionText: "Farklı renk seçenekleri mevcut mu? Stokta hangi renkler var?",
-      status: "CEVAPLANMIS",
-      createdAt: "2024-01-14T15:45:00Z",
-      answerText: "Evet, Titanium Blue, Phantom Black ve Cream renklerinde stokumuz mevcuttur."
-    },
-    {
-      id: 3,
-      productId: 103,
-      productName: "MacBook Air M3",
-      productImage: "https://images.unsplash.com/photo-1541807084-5c52b6b3adef?w=100&h=100&fit=crop",
-      customerName: "Mehmet Demir",
-      questionText: "RAM ve SSD yükseltme imkanı var mı? Fiyat farkları nelerdir?",
-      status: "BEKLIYOR",
-      createdAt: "2024-01-13T09:15:00Z",
-      answerText: null
-    },
-    {
-      id: 4,
-      productId: 104,
-      productName: "AirPods Pro 2",
-      productImage: "https://images.unsplash.com/photo-1606318801954-d46d46d3360a?w=100&h=100&fit=crop",
-      customerName: "Ayşe Öz",
-      questionText: "Noise cancelling özelliği ne kadar etkili? İlk nesille karşılaştırabilir misiniz?",
-      status: "REDDEDILDI",
-      createdAt: "2024-01-12T14:20:00Z",
-      answerText: null
-    },
-    {
-      id: 5,
-      productId: 101,
-      productName: "iPhone 15 Pro Max",
-      productImage: "https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=100&h=100&fit=crop",
-      customerName: "Can Arslan",
-      questionText: "Kamera özellikleri hakkında detaylı bilgi alabilir miyim?",
-      status: "CEVAPLANMIS",
-      createdAt: "2024-01-11T16:30:00Z",
-      answerText: "48MP Ana kamera, 12MP Ultra Wide, 12MP Telephoto lens ile profesyonel fotoğraflar çekebilirsiniz."
+useEffect(() => {
+  const fetchQuestions = async () => {
+    try {
+      const data = await getMyProductQuestions();
+      setQuestions(data);
+      setFilteredQuestions(data);
+
+      // ürün listesini sorulardan çıkar
+      const products = [
+        ...new Map(
+          data.map((q) => [q.productId, { id: q.productId, name: q.productName }])
+        ).values(),
+      ];
+      setProducts(products);
+
+    } catch (err) {
+      console.error("Sorular yüklenemedi:", err);
+    } finally {
+      setLoading(false);
     }
-  ];
+  };
 
-  const products = [...new Set(mockQuestions.map(q => ({ id: q.productId, name: q.productName })))];
+  fetchQuestions();
+}, []);
 
-  useEffect(() => {
-    setQuestions(mockQuestions);
-    setFilteredQuestions(mockQuestions);
-  }, []);
+//Cevapla
+const handleAnswerQuestion = async (questionId) => {
+  if (!answerText.trim()) return;
+
+  setLoading(true);
+
+  try {
+    // Servisi çağırıyoruz
+    const updatedQuestion = await answerProductQuestion(questionId, answerText);
+
+    // Gelen cevaba göre state'i güncelle
+    setQuestions(prev =>
+      prev.map(q =>
+        q.id === questionId
+          ? { ...q, status: updatedQuestion.status || 'CEVAPLANMIS', answerText: updatedQuestion.answerText || answerText }
+          : q
+      )
+    );
+
+    setShowAnswerModal(false);
+    setSelectedQuestion(null);
+    setAnswerText('');
+  } catch (err) {
+    console.error(err);
+    alert('Cevap gönderilirken bir hata oluştu.');
+  } finally {
+    setLoading(false);
+  }
+};
+
+//Reddetme
+const handleRejectQuestion = async (questionId) => {
+
+  try {
+    // API çağrısı
+    await rejectProductQuestion(questionId);
+
+    // Başarılıysa state güncelle
+    setQuestions(prev => prev.map(q => 
+      q.id === questionId 
+        ? { ...q, status: 'REDDEDILDI' }
+        : q
+    ));
+  } catch (err) {
+    console.error("Soru reddedilirken hata oluştu:", err);
+    alert("Soru reddedilirken bir hata oluştu.");
+  } finally {
+    setLoading(false);
+  }
+};
 
   useEffect(() => {
     let filtered = questions;
@@ -104,7 +117,7 @@ const SellerQuestionsPage = () => {
   const getStatusColor = (status) => {
     switch (status) {
       case 'BEKLIYOR': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-      case 'CEVAPLANMIS': return 'bg-green-100 text-green-800 border-green-200';
+      case 'CEVAPLANDI': return 'bg-green-100 text-green-800 border-green-200';
       case 'REDDEDILDI': return 'bg-red-100 text-red-800 border-red-200';
       default: return 'bg-gray-100 text-gray-800 border-gray-200';
     }
@@ -113,47 +126,16 @@ const SellerQuestionsPage = () => {
   const getStatusText = (status) => {
     switch (status) {
       case 'BEKLIYOR': return 'Bekliyor';
-      case 'CEVAPLANMIS': return 'Cevaplanmış';
+      case 'CEVAPLANDI': return 'Cevaplandı';
       case 'REDDEDILDI': return 'Reddedildi';
       default: return status;
     }
   };
 
-  const handleAnswerQuestion = async (questionId) => {
-    if (!answerText.trim()) return;
-    
-    setLoading(true);
-    // API call simülasyonu
-    setTimeout(() => {
-      setQuestions(prev => prev.map(q => 
-        q.id === questionId 
-          ? { ...q, status: 'CEVAPLANMIS', answerText: answerText }
-          : q
-      ));
-      setShowAnswerModal(false);
-      setSelectedQuestion(null);
-      setAnswerText('');
-      setLoading(false);
-    }, 1000);
-  };
-
-  const handleRejectQuestion = async (questionId) => {
-    setLoading(true);
-    // API call simülasyonu
-    setTimeout(() => {
-      setQuestions(prev => prev.map(q => 
-        q.id === questionId 
-          ? { ...q, status: 'REDDEDILDI' }
-          : q
-      ));
-      setLoading(false);
-    }, 500);
-  };
-
   const stats = {
     total: questions.length,
     pending: questions.filter(q => q.status === 'BEKLIYOR').length,
-    answered: questions.filter(q => q.status === 'CEVAPLANMIS').length,
+    answered: questions.filter(q => q.status === 'CEVAPLANDI').length,
     rejected: questions.filter(q => q.status === 'REDDEDILDI').length
   };
 
@@ -172,7 +154,7 @@ const SellerQuestionsPage = () => {
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Ürün Soruları Yönetimi</h1>
+          <AdminText>Ürün Soruları Yönetimi</AdminText>
           <p className="text-gray-600">Müşterilerinizin ürünleriniz hakkındaki sorularını yönetin</p>
         </div>
 
@@ -235,7 +217,7 @@ const SellerQuestionsPage = () => {
               <input
                 type="text"
                 placeholder="Soru, ürün veya müşteri adı ile ara..."
-                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
@@ -243,13 +225,13 @@ const SellerQuestionsPage = () => {
 
             <div className="relative">
               <select
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none bg-white"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent appearance-none bg-white outline-none"
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
               >
                 <option value="all">Tüm Durumlar</option>
                 <option value="BEKLIYOR">Bekleyen</option>
-                <option value="CEVAPLANMIS">Cevaplanmış</option>
+                <option value="CEVAPLANDI">Cevaplanan</option>
                 <option value="REDDEDILDI">Reddedilen</option>
               </select>
               <BsChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
@@ -257,7 +239,7 @@ const SellerQuestionsPage = () => {
 
             <div className="relative">
               <select
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none bg-white"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent appearance-none bg-white outline-none"
                 value={selectedProduct}
                 onChange={(e) => setSelectedProduct(e.target.value)}
               >
@@ -318,7 +300,7 @@ const SellerQuestionsPage = () => {
                         
                         <div className="flex items-center text-sm text-gray-500">
                           <FiCalendar className="mr-1" />
-                          {formatDate(question.createdAt)}
+                          {new Date(question.questionDate).toLocaleDateString()}
                         </div>
                       </div>
                       
@@ -363,8 +345,8 @@ const SellerQuestionsPage = () => {
 
       {/* Answer Modal */}
       {showAnswerModal && selectedQuestion && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-xl max-w-xl w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6 border-b border-gray-200">
               <h3 className="text-xl font-semibold text-gray-900">Soruyu Cevapla</h3>
             </div>
@@ -383,7 +365,7 @@ const SellerQuestionsPage = () => {
               <div className="mb-6">
                 <label className="block font-medium text-gray-900 mb-2">Cevabınız:</label>
                 <textarea
-                  className="w-full h-32 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                  className="w-full h-32 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent resize-none outline-none"
                   placeholder="Müşterinin sorusuna detaylı bir cevap yazın..."
                   value={answerText}
                   onChange={(e) => setAnswerText(e.target.value)}
@@ -406,7 +388,7 @@ const SellerQuestionsPage = () => {
               <button
                 onClick={() => handleAnswerQuestion(selectedQuestion.id)}
                 disabled={!answerText.trim() || loading}
-                className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+                className="px-6 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
               >
                 {loading ? (
                   <>

@@ -13,7 +13,7 @@ function CategoryProductsPage({ type = "category" }) {
     const [categoryData, setCategoryData] = useState(null);
     const [subcategories, setSubcategories] = useState([]);
     const [selectedSubcategories, setSelectedSubcategories] = useState([]);
-    const [maxPrice, setMaxPrice] = useState(30000);
+    const [maxPrice, setMaxPrice] = useState(100000);
     const [isFilterOpen, setIsFilterOpen] = useState(false);
     const [expanded, setExpanded] = useState(true);
     const [isSortOpen, setIsSortOpen] = useState(false);
@@ -288,7 +288,7 @@ function CategoryProductsPage({ type = "category" }) {
                             <input
                                 type="range"
                                 min={200}
-                                max={30000}
+                                max={100000}
                                 step={100}
                                 value={maxPrice}
                                 onChange={(e) => setMaxPrice(Number(e.target.value))}
@@ -363,7 +363,7 @@ function CategoryProductsPage({ type = "category" }) {
                     </div>
 
                     {/* Ürün grid'i */}
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-6">
                         {filteredProducts.length === 0 ? (
                             <div className="col-span-full text-center text-gray-500">
                                 Ürün bulunamadı.

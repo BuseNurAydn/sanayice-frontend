@@ -155,3 +155,122 @@ export const toggleProductStatus = async (id) => {
  
   return await response.json();
 };
+
+// Satıcıya ait ürün soruları
+export const getMyProductQuestions = async () => {
+  const token = localStorage.getItem("token");
+
+  const response = await fetch(`${API_BASE}/product-questions/my-product-questions`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error("Sorular alınamadı");
+  }
+
+  return await response.json();
+};
+
+//soruyu cevaplamak
+export const answerProductQuestion = async (questionId, answerText) => {
+  const token = localStorage.getItem("token");
+  try {
+    const response = await fetch(`${API_BASE}/product-questions/${questionId}/answer`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+         Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ answerText }),
+    });
+
+    if (!response.ok) {
+      throw new Error('Cevap gönderilemedi');
+    }
+
+    return await response.json(); // backend cevabı
+  } catch (err) {
+    console.error(err);
+    throw err;
+  }
+};
+
+//Reddetme
+export const rejectProductQuestion = async (questionId) => {
+  const token = localStorage.getItem("token");
+  try {
+    const response = await fetch(`${API_BASE}/product-questions/${questionId}/reject`, {
+      method: 'DELETE',
+      headers: {
+         Authorization: `Bearer ${token}`,
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error('Soru reddedilemedi');
+    }
+
+    return true;
+  } catch (err) {
+    console.error(err);
+    throw err;
+  }
+};
+
+// Excel dosyası ürün import etme
+export const bulkImportProducts = async (file) => {
+  const token = localStorage.getItem("token");
+
+  const formData = new FormData();
+  formData.append("file", file);
+
+  const response = await fetch(`${PRODUCTS_API}/bulk-import`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    body: formData,
+  });
+
+  if (!response.ok) {
+    throw new Error("Toplu ürün yükleme başarısız");
+  }
+
+  return await response.json();
+};
+
+//  Zorunlu kolon başlıklarını çekme
+export const getBulkImportRequiredColumns = async () => {
+  const token = localStorage.getItem("token");
+
+  const response = await fetch(`${PRODUCTS_API}/bulk-import/required-columns`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error("Zorunlu kolon başlıkları alınamadı");
+  }
+
+  return await response.json();
+};
+
+//  Opsiyonel kolon başlıklarını çekme
+export const getBulkImportOptionalColumns = async () => {
+  const token = localStorage.getItem("token");
+
+  const response = await fetch(`${PRODUCTS_API}/bulk-import/optional-columns`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error("Opsiyonel kolon başlıkları alınamadı");
+  }
+
+  return await response.json();
+};

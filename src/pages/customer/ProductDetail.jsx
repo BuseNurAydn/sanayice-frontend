@@ -11,9 +11,11 @@ import { toast } from "react-toastify";
 import { setBuyNowItem } from "../../store/buyNowSlice";
 import ProductCard from "../../components/ProductCard";
 import { ReviewIcon } from "./ReviewIcon";
+import { QuestionIcon } from "./QuestionIcon";
 import { addToFavorites, fetchFavorites, removeFavorites } from "../../services/favoritesService";
 import SellerQuestions from "../../components/SellerQuestions";
 import { followSeller, isFollowingSeller, unfollowSeller, getSellerRatings } from "../../services/authService";
+import { getProductQuestionsCount } from "../../services/productsService";
 
 const dummyRelatedProducts = [
   {
@@ -69,12 +71,11 @@ const ProductDetail = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [adding, setAdding] = useState(false);
-  const [questions, setQuestions] = useState([]);
-  const [newQuestion, setNewQuestion] = useState("");
   const tabsRef = useRef(null);
   const [isFollowing, setIsFollowing] = useState(false);
   const [sellerReviews, setSellerReviews] = useState([]);
   const [sellerAverage, setSellerAverage] = useState(0);
+  const [questionsCount, setQuestionsCount] = useState(0);
 
   const favorites = useSelector(state => state.favorites.items);
   const isFavorite = favorites.some(fav => fav.productId === product.id);
@@ -183,16 +184,7 @@ const ProductDetail = () => {
     fetchReviews();
   }, [id]);
 
-  if (loading) return <p>Yükleniyor...</p>;
-  if (error) return <p>Hata: {error}</p>;
-  if (!product) return <p>Ürün bulunamadı.</p>;
-
-  const averageRating = reviews.length > 0
-    ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
-    : 0;
-
-
-  // Add Favorites
+  //FAVORİLERE EKLEME
   const handleFavoriteClick = async (e) => {
     e.stopPropagation();
     const token = localStorage.getItem('token');
@@ -220,8 +212,7 @@ const ProductDetail = () => {
       setAdding(false);
     }
   };
-
-
+//SEPETE EKLEME
   const handleAddToCart = async (e) => {
     e.stopPropagation();
 
@@ -247,17 +238,25 @@ const ProductDetail = () => {
     }
   };
 
+  //SORU ADEDİ İÇİN
+useEffect(() => {
+  if (!id) return;
+
+  const fetchQuestionsCount = async () => {
+    try {
+      const count = await getProductQuestionsCount(id); 
+      setQuestionsCount(count);
+    } catch (err) {
+      console.error("Soru sayısı alınamadı:", err);
+    }
+  };
+
+  fetchQuestionsCount();
+}, [id]);
+
   const handleBuyNow = () => {
     dispatch(setBuyNowItem({ product, quantity }));
     navigate('/siparis-tamamla');
-  };
-
-  const handleAskQuestion = (e) => {
-    e.preventDefault();
-    if (!newQuestion.trim()) return;
-    const newQ = { question: newQuestion, answer: null };
-    setQuestions((prev) => [...prev, newQ]);
-    setNewQuestion("");
   };
 
   const htext = (text) => {
@@ -273,6 +272,16 @@ const ProductDetail = () => {
       });
     }
   };
+
+  
+  if (loading) return <p>Yükleniyor...</p>;
+  if (error) return <p>Hata: {error}</p>;
+  if (!product) return <p>Ürün bulunamadı.</p>;
+
+  const averageRating = reviews.length > 0
+    ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
+    : 0;
+
 
   const NavButton = ({ direction, onClick, disabled = false }) => (
     <button
@@ -683,7 +692,7 @@ const ProductDetail = () => {
                     {tab === "reviews" && (
                       <ReviewIcon count={reviews?.length || 0} />
                     )}
-                    {tab === "qa" && "Soru & Cevap"}
+                     {tab === "qa" && <QuestionIcon count={questionsCount} />}
                   </button>
                 ))}
               </div>
@@ -805,7 +814,7 @@ const ProductDetail = () => {
 
               {activeTab === "qa" && (
                 <div className="space-y-6 py-8">
-                  <SellerQuestions autoOpenForm={true} />
+                  <SellerQuestions  productId={id} autoOpenForm={true} />
                 </div>
               )}
             </div>

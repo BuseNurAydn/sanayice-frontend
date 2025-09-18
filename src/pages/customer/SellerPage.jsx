@@ -17,7 +17,7 @@ const SellerPage = () => {
 
     // Filtreleme
     const [selectedCategory, setSelectedCategory] = useState([]);
-    const [maxPrice, setMaxPrice] = useState(30000);
+    const [maxPrice, setMaxPrice] = useState(100000);
     const [minRating, setMinRating] = useState(0);
 
     useEffect(() => {
@@ -29,7 +29,8 @@ const SellerPage = () => {
                 const sellerProducts = await getActiveProductsBySeller(id);
                 setProducts(sellerProducts);
                 setFilteredProducts(sellerProducts);
-
+                 
+                console.log(sellerProducts)
                 // Satıcı bilgileri
                 const allFollowing = await getFollowing();
                 const sellerData = allFollowing.find(f => f.sellerId.toString() === id);
@@ -208,7 +209,7 @@ const SellerPage = () => {
                                 <input
                                     type="range"
                                     min={0}
-                                    max={30000}
+                                    max={100000}
                                     step={100}
                                     value={maxPrice}
                                     onChange={(e) => setMaxPrice(Number(e.target.value))}

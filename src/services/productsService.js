@@ -54,3 +54,46 @@ export const getActiveProductsBySeller = async (sellerId) => {
 
   return response.json();
 };
+
+ //ÜRÜNE SORU SORMA
+export const askProductQuestion = async (productId, questionText) => {
+  const token = localStorage.getItem("token");
+
+  const response = await fetch(`${API_BASE}/product-questions`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({
+      productId,
+      questionText,
+    }),
+  });
+
+  if (!response.ok) throw new Error("Soru gönderilemedi");
+
+  return response.json();
+};
+
+//Ürünün altına soruları getirme
+export const getProductQuestions = async (productId) => {
+  try {
+    const response = await fetch(`${API_BASE}/product-questions/product/${productId}`);
+    if (!response.ok) {
+      throw new Error("Sorular alınamadı");
+    }
+    return await response.json();
+  } catch (err) {
+    console.error(err);
+    return [];
+  }
+};
+
+//Soru adedi için
+export const getProductQuestionsCount = async (productId) => {
+  const res = await fetch(`${API_BASE}/product-questions/product/${productId}/count`);
+  if (!res.ok) throw new Error("Count alınamadı");
+  const data = await res.json();
+  return data; 
+};

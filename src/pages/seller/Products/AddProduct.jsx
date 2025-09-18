@@ -2,10 +2,11 @@ import AdminText from '../../../shared/Text/AdminText'
 import { useState, useEffect } from 'react'
 import { FaTrash } from "react-icons/fa";
 import { fetchCategories, fetchSubcategories } from "../../../services/categoryService";
-import { createProduct } from "../../../services/sellerProductService";
+import { createProduct, getBulkImportOptionalColumns, getBulkImportRequiredColumns, bulkImportProducts } from "../../../services/sellerProductService";
 import { toast } from 'react-toastify';
 import { Upload } from "lucide-react";
-import { Navigate, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import * as XLSX from "xlsx";
 
 
 const AddProduct = () => {
@@ -13,7 +14,7 @@ const AddProduct = () => {
   const boxStyle = 'border border-gray-200 md:p-4 p-2 rounded-lg shadow';
   const lineStyle = 'w-full h-[1px] bg-gray-300 mb-4'
   const labelStyle = 'block text-sm font-medium text-gray-900 pb-2';
-  const inputStyle = 'w-full border-gray-200 outline-none border px-3 py-2 rounded-lg mb-3';
+  const inputStyle = 'w-full border-gray-200 outline-none border px-3 py-2 rounded-lg my-4';
   const buttonStyle = "bg-[var(--color-orange)] text-white px-4 py-2 rounded-lg text-md";
 
   const [categories, setCategories] = useState([]);
@@ -23,7 +24,12 @@ const AddProduct = () => {
   const [mainImageError, setMainImageError] = useState("");
   const [additionalImageErrors, setAdditionalImageErrors] = useState([]);
 
+  const [excelFile, setExcelFile] = useState(null);
+  const [excelData, setExcelData] = useState([]);
+  const [requiredColumns, setRequiredColumns] = useState([]);
+  const [optionalColumns, setOptionalColumns] = useState([]);
 
+  
   const [formData, setFormData] = useState({
     name: "",
     description: "",
@@ -48,17 +54,57 @@ const AddProduct = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const categoriesData = await fetchCategories();
-        const subcategoriesData = await fetchSubcategories();
+        const [categoriesData, subcategoriesData, reqCols, optCols] = await Promise.all([
+          fetchCategories(),
+          fetchSubcategories(),
+          getBulkImportOptionalColumns(),
+          getBulkImportRequiredColumns()
+        ]);
 
         setCategories(categoriesData);
         setSubcategories(subcategoriesData);
+        setRequiredColumns(reqCols);
+        setOptionalColumns(optCols);
       } catch (error) {
         console.error("Veri çekme hatası:", error);
       }
     };
     fetchData();
   }, []);
+
+  // Excel dosyası yükleme ve gönderme
+  const handleExcelUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    setExcelFile(file);
+
+    const reader = new FileReader();
+    reader.onload = (evt) => {
+      const data = new Uint8Array(evt.target.result);
+      const workbook = XLSX.read(data, { type: "array" });
+      const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+      const jsonData = XLSX.utils.sheet_to_json(worksheet);
+      setExcelData(jsonData);
+    };
+    reader.readAsArrayBuffer(file);
+  };
+
+  const handleExcelSubmit = async () => {
+    if (!excelFile) {
+      toast.error("Lütfen bir Excel dosyası seçin!");
+      return;
+    }
+    try {
+      await bulkImportProducts(excelFile);
+      toast.success("Excel dosyası başarıyla yüklendi!");
+      setExcelFile(null);
+      setExcelData([]);
+    } catch (err) {
+      console.error(err);
+      toast.error("Excel yükleme sırasında hata oluştu!");
+    }
+  };
 
   // Diğer form alanları için genel değişiklik handler'ı
   const handleChange = (e) => {
@@ -190,14 +236,17 @@ const AddProduct = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!mainImageFile) {
-      toast.error("Ana resim yüklemek zorunludur!");
-      return;
-    }
 
-    if (!formData.name || !formData.description || !formData.price) {
-      toast.error("Gerekli alanları doldurun!");
-      return;
+    // Excel seçiliyse manuel alanları zorunlu yapma
+    if (!excelFile) {
+      if (!mainImageFile) {
+        toast.error("Ana resim yüklemek zorunludur!");
+        return;
+      }
+      if (!formData.name || !formData.description || !formData.price) {
+        toast.error("Gerekli alanları doldurun!");
+        return;
+      }
     }
 
     const safeParseInt = (val) => {
@@ -248,9 +297,23 @@ const AddProduct = () => {
       form.append("imageFiles", file);
     });
 
+
     try {
-      const result = await createProduct(form);
-      toast.success("Ürün başarıyla ona gönderildi!");
+      if (excelFile) {
+
+        // Excel yüklemesi (bulk import)
+        const excelForm = new FormData();
+        excelForm.append("file", excelFile);
+
+        const response = await bulkImportProducts(excelForm);
+        toast.success("Excel ürünleri başarıyla yüklendi, onaya gönderildi!");
+        setExcelFile(null);
+      } else {
+        // Normal ürün yükleme
+        const result = await createProduct(form);
+        toast.success("Ürün başarıyla onaya gönderildi!");
+      }
+
       navigate(`/satici/urunlerim`);
       handleClear();
       setMainImageFile(null);
@@ -293,7 +356,7 @@ const AddProduct = () => {
       <AdminText>Ürün Ekle</AdminText>
 
       {/* Form Alanı */}
-      <form onSubmit={handleSubmit} className="mt-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <form onSubmit={handleSubmit} className="my-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Sol Form */}
         <div className="space-y-6">
           <div className={boxStyle}>
@@ -486,16 +549,16 @@ const AddProduct = () => {
                 <label htmlFor="freeShipping" className={labelStyle}>Ücretsiz Kargo</label>
               </div>
               <div className=''>
-              <label>
-                <input
-                  type="checkbox"
-                  checked={formData.active}
-                  onChange={(e) => setFormData({ ...formData, active: e.target.checked })}
-                  
-                />
-                {formData.active ? "Aktif" : "Pasif"}
-              </label>
-             </div>
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={formData.active}
+                    onChange={(e) => setFormData({ ...formData, active: e.target.checked })}
+
+                  />
+                  {formData.active ? "Aktif" : "Pasif"}
+                </label>
+              </div>
             </div>
           </div>
 
@@ -579,6 +642,67 @@ const AddProduct = () => {
           </div>
         </div>
       </form>
+
+      {/* Excel ile Ürün Yükleme */}
+      <div className={boxStyle}>
+        <h3 className="font-semibold mb-2 ">Excel ile Ürün Yükle</h3>
+        <div className={lineStyle} />
+
+        <span className='text-sm text-orange-500 bg-orange-50 py-1 px-2 rounded-full'>! Lütfen excelinizi bu başlık isimlerine dikkat ederek yükleyiniz</span>
+
+        <input
+          type="file"
+          accept=".xlsx, .xls"
+          onChange={handleExcelUpload}
+          className={inputStyle}
+        />
+
+        {/* Gereken kolonları kullanıcıya gösterelim */}
+        {requiredColumns.length > 0 && (
+          <p className="text-sm text-gray-700 mt-2">
+            <strong>Zorunlu Kolonlar:</strong> {requiredColumns.join(", ")}
+          </p>
+        )}
+        {optionalColumns.length > 0 && (
+          <p className="text-sm text-gray-700 mt-1">
+            <strong>Opsiyonel Kolonlar:</strong> {optionalColumns.join(", ")}
+          </p>
+        )}
+
+        {excelData.length > 0 && (
+          <div className="overflow-x-auto mt-4">
+            <table className="w-full border border-gray-300 text-sm">
+              <thead>
+                <tr>
+                  {Object.keys(excelData[0]).map((col, idx) => (
+                    <th key={idx} className="border px-2 py-1 bg-gray-100">
+                      {col}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {excelData.map((row, rIdx) => (
+                  <tr key={rIdx}>
+                    {Object.values(row).map((val, cIdx) => (
+                      <td key={cIdx} className="border px-2 py-1">
+                        {val}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            <button
+              onClick={handleExcelSubmit}
+              className={`${buttonStyle} mt-4`}
+            >
+              Excel’i Yükle
+            </button>
+          </div>
+        )}
+      </div>
+
       {/* Butonlar */}
       <div className="mt-8 flex flex-col md:flex-row gap-4 justify-center">
         <button type="submit" className={buttonStyle} onClick={handleSubmit}>Onaya Gönder</button>

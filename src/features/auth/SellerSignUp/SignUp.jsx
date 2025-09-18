@@ -457,7 +457,7 @@ const SignUp = () => {
     // Normal satıcı kayıt formu
     return (
         <AuthLayout>
-            <form onSubmit={handleSubmit} className="space-y-6 flex flex-col px-4 md:px-8 pt-4 pb-8">
+            <form onSubmit={handleSubmit} className="space-y-6 flex flex-col px-4 md:px-8 pt-12 pb-8">
                 {/* mesaj kutusu */}
                 {message && (
                     <div className={`text-sm mb-2 ${messageStyles[messageType]}`}>

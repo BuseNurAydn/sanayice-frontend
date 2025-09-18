@@ -15,11 +15,12 @@ const Header = () => {
   const user = useSelector((state) => state.auth.user);
 
 
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    dispatch(logout());
-    navigate('/giris-kaydol/giris-yap');
-  };
+ const handleLogout = () => {
+  localStorage.removeItem('token');
+  dispatch(logout());
+  window.location.href = '/';
+};
+
 
   return (
     <header className='bg-[var(--color-light)] p-2 pl-12 md:pl-4 flex justify-between'>
