@@ -57,7 +57,7 @@ const dummyRelatedProducts = [
 
 
 const ProductDetail = () => {
-  const { id } = useParams();
+  const { brand, productSlug, id } = useParams();
   const [sliderIndex, setSliderIndex] = useState(0);
   const [favorite, setFavorite] = useState(false);
   const [quantity, setQuantity] = useState(1);
@@ -162,7 +162,6 @@ const ProductDetail = () => {
         if (!response.ok) throw new Error("Ürün bulunamadı");
         const data = await response.json();
         setProduct(data);
-
 
       } catch (err) {
         setError(err.message);

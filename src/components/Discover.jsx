@@ -30,7 +30,7 @@ const Discover = () => {
 
   return (
     <div className="relative w-full md:px-8 py-4">
-      <div className="container mx-auto relative flex items-center">
+      <div className="container mx-auto max-w-7xl relative flex items-center">
         
         {/* Sol Ok */}
         <button

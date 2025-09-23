@@ -86,8 +86,8 @@ const Header = ({ categories = [] }) => {
   }, [menuOpen]);
 
   return (
-    <header className="bg-white shadow-sm py-4 sticky top-0 z-30">
-      <div className="container mx-auto px-4 md:px-0 2xl:px-30 flex items-center justify-between">
+    <header className="bg-white shadow-sm py-4 z-30">
+      <div className="container mx-auto max-w-7xl px-4 md:px-0 flex items-center justify-between">
 
         {/* Hamburger Menü (Mobilde) */}
         <div className="md:hidden">

@@ -13,6 +13,8 @@ import CategoriesSection from '../../components/CategoriesSection';
 import CategorySection from '../../components/CategorySection';
 import AddSlider from "../../components/addSlider";
 import Discover from "../../components/Discover";
+import CategoriesMenu from "../../components/CategoriesMenu";
+import HeaderCategories from "../../components/HeaderCategories";
 const NextArrow = ({ onClick }) => (
   <div
     onClick={onClick}
@@ -128,7 +130,6 @@ const HomePage = () => {
       setLoading(true);
       try {
         const categoryData = await fetchCategories();
-
         // Her kategori için ürünleri çektim
         const categoriesWithProducts = await Promise.all(
           categoryData.map(async (cat) => {
@@ -157,6 +158,7 @@ const HomePage = () => {
     getProducts()
       .then(data => {
         setProducts(data);
+        console.log(data)
       })
       .catch(error => {
         console.error("Hata:", error);
@@ -243,125 +245,10 @@ const HomePage = () => {
   if (loading) return <div className="text-center py-20">Yükleniyor...</div>;
   return (
     <div className="bg-gray-50">
-      <nav className="bg-white shadow-sm border-b border-gray-300 relative hidden md:block">
-        <div className="container mx-auto md:px-0 2xl:px-32">
-          <div className="py-5">
-
-            {/* 1. Satır */}
-            <div className="flex justify-center">
-              {categories.slice(0, 7).map((category, index) => {
-                const alignRight = index >= 4; // Son 2 kategori sağa yaslanacak
-                return (
-                  <div key={category.id} className="relative group">
-                    <Link
-                      to={`/kategori/${category.id}`}
-                      className="text-sm font-medium text-gray-700 hover:text-orange-600 transition-all duration-300 py-2 px-4 rounded-lg hover:bg-orange-50 flex items-center gap-1"
-                    >
-                      {category.name}
-                      {category.subcategories?.length > 0 && (
-                        <svg
-                          className="w-3 h-3 transition-transform duration-300 group-hover:rotate-180"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                        </svg>
-                      )}
-                    </Link>
-
-                    {/* Alt Kategoriler */}
-                    {category.subcategories?.length > 0 && (
-                      <div
-                        className={`absolute top-full bg-white shadow-2xl border border-gray-200 rounded-2xl w-[480px] p-6 z-50 opacity-0 invisible group-hover:opacity-100 group-hover:visible group-hover:translate-y-2 transform scale-95 group-hover:scale-100 transition-all duration-300 ease-out
-                    ${alignRight ? "right-0" : "left-0"}`}
-                      >
-                        <div className="flex">
-                          {/* Sol Taraf - Alt Kategoriler */}
-                          <div className="grid grid-cols-2 gap-6 flex-1">
-                            {category.subcategories.map((sub) => (
-                              <div key={sub.id}>
-                                <Link
-                                  to={`/alt-kategori/${sub.id}`}
-                                  className="block text-xs font-semibold text-gray-800 hover:text-orange-600 mb-2"
-                                >
-                                  {sub.name}
-                                </Link>
-                              </div>
-                            ))}
-                          </div>
-
-                          {/* Dropdown Arrow */}
-                          <div
-                            className={`absolute -top-2 w-4 h-4 bg-white border-t border-l border-gray-200 rotate-45
-                        ${alignRight ? "right-8" : "left-8"}`}
-                          ></div>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-
-            {/* 2. Satır */}
-            <div className="flex justify-center gap-8 mt-3">
-              {categories.slice(7).map((category, index) => {
-                const alignRight = index >= 3; // sondaki 2 kategori sağa yaslanacak
-                return (
-                  <div key={category.id} className="relative group">
-                    <Link
-                      to={`/kategori/${category.id}`}
-                      className="text-sm font-medium text-gray-700 hover:text-orange-600 transition-all duration-300 py-2 px-4 rounded-lg hover:bg-orange-50 flex items-center gap-1"
-                    >
-                      {category.name}
-                      {category.subcategories?.length > 0 && (
-                        <svg
-                          className="w-3 h-3 transition-transform duration-300 group-hover:rotate-180"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                        </svg>
-                      )}
-                    </Link>
-
-                    {/* Alt Kategoriler */}
-                    {category.subcategories?.length > 0 && (
-                      <div
-                        className={`absolute top-full bg-white shadow-2xl border border-gray-200 rounded-2xl w-[400px] p-6 z-50 opacity-0 invisible group-hover:opacity-100 group-hover:visible group-hover:translate-y-2 transform scale-95 group-hover:scale-100 transition-all duration-300 ease-out
-                    ${alignRight ? "right-0" : "left-0"}`}
-                      >
-                        <div className="flex">
-                          <div className="grid grid-cols-2 gap-6 flex-1">
-                            {category.subcategories.map((sub) => (
-                              <div key={sub.id}>
-                                <Link
-                                  to={`/alt-kategori/${sub.id}`}
-                                  className="block text-xs font-semibold text-gray-800 hover:text-orange-600 mb-2"
-                                >
-                                  {sub.name}
-                                </Link>
-                              </div>
-                            ))}
-                          </div>
-
-                          <div
-                            className={`absolute -top-2 w-4 h-4 bg-white border-t border-l border-gray-200 rotate-45
-                        ${alignRight ? "right-8" : "left-8"}`}
-                          ></div>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-
-          </div>
-        </div>
-      </nav>
+     <HeaderCategories />
+          {/* diğer nav linkleri */}
+        
+      
    <div className="bg-white">
       <Discover />
    </div>

@@ -40,7 +40,7 @@ const SellerLogin = () => {
 
      // Yanlış sayfadan giriş yapma kontrolü
             if (data.roles[0] === 'ROLE_CUSTOMER') {
-                toast.error('Lütfen giriş sayfasını kullanın!');
+                toast.error('Lütfen müşteri giriş sayfasını kullanın!');
                 
                 setLoginData({
                     email: '',

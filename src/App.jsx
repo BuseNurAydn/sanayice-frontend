@@ -7,13 +7,14 @@ import "slick-carousel/slick/slick-theme.css";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useEffect ,useState} from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch,useSelector } from 'react-redux';
 import { setCredentials, logout } from './store/authSlice'; 
 import ScrollToTop from "./components/ScrollToTop";
 
 function App() {
   const dispatch = useDispatch();
   const [loading, setLoading] = useState(true);
+   const role = useSelector((state) => state.auth.user?.role);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -38,12 +39,10 @@ function App() {
       <ScrollToTop />
       <Routes>
         <Route path="/*" element={<CustomerRouters />} />
-        <Route path="/satici/*" element={<SellerRoutes />} />
+        {role && <Route path="/satici/*" element={<SellerRoutes />} />}
         <Route path="/giris-kaydol/*" element={<AuthRoutes />} />
       </Routes>
     </Router>
   );
 }
-
-
 export default App;

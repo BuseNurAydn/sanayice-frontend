@@ -5,6 +5,7 @@ import { toast } from "react-toastify";
 import { useDispatch, useSelector } from 'react-redux';
 import { addToCart } from '../services/cartService';
 import { addToFavorites, removeFavorites, fetchFavorites } from "../services/favoritesService";
+import { generateProductUrl } from "../utils/urlHelpers";
 
 const ProductCard = ({ product }) => {
   const navigate = useNavigate();
@@ -74,10 +75,12 @@ const ProductCard = ({ product }) => {
     }
   };
 
-  //detay sayfasına gitme
-  const handleClick = () => {
-    navigate(`/urun/${product.id}`);
-  };
+// ProductCard.jsx
+const handleClick = () => {
+    const productUrl = generateProductUrl(product);
+    console.log("Oluşturulan URL:", productUrl);
+    navigate(productUrl);
+};
 
   return (
     <div

@@ -21,7 +21,7 @@ const CustomerRoutes = () => {
         <Routes>
             <Route element={<CustomerLayout />}>
                 <Route path="/" element={<HomePage />} />
-                <Route path="urun/:id" element={<ProductDetail />} /> 
+                <Route path=":brand/:productSlug-p-:id" element={<ProductDetail />} />
                 <Route path="favorilerim" element={<FavoritePage />} /> 
                 <Route path="kategori/:id" element={<CategoryProductsPage type="category"  />} />
                 <Route path="alt-kategori/:id" element={<CategoryProductsPage type="subcategory" />} />

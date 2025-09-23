@@ -8,12 +8,12 @@ import { logout } from '../../store/authSlice';
 import { LuLogOut } from "react-icons/lu";
 
 const Header = () => {
-  const iconStyle = 'bg-[var(--color-orange)] px-2 py-1'
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const user = useSelector((state) => state.auth.user);
 
+  const iconStyle = 'bg-[var(--color-orange)] px-2 py-1'
 
  const handleLogout = () => {
   localStorage.removeItem('token');
