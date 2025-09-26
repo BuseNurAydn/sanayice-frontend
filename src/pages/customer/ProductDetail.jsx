@@ -57,7 +57,7 @@ const dummyRelatedProducts = [
 
 
 const ProductDetail = () => {
-  const { brand, productSlug, id } = useParams();
+  const { id} = useParams();
   const [sliderIndex, setSliderIndex] = useState(0);
   const [favorite, setFavorite] = useState(false);
   const [quantity, setQuantity] = useState(1);
@@ -86,7 +86,7 @@ const ProductDetail = () => {
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
-
+ 
   //satıcının değerlendirmesi
   useEffect(() => {
     const fetchSellerRatings = async () => {

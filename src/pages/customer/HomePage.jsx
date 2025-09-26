@@ -15,6 +15,16 @@ import AddSlider from "../../components/addSlider";
 import Discover from "../../components/Discover";
 import CategoriesMenu from "../../components/CategoriesMenu";
 import HeaderCategories from "../../components/HeaderCategories";
+import banner1 from "../../assets/png/Profesyoneller İçim Hassas Ölçüler - 4.png";
+import banner2 from "../../assets/png/Profesyoneller İçim Hassas Ölçüler - 5.png";
+import banner3 from "../../assets/png/Profesyoneller İçim Hassas Ölçüler - 6.png";
+import banner4 from "../../assets/png/Profesyoneller İçim Hassas Ölçüler - 7.png";
+import banner5 from "../../assets/png/Profesyoneller İçim Hassas Ölçüler - 8.png";
+import banner6 from "../../assets/png/Profesyoneller İçim Hassas Ölçüler - 9.png";
+import banner7 from "../../assets/png/Profesyoneller İçim Hassas Ölçüler.png";
+import banner8 from "../../assets/png/Profesyoneller İçim Hassas Ölçüler - 11.png";
+import banner9 from "../../assets/png/Profesyoneller İçim Hassas Ölçüler - 12.png";
+
 const NextArrow = ({ onClick }) => (
   <div
     onClick={onClick}
@@ -49,17 +59,35 @@ const HomePage = () => {
   const [banners, setBanners] = useState([]);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  const [leftBanners, setLeftBanners] = useState([]);
-  const [rightBanners, setRightBanners] = useState([]);
+  const addBanners = [
+  { imageUrl: banner1, linkUrl: "#" },
+  { imageUrl: banner2, linkUrl: "#" },
+  { imageUrl: banner3, linkUrl: "#" },
+  { imageUrl: banner4, linkUrl: "#" },
+  { imageUrl: banner5, linkUrl: "#" },
+  { imageUrl: banner6, linkUrl: "#" },
+  { imageUrl: banner7, linkUrl: "#" },
+  { imageUrl: banner8, linkUrl: "#" },
+  { imageUrl: banner9, linkUrl: "#" },
+];
 
-  
+// otomatik 3'lü gruplama
+const groupedBanners = chunkArray(addBanners, 3);
+
+function chunkArray(array, size) {
+  const result = [];
+  for (let i = 0; i < array.length; i += size) {
+    result.push(array.slice(i, i + size));
+  }
+  return result;
+}
+
   // Sayaç 
   const [leftIndex, setLeftIndex] = useState(1);
-  const [rightIndex, setRightIndex] = useState(1);
 
   const leftSettings = {
     dots: false,
-    infinite: leftBanners.length > 1,
+    infinite: banners.length > 1,
     speed: 500,
     autoplay: true,
     autoplaySpeed: 2000,
@@ -75,7 +103,7 @@ const HomePage = () => {
         settings: {
           slidesToShow: 1,
           slidesToScroll: 1,
-           infinite: leftBanners.length > 1,
+           infinite: banners.length > 1,
           dots: false,
         },
       },
@@ -85,39 +113,7 @@ const HomePage = () => {
           slidesToShow: 1,
           slidesToScroll: 1,
           arrows: true,
-           infinite: leftBanners.length > 1,
-        },
-      },
-    ],
-  };
-
-  const rightSettings = {
-    dots: false,
-    infinite: true,
-    speed: 500,
-    autoplay: true,
-    autoplaySpeed: 3000,
-    slidesToShow: 1,
-    slidesToScroll: 1,
-    nextArrow: <NextArrow />,
-    prevArrow: <PrevArrow />,
-    afterChange: (current) => setRightIndex(current + 1),
-    responsive: [
-      {
-        breakpoint: 1024,
-        settings: {
-          slidesToShow: 1,
-          slidesToScroll: 1,
-          arrows: true,
-        },
-      },
-      {
-        breakpoint: 600,
-        settings: {
-          slidesToShow: 1,
-          slidesToScroll: 1,
-          arrows: true,
-          infinite: true,
+           infinite: banners.length > 1,
         },
       },
     ],
@@ -185,10 +181,6 @@ const HomePage = () => {
     try {
       const data = await getAllPublicBanners();
       setBanners(data);
-
-      // İlk 4 sol slider, sonraki 4 sağ slider
-      setLeftBanners(data.slice(0, 4));
-      setRightBanners(data.slice(4, 8));
     } catch (error) {
       console.error("Bannerlar yüklenemedi:", error.message);
     }
@@ -280,46 +272,38 @@ const HomePage = () => {
 
       <main className="max-w-7xl mx-auto py-8 px-4">
         <section className="flex flex-col md:flex-row gap-6 pb-8">
-          {/* Sol Slider */}
-          <div className="relative w-full md:w-[620px]">
-            <Slider {...leftSettings}>
-              {leftBanners.map((banner, i) => (
-                <div key={i}>
-                  <img
-                    src={banner.imageUrl}
-                    alt={`Banner ${i}`}
-                    className="w-full h-auto md:h-[264px] object-cover rounded-md"
-                  />
-                </div>
-              ))}
-            </Slider>
+  {/* Sol Slider */}
+  <div className="relative w-full md:w-[820px]">
+    <Slider {...leftSettings}>
+      {banners.map((banner, i) => (
+        <div key={i}>
+          <img
+            src={banner.imageUrl}
+            alt={`Banner ${i}`}
+            className="w-full h-auto md:h-[340px] object-cover rounded-md"
+          />
+        </div>
+      ))}
+    </Slider>
 
-            {/* Sayaç kutusu */}
-            <div className="absolute bottom-2 right-2 bg-black/70 text-white px-2 py-0.5 rounded-md text-xs">
-              {leftIndex} / {leftBanners.length}
-            </div>
-          </div>
+    {/* Sayaç kutusu */}
+    <div className="absolute bottom-2 right-2 bg-black/70 text-white px-2 py-0.5 rounded-md text-xs">
+      {leftIndex} / {banners.length}
+    </div>
+  </div>
 
-          {/* Sağ Slider */}
-          <div className="relative w-full md:w-[620px]">
-            <Slider {...rightSettings}>
-              {rightBanners.map((banner, i) => (
-                <div key={i} className="border border-gray-200 rounded-lg">
-                  <img
-                    src={banner.imageUrl}
-                    alt={`Banner ${i}`}
-                    className="w-full h-auto md:h-[264px] object-cover rounded-md"
-                  />
-                </div>
-              ))}
-            </Slider>
+  {/* Sağ Sabit Kart */}
+  <div className="w-full md:w-[420px] flex-shrink-0">
+    <div className="bg-white rounded-md shadow-md overflow-hidden h-[200px] md:h-[340px] flex items-center justify-center">
+      <img
+        src="https://via.placeholder.com/250x250.png?text=Sabir+Kart"
+        alt="Sabit Kart"
+        className="object-cover w-full h-full"
+      />
+    </div>
+  </div>
+</section>
 
-            {/* Sayaç kutusu */}
-            <div className="absolute bottom-2 right-2 bg-black/70 text-white px-2 py-0.5 rounded-md text-xs">
-              {rightIndex} / {rightBanners.length}
-            </div>
-          </div>
-        </section>
 
         {/* Öne Çıkan Ürünler */}
         <section className="mb-12">
@@ -334,7 +318,7 @@ const HomePage = () => {
           </ScrollSection>
 
           {/* Reklam Alanı */}
-          <AddSlider />
+        <AddSlider banners={groupedBanners[0]} />
         </section>
 
         {/* İndirimli Ürünler */}
@@ -353,7 +337,7 @@ const HomePage = () => {
           </ScrollSection>
 
           {/* Reklam Alanı */}
-          <AddSlider />
+          <AddSlider banners={groupedBanners[1]} />
         </section>
 
         {/* Yeni Ürünler */}
@@ -372,7 +356,7 @@ const HomePage = () => {
           </ScrollSection>
 
           {/* Reklam Alanı */}
-          <AddSlider />
+           <AddSlider banners={groupedBanners[2]} />
         </section>
 
         {/* Her kategori bölümü için */}

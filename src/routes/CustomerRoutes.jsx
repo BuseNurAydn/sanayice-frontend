@@ -15,13 +15,13 @@ import PrivacyPolicy from '../pages/public/PrivacyPolicy';
 import ReturnPolicy from '../pages/public/ReturnPolicy';
 import TermsOfUse from '../pages/public/TermsOfUse';
 import SellerPage from '../pages/customer/SellerPage';
+import CargoTracking from '../pages/customer/AccountPage/CargoTracking';
 
 const CustomerRoutes = () => {
     return (
         <Routes>
             <Route element={<CustomerLayout />}>
-                <Route path="/" element={<HomePage />} />
-                <Route path=":brand/:productSlug-p-:id" element={<ProductDetail />} />
+                <Route path='/' element={<HomePage />} />
                 <Route path="favorilerim" element={<FavoritePage />} /> 
                 <Route path="kategori/:id" element={<CategoryProductsPage type="category"  />} />
                 <Route path="alt-kategori/:id" element={<CategoryProductsPage type="subcategory" />} />
@@ -34,8 +34,10 @@ const CustomerRoutes = () => {
                 <Route path="iptal-iade" element={<ReturnPolicy />} />
                 <Route path="kullanim-sozlesmesi" element={<TermsOfUse />} />
                 <Route path="kategoriler" element={<CategoriesPage />} />
-                 <Route path="magaza/:id" element={<SellerPage/>} />
-
+                <Route path="magaza/:id" element={<SellerPage/>} />
+                {/*<Route path=":brand/:productSlug-p-:id" element={<ProductDetail />} />*/}
+                <Route path="urun/:id" element={<ProductDetail />} /> 
+                <Route path="kargo-takip" element={<CargoTracking />} />
             {accountRoutes}
             </Route> 
             

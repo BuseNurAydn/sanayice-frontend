@@ -54,3 +54,20 @@ export const getOrders = async () => {
     throw error;
   }
 };
+export const getStatus = async (status) => {
+  const token = localStorage.getItem("token");
+
+  try {
+    const response = await fetch(`${ORDERS_API}/summary/status/${status}`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    return await response.json();
+  } catch (error) {
+    console.error("Siparişler alınırken hata:", error.message);
+    throw error;
+  }
+};

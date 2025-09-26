@@ -1,18 +1,113 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { getOrders } from "../../../services/ordersService";
-import ReviewModal from "../../../components/ReviewModal";
-import ProductDetailModal from "../../../components/ProductDetailModal";
-import { toast } from "react-toastify";
-import { API_BASE } from "../../../config";
+import { FaCheckCircle, FaBox, FaTimesCircle, FaUndo } from "react-icons/fa";
+
+// Status utils
+const statusColor = {
+  "Teslim Edildi": "text-green-600",
+  "Kargoya Verildi": "text-purple-600",
+  "Sipariş Onaylandı": "text-blue-600",
+  "İptal Edildi": "text-red-600",
+  "İade Edildi": "text-purple-600",
+};
+
+const statusIcon = {
+  "Teslim Edildi": <FaCheckCircle className="text-green-500 w-4 h-4" />,
+  "Kargoya Verildi": <FaBox className="text-purple-500 w-4 h-4" />,
+  "Sipariş Onaylandı": <FaCheckCircle className="text-blue-500 w-4 h-4" />,
+  "İptal Edildi": <FaTimesCircle className="text-red-500 w-4 h-4" />,
+  "İade Edildi": <FaUndo className="text-purple-500 w-4 h-4" />,
+};
+
+// Sipariş Ürünü Bileşeni
+const OrderItem = ({ item, statusDisplayName }) => (
+  <div className="flex items-center justify-between gap-4 border border-gray-100 p-4 rounded-md">
+    <div className="flex items-center gap-2 w-1/4">
+      {statusIcon[statusDisplayName]}
+      <span className={`font-semibold ${statusColor[statusDisplayName]}`}>
+        {statusDisplayName}
+      </span>
+    </div>
+
+    <div className="flex items-center gap-4 w-1/2">
+      <img
+        src={item.imageUrls[0]}
+        alt={item.productName}
+        className="w-20 h-20 object-cover rounded border border-gray-200"
+      />
+      <div>
+        <p className="font-medium text-sm">{item.productName}</p>
+        <p className="text-xs text-gray-600">{item.productBrand}</p>
+        <p className="text-xs text-gray-600">
+          Adet: {item.quantity} | Birim Fiyat:{" "}
+          {item.unitPrice.toLocaleString("tr-TR", {
+            style: "currency",
+            currency: "TRY",
+          })}
+        </p>
+        <p className="text-xs text-gray-600 font-semibold">
+          Toplam: {item.totalPrice.toLocaleString("tr-TR", {
+            style: "currency",
+            currency: "TRY",
+          })}
+        </p>
+      </div>
+    </div>
+
+    <div className="w-1/4"></div>
+  </div>
+);
+
+// Sipariş Kartı Bileşeni
+const OrderCard = ({ order, navigate }) => (
+  <div className="border border-gray-200 rounded-lg shadow-sm">
+    {/* Özet */}
+    <div className="bg-neutral-100 p-4 grid grid-cols-2 md:grid-cols-5 gap-4 rounded-t-lg">
+      <div className="flex flex-col">
+        <span className="text-sm text-gray-500">Sipariş Tarihi:</span>
+        <span className="text-sm text-gray-700 font-semibold">
+          {new Date(order.createdAt).toLocaleDateString()}
+        </span>
+      </div>
+      <div className="flex flex-col">
+        <span className="text-sm text-gray-500">Sipariş Özeti:</span>
+        <span className="text-sm text-gray-700 font-semibold">
+          {order.orderItems.length} ürün
+        </span>
+      </div>
+      <div className="flex flex-col">
+        <span className="text-sm text-gray-500">Alıcı:</span>
+        <span className="text-sm text-gray-700 font-semibold">{order.customerName}</span>
+      </div>
+      <div className="flex flex-col">
+        <span className="text-sm text-gray-500">Toplam:</span>
+        <span className="text-sm text-gray-700 font-semibold">
+          {order.totalAmount.toLocaleString({ style: "currency", currency: "TRY" })} TL
+        </span>
+      </div>
+
+      <button
+        onClick={() => navigate(`/hesabim/siparislerim/${order.id}`, { state: { order } })}
+        className="text-sm font-semibold border border-orange-600 py-1 px-6 text-orange-600 hover:bg-orange-100 rounded mt-4 md:mt-0 col-span-full md:col-auto justify-self-start md:justify-self-end cursor-pointer"
+      >
+        Detaylar
+      </button>
+    </div>
+
+    {/* Ürünler */}
+    <div className="p-4 space-y-3">
+      {order.orderItems.map((item) => (
+        <OrderItem key={item.id} item={item} statusDisplayName={order.statusDisplayName} />
+      ))}
+    </div>
+  </div>
+);
 
 const Orders = () => {
   const [orders, setOrders] = useState([]);
   const [activeTab, setActiveTab] = useState("all");
-  const [productDetail, setProductDetail] = useState(null);
-  const [selectedProduct, setSelectedProduct] = useState(null);
-  const [rating, setRating] = useState(0);
-  const [comment, setComment] = useState("");
-  const ORDER_API = `${API_BASE}/products/reviews`;
+  const navigate = useNavigate();
 
   const tabs = [
     { key: "all", label: "Tüm Siparişler" },
@@ -27,76 +122,21 @@ const Orders = () => {
       try {
         const data = await getOrders();
         setOrders(data);
-        console.log(data)
       } catch (error) {
         console.error("Siparişler alınamadı", error);
       }
     };
-
     fetchOrders();
   }, []);
 
-  // Duruma göre filtrele
   const filteredOrders =
     activeTab === "all"
       ? orders
-      : orders.filter((order) =>
-        order.status.toLowerCase() === activeTab.toLowerCase()
-      );
-
-  const getStatusColor = (status) => {
-    switch (status) {
-      case "Teslim Edildi":
-        return "text-green-600";
-      case "Kargoya Verildi":
-        return "text-purple-300";
-      case "Sipariş Onaylandı":
-        return "text-blue-600";
-      case "İptal Edildi":
-        return "text-red-600";
-      case "İade Edildi":
-        return "text-purple-600";
-      default:
-        return "text-yellow-400";
-    }
-  };
-
-
-  const openReviewModal = (product) => {
-    setSelectedProduct(product);
-    setRating(0);
-    setComment("");
-  };
-
-  const handleSubmitReview = async () => {
-    try {
-      const token = localStorage.getItem("token");
-      const response = await fetch(ORDER_API, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          productId: selectedProduct.productId,
-          rating,
-          comment,
-        }),
-      });
-
-      if (!response.ok) throw new Error("Yorum eklenemedi");
-
-      toast("Yorum başarıyla eklendi!");
-      setSelectedProduct(null);
-    } catch (error) {
-      console.error(error);
-      toast("Yorum eklenirken bir hata oluştu.");
-    }
-  };
+      : orders.filter((order) => order.status.toLowerCase() === activeTab.toLowerCase());
 
   return (
-    <div className="bg-white min-h-screen p-6 rounded-lg shadow-md"> {/* Ana konteyner için gölge ve padding */}
-      <h2 className="text-xl md:text-2xl font-bold text-gray-800 mb-6">Siparişlerim</h2> {/* Başlık eklendi */}
+    <div className="bg-white min-h-screen p-6 rounded-lg shadow-md">
+      <h2 className="text-xl md:text-2xl font-bold text-gray-800 mb-6">Siparişlerim</h2>
 
       {/* Sekmeler */}
       <div className="flex flex-wrap gap-4 md:gap-8 border-b border-gray-200 mb-6">
@@ -104,12 +144,12 @@ const Orders = () => {
           <button
             key={tab.key}
             onClick={() => setActiveTab(tab.key)}
-            className={`pb-2 text-sm font-semibold transition-colors duration-200 cursor-pointer ${activeTab === tab.key
-              ? "text-orange-600 border-b-2 border-orange-600"
-              : "text-gray-500 hover:text-orange-600"
-              }`}
+            className={`pb-2 text-sm font-semibold transition-colors duration-200 cursor-pointer ${
+              activeTab === tab.key
+                ? "text-orange-600 border-b-2 border-orange-600"
+                : "text-gray-500 hover:text-orange-600"
+            }`}
           >
-            {tab.icon}
             {tab.label}
           </button>
         ))}
@@ -124,113 +164,9 @@ const Orders = () => {
         )}
 
         {filteredOrders.map((order) => (
-          <div
-            key={order.id}
-            className="border border-gray-200 rounded-lg p-6 bg-white shadow-sm"
-          >
-            <div className="mb-4">
-              <p className="text-sm text-gray-700 font-semibold">
-                Sipariş No: {order.orderNumber}
-              </p>
-              <p className="text-xs text-gray-500">
-                Sipariş Tarihi: {new Date(order.createdAt).toLocaleDateString()}
-              </p>
-              <p className="text-xs">
-                Durum:{" "}
-                <span className={`font-semibold ${getStatusColor(order.statusDisplayName)}`}>
-                  {order.statusDisplayName}
-                </span>
-              </p>
-
-              <p className="text-xs text-gray-500">
-                Toplam Tutar: {order.totalAmount.toLocaleString("tr-TR", { style: "currency", currency: "TRY" })}
-              </p>
-              <p className="text-xs text-gray-500">Teslimat Adresi: {order.shippingAddress}</p>
-              <p className="text-xs text-gray-500">Fatura Adresi: {order.billingAddress}</p>
-              {order.customerNotes && (
-                <p className="text-xs text-gray-500">Notlar: {order.customerNotes}</p>
-              )}
-            </div>
-
-            <div className="space-y-3">
-              {order.orderItems.map((item) => (
-                <div
-                  key={item.id}
-                  className="flex flex-col md:flex-row md:items-center justify-between gap-4 border border-gray-100 p-4 rounded-md"
-                >
-                  {/* Ürün görseli + bilgiler */}
-                  <div className="flex flex-col md:flex-row gap-4">
-
-                    <img
-                      src={item.imageUrls[0]}
-                      alt={item.productName}
-                      className="w-20 h-20 object-cover rounded"
-                    />
-                    <div>
-                      <p className="font-medium">{item.productName}</p>
-                      <p className="text-xs text-gray-600">
-                        Marka: {item.productBrand} | Model: {item.productModel}
-                      </p>
-                      <p className="text-xs text-gray-600">
-                        Adet: {item.quantity} | Birim Fiyat:{" "}
-                        {item.unitPrice.toLocaleString("tr-TR", {
-                          style: "currency",
-                          currency: "TRY",
-                        })}
-                      </p>
-                      <p className="text-xs text-gray-600 font-semibold">
-                        Toplam:{" "}
-                        {item.totalPrice.toLocaleString("tr-TR", {
-                          style: "currency",
-                          currency: "TRY",
-                        })}
-                      </p>
-                      <p className="text-xs text-gray-600">
-                        Durum: {item.statusDisplayName || item.status}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex flex-row items-end gap-x-2">
-                    <button
-                      onClick={() => setProductDetail(item)}
-                      className="text-xs md:text-sm border border-blue-600 py-1 px-2 md:py-2 md:px-4 text-blue-600 font-semibold cursor-pointer hover:bg-blue-100">
-                      Ürün Detay
-                    </button>
-                    {order.statusDisplayName === "Teslim Edildi" && (
-                      <button
-                        onClick={() => openReviewModal(item)}
-                        className="text-xs md:text-sm font-semibold border border-orange-600 py-1 px-2 md:py-2 md:px-4 text-orange-600 cursor-pointer hover:bg-orange-100"
-                      >
-                        Ürünü Değerlendir
-                      </button>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
+          <OrderCard key={order.id} order={order} navigate={navigate} />
         ))}
       </div>
-
-      {/* MODAL */}
-      {productDetail && (
-        <ProductDetailModal
-          product={productDetail}
-          onClose={() => setProductDetail(null)}
-        />
-      )}
-
-      {selectedProduct && (
-        <ReviewModal
-          product={selectedProduct}
-          rating={rating}
-          setRating={setRating}
-          comment={comment}
-          setComment={setComment}
-          onClose={() => setSelectedProduct(null)}
-          onSubmit={handleSubmitReview}
-        />
-      )}
     </div>
   );
 };

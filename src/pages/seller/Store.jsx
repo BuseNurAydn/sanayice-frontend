@@ -11,8 +11,6 @@ const Store = () => {
     id: "seller-123",
     name: "Sanayice Teknoloji Mağazası",
     description: "En yeni elektronik ürünler ve teknolojik aksesuarlar.",
-    //logo: "https://via.placeholder.com/150/0000FF/FFFFFF?text=StoreLogo", // Örnek logo
-    //banner: "https://via.placeholder.com/1200x300/FFA500/FFFFFF?text=StoreBanner", // Örnek banner
     address: "Örnek Mah. Örnek Cad. No:123, İzmir",
     phone: "+90 232 123 45 67",
     email: "info@sanayicetechnology.com",
@@ -108,43 +106,44 @@ const Store = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 pb-10">
-      {/* Mağaza Bannerı */}
-      <div className="relative w-full h-64 bg-cover bg-center" style={{ backgroundImage: `url(${storeInfo?.banner})` }}>
-        <div className="absolute inset-0 bg-[var(--color-dark-blue)] bg-opacity-40 flex items-center justify-center p-4">
-          <div className="text-white text-center">
-            {storeInfo?.profileImageUrl && (
-              <img
-                src={storeInfo.profileImageUrl}
-                alt="Mağaza logosu"
-                className="w-24 h-24 rounded-full mx-auto mb-4 border-4 border-white shadow-lg"
-              />
-            )}
-            <div className='flex  justify-center items-center gap-2'>
-              <h1 className="text-2xl md:text-3xl font-bold">{storeInfo.name}</h1>
-              <span className="bg-green-200 text-black px-3 py-1.5 rounded-full font-semibold text-sm">
-                {storeInfo.averageRating}
-              </span>
+     {/* Banner */}
+            <div className="relative w-full h-40 md:h-48 bg-cover bg-center">
+                <div className="absolute inset-0 bg-[var(--color-dark-blue)] bg-opacity-40"></div>
             </div>
-            <p className='my-3 text-sm '>En yeni elektronik ürünler ve teknolojik aksesuarlar.</p>
 
-            {/* Takipçi sayısı */}
-            <span className="bg-[var(--color-dark-orange)] text-white px-3 py-1 rounded font-semibold text-sm">
-              {storeInfo.followerCount} takipçi
-            </span>
-          </div>
-        </div>
-      </div>
-
+            {/* Profil Bilgileri */}
+            <div className="max-w-7xl mx-auto px-4 md:px-6 relative">
+                {storeInfo&& (
+                    <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 -mt-12 sm:-mt-10">
+                        <img
+                            src={storeInfo.profileImageUrl}
+                            alt={storeInfo.sellerName}
+                            className="w-24 h-24 md:w-28 md:h-28 rounded-full border-4 border-white shadow-md"
+                        />
+                        <div className="flex-1 text-gray-900 text-center sm:text-left gap-6 mt-4 md:mt-10">
+                            <h1 className="text-xl md:text-2xl font-bold">{storeInfo.companyName}</h1>
+                            <div className="flex flex-wrap justify-center sm:justify-start gap-3 mt-2 text-sm text-gray-600">
+                                <span className="bg-[var(--color-dark-orange)] text-white px-3 py-1 rounded-full font-semibold text-sm">{storeInfo.averageRating}</span>
+                                <span>{storeInfo.followerCount} takipçi</span>
+                                <span>{products.length} ürün</span>
+                                <span>{storeInfo.ratingCount} değerlendirme</span>
+                            </div>
+                        </div>
+                       
+                    </div>
+                )}
+            </div>
       {/* Mağaza Bilgileri ve İletişim */}
       <div className="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8 mt-8">
+        {/** 
         <div className={`${boxStyle} mb-8`}>
           <h2 className="text-lg md:text-xl font-semibold text-gray-800 mb-4">Mağaza Bilgileri</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-700">
             {/**  <p className="flex items-center gap-2"><FaMapMarkerAlt className="text-[var(--color-orange)]" /> Adres: {storeInfo.address || "Adres bilgisi bulunamadı."}</p>
-            <p className="flex items-center gap-2"><FaPhone className="text-[var(--color-orange)]" /> Telefon:  {storeInfo.phone || "Telefon bilgisi bulunamadı."}</p>*/}
+            <p className="flex items-center gap-2"><FaPhone className="text-[var(--color-orange)]" /> Telefon:  {storeInfo.phone || "Telefon bilgisi bulunamadı."}</p>
             <p className="flex items-center gap-2"><FaEnvelope className="text-[var(--color-orange)]" /> E-posta: {storeInfo.email}</p>
           </div>
-        </div>
+        </div>*/}
 
         {/* Ürün Filtreleri ve Arama */}
         <div className={`${boxStyle} flex flex-col md:flex-row gap-4 mb-8`}>

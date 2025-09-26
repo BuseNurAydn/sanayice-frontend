@@ -1,32 +1,33 @@
 import React from 'react';
 import { FaStar } from 'react-icons/fa';
 
-const ReviewModal = ({ product, rating, setRating, comment, setComment, onClose, onSubmit }) => {
+const SellerReviewModal = ({ seller, rating, setRating, comment, setComment, onClose, onSubmit }) => {
   return (
-    <div className="fixed inset-0 bg-black/40 backdrop-blur-none flex items-center justify-center z-50">
+    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
       <div className="bg-white w-full max-w-lg rounded-lg shadow-lg p-6 relative">
-        {/* Kapat butonu */}
-        <div className='flex justify-between'>
-         <h2 className='font-semibold text-xl'>Ürünü Nasıl Buldunuz?</h2>
-        <button onClick={onClose} className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 text-xl">&times;</button>
+        {/* Başlık ve Kapat Butonu */}
+        <div className="flex justify-between items-center">
+          <h2 className="font-semibold text-xl">Satıcıyı Değerlendir</h2>
+          <button onClick={onClose} className="text-gray-500 hover:text-gray-700 text-xl">&times;</button>
         </div>
-        <div  className='h-0.5 bg-gray-200 w-full my-6'/>
-        {/* Ürün bilgileri */}
-        <div className="flex gap-4 mb-6">
+
+        <div className="h-0.5 bg-gray-200 w-full my-6"/>
+
+        {/* Satıcı Bilgisi */}
+        <div className="flex items-center gap-4 mb-6">
           <img
-            src={product.imageUrls[0]}
-            alt={product.productName}
-            className="w-24 h-24 object-cover rounded"
+            src={seller.profileImage || "https://via.placeholder.com/60"}
+            alt={seller.name}
+            className="w-16 h-16 object-cover rounded-full border border-gray-200"
           />
           <div>
-            <h2 className="text-lg font-bold">{product.productName}</h2>
-            <p className="text-sm text-gray-600">Marka: {product.productBrand}</p>
+            <h3 className="text-lg font-bold">{seller.sellerCompanyName}</h3>
           </div>
         </div>
 
         {/* Yıldız Puanlama */}
         <div className="flex items-center gap-2 mb-4">
-          <span className="text-gray-700 font-medium">Lütfen Ürünü Puanlayın:</span>
+          <span className="text-gray-700 font-medium">Lütfen Satıcıyı Puanlayın:</span>
           {[...Array(5)].map((_, i) => {
             const value = i + 1;
             return (
@@ -47,7 +48,7 @@ const ReviewModal = ({ product, rating, setRating, comment, setComment, onClose,
           onChange={(e) => setComment(e.target.value)}
           rows={4}
           className="w-full border border-gray-300 rounded-lg p-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-400"
-          placeholder="Yorumunuzu yazın..."
+          placeholder="Satıcı hakkında yorumunuzu yazın..."
         />
 
         {/* Butonlar */}
@@ -62,11 +63,12 @@ const ReviewModal = ({ product, rating, setRating, comment, setComment, onClose,
             onClick={onSubmit}
             className="px-5 py-2 rounded bg-orange-600 text-white hover:bg-orange-700"
           >
-            Yorum Yap
+            Gönder
           </button>
         </div>
       </div>
     </div>
   );
 };
-export default ReviewModal;
+
+export default SellerReviewModal;

@@ -1,17 +1,29 @@
 import React, { useRef } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import resim1 from "../assets/png/İNDİRİM - 1.jpg"
+import resim2 from "../assets/png/İNDİRİM - 2.jpg"
+import resim3 from "../assets/png/İNDİRİM - 3.jpg"
+import resim4 from "../assets/png/İNDİRİM - 4.jpg"
+import resim5 from "../assets/png/İNDİRİM - 5.jpg"
+import resim6 from "../assets/png/İNDİRİM - 6.jpg"
+import resim7 from "../assets/png/İNDİRİM - 7.jpg"
+import resim8 from "../assets/png/İNDİRİM - 8.jpg"
+import resim9 from "../assets/png/İNDİRİM - 9.jpg"
+import resim10 from "../assets/png/İNDİRİM - 10.jpg"
+import resim11 from "../assets/png/İNDİRİM - 11.jpg"
 
 const categories = [
-  { id: 1, name: "Yeni Gelen Ürünler", imageUrl: "", link: "/yeni-gelen" },
-  { id: 2, name: "İndirim Kuponlarım", imageUrl: "", link: "/kuponlar" },
-  { id: 3, name: "Fırsatlı Ürünler", imageUrl: "", link: "/firsatlar" },
-  { id: 4, name: "Avantajlı Ürünler", imageUrl: "", link: "/avantajli" },
-  { id: 5, name: "Sende Al", imageUrl: "", link: "/sendeal" },
-  { id: 6, name: "Krediler", imageUrl: "", link: "/krediler" },
-  { id: 7, name: "Kredi Kartı", imageUrl: "", link: "/kredi-karti" },
-  { id: 8, name: "Kampanyalar", imageUrl: "", link: "/kampanyalar" },
-  { id: 9, name: "Kampanyalar", imageUrl: "", link: "/kampanyalar" },
-  { id: 10, name: "Kampanyalar", imageUrl: "", link: "/kampanyalar" }
+  { id: 1, name: "Yeni Gelenler", imageUrl: resim1, link: "/yeni-gelenler" },
+  { id: 2, name: "Teknoloji", imageUrl: resim2, link: "/teknoloji" },
+  { id: 3, name: "Avantajlı Ürünler", imageUrl: resim3, link: "/avantajli-urunler" },
+  { id: 4, name: "Çok Satanlar", imageUrl: resim4, link: "/cok-satanlar" },
+  { id: 5, name: "Kargo Bedava", imageUrl: resim5, link: "/kargo-bedava" },
+  { id: 6, name: "Fırsat Ürünleri", imageUrl: resim6, link: "/firsat-urunleri" },
+  { id: 7, name: "Ustaya Göre", imageUrl: resim7, link: "/ustaya-gore" },
+  { id: 8, name: "Tüm Kategoriler", imageUrl: resim8, link: "/tum-kategoriler" },
+  { id: 9, name: "Favoriler", imageUrl: resim9, link: "/favoriler" },
+  { id: 10, name: "Hemen Al", imageUrl: resim10, link: "/hemen-al" },
+  { id: 11, name: "Fiyatı Düşenler", imageUrl: resim11, link: "/fiyati-dusenler" }
 ];
 
 const Discover = () => {
@@ -52,7 +64,7 @@ const Discover = () => {
                   href={cat.link}
                   className="flex flex-col items-center group cursor-pointer"
                 >
-                  <div className="w-16 h-16 rounded-full overflow-hidden flex items-center justify-center border border-gray-200 group-hover:shadow-lg group-hover:border-orange-400 transition">
+                  <div className="w-15 h-15 rounded-full overflow-hidden flex items-center justify-center group-hover:shadow-lg group-hover:border-orange-400 transition">
                     <img
                       src={cat.imageUrl}
                       alt={cat.name}

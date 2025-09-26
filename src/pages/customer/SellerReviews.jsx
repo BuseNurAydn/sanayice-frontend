@@ -134,43 +134,6 @@ const SellerReviews = ({ sellerId }) => {
                     </div>
                 ))}
             </div>
-
-
-            {/* Yorum Formu */}
-            <form
-                onSubmit={handleSubmit}
-                className="bg-gray-50 p-4 rounded-lg shadow-sm"
-            >
-                <label className="block text-sm font-medium mb-1">Puanınız:</label>
-                <div className="flex gap-1 mb-3">
-                    {[1, 2, 3, 4, 5].map((star) => (
-                        <button
-                            key={star}
-                            type="button"
-                            onClick={() => setRating(star)}
-                            className={`text-2xl ${star <= rating ? "text-yellow-500" : "text-gray-300"
-                                }`}
-                        >
-                            ★
-                        </button>
-                    ))}
-                </div>
-
-                <label className="block text-sm font-medium mb-1">Yorumunuz:</label>
-                <textarea
-                    value={comment}
-                    onChange={(e) => setComment(e.target.value)}
-                    placeholder="Satıcı hakkında yorum yapın..."
-                    className="w-full border border-gray-200 rounded-lg p-3 mb-3 focus:outline-none focus:ring-1 focus:ring-orange-500"
-                />
-
-                <button
-                    type="submit"
-                    className="bg-orange-500 text-white px-4 py-2 rounded-lg hover:bg-orange-600 transition"
-                >
-                    Gönder
-                </button>
-            </form>
         </div>
     );
 };

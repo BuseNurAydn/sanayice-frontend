@@ -6,16 +6,16 @@ import { createProduct, getBulkImportOptionalColumns, getBulkImportRequiredColum
 import { toast } from 'react-toastify';
 import { Upload } from "lucide-react";
 import { useNavigate } from 'react-router-dom';
-import * as XLSX from "xlsx";
+import BulkUpload from './BulkUpload';
 
 
 const AddProduct = () => {
   const navigate = useNavigate();
-  const boxStyle = 'border border-gray-200 md:p-4 p-2 rounded-lg shadow';
+  const boxStyle = 'border border-gray-100 md:p-4 p-2 rounded-lg shadow';
   const lineStyle = 'w-full h-[1px] bg-gray-300 mb-4'
   const labelStyle = 'block text-sm font-medium text-gray-900 pb-2';
   const inputStyle = 'w-full border-gray-200 outline-none border px-3 py-2 rounded-lg my-4';
-  const buttonStyle = "bg-[var(--color-orange)] text-white px-4 py-2 rounded-lg text-md";
+  const buttonStyle = "bg-[var(--color-orange)] hover:bg-orange-500 text-white px-4 py-2 rounded-lg text-md";
 
   const [categories, setCategories] = useState([]);
   const [subcategories, setSubcategories] = useState([]);
@@ -23,12 +23,10 @@ const AddProduct = () => {
   const [additionalImageFiles, setAdditionalImageFiles] = useState([]);
   const [mainImageError, setMainImageError] = useState("");
   const [additionalImageErrors, setAdditionalImageErrors] = useState([]);
+  const [showBulkUpload, setShowBulkUpload] = useState(false);
 
   const [excelFile, setExcelFile] = useState(null);
-  const [excelData, setExcelData] = useState([]);
-  const [requiredColumns, setRequiredColumns] = useState([]);
-  const [optionalColumns, setOptionalColumns] = useState([]);
-
+ 
   
   const [formData, setFormData] = useState({
     name: "",
@@ -72,40 +70,7 @@ const AddProduct = () => {
     fetchData();
   }, []);
 
-  // Excel dosyası yükleme ve gönderme
-  const handleExcelUpload = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    setExcelFile(file);
-
-    const reader = new FileReader();
-    reader.onload = (evt) => {
-      const data = new Uint8Array(evt.target.result);
-      const workbook = XLSX.read(data, { type: "array" });
-      const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-      const jsonData = XLSX.utils.sheet_to_json(worksheet);
-      setExcelData(jsonData);
-    };
-    reader.readAsArrayBuffer(file);
-  };
-
-  const handleExcelSubmit = async () => {
-    if (!excelFile) {
-      toast.error("Lütfen bir Excel dosyası seçin!");
-      return;
-    }
-    try {
-      await bulkImportProducts(excelFile);
-      toast.success("Excel dosyası başarıyla yüklendi!");
-      setExcelFile(null);
-      setExcelData([]);
-    } catch (err) {
-      console.error(err);
-      toast.error("Excel yükleme sırasında hata oluştu!");
-    }
-  };
-
+  
   // Diğer form alanları için genel değişiklik handler'ı
   const handleChange = (e) => {
     const { id, value } = e.target;
@@ -642,72 +607,15 @@ const AddProduct = () => {
           </div>
         </div>
       </form>
-
-      {/* Excel ile Ürün Yükleme */}
-      <div className={boxStyle}>
-        <h3 className="font-semibold mb-2 ">Excel ile Ürün Yükle</h3>
-        <div className={lineStyle} />
-
-        <span className='text-sm text-orange-500 bg-orange-50 py-1 px-2 rounded-full'>! Lütfen excelinizi bu başlık isimlerine dikkat ederek yükleyiniz</span>
-
-        <input
-          type="file"
-          accept=".xlsx, .xls"
-          onChange={handleExcelUpload}
-          className={inputStyle}
-        />
-
-        {/* Gereken kolonları kullanıcıya gösterelim */}
-        {requiredColumns.length > 0 && (
-          <p className="text-sm text-gray-700 mt-2">
-            <strong>Zorunlu Kolonlar:</strong> {requiredColumns.join(", ")}
-          </p>
-        )}
-        {optionalColumns.length > 0 && (
-          <p className="text-sm text-gray-700 mt-1">
-            <strong>Opsiyonel Kolonlar:</strong> {optionalColumns.join(", ")}
-          </p>
-        )}
-
-        {excelData.length > 0 && (
-          <div className="overflow-x-auto mt-4">
-            <table className="w-full border border-gray-300 text-sm">
-              <thead>
-                <tr>
-                  {Object.keys(excelData[0]).map((col, idx) => (
-                    <th key={idx} className="border px-2 py-1 bg-gray-100">
-                      {col}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {excelData.map((row, rIdx) => (
-                  <tr key={rIdx}>
-                    {Object.values(row).map((val, cIdx) => (
-                      <td key={cIdx} className="border px-2 py-1">
-                        {val}
-                      </td>
-                    ))}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            <button
-              onClick={handleExcelSubmit}
-              className={`${buttonStyle} mt-4`}
-            >
-              Excel’i Yükle
-            </button>
-          </div>
-        )}
-      </div>
-
       {/* Butonlar */}
       <div className="mt-8 flex flex-col md:flex-row gap-4 justify-center">
         <button type="submit" className={buttonStyle} onClick={handleSubmit}>Onaya Gönder</button>
         <button type="button" className={buttonStyle} onClick={handleClear}>Temizle</button>
       </div>
+
+       <hr className="my-12 text-gray-300" />
+
+      <BulkUpload/>
     </div>
   );
 };

@@ -74,13 +74,20 @@ const ProductCard = ({ product }) => {
       setAdding(false);
     }
   };
-
+{/** 
 // ProductCard.jsx
 const handleClick = () => {
-    const productUrl = generateProductUrl(product);
-    console.log("Oluşturulan URL:", productUrl);
-    navigate(productUrl);
+  console.log("Div clicked!");  // <- bu mutlaka console'da görünmeli
+  const productUrl = generateProductUrl(product);
+  console.log("Oluşturulan URL:", productUrl);
+  navigate(productUrl);
 };
+*/}
+
+  //detay sayfasına gitme
+  const handleClick = () => {
+    navigate(`/urun/${product.id}`);
+  };
 
   return (
     <div

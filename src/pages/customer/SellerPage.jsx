@@ -29,8 +29,7 @@ const SellerPage = () => {
                 const sellerProducts = await getActiveProductsBySeller(id);
                 setProducts(sellerProducts);
                 setFilteredProducts(sellerProducts);
-                 
-                console.log(sellerProducts)
+                
                 // Satıcı bilgileri
                 const allFollowing = await getFollowing();
                 const sellerData = allFollowing.find(f => f.sellerId.toString() === id);
