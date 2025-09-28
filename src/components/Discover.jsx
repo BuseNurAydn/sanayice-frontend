@@ -57,18 +57,18 @@ const Discover = () => {
           ref={scrollRef}
           className="overflow-x-auto scrollbar-hide scroll-smooth flex-1 md:mx-4"
         >
-          <ul className="flex  gap-2 md:gap-6 justify-center min-w-max">
+          <ul className="flex gap-2 md:gap-6 justify-center min-w-max">
             {categories.map((cat) => (
               <li key={cat.id} className="flex flex-col items-center min-w-[90px]">
                 <a
                   href={cat.link}
-                  className="flex flex-col items-center"
+                  className="flex flex-col items-center group"
                 >
-                  <div className="w-15 h-15 rounded-full overflow-hidden flex items-center justify-center group-hover:shadow-lg group-hover:border-orange-400 transition">
+                  <div className="w-15 h-15 rounded-full overflow-hidden flex items-center justify-center group-hover:shadow-lg group-hover:border-orange-600 transition">
                     <img
                       src={cat.imageUrl}
                       alt={cat.name}
-                      className="w-full h-auto object-cover"
+                      className="w-full h-full object-contain"
                     
                     />
                   </div>

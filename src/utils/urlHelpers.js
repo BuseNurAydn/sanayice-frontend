@@ -45,3 +45,4 @@ export function exampleUsage(product) {
   console.log("Kategori URL:", categoryURL);
   console.log("Alt Kategori URL:", subCategoryURL);
 }
+

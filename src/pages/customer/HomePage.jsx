@@ -157,7 +157,6 @@ const HomePage = () => {
     getProducts()
       .then(data => {
         setProducts(data);
-        console.log(data)
       })
       .catch(error => {
         console.error("Hata:", error);

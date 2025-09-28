@@ -57,7 +57,7 @@ const dummyRelatedProducts = [
 
 
 const ProductDetail = () => {
-  const { id} = useParams();
+   const { id } = useParams();
   const [sliderIndex, setSliderIndex] = useState(0);
   const [favorite, setFavorite] = useState(false);
   const [quantity, setQuantity] = useState(1);

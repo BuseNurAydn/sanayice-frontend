@@ -35,8 +35,8 @@ const CustomerRoutes = () => {
                 <Route path="kullanim-sozlesmesi" element={<TermsOfUse />} />
                 <Route path="kategoriler" element={<CategoriesPage />} />
                 <Route path="magaza/:id" element={<SellerPage/>} />
-                {/*<Route path=":brand/:productSlug-p-:id" element={<ProductDetail />} />*/}
-                <Route path="urun/:id" element={<ProductDetail />} /> 
+                <Route path=":brand/:productSlug-p-:id" element={<ProductDetail />} />
+                 {/*<Route path="urun/:id" element={<ProductDetail />} /> */}
                 <Route path="kargo-takip" element={<CargoTracking />} />
             {accountRoutes}
             </Route> 

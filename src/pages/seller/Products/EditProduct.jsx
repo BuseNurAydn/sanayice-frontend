@@ -40,6 +40,7 @@ const EditProduct = () => {
       const res = await fetch(url);
       const blob = await res.blob();
       return new File([blob], filename, { type: mimeType });
+      console.log(res)
     } catch (error) {
       console.error('URL\'den file dönüştürme hatası:', error);
       return null;
