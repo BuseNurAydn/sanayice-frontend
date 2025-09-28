@@ -295,16 +295,17 @@ function chunkArray(array, size) {
     </div>
   </div>
 
-  {/* Sağ Sabit Kart */}
-  <div className="w-full md:w-[420px] flex-shrink-0">
-    <div className="bg-white rounded-md shadow-md overflow-hidden h-[340px] flex items-center justify-center">
-      <img
-        src={cardImage2}
-        alt="Sabit Kart"
-        className="object-cover w-full h-full"
-      />
-    </div>
+ {/* Sağ Sabit Kart */}
+<div className="w-full md:w-[420px] flex-shrink-0">
+  <div className="bg-white rounded-md shadow-md overflow-hidden flex items-center justify-center">
+    <img
+      src={cardImage2}
+      alt="Sabit Kart"
+      className="w-full h-auto max-h-[340px] object-cover"
+    />
   </div>
+</div>
+
 </section>
 
 
