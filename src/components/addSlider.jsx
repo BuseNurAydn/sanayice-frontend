@@ -34,12 +34,12 @@ const AddSlider = ({ banners }) => {
     <div className="my-8 overflow-hidden">
       <Slider {...settings}>
         {banners.map((banner, i) => (
-          <div key={i} className="pr-4">
+          <div key={i} className="pr-4 w-[424px] h-[185.5px]">
             <a href={banner.linkUrl} target="_blank" rel="noopener noreferrer">
               <img
                 src={banner.imageUrl}
                 alt={`Reklam ${i + 1}`}
-                className="w-[424px] h-[185.5px] object-cover rounded-xl shadow"
+                className="w-full h-auto object-cover rounded-xl shadow"
               />
             </a>
           </div>

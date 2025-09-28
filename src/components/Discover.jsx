@@ -1,16 +1,16 @@
 import React, { useRef } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import resim1 from "../assets/png/İNDİRİM - 1.jpg"
-import resim2 from "../assets/png/İNDİRİM - 2.jpg"
-import resim3 from "../assets/png/İNDİRİM - 3.jpg"
-import resim4 from "../assets/png/İNDİRİM - 4.jpg"
-import resim5 from "../assets/png/İNDİRİM - 5.jpg"
-import resim6 from "../assets/png/İNDİRİM - 6.jpg"
-import resim7 from "../assets/png/İNDİRİM - 7.jpg"
-import resim8 from "../assets/png/İNDİRİM - 8.jpg"
-import resim9 from "../assets/png/İNDİRİM - 9.jpg"
-import resim10 from "../assets/png/İNDİRİM - 10.jpg"
-import resim11 from "../assets/png/İNDİRİM - 11.jpg"
+import resim1 from "../assets/png/İNDİRİM - 1.png"
+import resim2 from "../assets/png/İNDİRİM - 2.png"
+import resim3 from "../assets/png/İNDİRİM - 3.png"
+import resim4 from "../assets/png/İNDİRİM - 4.png"
+import resim5 from "../assets/png/İNDİRİM - 5.png"
+import resim6 from "../assets/png/İNDİRİM - 6.png"
+import resim7 from "../assets/png/İNDİRİM - 7.png"
+import resim8 from "../assets/png/İNDİRİM - 8.png"
+import resim9 from "../assets/png/İNDİRİM - 9.png"
+import resim10 from "../assets/png/İNDİRİM - 10.png"
+import resim11 from "../assets/png/İNDİRİM - 11.png"
 
 const categories = [
   { id: 1, name: "Yeni Gelenler", imageUrl: resim1, link: "/yeni-gelenler" },
@@ -62,13 +62,14 @@ const Discover = () => {
               <li key={cat.id} className="flex flex-col items-center min-w-[90px]">
                 <a
                   href={cat.link}
-                  className="flex flex-col items-center group cursor-pointer"
+                  className="flex flex-col items-center"
                 >
                   <div className="w-15 h-15 rounded-full overflow-hidden flex items-center justify-center group-hover:shadow-lg group-hover:border-orange-400 transition">
                     <img
                       src={cat.imageUrl}
                       alt={cat.name}
-                      className="w-full h-full object-contain"
+                      className="w-full h-auto object-cover"
+                    
                     />
                   </div>
                   <p className="mt-2 text-sm font-medium text-gray-700 text-center group-hover:text-orange-500">

@@ -24,6 +24,7 @@ import banner6 from "../../assets/png/Profesyoneller İçim Hassas Ölçül
 import banner7 from "../../assets/png/Profesyoneller İçim Hassas Ölçüler.png";
 import banner8 from "../../assets/png/Profesyoneller İçim Hassas Ölçüler - 11.png";
 import banner9 from "../../assets/png/Profesyoneller İçim Hassas Ölçüler - 12.png";
+import cardImage2 from "../../assets/png/michelle! - 2.png";
 
 const NextArrow = ({ onClick }) => (
   <div
@@ -70,6 +71,8 @@ const HomePage = () => {
   { imageUrl: banner8, linkUrl: "#" },
   { imageUrl: banner9, linkUrl: "#" },
 ];
+
+const cardImage =   { imageUrl: cardImage2, linkUrl: "#" }
 
 // otomatik 3'lü gruplama
 const groupedBanners = chunkArray(addBanners, 3);
@@ -294,9 +297,9 @@ function chunkArray(array, size) {
 
   {/* Sağ Sabit Kart */}
   <div className="w-full md:w-[420px] flex-shrink-0">
-    <div className="bg-white rounded-md shadow-md overflow-hidden h-[200px] md:h-[340px] flex items-center justify-center">
+    <div className="bg-white rounded-md shadow-md overflow-hidden h-[340px] flex items-center justify-center">
       <img
-        src="https://via.placeholder.com/250x250.png?text=Sabir+Kart"
+        src={cardImage2}
         alt="Sabit Kart"
         className="object-cover w-full h-full"
       />
