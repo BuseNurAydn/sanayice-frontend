@@ -17,8 +17,12 @@ export function createSlug(text) {
 
 // Ürün URL Üretici
 export function generateProductUrl(product) {
-  const brandSlug = createSlug(product.brand);
-  const productSlug = createSlug(product.name);
+  if (!product || !product.id) {
+    return '/';
+  }
+  
+  const brandSlug = product.brand ? createSlug(product.brand) : 'marka';
+  const productSlug = product.name ? createSlug(product.name) : 'urun';
   return `/${brandSlug}/${productSlug}-p-${product.id}`;
 }
 

@@ -57,7 +57,17 @@ const dummyRelatedProducts = [
 
 
 const ProductDetail = () => {
-   const { id } = useParams();
+  const { id, brand, productSlug } = useParams();
+  
+  // SEO route'dan geliyorsa id'yi productSlug'dan extract et
+  let actualId = id;
+  if (brand && productSlug && !id) {
+    // productSlug format: "product-name-p-123"
+    const match = productSlug.match(/-p-(\d+)$/);
+    if (match) {
+      actualId = match[1];
+    }
+  }
   const [sliderIndex, setSliderIndex] = useState(0);
   const [favorite, setFavorite] = useState(false);
   const [quantity, setQuantity] = useState(1);
@@ -151,15 +161,26 @@ const ProductDetail = () => {
 
   useEffect(() => {
     const fetchProduct = async () => {
+      if (!actualId) {
+        setError('Ürün ID bulunamadı');
+        setLoading(false);
+        return;
+      }
+      
       setLoading(true);
+      
       try {
         const token = localStorage.getItem("token");
-        const response = await fetch(`${PRODUCTS_API}/${id}`, {
+        const response = await fetch(`${PRODUCTS_API}/${actualId}`, {
           headers: {
             "Authorization": `Bearer ${token}`
           }
         });
-        if (!response.ok) throw new Error("Ürün bulunamadı");
+        
+        if (!response.ok) {
+          throw new Error("Ürün bulunamadı");
+        }
+        
         const data = await response.json();
         setProduct(data);
 
@@ -170,8 +191,10 @@ const ProductDetail = () => {
       }
     };
     const fetchReviews = async () => {
+      if (!actualId) return;
+      
       try {
-        const res = await fetch(`${PRODUCTS_API}/${id}/reviews`);
+        const res = await fetch(`${PRODUCTS_API}/${actualId}/reviews`);
         const data = await res.json();
         setReviews(data);
       } catch (err) {
@@ -181,7 +204,7 @@ const ProductDetail = () => {
 
     fetchProduct();
     fetchReviews();
-  }, [id]);
+  }, [actualId]);
 
   //FAVORİLERE EKLEME
   const handleFavoriteClick = async (e) => {
@@ -251,7 +274,7 @@ useEffect(() => {
   };
 
   fetchQuestionsCount();
-}, [id]);
+}, [actualId]);
 
   const handleBuyNow = () => {
     dispatch(setBuyNowItem({ product, quantity }));
@@ -273,9 +296,23 @@ useEffect(() => {
   };
 
   
-  if (loading) return <p>Yükleniyor...</p>;
-  if (error) return <p>Hata: {error}</p>;
-  if (!product) return <p>Ürün bulunamadı.</p>;
+  if (loading) return (
+    <div className="flex justify-center items-center min-h-screen">
+      <div className="text-lg">Yükleniyor...</div>
+    </div>
+  );
+  
+  if (error) return (
+    <div className="flex justify-center items-center min-h-screen">
+      <div className="text-lg text-red-600">Hata: {error}</div>
+    </div>
+  );
+  
+  if (!product || !product.id) return (
+    <div className="flex justify-center items-center min-h-screen">
+      <div className="text-lg">Ürün bulunamadı.</div>
+    </div>
+  );
 
   const averageRating = reviews.length > 0
     ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length

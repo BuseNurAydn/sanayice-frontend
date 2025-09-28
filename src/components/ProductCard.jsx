@@ -75,10 +75,16 @@ const ProductCard = ({ product }) => {
     }
   };
 
-  //detay sayfası
+  //detay sayfası - SEO URL ile
 const handleClick = () => {
   const productUrl = generateProductUrl(product);
-  console.log("Oluşturulan URL:", productUrl);
+  
+  // Fallback için basit route
+  if (productUrl === '/') {
+    navigate(`/urun/${product.id}`);
+    return;
+  }
+  
   navigate(productUrl);
 };
 

@@ -1,7 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import SellerRoutes from './routes/SellerRoutes';
 import AuthRoutes from './routes/AuthRoutes';
-import CustomerRouters from './routes/CustomerRoutes';
+import CustomerRoutes from './routes/CustomerRoutes';
 import "slick-carousel/slick/slick.css"; 
 import "slick-carousel/slick/slick-theme.css";
 import { ToastContainer } from "react-toastify";
@@ -38,7 +38,7 @@ function App() {
     <Router>
       <ScrollToTop />
       <Routes>
-        <Route path="/*" element={<CustomerRouters />} />
+        <Route path="/*" element={<CustomerRoutes />} />
         {role && <Route path="/satici/*" element={<SellerRoutes />} />}
         <Route path="/giris-kaydol/*" element={<AuthRoutes />} />
       </Routes>
