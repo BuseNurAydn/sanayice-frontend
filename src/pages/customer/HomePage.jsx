@@ -61,29 +61,29 @@ const HomePage = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const addBanners = [
-  { imageUrl: banner1, linkUrl: "#" },
-  { imageUrl: banner2, linkUrl: "#" },
-  { imageUrl: banner3, linkUrl: "#" },
-  { imageUrl: banner4, linkUrl: "#" },
-  { imageUrl: banner5, linkUrl: "#" },
-  { imageUrl: banner6, linkUrl: "#" },
-  { imageUrl: banner7, linkUrl: "#" },
-  { imageUrl: banner8, linkUrl: "#" },
-  { imageUrl: banner9, linkUrl: "#" },
-];
+    { imageUrl: banner1, linkUrl: "#" },
+    { imageUrl: banner2, linkUrl: "#" },
+    { imageUrl: banner3, linkUrl: "#" },
+    { imageUrl: banner4, linkUrl: "#" },
+    { imageUrl: banner5, linkUrl: "#" },
+    { imageUrl: banner6, linkUrl: "#" },
+    { imageUrl: banner7, linkUrl: "#" },
+    { imageUrl: banner8, linkUrl: "#" },
+    { imageUrl: banner9, linkUrl: "#" },
+  ];
 
-const cardImage =   { imageUrl: cardImage2, linkUrl: "#" }
+  const cardImage = { imageUrl: cardImage2, linkUrl: "#" }
 
-// otomatik 3'lü gruplama
-const groupedBanners = chunkArray(addBanners, 3);
+  // otomatik 3'lü gruplama
+  const groupedBanners = chunkArray(addBanners, 3);
 
-function chunkArray(array, size) {
-  const result = [];
-  for (let i = 0; i < array.length; i += size) {
-    result.push(array.slice(i, i + size));
+  function chunkArray(array, size) {
+    const result = [];
+    for (let i = 0; i < array.length; i += size) {
+      result.push(array.slice(i, i + size));
+    }
+    return result;
   }
-  return result;
-}
 
   // Sayaç 
   const [leftIndex, setLeftIndex] = useState(1);
@@ -106,7 +106,7 @@ function chunkArray(array, size) {
         settings: {
           slidesToShow: 1,
           slidesToScroll: 1,
-           infinite: banners.length > 1,
+          infinite: banners.length > 1,
           dots: false,
         },
       },
@@ -116,7 +116,7 @@ function chunkArray(array, size) {
           slidesToShow: 1,
           slidesToScroll: 1,
           arrows: true,
-           infinite: banners.length > 1,
+          infinite: banners.length > 1,
         },
       },
     ],
@@ -134,7 +134,7 @@ function chunkArray(array, size) {
           categoryData.map(async (cat) => {
             try {
               const products = await getProductsByCategoryId(cat.id);
-              return { ...cat, products, banners: [] }; 
+              return { ...cat, products, banners: [] };
             } catch {
               return { ...cat, products: [], banners: [] };
             }
@@ -179,18 +179,18 @@ function chunkArray(array, size) {
   }, []);
 
   // GET BANNERS
- useEffect(() => {
-  const fetchBanners = async () => {
-    try {
-      const data = await getAllPublicBanners();
-      setBanners(data);
-    } catch (error) {
-      console.error("Bannerlar yüklenemedi:", error.message);
-    }
-  };
+  useEffect(() => {
+    const fetchBanners = async () => {
+      try {
+        const data = await getAllPublicBanners();
+        setBanners(data);
+      } catch (error) {
+        console.error("Bannerlar yüklenemedi:", error.message);
+      }
+    };
 
-  fetchBanners();
-}, []);
+    fetchBanners();
+  }, []);
 
   const scroll = (ref, direction) => {
     if (ref.current) {
@@ -240,13 +240,13 @@ function chunkArray(array, size) {
   if (loading) return <div className="text-center py-20">Yükleniyor...</div>;
   return (
     <div className="bg-gray-50">
-     <HeaderCategories />
-          {/* diğer nav linkleri */}
-        
-      
-   <div className="bg-white">
-      <Discover />
-   </div>
+      <HeaderCategories />
+      {/* diğer nav linkleri */}
+
+
+      <div className="bg-white">
+        <Discover />
+      </div>
       {/* CSS Animasyonları */}
       <style>{`
         @keyframes dropdown {
@@ -275,38 +275,38 @@ function chunkArray(array, size) {
 
       <main className="max-w-7xl mx-auto py-8 px-4">
         <section className="flex flex-col md:flex-row gap-6 pb-8">
-  {/* Sol Slider */}
-  <div className="relative w-full md:w-[820px]">
-    <Slider {...leftSettings}>
-      {banners.map((banner, i) => (
-        <div key={i}>
-          <img
-            src={banner.imageUrl}
-            alt={`Banner ${i}`}
-            className="w-full h-auto md:h-[340px] object-cover rounded-md"
-          />
-        </div>
-      ))}
-    </Slider>
+          {/* Sol Slider */}
+          <div className="relative w-full md:w-[820px]">
+            <Slider {...leftSettings}>
+              {banners.map((banner, i) => (
+                <div key={i}>
+                  <img
+                    src={banner.imageUrl}
+                    alt={`Banner ${i}`}
+                    className="w-full h-auto md:h-[340px] object-cover rounded-md"
+                  />
+                </div>
+              ))}
+            </Slider>
 
-    {/* Sayaç kutusu */}
-    <div className="absolute bottom-2 right-2 bg-black/70 text-white px-2 py-0.5 rounded-md text-xs">
-      {leftIndex} / {banners.length}
-    </div>
-  </div>
+            {/* Sayaç kutusu */}
+            <div className="absolute bottom-2 right-2 bg-black/70 text-white px-2 py-0.5 rounded-md text-xs">
+              {leftIndex} / {banners.length}
+            </div>
+          </div>
 
- {/* Sağ Sabit Kart */}
-<div className="w-full md:w-[420px] flex-shrink-0">
-  <div className="bg-white rounded-md shadow-md overflow-hidden flex items-center justify-center">
-    <img
-      src={cardImage2}
-      alt="Sabit Kart"
-      className="w-full h-auto max-h-[340px] object-cover"
-    />
-  </div>
-</div>
+          {/* Sağ Sabit Kart */}
+          <div className="w-full md:w-[420px] flex-shrink-0">
+            <div className="bg-white rounded-md shadow-md overflow-hidden flex items-center justify-center">
+              <img
+                src={cardImage2}
+                alt="Sabit Kart"
+                className="w-full h-auto max-h-[340px] object-cover"
+              />
+            </div>
+          </div>
 
-</section>
+        </section>
 
 
         {/* Öne Çıkan Ürünler */}
@@ -322,7 +322,7 @@ function chunkArray(array, size) {
           </ScrollSection>
 
           {/* Reklam Alanı */}
-        <AddSlider banners={groupedBanners[0]} />
+          <AddSlider banners={groupedBanners[0]} />
         </section>
 
         {/* İndirimli Ürünler */}
@@ -360,7 +360,7 @@ function chunkArray(array, size) {
           </ScrollSection>
 
           {/* Reklam Alanı */}
-           <AddSlider banners={groupedBanners[2]} />
+          <AddSlider banners={groupedBanners[2]} />
         </section>
 
         {/* Her kategori bölümü için */}
@@ -370,7 +370,7 @@ function chunkArray(array, size) {
 
 
         {/*Kategori Kartları */}
-      {/**  <CategoriesSection categories={categories} /> */} 
+        {/**  <CategoriesSection categories={categories} /> */}
 
       </main>
 

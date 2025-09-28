@@ -55,9 +55,9 @@ const Discover = () => {
         {/* Kategoriler */}
         <div
           ref={scrollRef}
-          className="overflow-x-auto scrollbar-hide scroll-smooth flex-1 mx-4"
+          className="overflow-x-auto scrollbar-hide scroll-smooth flex-1 md:mx-4"
         >
-          <ul className="flex gap-6 justify-center min-w-max">
+          <ul className="flex md:gap-6 justify-center min-w-max">
             {categories.map((cat) => (
               <li key={cat.id} className="flex flex-col items-center min-w-[90px]">
                 <a
