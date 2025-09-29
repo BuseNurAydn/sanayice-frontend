@@ -87,13 +87,8 @@ const handleClick = () => {
   
   navigate(productUrl);
 };
+console.log(generateProductUrl(product));
 
-{/** 
-  //detay sayfasına gitme
-  const handleClick = () => {
-    navigate(`/urun/${product.id}`);
-  };
-*/}
   return (
     <div
       onClick={handleClick}

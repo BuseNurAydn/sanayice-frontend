@@ -23,6 +23,8 @@ const CustomerRoutes = () => {
             <Route element={<CustomerLayout />}>
                 <Route path='/' element={<HomePage />} />
                 <Route path="favorilerim" element={<FavoritePage />} /> 
+                <Route path="urun/:id" element={<ProductDetail />} />
+                <Route path=":brand/:productSlug" element={<ProductDetail />} />
                 <Route path="kategori/:id" element={<CategoryProductsPage type="category"  />} />
                 <Route path=":categorySlug" element={<CategoryProductsPage type="category"  />}  />
                 <Route path="alt-kategori/:id" element={<CategoryProductsPage type="subcategory" />} />
@@ -39,8 +41,7 @@ const CustomerRoutes = () => {
                 <Route path="kategoriler" element={<CategoriesPage />} />
                 <Route path="magaza/:id" element={<SellerPage/>} />
                 <Route path="kargo-takip" element={<CargoTracking />} />
-                <Route path="urun/:id" element={<ProductDetail />} />
-                <Route path=":brand/:productSlug" element={<ProductDetail />} />
+              
             {accountRoutes}
             </Route> 
             

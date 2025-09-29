@@ -16,6 +16,7 @@ import { addToFavorites, fetchFavorites, removeFavorites } from "../../services/
 import SellerQuestions from "../../components/SellerQuestions";
 import { followSeller, isFollowingSeller, unfollowSeller, getSellerRatings } from "../../services/authService";
 import { getProductQuestionsCount } from "../../services/productsService";
+import { generateCategoryUrl } from "../../utils/urlHelpers";
 
 const dummyRelatedProducts = [
   {
@@ -392,7 +393,7 @@ useEffect(() => {
             </Link>
             <span className="mx-2">/</span>
             <Link
-              to={`/kategori/${product.categoryId}`}
+              to={generateCategoryUrl({ id: product.categoryId, name: product.categoryName })}
               className="hover:text-orange-600 cursor-pointer text-xs"
             >
               {htext(product.categoryName)}
