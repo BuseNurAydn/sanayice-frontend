@@ -24,7 +24,10 @@ const CustomerRoutes = () => {
                 <Route path='/' element={<HomePage />} />
                 <Route path="favorilerim" element={<FavoritePage />} /> 
                 <Route path="kategori/:id" element={<CategoryProductsPage type="category"  />} />
+                <Route path=":categorySlug" element={<CategoryProductsPage type="category"  />}  />
                 <Route path="alt-kategori/:id" element={<CategoryProductsPage type="subcategory" />} />
+                <Route path=":categorySlug/:subcategorySlug" element={<CategoryProductsPage type="subcategory"
+                />} />
                 <Route path="sepetim" element={<CartPage />} />
                 <Route path="iletisim" element={<Contact />}></Route>
                 <Route path="siparis-tamamla" element={<CheckoutPage />}></Route>

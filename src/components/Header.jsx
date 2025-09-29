@@ -10,6 +10,7 @@ import { useEffect, useState } from 'react'
 import { fetchCart, addToCart } from "../services/cartService";
 import { toast } from "react-toastify"
 import { fetchFavorites, addToFavorites } from "../services/favoritesService";
+import { generateCategoryUrl, generateSubCategoryUrl } from "../utils/urlHelpers";
 
 const Header = ({ categories = [] }) => {
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -281,7 +282,7 @@ const Header = ({ categories = [] }) => {
                   <li key={cat.id}>
                     <div className="flex justify-between items-center py-2 px-1 rounded-lg hover:bg-orange-50 transition-colors duration-200 cursor-pointer">
                       <Link
-                        to={`/kategori/${cat.id}`}
+                        to={generateCategoryUrl(cat)}
                         onClick={() => setMenuOpen(false)}
                         className="text-gray-800 text-[12px] font-semibold"
                       >
@@ -310,7 +311,7 @@ const Header = ({ categories = [] }) => {
                         {cat.subcategories.map((sub) => (
                           <li key={sub.id}>
                             <Link
-                              to={`/kategori/${cat.id}`}
+                              to={generateSubCategoryUrl(sub, cat)}
                               onClick={() => setMenuOpen(false)}
                               className="text-gray-600 hover:text-orange-500 text-xs font-medium block transition-colors duration-200"
                             >

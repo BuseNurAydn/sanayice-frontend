@@ -7,7 +7,7 @@ import { getCategoryById, getSubCategoryById } from "../../services/categoryServ
 import { getProductsByCategoryId, getProductsBySubCategoryId } from "../../services/productsService";
 
 function CategoryProductsPage({ type = "category" }) {
-    const { id } = useParams();
+    const { id, categorySlug, subcategorySlug } = useParams();
     const [products, setProducts] = useState([]);
     const [filteredProducts, setFilteredProducts] = useState([]);
     const [categoryData, setCategoryData] = useState(null);
@@ -19,16 +19,36 @@ function CategoryProductsPage({ type = "category" }) {
     const [isSortOpen, setIsSortOpen] = useState(false);
     const [sortBy, setSortBy] = useState("");
 
+    let actualId = id;
+    let pageType = type; // default "category"
+
+    // Eğer URL alt kategori içeriyorsa
+    if (subcategorySlug) {
+        const match = subcategorySlug.match(/-x-g(\d+)$/);
+        if (match) {
+            actualId = parseInt(match[1], 10);
+            pageType = "subcategory"; // alt kategori sayfası
+        }
+    }
+    // Eğer sadece categorySlug var
+    else if (categorySlug && !id) {
+        const match = categorySlug.match(/-x-g(\d+)$/);
+        if (match) {
+            actualId = parseInt(match[1], 10);
+            pageType = "category";
+        }
+    }
+
     // Kategori veya Subcategory bilgisi getir
     useEffect(() => {
         const fetchData = async () => {
             try {
                 if (type === "category") {
-                    const data = await getCategoryById(id);
+                    const data = await getCategoryById(actualId);
                     setCategoryData(data);
                     setSubcategories(data.subcategories || []);
                 } else {
-                    const data = await getSubCategoryById(id);
+                    const data = await getSubCategoryById(actualId);
                     setCategoryData(data);
                     setSubcategories([]);
                 }
@@ -37,7 +57,7 @@ function CategoryProductsPage({ type = "category" }) {
             }
         };
         fetchData();
-    }, [id, type]);
+    }, [actualId, pageType]);
 
     // Ürünleri getir
     useEffect(() => {
@@ -45,9 +65,9 @@ function CategoryProductsPage({ type = "category" }) {
             try {
                 let data = [];
                 if (type === "category") {
-                    data = await getProductsByCategoryId(id);
+                    data = await getProductsByCategoryId(actualId);
                 } else {
-                    data = await getProductsBySubCategoryId(id);
+                    data = await getProductsBySubCategoryId(actualId);
                 }
                 setProducts(data);
                 setFilteredProducts(data);
@@ -56,7 +76,7 @@ function CategoryProductsPage({ type = "category" }) {
             }
         };
         fetchProducts();
-    }, [id, type]);
+    }, [actualId, pageType]);
 
     useEffect(() => {
         let result = [...products];

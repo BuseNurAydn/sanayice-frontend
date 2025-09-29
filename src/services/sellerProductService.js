@@ -220,11 +220,8 @@ export const rejectProductQuestion = async (questionId) => {
 };
 
 // Excel dosyası ürün import etme
-export const bulkImportProducts = async (file) => {
+export const bulkImportProducts = async (formData) => {
   const token = localStorage.getItem("token");
-
-  const formData = new FormData();
-  formData.append("file", file);
 
   const response = await fetch(`${PRODUCTS_API}/bulk-import`, {
     method: "POST",
@@ -240,6 +237,7 @@ export const bulkImportProducts = async (file) => {
 
   return await response.json();
 };
+
 
 //  Zorunlu kolon başlıklarını çekme
 export const getBulkImportRequiredColumns = async () => {

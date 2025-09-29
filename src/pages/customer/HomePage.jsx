@@ -15,15 +15,15 @@ import AddSlider from "../../components/addSlider";
 import Discover from "../../components/Discover";
 import CategoriesMenu from "../../components/CategoriesMenu";
 import HeaderCategories from "../../components/HeaderCategories";
-import banner1 from "../../assets/png/Profesyoneller İçim Hassas Ölçüler - 4.png";
-import banner2 from "../../assets/png/Profesyoneller İçim Hassas Ölçüler - 5.png";
-import banner3 from "../../assets/png/Profesyoneller İçim Hassas Ölçüler - 6.png";
-import banner4 from "../../assets/png/Profesyoneller İçim Hassas Ölçüler - 7.png";
-import banner5 from "../../assets/png/Profesyoneller İçim Hassas Ölçüler - 8.png";
-import banner6 from "../../assets/png/Profesyoneller İçim Hassas Ölçüler - 9.png";
-import banner7 from "../../assets/png/Profesyoneller İçim Hassas Ölçüler.png";
-import banner8 from "../../assets/png/Profesyoneller İçim Hassas Ölçüler - 11.png";
-import banner9 from "../../assets/png/Profesyoneller İçim Hassas Ölçüler - 12.png";
+import banner1 from "../../assets/png/Profesyoneller İçim Hassas Ölçüler - 13.png";
+import banner2 from "../../assets/png/Profesyoneller İçim Hassas Ölçüler - 14.png";
+import banner3 from "../../assets/png/Profesyoneller İçim Hassas Ölçüler - 15.png";
+import banner4 from "../../assets/png/Profesyoneller İçim Hassas Ölçüler - 16.png";
+import banner5 from "../../assets/png/Profesyoneller İçim Hassas Ölçüler - 17.png";
+import banner6 from "../../assets/png/Profesyoneller İçim Hassas Ölçüler - 18.png";
+import banner7 from "../../assets/png/Profesyoneller İçim Hassas Ölçüler - 19.png";
+import banner8 from "../../assets/png/Profesyoneller İçim Hassas Ölçüler - 20.png";
+import banner9 from "../../assets/png/Profesyoneller İçim Hassas Ölçüler - 21.png";
 import cardImage2 from "../../assets/png/michelle! - 2.png";
 
 const NextArrow = ({ onClick }) => (

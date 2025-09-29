@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import CategoriesMenu from "./CategoriesMenu";
 import { fetchCategories } from "../services/categoryService";
 import { TfiAlignLeft } from "react-icons/tfi";
+import { generateCategoryUrl } from "../utils/urlHelpers";
 
 const HeaderCategories = () => {
   const [categories, setCategories] = useState([]);
@@ -50,7 +51,7 @@ const HeaderCategories = () => {
           {featuredCategories.map((cat) => (
             <Link
               key={cat.id}
-              to={`/kategori/${cat.id}`}
+              to={generateCategoryUrl(cat)}
               className="text-gray-700 hover:text-orange-600 font-medium"
             >
               {cat.name}

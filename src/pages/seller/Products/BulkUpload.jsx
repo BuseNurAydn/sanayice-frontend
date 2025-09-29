@@ -60,6 +60,10 @@ const BulkUpload = () => {
     formData.append("file", excelFile);
     formData.append("categoryId", categoryId);
     formData.append("subcategoryId", subcategoryId);
+  
+    for (let pair of formData.entries()) {
+  console.log(pair[0] + ': ' + pair[1]);
+}
 
     try {
       await bulkImportProducts(formData);

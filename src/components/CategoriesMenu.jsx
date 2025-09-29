@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { fetchCategories } from "../services/categoryService";
 import { TfiAngleRight } from "react-icons/tfi";
+import { generateCategoryUrl, generateSubCategoryUrl } from "../utils/urlHelpers";
 
 const CategoriesMenu = () => {
   const [categories, setCategories] = useState([]);
@@ -34,7 +35,7 @@ const CategoriesMenu = () => {
               onMouseEnter={() => setHoveredCategory(cat)}
             >
               <Link
-                to={`/kategori/${cat.id}`}
+                to={generateCategoryUrl(cat)}
                 className={`font-medium text-gray-700 hover:text-orange-600 ${hoveredCategory?.id === cat.id ? "text-orange-600" : ""
                   }`}
               >
@@ -55,9 +56,9 @@ const CategoriesMenu = () => {
           }}
         >
           {hoveredCategory.subcategories.map((sub) => (
-            <Link
+            <Link 
               key={sub.id}
-              to={`/alt-kategori/${sub.id}`}
+              to={generateSubCategoryUrl(sub, hoveredCategory)}
               className="block font-semibold text-gray-800 hover:text-orange-600"
             >
               {sub.name}

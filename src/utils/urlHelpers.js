@@ -28,25 +28,24 @@ export function generateProductUrl(product) {
 
 // Kategori URL Üretici
 export function generateCategoryUrl(category) {
-  const categorySlug = createSlug(category.name);
+
+  if (!category || !category.id) {
+    return '/';
+  }
+  const categorySlug = category.name? createSlug(category.name) : 'kategori';
   return `/${categorySlug}-x-g${category.id}`;
 }
 
 // Alt Kategori URL Üretici
-export function generateSubCategoryUrl(subcategory) {
-  const categorySlug = createSlug(subcategory.categoryName);
-  const subcategorySlug = createSlug(subcategory.subcategoryName);
-  return `/${categorySlug}-${subcategorySlug}-x-g${subcategory.subcategoryId}`;
+export function generateSubCategoryUrl(subcategory,category) {
+
+    if (!subcategory || !subcategory.id) {
+    return '/';
+    }
+
+  const categorySlug = category?.name? createSlug(category.name) : 'kategori';
+  const subcategorySlug = subcategory.name? createSlug(subcategory.name) : 'altkategori';
+  return `/${categorySlug}-${subcategorySlug}-x-g${subcategory.id}`;
 }
 
-//  Örnek kullanım
-export function exampleUsage(product) {
-  const productURL = generateProductUrl(product);
-  const categoryURL = generateCategoryUrl({ id: product.categoryId, name: product.categoryName });
-  const subCategoryURL = generateSubCategoryUrl(product);
-
-  console.log("Ürün URL:", productURL);
-  console.log("Kategori URL:", categoryURL);
-  console.log("Alt Kategori URL:", subCategoryURL);
-}
 
