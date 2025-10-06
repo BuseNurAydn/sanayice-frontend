@@ -1,0 +1,597 @@
+import { useState, useEffect } from 'react';
+import { FaTrash } from "react-icons/fa";
+import { fetchCategories, fetchSubcategories } from "../../../services/categoryService";
+import { createProduct } from "../../../services/sellerProductService";
+import { toast } from 'react-toastify';
+import { Upload } from "lucide-react";
+import { useNavigate } from 'react-router-dom';
+
+const SingleProductForm = () => {
+    const navigate = useNavigate();
+    
+    // Stil Sabitleri
+    const boxStyle = 'border border-gray-100 md:p-4 p-2 rounded-lg shadow';
+    const lineStyle = 'w-full h-[1px] bg-gray-300 mb-4'
+    const labelStyle = 'block text-sm font-medium text-gray-900 pb-2';
+    const inputStyle = 'w-full border-gray-200 outline-none border px-3 py-2 rounded-lg my-4';
+    const buttonStyle = "bg-[var(--color-orange)] hover:bg-orange-500 text-white px-4 py-2 rounded-lg text-md";
+
+    // State'ler
+    const [categories, setCategories] = useState([]);
+    const [subcategories, setSubcategories] = useState([]);
+    const [mainImageFile, setMainImageFile] = useState(null);
+    const [additionalImageFiles, setAdditionalImageFiles] = useState([]);
+    const [mainImageError, setMainImageError] = useState("");
+    const [additionalImageErrors, setAdditionalImageErrors] = useState([]);
+  
+    const [formData, setFormData] = useState({
+        name: "",
+        description: "",
+        brand: "",
+        modelNumber: "",
+        stockQuantity: "",
+        price: "",
+        categoryId: "",
+        subcategoryId: "",
+        highlightedFeatures: ["", "", ""],
+        technicalSpecifications: { "": "" },
+        weightGrams: "",
+        lengthMm: "",
+        widthMm: "",
+        heightMm: "",
+        warrantyMonths: "",
+        freeShipping: false,
+        shippingDays: "",
+        active: true,
+    });
+
+    // Kategorileri ve Alt Kategorileri Çekme
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const [categoriesData, subcategoriesData] = await Promise.all([
+                    fetchCategories(),
+                    fetchSubcategories(),
+                ]);
+
+                setCategories(categoriesData);
+                setSubcategories(subcategoriesData);
+            } catch (error) {
+                console.error("Veri çekme hatası:", error);
+                toast.error("Kategori ve alt kategori bilgileri yüklenemedi.");
+            }
+        };
+        fetchData();
+    }, []);
+
+    // Handler Fonksiyonları
+    const handleChange = (e) => {
+        const { id, value } = e.target;
+        setFormData(prev => ({ ...prev, [id]: value }));
+    };
+
+    const handleFeatureChange = (index, value) => {
+        const newFeatures = [...formData.highlightedFeatures];
+        newFeatures[index] = value;
+        setFormData(prev => ({ ...prev, highlightedFeatures: newFeatures }));
+    };
+
+   //Teknik özellik ekleme,silme
+    const handleTechSpecChange = (oldKey, newKey, newValue, isKeyChange) => {
+        setFormData((prev) => {
+            const newSpecs = { ...prev.technicalSpecifications };
+
+            if (isKeyChange) {
+                 // Anahtar değişmiş: eski key'i sil, yeni key ve değeri ekle
+                delete newSpecs[oldKey];
+                if (newKey) {
+                    newSpecs[newKey] = newValue || "";
+                }
+            } else {
+                // Değer değişmiş
+                newSpecs[oldKey] = newValue;
+            }
+
+            return {
+                ...prev,
+                technicalSpecifications: newSpecs,
+            };
+        });
+    };
+
+    // Yeni boş teknik özellik ekle
+    const addTechSpec = () => {
+        setFormData((prev) => {
+            const newSpecs = { ...prev.technicalSpecifications };
+             // boş bir key varsa, tekrar ekleme
+            if (newSpecs.hasOwnProperty("")) return prev;
+
+            return {
+                ...prev,
+                technicalSpecifications: {
+                    ...newSpecs,
+                    "": "",
+                },
+            };
+        });
+    };
+    // Teknik özellik sil
+    const removeTechSpec = (keyToRemove) => {
+        setFormData((prev) => {
+            const updatedSpecs = { ...prev.technicalSpecifications };
+            delete updatedSpecs[keyToRemove];
+            return {
+                ...prev,
+                technicalSpecifications: updatedSpecs,
+            };
+        });
+    };
+     // Kategori değiştiğinde alt kategori sıfırlanır
+    const handleCategoryChange = (e) => {
+        const selectedId = parseInt(e.target.value);
+        setFormData(prev => ({
+            ...prev,
+            categoryId: selectedId,
+            subcategoryId: '',
+        }));
+    };
+     // Ana resim dosyası yükleme handler'ı
+    const handleMainImageUpload = (file) => {
+        setMainImageError("");
+        if (!file) return;
+
+        // Kontrol mantığı korundu (500MB'dan büyük dosya ve tip kontrolü)
+        if (file.size > 500 * 1024 * 1024) { 
+            setMainImageError("Dosya boyutu 500MB'dan büyük olamaz");
+            return;
+        }
+        const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg'];
+        if (!allowedTypes.includes(file.type)) {
+            setMainImageError("Sadece JPG ve PNG dosyaları yüklenebilir");
+            return;
+        }
+        setMainImageFile(file);
+        const imageUrl = URL.createObjectURL(file);
+        setFormData((prev) => ({ ...prev, imageUrl }));
+    };
+     // Ek resimler dosyası yükleme handler'ı (çoklu dosya)
+    const handleAdditionalImagesUpload = (fileList) => {
+        const files = Array.from(fileList);
+        const newErrors = [];
+        const validFiles = [];
+
+        files.forEach((file, index) => {
+            if (file.size > 500 * 1024 * 1024) { 
+                newErrors.push(`Resim ${index + 1}: Dosya boyutu 500MB'dan büyük olamaz`);
+            } else if (!['image/jpeg', 'image/png', 'image/jpg'].includes(file.type)) {
+                newErrors.push(`Resim ${index + 1}: Geçersiz dosya türü`);
+            } else {
+                validFiles.push(file);
+            }
+        });
+
+        setAdditionalImageFiles((prev) => [...prev, ...validFiles]);
+        setAdditionalImageErrors(newErrors);
+    };
+
+
+    // Ek resim silme fonksiyonu
+    const removeAdditionalImage = (index) => {
+        setAdditionalImageFiles(prev => prev.filter((_, i) => i !== index));
+    };
+
+    const handleClear = () => {
+        setFormData({
+            name: "",
+            description: "",
+            brand: "",
+            modelNumber: "",
+            stockQuantity: "",
+            price: "",
+            categoryId: "",
+            subcategoryId: "",
+            highlightedFeatures: ["", "", ""],
+            technicalSpecifications: { "": "" },
+            weightGrams: "",
+            lengthMm: "",
+            widthMm: "",
+            heightMm: "",
+            warrantyMonths: "",
+            freeShipping: false,
+            shippingDays: "",
+            active: true
+        });
+        setMainImageFile(null);
+        setAdditionalImageFiles([]);
+        setMainImageError("");
+        setAdditionalImageErrors([]);
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+
+        if (!mainImageFile) {
+            toast.error("Ana resim yüklemek zorunludur!");
+            return;
+        }
+        if (!formData.name || !formData.brand || !formData.modelNumber || !formData.price || !formData.categoryId || !formData.subcategoryId) {
+            toast.error("Ürün Adı, Marka, Model, Fiyat ve Kategori/Alt Kategori zorunludur!");
+            return;
+        }
+
+        // Değerleri doğru türlere dönüştürme yardımcıları (AddProduct'tan taşındı)
+        const safeParseInt = (val) => {
+            const parsed = parseInt(val);
+            return isNaN(parsed) ? null : parsed;
+        };
+        const safeParseFloat = (val) => {
+            const parsed = parseFloat(val);
+            return isNaN(parsed) ? null : parsed;
+        };
+
+        // Ürün objesini oluşturma
+        const productObj = {
+            name: formData.name,
+            description: formData.description,
+            brand: formData.brand,
+            modelNumber: formData.modelNumber,
+            stockQuantity: safeParseInt(formData.stockQuantity),
+            price: safeParseFloat(formData.price),
+            categoryId: safeParseInt(formData.categoryId),
+            subcategoryId: safeParseInt(formData.subcategoryId),
+            active: formData.active,
+            highlightedFeatures: formData.highlightedFeatures.filter(f => f.trim() !== ""),
+            technicalSpecifications: Object.fromEntries(
+                Object.entries(formData.technicalSpecifications).filter(
+                    ([k, v]) => k.trim() && v.trim()
+                )
+            ),
+            weightGrams: safeParseInt(formData.weightGrams),
+            lengthMm: safeParseInt(formData.lengthMm),
+            widthMm: safeParseInt(formData.widthMm),
+            heightMm: safeParseInt(formData.heightMm),
+            warrantyMonths: safeParseInt(formData.warrantyMonths),
+            freeShipping: formData.freeShipping,
+            shippingDays: safeParseInt(formData.shippingDays),
+        };
+
+        // FormData oluşturma
+        const form = new FormData();
+        form.append("product", JSON.stringify(productObj));
+
+        if (mainImageFile) {
+            form.append("imageFiles", mainImageFile);
+        }
+        additionalImageFiles.forEach((file) => {
+            form.append("imageFiles", file);
+        });
+
+        try {
+            // Tekli ürün yükleme işlemi
+            await createProduct(form);
+            toast.success("Ürün başarıyla onaya gönderildi!");
+            
+            navigate(`/satici/urunlerim`); // Ürünlerim sayfasına yönlendir
+            handleClear(); // Formu temizle
+        } catch (error) {
+            console.error("Hata detayı:", error);
+            toast.error(`Ürün eklenemedi: ${error?.message || "Sunucu hatası"}`);
+        }
+    };
+
+    // Alt kategorileri filtreleme (AddProduct'tan taşındı)
+    const filteredSubcategories = subcategories.filter(
+        sub => sub.categoryId === parseInt(formData.categoryId)
+    );
+
+    return (
+        <form onSubmit={handleSubmit} className="my-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Sol Form */}
+            <div className="space-y-6">
+                <div className={boxStyle}>
+                    <h3 className="font-semibold mb-2">Ad ve Açıklama</h3>
+                    <div className={lineStyle} />
+
+                    <div>
+                        <label htmlFor="name" className={labelStyle}> Ürün Adı <span className="text-red-500">*</span></label>
+                        <input type="text" id="name" required className={inputStyle} value={formData.name}
+                            onChange={handleChange} />
+                    </div>
+                    <div>
+                        <label htmlFor="description" className={labelStyle}>Ürün Açıklaması</label>
+                        <textarea id='description' className={inputStyle} value={formData.description} onChange={handleChange}
+                        />
+                    </div>
+                </div>
+
+                <div className={boxStyle}>
+                    <h3 className="font-semibold mb-2">Kategori</h3>
+                    <div className={lineStyle} />
+                    <div>
+                        <label htmlFor="categoryId" className={labelStyle}>Ürün Kategorisi <span className="text-red-500">*</span> </label>
+                        <select id="categoryId" required className={inputStyle} value={formData.categoryId}
+                            onChange={handleCategoryChange}>
+                            <option value="">Kategori Seçiniz</option>
+                            {categories.map(cat => (
+                                <option key={cat.id} value={cat.id}>{cat.name}</option>
+                            ))}
+                        </select>
+                    </div>
+                    <div>
+                        <label htmlFor="subcategoryId" className={labelStyle}>Ürün Alt Kategorisi <span className="text-red-500">*</span></label>
+                        <select id="subcategoryId" required className={inputStyle} value={formData.subcategoryId} onChange={handleChange}>
+                            <option value="">Alt Kategori Seçiniz</option>
+                            {filteredSubcategories.map(sub => (
+                                <option key={sub.id} value={sub.id}>{sub.name}</option>
+                            ))}
+                        </select>
+                    </div>
+                </div>
+                <div className={boxStyle}>
+                    <h3 className="font-semibold mb-2">Öne Çıkan Özellikler</h3>
+                    <div className={lineStyle} />
+                    {[0, 1, 2].map((i) => (
+                        <input
+                            key={i}
+                            type="text"
+                            className={inputStyle}
+                            placeholder={`Özellik ${i + 1}`}
+                            value={formData.highlightedFeatures[i]}
+                            onChange={(e) => handleFeatureChange(i, e.target.value)}
+                        />
+                    ))}
+                </div>
+
+                <div className={boxStyle}>
+                    <h3 className="font-semibold mb-2">Teknik Özellikler</h3>
+                    <div className={lineStyle} />
+
+                    <div className="flex flex-col gap-4">
+                        {Object.entries(formData.technicalSpecifications).map(([key, value], idx) => (
+                            <div
+                                key={idx}
+                                className="flex flex-wrap md:flex-nowrap items-center gap-2"
+                            >
+                                <input
+                                    placeholder="Özellik Adı"
+                                    value={key}
+                                    onChange={(e) =>
+                                        handleTechSpecChange(key, e.target.value, value, true)
+                                    }
+                                    className="flex-1 min-w-[120px] border-gray-200 outline-none border p-2 rounded-lg"
+                                />
+                                <input
+                                    placeholder="Değeri"
+                                    value={value}
+                                    onChange={(e) =>
+                                        handleTechSpecChange(key, key, e.target.value, false)
+                                    }
+                                    className="flex-1 min-w-[120px] border-gray-200 outline-none border p-2 rounded-lg"
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => removeTechSpec(key)}
+                                    className="text-red-500 hover:text-red-700 p-2"
+                                >
+                                    <FaTrash />
+                                </button>
+                            </div>
+                        ))}
+                        <button
+                            type="button"
+                            onClick={addTechSpec}
+                            className="mt-2 w-fit px-4 py-1 bg-amber-500 text-white rounded hover:bg-amber-600 transition"
+                        >
+                            Özellik Ekle
+                        </button>
+
+                    </div>
+                </div>
+            </div>
+            {/* Sağ Form */}
+            <div className="space-y-6">
+                <div className={boxStyle}>
+                    <h3 className="font-semibold mb-2">Ürün Detayları</h3>
+                    <div className={lineStyle} />
+                    <div className="grid grid-cols-2 gap-3">
+                        <div>
+                            <label htmlFor="brand" className={labelStyle}> Marka <span className="text-red-500">*</span>
+                            </label>
+                            <input id='brand' required className={inputStyle} value={formData.brand} onChange={handleChange}></input>
+                        </div>
+
+                        <div>
+                            <label htmlFor="stockQuantity" className={labelStyle}>Stok Miktarı</label>
+                            <input type="number" id="stockQuantity" min="0" className={inputStyle} value={formData.stockQuantity} onChange={handleChange} />
+                        </div>
+                    </div>
+
+                    <div className="mt-4">
+                        <label htmlFor="modelNumber" className={labelStyle}>Model Numarası <span className="text-red-500">*</span>
+                        </label>
+                        <input type="text" id="modelNumber" required className={inputStyle} value={formData.modelNumber}
+                            onChange={handleChange} />
+                    </div>
+                    <div className="flex flex-wrap gap-4">
+                        <div className="w-full sm:w-[calc(50%-0.5rem)]">
+                            <label className={labelStyle}>Ağırlık (gram)</label>
+                            <input
+                                type="number"
+                                className={inputStyle}
+                                value={formData.weightGrams}
+                                onChange={(e) => setFormData({ ...formData, weightGrams: e.target.value })}
+                            />
+                        </div>
+
+                        <div className="w-full sm:w-[calc(50%-0.5rem)]">
+                            <label className={labelStyle}>Uzunluk (mm)</label>
+                            <input
+                                type="number"
+                                className={inputStyle}
+                                value={formData.lengthMm}
+                                onChange={(e) => setFormData({ ...formData, lengthMm: e.target.value })}
+                            />
+                        </div>
+
+                        <div className="w-full sm:w-[calc(50%-0.5rem)]">
+                            <label className={labelStyle}>Genişlik (mm)</label>
+                            <input
+                                type="number"
+                                className={inputStyle}
+                                value={formData.widthMm}
+                                onChange={(e) => setFormData({ ...formData, widthMm: e.target.value })}
+                            />
+                        </div>
+
+                        <div className="w-full sm:w-[calc(50%-0.5rem)]">
+                            <label className={labelStyle}>Yükseklik (mm)</label>
+                            <input
+                                type="number"
+                                className={inputStyle}
+                                value={formData.heightMm}
+                                onChange={(e) => setFormData({ ...formData, heightMm: e.target.value })}
+                            />
+                        </div>
+
+                        <div className="w-full sm:w-[calc(50%-0.5rem)]">
+                            <label className={labelStyle}>Garanti Süresi (ay)</label>
+                            <input
+                                type="number"
+                                className={inputStyle}
+                                value={formData.warrantyMonths}
+                                onChange={(e) => setFormData({ ...formData, warrantyMonths: e.target.value })}
+                            />
+                        </div>
+                        <div className="w-full sm:w-[calc(50%-0.5rem)]">
+                            <label className={labelStyle}>Kargo Süresi (gün)</label>
+                            <input
+                                type="number"
+                                className={inputStyle}
+                                value={formData.shippingDays}
+                                onChange={(e) => setFormData({ ...formData, shippingDays: e.target.value })}
+                            />
+                        </div>
+                        <div className="w-full sm:w-[calc(50%-0.5rem)] flex items-center gap-2 mt-4">
+                            <input type="checkbox" id="freeShipping" checked={formData.freeShipping}
+                                onChange={(e) => setFormData({ ...formData, freeShipping: e.target.checked })}
+                            />
+                            <label htmlFor="freeShipping">Ücretsiz Kargo</label>
+                        </div>
+                        <div className='w-full sm:w-[calc(50%-0.5rem)] flex items-center gap-2 mt-4'>
+                            <input
+                                type="checkbox"
+                                id="active"
+                                checked={formData.active}
+                                onChange={(e) => setFormData({ ...formData, active: e.target.checked })}
+                            />
+                            <label htmlFor="active" >
+                                Ürün {formData.active ? "Aktif" : "Pasif"}
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div className={boxStyle}>
+                    <h3 className="font-semibold mb-2">Ürün Fiyatı</h3>
+                    <div className={lineStyle} />
+                    <div>
+                        <label htmlFor="price" className={labelStyle}>Ürün Fiyatı (TL)<span className="text-red-500">*</span>
+                        </label>
+                        <input type="number" id='price' min="0" required className={inputStyle} value={formData.price} onChange={handleChange} />
+                    </div>
+                </div>
+                <div className={boxStyle}>
+                    <h3 className="font-semibold mb-2">Ürün Görselleri</h3>
+                    <div className={lineStyle} />
+
+                    {/* Ana Resim */}
+                    <p className='text-sm text-gray-700 font-medium'>Ana Resim (<span className="text-red-500">*</span> Zorunlu)</p>
+                    <div
+                        className="border-2 border-dashed border-gray-300 rounded-lg p-4 hover:border-orange-500 hover:bg-orange-50 cursor-pointer w-64 mb-4 mt-2"
+                        onClick={() => {
+                            const input = document.createElement("input");
+                            input.type = "file";
+                            input.accept = "image/*";
+                            input.onchange = (e) => handleMainImageUpload(e.target.files[0]);
+                            input.click();
+                        }}
+                    >
+                        <Upload className="w-6 h-6 text-gray-400 mx-auto mb-2" />
+                        <p className="text-xs text-center text-gray-600">Ana Resim Yükle</p>
+                    </div>
+
+                    {mainImageFile && (
+                        <div className="mb-4 relative w-32 h-32">
+                            <img
+                                src={URL.createObjectURL(mainImageFile)}
+                                alt="Ana Resim"
+                                className="w-full h-full object-cover rounded"
+                            />
+                            <button
+                                type="button"
+                                onClick={() => setMainImageFile(null)}
+                                className="absolute top-[-8px] right-[-8px] bg-red-500 text-white rounded-full p-1 text-xs"
+                            >
+                                <FaTrash className='w-3 h-3' />
+                            </button>
+                        </div>
+                    )}
+                    {mainImageError && (
+                        <p className="text-red-500 text-sm mt-1">{mainImageError}</p>
+                    )}
+                    
+                    {/* Ek Resimler */}
+                    <p className='text-sm text-gray-700 font-medium mt-6'>Ek Resimler (Opsiyonel)</p>
+                    <div
+                        className="border-2 border-dashed border-gray-300 rounded-lg p-4 hover:border-orange-500 hover:bg-orange-50 cursor-pointer w-64 mb-4 mt-2"
+                        onClick={() => {
+                            const input = document.createElement("input");
+                            input.type = "file";
+                            input.accept = "image/*";
+                            input.multiple = true;
+                            input.onchange = (e) => handleAdditionalImagesUpload(e.target.files);
+                            input.click();
+                        }}
+                    >
+                        <Upload className="w-6 h-6 text-gray-400 mx-auto mb-2" />
+                        <p className="text-xs text-center text-gray-600">Ek Resim(ler) Yükle (Maks. 2)</p>
+                    </div>
+
+                    {additionalImageFiles.length > 0 && (
+                        <div className="flex gap-3 flex-wrap">
+                            {additionalImageFiles.map((file, idx) => (
+                                <div key={idx} className="relative w-20 h-20">
+                                    <img
+                                        src={URL.createObjectURL(file)}
+                                        alt={`Ek ${idx + 1}`}
+                                        className="w-full h-full object-cover rounded"
+                                    />
+                                     <button
+                                        type="button"
+                                        onClick={() => removeAdditionalImage(idx)}
+                                        className="absolute top-[-8px] right-[-8px] bg-red-500 text-white rounded-full p-1 text-xs"
+                                    >
+                                        <FaTrash className='w-3 h-3' />
+                                    </button>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                    {additionalImageErrors.length > 0 && (
+                        <ul className="text-red-500 text-sm mt-2 list-disc list-inside">
+                            {additionalImageErrors.map((error, idx) => (
+                                <li key={idx}>{error}</li>
+                            ))}
+                        </ul>
+                    )}
+
+                </div>
+                <div className="mt-8 flex gap-4 justify-end">
+                    <button type="button" className="text-gray-600 hover:text-gray-800 px-4 py-2 rounded-lg text-md border border-gray-300" onClick={handleClear}>Temizle</button>
+                    <button type="submit" className={buttonStyle}>Onaya Gönder</button>
+                </div>
+            </div>
+        </form>
+    );
+};
+export default SingleProductForm;

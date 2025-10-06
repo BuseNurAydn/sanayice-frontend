@@ -222,6 +222,7 @@ export const rejectProductQuestion = async (questionId) => {
 // Excel dosyası ürün import etme
 export const bulkImportProducts = async (formData) => {
   const token = localStorage.getItem("token");
+  
 
   const response = await fetch(`${PRODUCTS_API}/bulk-import`, {
     method: "POST",

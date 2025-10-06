@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
-import GooglePlay from '../../assets/svg/playstore.svg';
-import AppStore from '../../assets/png/AppStore.jpg';
+import PlayStore from '../../assets/png/PlayStore.png';
+import AppStore from '../../assets/png/AppStore.png';
 import { FaFacebook, FaWhatsapp } from "react-icons/fa";
 import { AiFillInstagram } from "react-icons/ai";
 import { IoLogoYoutube } from "react-icons/io";
@@ -12,15 +12,18 @@ const Footer = () => {
     <footer className="bg-[var(--color-gray)] pt-8 text-sm custom-font ">
 
       {/* Üst Bölüm */}
-      <div className="max-w-7xl mx-auto px-5 grid grid-cols-1 md:grid-cols-6 gap-14">
-        <div>
-
-          <div className="flex flex-col">
-            <h3 className="font-bold mb-2 text-[var(--color-dark)]">Uygulamamızı İndirin</h3>
-            <div className="flex flex-col gap-2">
-              <img src={AppStore} alt="App Store" className='h-10' />
-              <img src={GooglePlay} alt="Google Play" className="h-10" />
-            </div>
+      <div className="max-w-7xl mx-auto px-5 md:px-0 grid grid-cols-1 md:grid-cols-7 gap-6">
+        <div className="md:col-span-2 flex flex-col items-start text-center md:text-left">
+          <h3 className="font-bold mb-4 text-[var(--color-dark)] md:text-lg">Uygulamamızı İndirin</h3>
+          <div className="flex flex-row gap-3">
+            <img
+              src={AppStore}
+              alt="App Store"
+            />
+            <img
+              src={PlayStore}
+              alt="Google Play"
+            />
           </div>
         </div>
 
@@ -85,7 +88,7 @@ const Footer = () => {
           </div>
 
           <Link to="https://wa.me/905555555555" target="_blank" rel="noopener noreferrer" className=" text-[var(--color-dark-orange)] mt-1 block font-bold text-xl">
-            0850 000 00 00
+            0850 255 12 05
           </Link>
           
           {/* Ayırıcı */}

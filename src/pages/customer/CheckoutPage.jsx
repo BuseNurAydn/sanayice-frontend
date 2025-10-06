@@ -194,7 +194,8 @@ const CheckoutPage = () => {
         fullAddress: "",
         isDefault: false
       });
-      await fetchAddresses(); // adresleri yeniden çektim
+      const updated = await fetchAddresses(); // <-- adresleri al
+      setAddresses(updated); 
     } catch (error) {
       toast.error(error.message);
     }
@@ -204,16 +205,21 @@ const CheckoutPage = () => {
   const handleConfirmOrder = async () => {
     try {
       const orderRequest = {
-        selectedAddressId: selectedAddressId,
-        billingAddress: formData.billingAddress,
+        selectedAddressId: formData.selectedAddressId,
+        billingAddress: formData.billingAddress || formData.fullAddress,
         customerNotes: formData.customerNotes,
         shippingMethod: formData.shippingMethod,
-        shippingCost: parseFloat(formData.shippingCost),
+        shippingCost: getSelectedShippingPrice(), 
         paymentMethod: formData.paymentMethod,
         paymentToken: formData.paymentMethod === 'credit-card' ? formData.paymentToken : undefined,
         couponCode: appliedCoupon ? appliedCoupon.code : null,
       };
 
+       // BURAYA EKLEYİN: Sunucuya Gidecek Son Veriyi Konsola Yazdırma
+    console.log("Sunucuya Gönderilen Sipariş İsteği (orderRequest):", orderRequest);
+    console.log("JSON.stringify Gövdesi:", JSON.stringify(orderRequest, null, 2)); 
+    // ^ Bu satır, veriyi daha okunaklı (pretty-printed) gösterir.
+    
       const token = localStorage.getItem('token'); //  token
       const response = await fetch(CHECKOUT_API, {
         method: 'POST',

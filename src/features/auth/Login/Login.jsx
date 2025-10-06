@@ -78,7 +78,7 @@ const Login = () => {
                     navigate('/');
                 }
                 else {
-                    navigate('/satici/kategoriler')
+                    navigate('/satici/satici-dogrulama')
                 }
             }, 1500); // 1.5 saniye bekleyip yönlendir
 

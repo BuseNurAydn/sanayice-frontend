@@ -87,7 +87,6 @@ const handleClick = () => {
   
   navigate(productUrl);
 };
-console.log(generateProductUrl(product));
 
   return (
     <div

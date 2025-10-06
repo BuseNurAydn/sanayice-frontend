@@ -21,6 +21,7 @@ import AddBrand from '../pages/seller/Brand/AddBrand';
 import BrandList from '../pages/seller/Brand/BrandList';
 import ProductApproval from '../pages/seller/ProductApproval';
 import SellerQuestionsPage from '../pages/seller/SellerQuestionsPage';
+import Notifications from '../pages/seller/Notifications';
 
 const SellerRoutes = () => {
     return (
@@ -85,8 +86,16 @@ const SellerRoutes = () => {
                 <Route
                     path="satici-profil"
                     element={
-                        <RoleProtectedRoute allowedRoles={['ROLE_SELLER','ROLE_MANAGER']}>
+                        <RoleProtectedRoute allowedRoles={['ROLE_SELLER', 'ROLE_MANAGER']}>
                             <SellerProfile />
+                        </RoleProtectedRoute>
+                    }
+                />
+                <Route
+                    path="bildirimler"
+                    element={
+                        <RoleProtectedRoute allowedRoles={['ROLE_SELLER', 'ROLE_MANAGER']}>
+                            <Notifications />
                         </RoleProtectedRoute>
                     }
                 />
@@ -98,7 +107,7 @@ const SellerRoutes = () => {
                         </RoleProtectedRoute>
                     }
                 />
-                  <Route
+                <Route
                     path="satici-sorulari"
                     element={
                         <RoleProtectedRoute allowedRoles={['ROLE_SELLER']}>
@@ -133,7 +142,7 @@ const SellerRoutes = () => {
                         </RoleProtectedRoute>
                     }
                 />
-                  <Route
+                <Route
                     path="kampanya-kupon-yonetimi"
                     element={
                         <RoleProtectedRoute allowedRoles={['ROLE_MANAGER']}>
@@ -141,8 +150,8 @@ const SellerRoutes = () => {
                         </RoleProtectedRoute>
                     }
                 />
-                
-                  <Route
+
+                <Route
                     path="satici-kupon-kampanya-yonetimi"
                     element={
                         <RoleProtectedRoute allowedRoles={['ROLE_MANAGER']}>
@@ -202,7 +211,6 @@ const SellerRoutes = () => {
                         </RoleProtectedRoute>
                     }
                 />
-                
             </Route>
         </Routes>
 

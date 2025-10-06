@@ -1,4 +1,6 @@
 import Slider from "react-slick";
+import { Link } from "react-router-dom";
+
 
 const AddSlider = ({ banners }) => {
   const settings = {
@@ -35,13 +37,13 @@ const AddSlider = ({ banners }) => {
       <Slider {...settings}>
         {banners.map((banner, i) => (
           <div key={i} className="pr-4 w-[424px] h-[185.5px]">
-            <a href={banner.linkUrl} target="_blank" rel="noopener noreferrer">
+            <Link to={`/kategori/banner/${banner.link}`} target="_blank" rel="noopener noreferrer">
               <img
                 src={banner.imageUrl}
                 alt={`Reklam ${i + 1}`}
                 className="w-full h-auto object-cover rounded-xl shadow"
               />
-            </a>
+            </Link>
           </div>
         ))}
       </Slider>

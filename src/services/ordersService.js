@@ -30,7 +30,7 @@ export const handleConfirmCart = async ({ shippingAddress, billingAddress, custo
     console.error("Hata:", err.message);
     throw err;
   }
-};
+}; 
 
 // Siparişleri Getir - GET
 export const getOrders = async () => {

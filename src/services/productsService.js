@@ -1,5 +1,4 @@
 import { API_BASE } from "../config";
-
 const PRODUCTS_API = `${API_BASE}/products`;
 
 //ANASAYFA İÇİN ÜRÜNLER

@@ -1,30 +1,7 @@
 import React, { useRef } from "react";
+import { Link } from "react-router-dom";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import resim1 from "../assets/png/İNDİRİM - 1.png"
-import resim2 from "../assets/png/İNDİRİM - 2.png"
-import resim3 from "../assets/png/İNDİRİM - 3.png"
-import resim4 from "../assets/png/İNDİRİM - 4.png"
-import resim5 from "../assets/png/İNDİRİM - 5.png"
-import resim6 from "../assets/png/İNDİRİM - 6.png"
-import resim7 from "../assets/png/İNDİRİM - 7.png"
-import resim8 from "../assets/png/İNDİRİM - 8.png"
-import resim9 from "../assets/png/İNDİRİM - 9.png"
-import resim10 from "../assets/png/İNDİRİM - 10.png"
-import resim11 from "../assets/png/İNDİRİM - 11.png"
-
-const categories = [
-  { id: 1, name: "Yeni Gelenler", imageUrl: resim1, link: "/yeni-gelenler" },
-  { id: 2, name: "Teknoloji", imageUrl: resim2, link: "/teknoloji" },
-  { id: 3, name: "Avantajlı Ürünler", imageUrl: resim3, link: "/avantajli-urunler" },
-  { id: 4, name: "Çok Satanlar", imageUrl: resim4, link: "/cok-satanlar" },
-  { id: 5, name: "Kargo Bedava", imageUrl: resim5, link: "/kargo-bedava" },
-  { id: 6, name: "Fırsat Ürünleri", imageUrl: resim6, link: "/firsat-urunleri" },
-  { id: 7, name: "Ustaya Göre", imageUrl: resim7, link: "/ustaya-gore" },
-  { id: 8, name: "Tüm Kategoriler", imageUrl: resim8, link: "/tum-kategoriler" },
-  { id: 9, name: "Favoriler", imageUrl: resim9, link: "/favoriler" },
-  { id: 10, name: "Hemen Al", imageUrl: resim10, link: "/hemen-al" },
-  { id: 11, name: "Fiyatı Düşenler", imageUrl: resim11, link: "/fiyati-dusenler" }
-];
+import { categories } from "../constants/categories"; 
 
 const Discover = () => {
   const scrollRef = useRef(null);
@@ -60,7 +37,7 @@ const Discover = () => {
           <ul className="flex gap-2 md:gap-6 justify-center min-w-max">
             {categories.map((cat) => (
               <li key={cat.id} className="flex flex-col items-center min-w-[90px]">
-                <a
+                <Link to={`/discover/${cat.link}`}
                   href={cat.link}
                   className="flex flex-col items-center group"
                 >
@@ -75,7 +52,7 @@ const Discover = () => {
                   <p className="mt-2 text-sm font-medium text-gray-700 text-center group-hover:text-orange-500">
                     {cat.name}
                   </p>
-                </a>
+                </Link>
               </li>
             ))}
           </ul>

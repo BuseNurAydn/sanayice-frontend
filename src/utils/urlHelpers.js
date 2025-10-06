@@ -36,16 +36,17 @@ export function generateCategoryUrl(category) {
   return `/${categorySlug}-x-g${category.id}`;
 }
 
-// Alt Kategori URL Üretici
-export function generateSubCategoryUrl(subcategory,category) {
+// Alt Kategori URL Üretici (GÜNCEL)
+export function generateSubCategoryUrl(subcategory, category) {
 
     if (!subcategory || !subcategory.id) {
-    return '/';
+        return '/';
     }
 
-  const categorySlug = category?.name? createSlug(category.name) : 'kategori';
-  const subcategorySlug = subcategory.name? createSlug(subcategory.name) : 'altkategori';
-  return `/${categorySlug}-${subcategorySlug}-x-g${subcategory.id}`;
+    const categorySlug = category?.name ? createSlug(category.name) : 'kategori';
+    const subcategorySlug = subcategory.name ? createSlug(subcategory.name) : 'altkategori';
+    
+    return `c/${categorySlug}/${subcategorySlug}-x-g${subcategory.id}`; 
 }
 
 

@@ -7,7 +7,7 @@ import { AiFillProduct } from "react-icons/ai";
 import { BiSolidCategory } from "react-icons/bi";
 import { FaPlus } from "react-icons/fa6";
 import { GiHamburgerMenu } from "react-icons/gi";
-import { useSelector } from "react-redux";
+import { useSelector} from "react-redux";
 import { MdStorefront, MdVerifiedUser, MdViewCarousel, MdLocalOffer, MdSupport } from "react-icons/md";
 import { API_BASE } from "../../config"; 
 
@@ -209,7 +209,7 @@ const Sidebar = () => {
         <div className="flex items-center justify-between p-4 border-b border-slate-200 bg-white/50">
           {!collapsed && (
             <h2 className="text-lg pl-12 font-semibold text-slate-800 truncate">
-              Yönetim Paneli
+               {role === 'ROLE_SELLER' ? 'Satıcı Paneli' : 'Yönetici Paneli'}
             </h2>
           )}
           

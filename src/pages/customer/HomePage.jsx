@@ -15,16 +15,8 @@ import AddSlider from "../../components/addSlider";
 import Discover from "../../components/Discover";
 import CategoriesMenu from "../../components/CategoriesMenu";
 import HeaderCategories from "../../components/HeaderCategories";
-import banner1 from "../../assets/png/Profesyoneller İçim Hassas Ölçüler - 13.png";
-import banner2 from "../../assets/png/Profesyoneller İçim Hassas Ölçüler - 14.png";
-import banner3 from "../../assets/png/Profesyoneller İçim Hassas Ölçüler - 15.png";
-import banner4 from "../../assets/png/Profesyoneller İçim Hassas Ölçüler - 16.png";
-import banner5 from "../../assets/png/Profesyoneller İçim Hassas Ölçüler - 17.png";
-import banner6 from "../../assets/png/Profesyoneller İçim Hassas Ölçüler - 18.png";
-import banner7 from "../../assets/png/Profesyoneller İçim Hassas Ölçüler - 19.png";
-import banner8 from "../../assets/png/Profesyoneller İçim Hassas Ölçüler - 20.png";
-import banner9 from "../../assets/png/Profesyoneller İçim Hassas Ölçüler - 21.png";
 import cardImage2 from "../../assets/png/michelle! - 2.png";
+import { groupedBanners } from "../../constants/banners";
 
 const NextArrow = ({ onClick }) => (
   <div
@@ -59,31 +51,6 @@ const HomePage = () => {
   const [activeCategory, setActiveCategory] = useState(null);
   const [banners, setBanners] = useState([]);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-
-  const addBanners = [
-    { imageUrl: banner1, linkUrl: "#" },
-    { imageUrl: banner2, linkUrl: "#" },
-    { imageUrl: banner3, linkUrl: "#" },
-    { imageUrl: banner4, linkUrl: "#" },
-    { imageUrl: banner5, linkUrl: "#" },
-    { imageUrl: banner6, linkUrl: "#" },
-    { imageUrl: banner7, linkUrl: "#" },
-    { imageUrl: banner8, linkUrl: "#" },
-    { imageUrl: banner9, linkUrl: "#" },
-  ];
-
-  const cardImage = { imageUrl: cardImage2, linkUrl: "#" }
-
-  // otomatik 3'lü gruplama
-  const groupedBanners = chunkArray(addBanners, 3);
-
-  function chunkArray(array, size) {
-    const result = [];
-    for (let i = 0; i < array.length; i += size) {
-      result.push(array.slice(i, i + size));
-    }
-    return result;
-  }
 
   // Sayaç 
   const [leftIndex, setLeftIndex] = useState(1);

@@ -98,7 +98,7 @@ const ProductDetail = () => {
     window.scrollTo(0, 0);
   }, []);
  
-  //satıcının değerlendirmesi
+  //satıcının değerlendirmesi4
   useEffect(() => {
     const fetchSellerRatings = async () => {
       if (!product?.sellerId) return;

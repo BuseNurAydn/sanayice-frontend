@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
 import { FaTrash, FaEdit, FaSearch, FaFileExcel, FaFilter, FaPlus } from "react-icons/fa";
-import { Check } from 'lucide-react';
+import { Check, Clock, CircleX } from 'lucide-react';
 import { GoChevronRight, GoChevronLeft } from "react-icons/go";
 import { useNavigate } from "react-router-dom";
-import { fetchMyApprovedProducts, deleteProduct } from "../../../services/sellerProductService";
+import { fetchMyProducts, deleteProduct } from "../../../services/sellerProductService";
 import ConfirmDialog from "../../../components/ConfirmDialog";
 import { toast } from "react-toastify";
 import * as XLSX from "xlsx";
@@ -27,10 +27,10 @@ const Products = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const data = await fetchMyApprovedProducts();
+        const data = await fetchMyProducts(); // artık tüm ürünleri çekiyoruz
         setProducts(data);
       } catch (error) {
-        toast.error("Onaylı ürünler alınamadı");
+        toast.error("Ürünler alınamadı");
       }
     };
     fetchData();
@@ -65,14 +65,14 @@ const Products = () => {
   // Excel indir
   const handleExportExcel = async () => {
     try {
-      const approvedProducts = await fetchMyApprovedProducts();
-      if (approvedProducts.length === 0) {
-        toast.info("Onaylı ürün bulunamadı!");
+      const allProducts = await fetchMyProducts();
+      if (allProducts.length === 0) {
+        toast.info("Ürün bulunamadı!");
         return;
       }
-      const ws = XLSX.utils.json_to_sheet(approvedProducts);
+      const ws = XLSX.utils.json_to_sheet(allProducts);
       const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, "Onaylı Ürünler");
+      XLSX.utils.book_append_sheet(wb, ws, "Ürünlerim");
       XLSX.writeFile(wb, "urunler.xlsx");
     } catch (error) {
       toast.error("Excel indirilemedi!");
@@ -81,9 +81,10 @@ const Products = () => {
 
   // Tab filtreleme
   const tabFilteredProducts = products.filter((p) => {
-    if (activeTab === "active") return p.active;
-    if (activeTab === "inactive") return !p.active;
-    if (activeTab === "outofstock") return p.stockQuantity === 0;
+    if (activeTab === "active") return p.active && p.approvalStatus === "ONAYLANDI";
+    if (activeTab === "inactive") return !p.active && p.approvalStatus === "ONAYLANDI";
+    if (activeTab === "outofstock") return p.stockQuantity === 0 && p.approvalStatus === "ONAYLANDI";
+    if (activeTab === "pending") return p.approvalStatus === "BEKLIYOR";
     return true;
   });
 
@@ -109,8 +110,21 @@ const Products = () => {
     if (approvalStatus === "ONAYLANDI") {
       return (
         <span className="inline-flex items-center px-2 py-1 text-xs font-semibold text-green-800 bg-green-100 rounded-full">
-          <Check className="w-4 h-4 mr-1 " />
-          Onaylandı
+          <Check className="w-4 h-4 mr-1" /> Onaylandı
+        </span>
+      );
+    }
+    if (approvalStatus === "BEKLIYOR") {
+      return (
+        <span className="inline-flex items-center px-2 py-1 text-xs font-semibold text-orange-800 bg-orange-100 rounded-full">
+          <Clock className="w-4 h-4 mr-1" /> Beklemede
+        </span>
+      );
+    }
+    if (approvalStatus === "REDDEDILDI") {
+      return (
+        <span className="inline-flex items-center px-2 py-1 text-xs font-semibold text-red-800 bg-red-100 rounded-full">
+         <CircleX  className="w-4 h-4 mr-1" /> Reddedildi
         </span>
       );
     }
@@ -144,9 +158,10 @@ const Products = () => {
       <div className="flex gap-1 md:gap-4 border-b border-gray-200 mb-8 custom-font text-xs md:text-sm pt-8">
         {[ 
           { key: "all", label: "Tüm Ürünler", count: products.length },
-          { key: "active", label: "Satışta Olanlar", count: products.filter((p) => p.active).length },
-          { key: "inactive", label: "Satışta Olmayanlar", count: products.filter((p) => !p.active).length },
-          { key: "outofstock", label: "Tükenenler", count: products.filter((p) => p.stockQuantity === 0).length },
+          { key: "pending", label: "Beklemede Olanlar", count: products.filter(p => p.approvalStatus === "BEKLIYOR").length },
+          { key: "active", label: "Satışta Olanlar", count: products.filter(p => p.active && p.approvalStatus === "ONAYLANDI").length },
+          { key: "inactive", label: "Satışta Olmayanlar", count: products.filter(p => !p.active && p.approvalStatus === "ONAYLANDI").length },
+          { key: "outofstock", label: "Tükenenler", count: products.filter(p => p.stockQuantity === 0 && p.approvalStatus === "ONAYLANDI").length },
         ].map((tab) => (
           <button
             key={tab.key}
@@ -306,6 +321,7 @@ const Products = () => {
           <FaFileExcel /> Excel İndir
         </button>
       </div>
+
       {/* Silme Onay Dialogu */}
       {isConfirmOpen && (
         <ConfirmDialog
@@ -317,5 +333,5 @@ const Products = () => {
     </div>
   );
 };
-export default Products;
 
+export default Products;

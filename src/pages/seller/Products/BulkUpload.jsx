@@ -5,6 +5,7 @@ import { bulkImportProducts } from "../../../services/sellerProductService";
 import { toast } from "react-toastify";
 import { Upload } from "lucide-react";
 import { FaFileExcel } from "react-icons/fa6";
+import * as XLSX from "xlsx";
 
 const BulkUpload = () => {
   const [categories, setCategories] = useState([]);
@@ -56,31 +57,62 @@ const BulkUpload = () => {
       return;
     }
 
-    const formData = new FormData();
-    formData.append("file", excelFile);
-    formData.append("categoryId", categoryId);
-    formData.append("subcategoryId", subcategoryId);
-  
-    for (let pair of formData.entries()) {
-  console.log(pair[0] + ': ' + pair[1]);
-}
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+      try {
+        // Excel oku
+        const data = new Uint8Array(e.target.result);
+        const workbook = XLSX.read(data, { type: "array" });
+        const ws = workbook.Sheets[workbook.SheetNames[0]];
 
-    try {
-      await bulkImportProducts(formData);
-      toast.success("Excel ürünleri başarıyla yüklendi ve onaya gönderildi!");
-      setExcelFile(null);
-      setCategoryId("");
-      setSubcategoryId("");
-    } catch (error) {
-      console.error(error);
-      toast.error("Ürünler gönderilemedi!");
-    }
+        // Sheet'i JSON olarak al (header:1 → array of arrays)
+         let sheetData = XLSX.utils.sheet_to_json(ws, { header: 1 });
+
+        // Başlıklara kategori sütunlarını ekle
+         sheetData[0].push("KATEGORİ", "ALT KATEGORİ");
+
+        // Her ürün satırına kategori bilgilerini ekle
+       for (let i = 1; i < sheetData.length; i++) {
+        if (sheetData[i] && sheetData[i].length > 0) {
+          sheetData[i].push(categoryId, subcategoryId);
+        }
+      }
+
+        // Yeni sheet oluştur
+        const newWs = XLSX.utils.aoa_to_sheet(sheetData);
+        workbook.Sheets[workbook.SheetNames[0]] = newWs;
+
+        const jsonPreview = XLSX.utils.sheet_to_json(newWs, { header: 1 });
+        console.log("Güncellenmiş Excel:", jsonPreview);
+
+
+        // Yeni Excel dosyası oluştur
+        const updatedExcel = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
+        const updatedFile = new File(
+          [updatedExcel],
+          `updated_${excelFile.name}`,
+          { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" }
+        );
+
+        // FormData ile backend’e gönder
+        const formData = new FormData();
+        formData.append("file", updatedFile);
+
+        await bulkImportProducts(formData);
+        toast.success("Excel güncellendi ve yüklendi!");
+        setExcelFile(null);
+       
+      } catch (err) {
+        console.error(err);
+        toast.error("Excel işlenemedi!");
+      }
+    };
+
+    reader.readAsArrayBuffer(excelFile);
   };
-
 
   return (
     <div className="border border-gray-100 md:p-4 p-2 rounded-lg shadow">
-      <h2 className="font-semibold text-lg mb-4">Excel ile Toplu Ürün Yükle</h2>
 
       <button
         onClick={() => {
@@ -88,7 +120,7 @@ const BulkUpload = () => {
         }}
         className="bg-green-500 text-white px-2 py-1 text-sm rounded mb-4 hover:bg-green-600 flex items-center gap-1 cursor-pointer"
       >
-       <FaFileExcel /> Örnek Excel Dosyasını İndir
+        <FaFileExcel /> Örnek Excel Dosyasını İndir
       </button>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import ProductCard from "../../components/ProductCard";
 import { toast } from "react-toastify";
 import { FaFilter } from "react-icons/fa";
@@ -18,46 +18,65 @@ function CategoryProductsPage({ type = "category" }) {
     const [expanded, setExpanded] = useState(true);
     const [isSortOpen, setIsSortOpen] = useState(false);
     const [sortBy, setSortBy] = useState("");
+    const navigate = useNavigate();
 
     let actualId = id;
-    let pageType = type; // default "category"
+    let pageType = type;
 
-    // Eğer URL alt kategori içeriyorsa
-    if (subcategorySlug) {
+    if (categorySlug && subcategorySlug) {
         const match = subcategorySlug.match(/-x-g(\d+)$/);
         if (match) {
             actualId = parseInt(match[1], 10);
-            pageType = "subcategory"; // alt kategori sayfası
+        } else {
+            actualId = subcategorySlug;   // ID yoksa slug'ın kendisini kullan (API slug ile de çekebilmeli)
         }
+        pageType = "subcategory"; // Alt kategori slug rotası her zaman alt kategoridir
     }
-    // Eğer sadece categorySlug var
     else if (categorySlug && !id) {
         const match = categorySlug.match(/-x-g(\d+)$/);
         if (match) {
             actualId = parseInt(match[1], 10);
-            pageType = "category";
+        } else {
+            actualId = categorySlug;
         }
+        pageType = "category";
     }
-
     // Kategori veya Subcategory bilgisi getir
     useEffect(() => {
         const fetchData = async () => {
+            // actualId bir değer değilse (örneğin sadece /alt-kategori/ yazıldıysa) işlemi durdur.
+            if (!actualId) return;
+
             try {
-                if (type === "category") {
-                    const data = await getCategoryById(actualId);
-                    setCategoryData(data);
-                    setSubcategories(data.subcategories || []);
+                let data = null;
+                const isId = !isNaN(actualId) && actualId !== null && actualId !== ''; // Sayı mı kontrolü
+
+                if (pageType === "category") {
+                    data = await getCategoryById(actualId);
                 } else {
-                    const data = await getSubCategoryById(actualId);
-                    setCategoryData(data);
-                    setSubcategories([]);
+                    if (isId) {
+                        data = await getSubCategoryById(actualId);
+                    } else {
+                        data = await getSubCategoryById(actualId);
+                    }
                 }
+                // 404 KONTROLÜ
+                if (!data || (typeof data === 'object' && Object.keys(data).length === 0)) {
+                    console.log(`Veri bulunamadı. 404'e yönlendiriliyor: ${actualId}`);
+                    navigate('/sayfa-bulunamadi', { replace: true });
+                    return;
+                }
+                setCategoryData(data);
+                setSubcategories(data.subcategories || []);
+
             } catch (err) {
-                toast.error(err.message);
+                navigate('/sayfa-bulunamadi', { replace: true });
             }
         };
-        fetchData();
-    }, [actualId, pageType]);
+        if (actualId) {
+            fetchData();
+        }
+    }, [actualId, pageType, navigate]);
 
     // Ürünleri getir
     useEffect(() => {

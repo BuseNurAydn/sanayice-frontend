@@ -5,6 +5,7 @@ import { getProducts } from "../../services/productsService";
 import { fetchCategories } from '../../services/categoryService';
 import { useSelector } from "react-redux";
 import { getMyProfile } from '../../services/authService';
+import { generateProductUrl } from '../../utils/urlHelpers';
 const Store = () => {
 
   const [storeInfo, setStoreInfo] = useState({
@@ -204,7 +205,7 @@ const Store = () => {
                   </p>
 
                   <Link
-                    to={`/urun/${product.id}`}
+                    to={generateProductUrl(product)}
                     className="flex items-center justify-center gap-2 mt-auto bg-[var(--color-orange)] text-white text-sm py-2 rounded-lg text-center font-medium hover:bg-[var(--color-dark-orange)] transition-colors"
                   >
                     <FaEye /> Ürünü Gör

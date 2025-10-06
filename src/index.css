@@ -1,7 +1,6 @@
 @import "tailwindcss";
 
-
-@theme{
+:root{
   --color-yellow: #FFE300;
   --color-orangeTwo: #fb8c00 ;
   --color-orange: #FC8A06;

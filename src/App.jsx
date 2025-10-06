@@ -41,6 +41,7 @@ function App() {
         <Route path="/*" element={<CustomerRoutes />} />
         {role && <Route path="/satici/*" element={<SellerRoutes />} />}
         <Route path="/giris-kaydol/*" element={<AuthRoutes />} />
+        
       </Routes>
     </Router>
   );
