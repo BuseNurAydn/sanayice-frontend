@@ -249,7 +249,9 @@ const CartPage = () => {
           <h3 className="text-xl font-bold mb-6">Önerilen Ürünler</h3>
           <ScrollSection scrollRef={suggestedScrollRef}>
             {dummyRelatedProducts.map((item) => (
-              <ProductCard key={item.id} product={item} />
+             <div key={item.id} className="flex-shrink-0 min-w-[224px] max-h-[330px]"> 
+                 <ProductCard product={item} />
+              </div>
             ))}
           </ScrollSection>
         </div>

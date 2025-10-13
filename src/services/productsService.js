@@ -1,5 +1,6 @@
 import { API_BASE } from "../config";
 const PRODUCTS_API = `${API_BASE}/products`;
+const SECTION_API = `${API_BASE}/public/products`;
 
 //ANASAYFA İÇİN ÜRÜNLER
 export const getProducts = async () => {
@@ -96,3 +97,21 @@ export const getProductQuestionsCount = async (productId) => {
   const data = await res.json();
   return data; 
 };
+
+// Öne Çıkan Ürünler
+export async function getFeaturedProducts(limit = 20) {
+  const res = await fetch(`${SECTION_API}/popular?limit=${limit}`);
+  return await res.json();
+}
+
+// Yeni Gelen Ürünler
+export async function getDiscountedProducts() {
+  const res = await fetch(`${SECTION_API}/discounted`);
+  return await res.json();
+}
+
+// Süper İndirimler
+export async function getNewArrivals(days = 7) {
+  const res = await fetch(`${SECTION_API}/new?days=${days}`);
+  return await res.json();
+}

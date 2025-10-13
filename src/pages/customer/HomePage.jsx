@@ -1,11 +1,11 @@
 import { useState, useRef, useEffect } from "react";
-import { Link } from 'react-router-dom'
+import { Link , useNavigate} from 'react-router-dom'
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import ProductCard from "../../components/ProductCard";
-import { getProducts, getProductsByCategoryId } from "../../services/productsService";
+import { getProducts, getProductsByCategoryId, getFeaturedProducts, getNewArrivals, getDiscountedProducts} from "../../services/productsService";
 import { fetchActiveBrands } from "../../services/brandservice";
 import { fetchCategories } from "../../services/categoryService";
 import { getAllPublicBanners } from "../../services/bannerService";
@@ -51,6 +51,11 @@ const HomePage = () => {
   const [activeCategory, setActiveCategory] = useState(null);
   const [banners, setBanners] = useState([]);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const navigate = useNavigate();
+
+  const [featuredProducts, setFeaturedProducts] = useState([]); // 🔥 Öne çıkan
+  const [discountedProducts, setDiscountedProducts] = useState([]); // 🔥 Süper indirimler
+  const [newProducts, setNewProducts] = useState([]); // 🔥 Yeni gelenler
 
   // Sayaç 
   const [leftIndex, setLeftIndex] = useState(1);
@@ -156,6 +161,46 @@ const HomePage = () => {
     };
 
     fetchBanners();
+  }, []);
+
+  
+  // --- ÖNE ÇIKAN ÜRÜNLER ---
+  useEffect(() => {
+    const fetchFeatured = async () => {
+      try {
+        const data = await getFeaturedProducts(20); // /popular?limit=20
+        setFeaturedProducts(data);
+      } catch (err) {
+        console.error("Öne çıkan ürünler alınamadı:", err);
+      }
+    };
+    fetchFeatured();
+  }, []);
+
+  // --- SÜPER İNDİRİMLER ---
+  useEffect(() => {
+    const fetchDiscounted = async () => {
+      try {
+        const data = await getDiscountedProducts(); // /discounted
+        setDiscountedProducts(data);
+      } catch (err) {
+        console.error("İndirimli ürünler alınamadı:", err);
+      }
+    };
+    fetchDiscounted();
+  }, []);
+
+  // --- YENİ GELENLER ---
+  useEffect(() => {
+    const fetchNew = async () => {
+      try {
+        const data = await getNewArrivals(); // /new?days=7
+        setNewProducts(data);
+      } catch (err) {
+        console.error("Yeni gelen ürünler alınamadı:", err);
+      }
+    };
+    fetchNew();
   }, []);
 
   const scroll = (ref, direction) => {
@@ -279,11 +324,13 @@ const HomePage = () => {
         <section className="mb-12">
           <div className="flex items-center justify-between mb-6">
             <h2 className="font-bold text-lg md:text-2xl text-gray-900">Öne Çıkan Ürünler</h2>
-            <button className="text-[var(--color-dark-orange)] font-semibold">Tümünü Gör →</button>
+            <button onClick={() => navigate("/discover/favoriler")} className="text-[var(--color-dark-orange)] font-semibold cursor-pointer hover:bg-orange-50 p-2 rounded-lg">Tümünü Gör →</button>
           </div>
           <ScrollSection scrollRef={featuredScrollRef}>
-            {products.map(product => (
-              <ProductCard key={product.id} product={product} />
+            {featuredProducts.map(product => (
+               <div key={product.id} className="flex-shrink-0 min-w-[224px] max-h-[330px]"> 
+                 <ProductCard product={product} />
+              </div>
             ))}
           </ScrollSection>
 
@@ -298,11 +345,13 @@ const HomePage = () => {
               <h2 className="font-bold text-lg md:text-2xl text-gray-900">🔥 Süper İndirimler</h2>
               <p className="text-gray-600 text-sm">Sınırlı süre için özel fiyatlar</p>
             </div>
-            <button className="text-[var(--color-dark-orange)] font-semibold">Tümünü Gör →</button>
+          <button onClick={() => navigate("/discover/fiyati-dusenler")} className="text-[var(--color-dark-orange)] font-semibold cursor-pointer hover:bg-orange-50 p-2 rounded-lg">Tümünü Gör →</button>
           </div>
           <ScrollSection scrollRef={discountedScrollRef}>
-            {products.map(product => (
-              <ProductCard key={product.id} product={product} />
+            {discountedProducts.map(product => (
+              <div key={product.id} className="flex-shrink-0 min-w-[224px] max-h-[330px]"> 
+                 <ProductCard product={product} />
+              </div>
             ))}
           </ScrollSection>
 
@@ -317,11 +366,13 @@ const HomePage = () => {
               <h2 className="font-bold text-lg md:text-2xl text-gray-900">✨ Yeni Gelenler</h2>
               <p className="text-gray-600 text-sm">En son çıkan ürünler</p>
             </div>
-            <button className="text-[var(--color-dark-orange)] font-semibold">Tümünü Gör →</button>
+            <button onClick={() => navigate("/discover/yeni-gelenler")} className="text-[var(--color-dark-orange)] font-semibold cursor-pointer hover:bg-orange-50 p-2 rounded-lg">Tümünü Gör →</button>
           </div>
           <ScrollSection scrollRef={newProductsScrollRef}>
-            {products.map(product => (
-              <ProductCard key={product.id} product={product} />
+            {newProducts.map(product => (
+              <div key={product.id} className="flex-shrink-0 min-w-[224px] max-h-[330px]"> 
+                 <ProductCard product={product} />
+              </div>
             ))}
           </ScrollSection>
 

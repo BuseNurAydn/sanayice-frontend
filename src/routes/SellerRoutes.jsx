@@ -22,6 +22,8 @@ import BrandList from '../pages/seller/Brand/BrandList';
 import ProductApproval from '../pages/seller/ProductApproval';
 import SellerQuestionsPage from '../pages/seller/SellerQuestionsPage';
 import Notifications from '../pages/seller/Notifications';
+import MediaCenter from '../pages/seller/Products/MediaCenter';
+
 
 const SellerRoutes = () => {
     return (
@@ -64,6 +66,14 @@ const SellerRoutes = () => {
                     element={
                         <RoleProtectedRoute allowedRoles={['ROLE_SELLER']}>
                             <AddProduct />
+                        </RoleProtectedRoute>
+                    }
+                />
+                 <Route
+                    path="urun/medya-merkezi"
+                    element={
+                        <RoleProtectedRoute allowedRoles={['ROLE_SELLER']}>
+                            <MediaCenter />
                         </RoleProtectedRoute>
                     }
                 />

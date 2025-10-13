@@ -862,7 +862,9 @@ useEffect(() => {
           <h3 className="text-xl font-bold mb-6">Buna bakanların aldıkları</h3>
           <ScrollSection scrollRef={relatedScrollRef}>
             {dummyRelatedProducts.map((item) => (
-              <ProductCard key={item.id} product={item} />
+             <div key={item.id} className="flex-shrink-0 min-w-[224px] max-h-[330px]"> 
+                 <ProductCard product={item} />
+              </div>
             ))}
           </ScrollSection>
         </div>
@@ -871,7 +873,9 @@ useEffect(() => {
           <h3 className="text-xl font-bold mb-6">Bunlar da ilgini çekebilir</h3>
           <ScrollSection scrollRef={suggestedScrollRef}>
             {dummyRelatedProducts.map((item) => (
-              <ProductCard key={item.id} product={item} />
+             <div key={item.id} className="flex-shrink-0 min-w-[224px] max-h-[330px]"> 
+                 <ProductCard product={item} />
+              </div>
             ))}
           </ScrollSection>
 

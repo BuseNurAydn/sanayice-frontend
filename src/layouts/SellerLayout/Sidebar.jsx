@@ -5,7 +5,7 @@ import { IoIosArrowDown, IoIosArrowUp } from "react-icons/io";
 import { BsFileBarGraphFill, BsHandbagFill } from "react-icons/bs";
 import { AiFillProduct } from "react-icons/ai";
 import { BiSolidCategory } from "react-icons/bi";
-import { FaPlus } from "react-icons/fa6";
+import { FaPlus,FaImage  } from "react-icons/fa6";
 import { GiHamburgerMenu } from "react-icons/gi";
 import { useSelector} from "react-redux";
 import { MdStorefront, MdVerifiedUser, MdViewCarousel, MdLocalOffer, MdSupport } from "react-icons/md";
@@ -46,6 +46,11 @@ const menuItems = [
         label: "Ürün Ekleme",
         to: "/satici/urun/ekleme",
         icon: <FaPlus />,
+      },
+       {
+        label: "Görsel Galerisi",
+        to: "/satici/urun/medya-merkezi",
+        icon: <FaImage  />,
       }
     ],
   },

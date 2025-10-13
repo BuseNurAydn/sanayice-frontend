@@ -20,7 +20,9 @@ const CategorySection = ({ category }) => {
       {/* Ürünler */}
       <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide">
         {(category.products?.length > 0 ? category.products : dummyProducts).map((product) => (
-          <ProductCard key={product.id} product={product} />
+          <div key={product.id} className="flex-shrink-0 min-w-[224px] max-h-[330px]"> 
+                 <ProductCard product={product} />
+          </div>
         ))}
       </div>
 

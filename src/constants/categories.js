@@ -11,9 +11,9 @@ import resim10 from "../assets/png/İNDİRİM - 10.png";
 import resim11 from "../assets/png/İNDİRİM - 11.png";
 
 export const categories = [
-  { id: 1, name: "Yeni Gelenler", imageUrl: resim1, link: "yeni-gelenler", endpoint: "/public/products/new?days=14" },
+  { id: 1, name: "Yeni Gelenler", imageUrl: resim1, link: "yeni-gelenler", endpoint: "/public/products/new?days=7" },
   { id: 2, name: "Teknoloji", imageUrl: resim2, link: "teknoloji", endpoint:"/products/categories/18" },
-  { id: 3, name: "Avantajlı Ürünler", imageUrl: resim3, link: "avantajli-urunler", endpoint:"/products/categories/41"},
+  { id: 3, name: "Avantajlı Ürünler", imageUrl: resim3, link: "avantajli-urunler", endpoint:"/public/products/discounted"},
   { id: 4, name: "Çok Satanlar", imageUrl: resim4, link: "cok-satanlar", endpoint: "/public/products/best-selling?limit=20" },
   { id: 5, name: "Kargo Bedava", imageUrl: resim5, link: "kargo-bedava", endpoint:"/public/products/free-shipping" },
   { id: 6, name: "Fırsat Ürünleri", imageUrl: resim6, link: "firsat-urunleri", endpoint:"/public/products/featured" },

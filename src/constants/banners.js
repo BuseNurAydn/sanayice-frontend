@@ -10,18 +10,18 @@ import banner9 from "../assets/png/Profesyoneller İçim Hassas Ölçüler 
 
 export const groupedBanners = [
   [
-    { id: 1, imageUrl: banner1, link:"dogru-olcu", endpoint: "/public/products/filter?isFeatured=true" },
-    { id: 2, imageUrl: banner2,link:"atolyene-guc-kat", endpoint: "/public/products/filter?hasDiscount=true" },
-    { id: 3, imageUrl: banner3,link:"enerjini-burdan-al", endpoint: "/public/products/filter?freeShipping=true" },
+    { id: 1, imageUrl: banner1, name: "Doğru Ölçü Doğru Sonuç" ,link:"dogru-olcu", endpoint: "/public/products/filter?isFeatured=true" },
+    { id: 2, imageUrl: banner2, name:"Atölyene Güç Kat" ,link:"atolyene-guc-kat", endpoint: "/public/products/filter?hasDiscount=true" },
+    { id: 3, imageUrl: banner3, name:"Enerjini Burdan Al", link:"enerjini-burdan-al", endpoint: "/public/products/filter?freeShipping=true" },
   ],
   [
-    { id: 4, imageUrl: banner4, link:"guvenlik", endpoint: "/public/products/filter?categoryId=1" },
-    { id: 5, imageUrl: banner5, link:"usta-malzemeleri", endpoint: "/public/products/filter?isFeatured=true&categoryId=5" },
-    { id: 6, imageUrl: banner6, link:"sanayi", endpoint: "/public/products/filter?hasDiscount=true&freeShipping=true" },
+    { id: 4, imageUrl: banner4,  name:"Önce Güvenlik", link:"guvenlik", endpoint: "/public/products/filter?categoryId=1" },
+    { id: 5, imageUrl: banner5,  name:"Usta Malzemeleri", link:"usta-malzemeleri", endpoint: "/public/products/filter?isFeatured=true&categoryId=5" },
+    { id: 6, imageUrl: banner6,  name:"Sanayi Burada", link:"sanayi", endpoint: "/public/products/filter?hasDiscount=true&freeShipping=true" },
   ],
   [
-    { id: 7, imageUrl: banner7, link:"kesici-cozumler", endpoint: "/public/products/filter?categoryId=1&subcategoryId=5&hasDiscount=true" },
-    { id: 8, imageUrl: banner8, link:"kontrol-elinde", endpoint: "/public/products/filter?isFeatured=true&hasDiscount=true&freeShipping=true&categoryId=1&subcategoryId=3" },
-    { id: 9, imageUrl: banner9, link:"elindeki-guc", endpoint: "/public/products/filter?isFeatured=true" },
+    { id: 7, imageUrl: banner7,  name:"Kesici Çözümler", link:"kesici-cozumler", endpoint: "/public/products/filter?categoryId=1&subcategoryId=5&hasDiscount=true" },
+    { id: 8, imageUrl: banner8,  name:"Kontrol Elinde", link:"kontrol-elinde", endpoint: "/public/products/filter?isFeatured=true&hasDiscount=true&freeShipping=true&categoryId=1&subcategoryId=3" },
+    { id: 9, imageUrl: banner9,  name:"Elindeki Güç", link:"elindeki-guc", endpoint: "/public/products/filter?isFeatured=true" },
   ]
 ];

@@ -1,194 +1,158 @@
-import { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useEffect, useState, useMemo } from "react";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import ProductCard from "../../components/ProductCard";
+import ProductFilterSidebar from "../../components/ProductFilterSidebar";
 import { toast } from "react-toastify";
-import { FaFilter } from "react-icons/fa";
+import { FaFilter, FaTimes } from "react-icons/fa";
+import { SlArrowRight } from "react-icons/sl";
+import { generateCategoryUrl } from "../../utils/urlHelpers";
 import { getCategoryById, getSubCategoryById } from "../../services/categoryService";
 import { getProductsByCategoryId, getProductsBySubCategoryId } from "../../services/productsService";
+import useProductFiltering from "../../hooks/useProductFiltering";
 
 function CategoryProductsPage({ type = "category" }) {
     const { id, categorySlug, subcategorySlug } = useParams();
-    const [products, setProducts] = useState([]);
-    const [filteredProducts, setFilteredProducts] = useState([]);
-    const [categoryData, setCategoryData] = useState(null);
-    const [subcategories, setSubcategories] = useState([]);
-    const [selectedSubcategories, setSelectedSubcategories] = useState([]);
-    const [maxPrice, setMaxPrice] = useState(100000);
-    const [isFilterOpen, setIsFilterOpen] = useState(false);
-    const [expanded, setExpanded] = useState(true);
-    const [isSortOpen, setIsSortOpen] = useState(false);
-    const [sortBy, setSortBy] = useState("");
     const navigate = useNavigate();
+    const [products, setProducts] = useState([]);
+    const [categoryData, setCategoryData] = useState(null);
+    const [isFilterOpen, setIsFilterOpen] = useState(false);
+    const [isSortOpen, setIsSortOpen] = useState(false);
 
+    // --- URL Analizi ---
     let actualId = id;
     let pageType = type;
 
     if (categorySlug && subcategorySlug) {
         const match = subcategorySlug.match(/-x-g(\d+)$/);
-        if (match) {
-            actualId = parseInt(match[1], 10);
-        } else {
-            actualId = subcategorySlug;   // ID yoksa slug'ın kendisini kullan (API slug ile de çekebilmeli)
-        }
-        pageType = "subcategory"; // Alt kategori slug rotası her zaman alt kategoridir
-    }
-    else if (categorySlug && !id) {
+        actualId = match ? parseInt(match[1], 10) : subcategorySlug;
+        pageType = "subcategory";
+    } else if (categorySlug && !id) {
         const match = categorySlug.match(/-x-g(\d+)$/);
-        if (match) {
-            actualId = parseInt(match[1], 10);
-        } else {
-            actualId = categorySlug;
-        }
+        actualId = match ? parseInt(match[1], 10) : categorySlug;
         pageType = "category";
     }
-    // Kategori veya Subcategory bilgisi getir
+
+    // --- Kategori veya Alt Kategori Verisi ---
     useEffect(() => {
         const fetchData = async () => {
-            // actualId bir değer değilse (örneğin sadece /alt-kategori/ yazıldıysa) işlemi durdur.
             if (!actualId) return;
 
             try {
                 let data = null;
-                const isId = !isNaN(actualId) && actualId !== null && actualId !== ''; // Sayı mı kontrolü
-
                 if (pageType === "category") {
                     data = await getCategoryById(actualId);
                 } else {
-                    if (isId) {
-                        data = await getSubCategoryById(actualId);
-                    } else {
-                        data = await getSubCategoryById(actualId);
+                    data = await getSubCategoryById(actualId);
+                    if (data?.categoryId) {
+                        const parentCategory = await getCategoryById(data.categoryId);
+                        data.parentCategory = parentCategory;
                     }
                 }
-                // 404 KONTROLÜ
-                if (!data || (typeof data === 'object' && Object.keys(data).length === 0)) {
-                    console.log(`Veri bulunamadı. 404'e yönlendiriliyor: ${actualId}`);
-                    navigate('/sayfa-bulunamadi', { replace: true });
+
+                if (!data || Object.keys(data).length === 0) {
+                    navigate("/sayfa-bulunamadi", { replace: true });
                     return;
                 }
                 setCategoryData(data);
-                setSubcategories(data.subcategories || []);
-
-            } catch (err) {
-                navigate('/sayfa-bulunamadi', { replace: true });
+            } catch {
+                navigate("/sayfa-bulunamadi", { replace: true });
             }
         };
-        if (actualId) {
-            fetchData();
-        }
+        fetchData();
     }, [actualId, pageType, navigate]);
 
-    // Ürünleri getir
+    // --- Ürünleri Çek ---
     useEffect(() => {
         const fetchProducts = async () => {
             try {
                 let data = [];
-                if (type === "category") {
+                if (pageType === "category") {
                     data = await getProductsByCategoryId(actualId);
                 } else {
                     data = await getProductsBySubCategoryId(actualId);
                 }
                 setProducts(data);
-                setFilteredProducts(data);
-            } catch (err) {
+            } catch {
                 toast.error("Ürünler alınamadı");
             }
         };
         fetchProducts();
     }, [actualId, pageType]);
 
-    useEffect(() => {
-        let result = [...products];
-        if (selectedSubcategories.length > 0) {
-            result = result.filter((product) =>
-                selectedSubcategories.includes(product.subcategoryName)
-            );
-        }
-        result = result.filter((product) => Number(product.price) <= maxPrice);
-        setFilteredProducts(result);
-    }, [selectedSubcategories, maxPrice, products]);
+    // --- Min/Max Fiyat Aralığı Hesaplama ---
+    const priceRange = useMemo(() => {
+        if (products.length === 0) return { min: 0, max: 100000 };
+        const prices = products.map((p) => Number(p.price) || 0);
+        return { min: Math.floor(Math.min(...prices)), max: Math.ceil(Math.max(...prices)) };
+    }, [products]);
 
-    useEffect(() => {
-        let sorted = [...filteredProducts];
-
-        switch (sortBy) {
-            case "price-asc":
-                sorted.sort((a, b) => a.price - b.price);
-                break;
-            case "price-desc":
-                sorted.sort((a, b) => b.price - a.price);
-                break;
-            case "oldest":
-                sorted.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
-                break;
-            case "newest":
-                sorted.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-                break;
-            case "discount":
-                sorted = sorted.filter((p) => p.discountPercentage > 0);
-                break;
-            default:
-                break;
-        }
-
-        setFilteredProducts(sorted);
-    }, [sortBy]);
-
-    const toggleSubcategory = (subcategoryName) => {
-        setSelectedSubcategories((prev) =>
-            prev.includes(subcategoryName)
-                ? prev.filter((name) => name !== subcategoryName)
-                : [...prev, subcategoryName]
-        );
-    };
-
-    const clearFilters = () => {
-        setSelectedSubcategories([]);
-        setMaxPrice(30000);
-    };
-
-    const removeFilter = (name) => {
-        setSelectedSubcategories((prev) => prev.filter((item) => item !== name));
-    };
+    //  useProductFiltering Hook Kullanımı
+    const {
+        products: filteredProducts,
+        filters,
+        setFilters,
+        sortOption,
+        setSortOption,
+        activeFilterCount,
+        clearFilters,
+    } = useProductFiltering(products, priceRange);
 
     return (
         <div className="bg-gradient-to-br from-gray-50 to-gray-100">
+            {/* Duyuru Alanları */}
             <div className="bg-yellow-100 text-yellow-800 text-center py-2 text-sm font-medium">
                 5000 TL ve üzeri alışverişlerde ücretsiz kargo fırsatını kaçırmayın!
             </div>
             <div className="bg-blue-100 text-blue-900 text-center py-3 text-sm font-semibold">
                 Yeni ürünler eklendi!
             </div>
-            <div className="max-w-7xl mx-auto p-6">
-                <h1 className="text-md md:text-xl font-semibold text-gray-800 mb-2">
-                    {categoryData?.name}
-                </h1>
-                <p className="text-sm text-gray-500">
-                    Toplam {filteredProducts.length} ürün
-                </p>
+
+            {/* Breadcrumb */}
+            <div className="max-w-7xl mx-auto px-6 py-3">
+                <nav className="flex items-center flex-wrap text-sm lg:text-base">
+                    <Link to="/" className="hover:text-orange-600 text-gray-700">Sanayice</Link>
+
+                    {pageType === "subcategory" && categoryData?.parentCategory && (
+                        <>
+                            <span className="mx-2"><SlArrowRight className="text-orange-600" /></span>
+                            <Link
+                                to={generateCategoryUrl(categoryData.parentCategory)}
+                                className="hover:text-orange-600 text-gray-700"
+                            >
+                                {categoryData.parentCategory.name}
+                            </Link>
+                        </>
+                    )}
+
+                    {categoryData && (
+                        <>
+                            <span className="mx-2"><SlArrowRight className="text-orange-600" /></span>
+                            <span className="text-gray-900 font-semibold">{categoryData.name}</span>
+                        </>
+                    )}
+                </nav>
             </div>
 
-
-            {/* Mobilde filtre ve sıralama butonları */}
-            <div className="md:hidden px-6 mt-2 mb-8 flex gap-1">
+            {/* --- MOBİL: Filtre ve Sıralama Butonları --- */}
+            <div className="md:hidden px-4 mt-2 flex gap-1">
                 {/* Filtrele Butonu */}
                 <button
                     onClick={() => setIsFilterOpen(true)}
-                    className="bg-orange-400 text-white py-2 px-4 rounded-md font-semibold flex-1 flex items-center justify-between cursor-pointer"
+                    className="bg-orange-500 text-white py-2 px-4 rounded-md font-semibold flex-1 flex items-center justify-between hover:bg-orange-600"
                 >
-                    <div className="flex items-center justify-center gap-2">
+                    <div className="flex items-center gap-2">
                         <span>Filtrele</span>
                         <FaFilter />
                     </div>
                     <span className="text-xs bg-white text-orange-600 px-2 py-0.5 rounded-full">
-                        {selectedSubcategories.length + (maxPrice < 30000 ? 1 : 0)} aktif
+                        {activeFilterCount} aktif
                     </span>
                 </button>
 
                 {/* Sırala Butonu */}
                 <button
                     onClick={() => setIsSortOpen(true)}
-                    className="bg-orange-400 text-white py-2 px-4 rounded-md font-semibold flex-1 flex items-center justify-center gap-2 cursor-pointer"
+                    className="bg-gray-50 text-orange-600 py-2 px-4 rounded-md font-semibold flex-1 flex items-center justify-center gap-2 border border-gray-300 transition hover:bg-gray-200"
                 >
                     <span>Sırala</span>
                     <svg
@@ -203,34 +167,36 @@ function CategoryProductsPage({ type = "category" }) {
                 </button>
             </div>
 
+            {/** Mobilde sıralama paneli */}
             {isSortOpen && (
-                <div className="fixed inset-0 z-50  bg-opacity-30 flex items-center justify-center md:hidden">
-                    <div className="bg-white w-11/12 max-w-sm rounded-lg p-4 shadow-xl animate-fade-in">
-                        <h3 className="text-lg font-semibold mb-4 text-center">Sırala</h3>
-                        {[
-                            { label: "Fiyat artan", value: "price-asc" },
-                            { label: "Fiyat azalan", value: "price-desc" },
-                            { label: "İlk Eklenen", value: "oldest" },
-                            { label: "Son Eklenen", value: "newest" },
-                            { label: "İndirimli", value: "discount" },
-                        ].map((option) => (
-                            <button
-                                key={option.value}
-                                onClick={() => {
-                                    setSortBy(option.value);
-                                    setIsSortOpen(false);
-                                }}
-                                className={`w-full text-left px-4 py-2 rounded-md mb-2 transition ${sortBy === option.value
-                                    ? "bg-orange-100 text-orange-700"
-                                    : "bg-gray-100 text-gray-800 hover:bg-orange-50"
-                                    }`}
-                            >
-                                {option.label}
-                            </button>
-                        ))}
+                <div className="fixed inset-0 z-50 bg-black/50 bg-opacity-40 flex items-center justify-center lg:hidden transition-opacity duration-300">
+                    <div className="bg-white w-full rounded-t-xl p-4 shadow-xl max-w-sm transform translate-y-0 transition-transform duration-300">
+                        <h3 className="text-lg font-bold mb-4 border-b border-gray-200 pb-2 text-center">Sırala</h3>
+                        <div className="space-y-2">
+                            {[
+                                { label: "Önerilen Sıralama", value: "recommended" },
+                                { label: "En Çok Satanlar", value: "bestSeller" },
+                                { label: "Fiyat: Yüksekten Düşüğe", value: "highPrice" },
+                                { label: "Fiyat: Düşükten Yükseğe", value: "lowPrice" },
+                            ].map((option) => (
+                                <button
+                                    key={option.value}
+                                    onClick={() => {
+                                        setSortOption(option.value);
+                                        setIsSortOpen(false);
+                                    }}
+                                    className={`w-full text-left px-4 py-3 rounded-lg transition text-base ${sortOption === option.value
+                                        ? "bg-orange-100 text-orange-700 font-semibold border border-orange-300"
+                                        : "bg-gray-50 text-gray-800 hover:bg-gray-100"
+                                        }`}
+                                >
+                                    {option.label}
+                                </button>
+                            ))}
+                        </div>
                         <button
                             onClick={() => setIsSortOpen(false)}
-                            className="mt-2 w-full text-center text-sm text-red-500 cursor-pointer"
+                            className="mt-4 w-full py-2 text-center text-sm font-semibold text-gray-600 hover:text-gray-800 transition"
                         >
                             Kapat
                         </button>
@@ -238,174 +204,92 @@ function CategoryProductsPage({ type = "category" }) {
                 </div>
             )}
 
-
-            {/* Mobil Filtre Paneli */}
+            {/* --- MOBİL FİLTRE PANELİ --- */}
             {isFilterOpen && (
-                <div className="fixed inset-0 z-50 flex">
+                <div className="fixed inset-0 z-50 flex lg:hidden justify-end">
                     <div
-                        className="fixed inset-0 bg-opacity-30 "
+                        className="fixed inset-0 bg-black/50"
                         onClick={() => setIsFilterOpen(false)}
                     ></div>
 
-                    <div className="relative bg-white w-4/5 max-w-sm h-full p-4 shadow-lg animate-slide-in-left z-50 overflow-y-auto">
-                        <div className="flex justify-between items-center mb-4">
-                            <h2 className="text-lg font-semibold">Filtrele</h2>
-                            <button
-                                onClick={() => setIsFilterOpen(false)}
-                                className=" text-md font-bold"
-                            >
-                                ✕
-                            </button>
+                    <div className="relative bg-white w-4/5 max-w-sm h-full shadow-lg flex flex-col">
+                        <div className="p-4 border-b border-gray-200 flex justify-between items-center">
+                            <h2 className="text-xl font-bold">Filtrele</h2>
+                            <button onClick={() => setIsFilterOpen(false)}><FaTimes size={20} /></button>
                         </div>
-                        <div className="border-t border-gray-300 my-4 w-full"></div>
-
-                        {(selectedSubcategories.length > 0 || maxPrice < 30000) && (
-                            <div className="mb-4">
-                                <div className="flex items-center justify-between mb-4">
-                                    <h3 className="text-sm font-semibold text-gray-600">Uygulanan Filtreler:</h3>
-                                    <button
-                                        onClick={clearFilters}
-                                        className="text-sm text-red-500 underline"
-                                    >
-                                        Filtreleri Temizle
-                                    </button>
-                                </div>
-                                <div className="flex flex-wrap gap-2 text-sm">
-                                    {selectedSubcategories.map((name) => (
-                                        <span
-                                            key={name}
-                                            className="bg-orange-100 text-orange-700 px-3 py-1 rounded-full flex items-center"
-                                        >
-                                            {name}
-                                            <button
-                                                onClick={() => removeFilter(name)}
-                                                className="ml-2 text-orange-500 hover:text-orange-700 font-bold"
-                                                aria-label={`${name} filtresini kaldır`}
-                                            >
-                                                ×
-                                            </button>
-                                        </span>
-                                    ))}
-                                    {maxPrice < 30000 && (
-                                        <span className="bg-blue-100 text-blue-700 px-2 py-1 rounded-full flex items-center">
-                                            Maks. {maxPrice.toLocaleString()} TL
-                                            <button
-                                                onClick={() => setMaxPrice(30000)}
-                                                className="ml-2 text-blue-600 hover:text-blue-800 font-bold"
-                                                aria-label="Fiyat filtresini kaldır"
-                                            >
-                                                ×
-                                            </button>
-                                        </span>
-                                    )}
-                                </div>
+                        {/* Aktif Filtre Bilgisi ve Temizle Butonu */}
+                        {activeFilterCount > 0 && (
+                            <div className="px-4 pt-2 flex justify-between items-center text-sm">
+                                <span className="text-orange-600 font-semibold">{activeFilterCount} Filtre Aktif</span>
+                                <button onClick={clearFilters} className="text-red-500 hover:text-red-700 underline">
+                                    Temizle
+                                </button>
                             </div>
                         )}
 
-                        <div className="mb-6">
-                            <h3
-                                onClick={() => setExpanded(!expanded)}
-                                className="font-semibold mb-2 cursor-pointer"
-                            >
-                                Alt Kategoriler
-                            </h3>
-                            {expanded && subcategories.map((subcat) => (
-                                <label key={subcat.id} className="block text-sm mb-1">
-                                    <input
-                                        type="checkbox"
-                                        className="mr-2"
-                                        checked={selectedSubcategories.includes(subcat.name)}
-                                        onChange={() => toggleSubcategory(subcat.name)}
-                                    />
-                                    {subcat.name}
-                                </label>
-                            ))}
+                        <div className="p-4 flex-grow overflow-y-auto">
+                            <ProductFilterSidebar
+                                allProducts={products}
+                                filters={filters}
+                                setFilters={setFilters}
+                                clearFilters={clearFilters}
+                                priceRange={priceRange}
+                            />
                         </div>
 
-                        <div>
-                            <h3 className="font-semibold mb-2">Fiyat Aralığı</h3>
-                            <input
-                                type="range"
-                                min={200}
-                                max={100000}
-                                step={100}
-                                value={maxPrice}
-                                onChange={(e) => setMaxPrice(Number(e.target.value))}
-                                className="w-full accent-[var(--color-dark-orange)]"
-                            />
-                            <p className="text-sm mt-1">
-                                Maksimum: {maxPrice.toLocaleString()} TL
-                            </p>
+                        <div className="p-4 border-t border-gray-200">
+                            <button
+                                onClick={() => setIsFilterOpen(false)}
+                                className="w-full py-3 bg-orange-500 text-white rounded-lg font-semibold hover:bg-orange-600 transition"
+                            >
+                                {filteredProducts.length} Ürünü Göster
+                            </button>
                         </div>
                     </div>
                 </div>
             )}
 
-            <main className="max-w-7xl mx-auto px-6 flex pb-10 gap-6">
-                <div className="w-1/4 bg-white p-6 rounded shadow-md hidden md:block">
-                    <h2 className="text-lg font-semibold mb-4">Filtrele</h2>
-                    <div className="mb-6">
-                        <h3 className="font-semibold mb-2">Alt Kategoriler</h3>
-                        {subcategories.map((subcat) => (
-                            <label key={subcat.id} className="block text-sm mb-1">
-                                <input
-                                    type="checkbox"
-                                    className="mr-2"
-                                    checked={selectedSubcategories.includes(subcat.name)}
-                                    onChange={() => toggleSubcategory(subcat.name)}
-                                />
-                                {subcat.name}
-                            </label>
-                        ))}
-                    </div>
-                    <div className="mb-6">
-                        <h3 className="font-semibold mb-2">Fiyat Aralığı</h3>
-                        <input
-                            type="range"
-                            min={200}
-                            max={30000}
-                            step={100}
-                            value={maxPrice}
-                            onChange={(e) => setMaxPrice(Number(e.target.value))}
-                            className="w-full"
-                        />
-                        <p className="text-sm mt-1">
-                            Maksimum: {maxPrice.toLocaleString()} TL
-                        </p>
-                    </div>
+            {/* --- ANA İÇERİK --- */}
+            <main className="max-w-7xl mx-auto px-4 py-8 flex pb-10 gap-6">
+                {/* Sidebar (Desktop) */}
+                <div className="w-1/4 hidden md:block">
+                    <ProductFilterSidebar
+                        allProducts={products}
+                        products={filteredProducts}
+                        filters={filters}
+                        setFilters={setFilters}
+                        clearFilters={clearFilters}
+                        priceRange={priceRange}
+                    />
                 </div>
+
+                {/* Ürün Listesi */}
                 <div className="w-full md:w-3/4 flex flex-col gap-4">
-
-                    <div className="hidden md:flex items-center justify-between pb-2">
-
-                        <div className="flex items-center bg-gray-100 rounded overflow-hidden text-sm font-medium shadow-sm">
-                            {[
-                                { label: "Fiyat artan", value: "price-asc" },
-                                { label: "Fiyat azalan", value: "price-desc" },
-                                { label: "İndirim oranı artan", value: "discount" },
-                                { label: "İlk eklenen", value: "oldest" },
-                                { label: "Son eklenen", value: "newest" },
-                            ].map((option) => (
-                                <button
-                                    key={option.value}
-                                    onClick={() => setSortBy(option.value)}
-                                    className={`px-8 py-3 transition-all duration-200
-                            ${sortBy === option.value
-                                            ? "bg-orange-400 text-white underline-offset-4"
-                                            : "text-gray-700 hover:bg-orange-500 hover:text-white"
-                                        }`}
-                                >
-                                    {option.label}
-                                </button>
-                            ))}
+                    {/* Üst Başlık ve Sıralama */}
+                    <div className="hidden lg:flex justify-between items-center mb-6 p-4 bg-white rounded-xl shadow-md border-t-4 border-orange-500">
+                        <div className="flex gap-2 items-center">
+                            <h1 className="text-xl font-bold text-gray-800">{categoryData?.name || "Kategori Adı"}</h1>
+                            <p className="text-sm text-gray-500">(Toplam {filteredProducts.length} ürün)</p>
                         </div>
+
+                        <select
+                            className="border outline-none border-gray-300 rounded-lg p-2 text-sm focus:ring-orange-500"
+                            value={sortOption}
+                            onChange={(e) => setSortOption(e.target.value)}
+                        >
+                            <option value="recommended">Önerilen</option>
+                            <option value="lowPrice">Fiyat: Düşükten Yükseğe</option>
+                            <option value="highPrice">Fiyat: Yüksekten Düşüğe</option>
+                            <option value="bestSeller">Çok Satanlar</option>
+                        </select>
                     </div>
 
-                    {/* Ürün grid'i */}
+                    {/* Ürün Grid */}
                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-6">
                         {filteredProducts.length === 0 ? (
-                            <div className="col-span-full text-center text-gray-500">
-                                Ürün bulunamadı.
+                            <div className="col-span-full text-center py-10 bg-white rounded-lg shadow-md">
+                                <p className="text-xl font-semibold text-gray-700">Aradığınız kriterlere uygun ürün bulunamadı.</p>
+                                <p className="text-gray-500 mt-2">Filtreleri temizlemeyi veya değiştirmeyi deneyin.</p>
                             </div>
                         ) : (
                             filteredProducts.map((product) => (
@@ -414,7 +298,6 @@ function CategoryProductsPage({ type = "category" }) {
                         )}
                     </div>
                 </div>
-
             </main>
         </div>
     );

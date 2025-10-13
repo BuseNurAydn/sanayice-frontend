@@ -20,7 +20,6 @@ const SellerPage = () => {
     const [maxPrice, setMaxPrice] = useState(100000);
     const [minRating, setMinRating] = useState(0);
 
-    
     useEffect(() => {
         const fetchData = async () => {
             setLoading(true);

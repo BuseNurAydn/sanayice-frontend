@@ -91,7 +91,7 @@ const handleClick = () => {
   return (
     <div
       onClick={handleClick}
-      className="bg-white border border-gray-200 rounded-xl shadow p-4 min-w-[224px] max-h-[330px] flex flex-col hover:shadow-lg transition-all duration-300 cursor-pointer relative"
+      className="bg-white border border-gray-200 rounded-xl shadow p-4 flex flex-col hover:shadow-lg transition-all duration-300 cursor-pointer relative"
       tabIndex={0}
       onKeyDown={(e) => { if (e.key === "Enter") handleClick(); }}
     >
@@ -115,7 +115,6 @@ const handleClick = () => {
             <span className="text-gray-400 text-sm">Ürün Görseli</span>
           )}
         </div>
-        {/* ...badge ve diğerleri aynı */}
       </div>
       <h1 className="text-sm font-semibold text-gray-800 flex-1">{product.name}</h1>
       <p className="text-md mb-2">{product.brand}</p>
