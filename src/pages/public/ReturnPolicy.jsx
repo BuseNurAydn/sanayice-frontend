@@ -4,7 +4,7 @@ import { FaInfoCircle, FaShieldAlt, FaUndo, FaTimes, FaCalendarAlt } from 'react
 const ReturnPolicy = () => {
   return (
     <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-4xl mx-auto px-6">
+      <div className="max-w-4xl mx-auto px-3 md:px-6">
         {/* Header */}
         <div className="relative bg-gradient-to-r from-orange-500 to-orange-600 rounded-2xl shadow-lg p-8 mb-8 text-white overflow-hidden">
           <div className="absolute inset-0 bg-orange-700 opacity-20"></div>
@@ -13,7 +13,7 @@ const ReturnPolicy = () => {
               <FaShieldAlt className="w-8 h-8 text-orange-200 mr-3" />
               <span className="text-orange-100 font-medium">Güvenli Alışveriş</span>
             </div>
-            <h1 className="text-4xl font-bold mb-4">Mesafeli Satış Sözleşmesi</h1>
+            <h1 className="text-2xl md:text-4xl font-bold mb-4">Mesafeli Satış Sözleşmesi</h1>
             <div className="flex items-center justify-center text-orange-100">
               <FaCalendarAlt className="w-4 h-4 mr-2" />
               <span>Son güncelleme: 20 Ekim 2025</span>
@@ -49,7 +49,7 @@ const ReturnPolicy = () => {
         </div>
 
         {/* Main Content */}
-        <div className="bg-white rounded-xl shadow-sm p-8">
+        <div className="bg-white rounded-xl shadow-sm p-4 md:p-8">
           
           {/* Section 1 */}
           <section className="mb-8">
@@ -210,5 +210,4 @@ const ReturnPolicy = () => {
     </div>
   );
 };
-
 export default ReturnPolicy;

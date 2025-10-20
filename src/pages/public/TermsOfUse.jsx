@@ -43,7 +43,7 @@ const TermsOfUse = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-4xl mx-auto px-6">
+      <div className="max-w-4xl mx-auto px-3 md:px-6">
         {/* Header */}
         <div className="relative bg-gradient-to-r from-orange-500 to-orange-600 rounded-2xl shadow-lg p-8 mb-8 text-white overflow-hidden">
           <div className="absolute inset-0 bg-orange-700 opacity-20"></div>
@@ -52,8 +52,8 @@ const TermsOfUse = () => {
               <FaGavel className="w-8 h-8 text-orange-200 mr-3" />
               <span className="text-orange-100 font-medium">Yasal Belgeler</span>
             </div>
-            <h1 className="text-4xl font-bold mb-4">Kullanım Koşulları</h1>
-            <p className="text-lg text-orange-100 mb-4">
+            <h1 className="text-2xl md:text-4xl font-bold mb-4">Kullanım Koşulları</h1>
+            <p className="md:text-lg text-orange-100 mb-4">
               Sanayice platformunu kullanmadan önce lütfen bu koşulları dikkatlice okuyunuz
             </p>
             <div className="flex items-center justify-center text-orange-100">
@@ -102,13 +102,13 @@ const TermsOfUse = () => {
         {/* Main Content */}
         <div className="space-y-8">
           {sections.map((section, index) => (
-            <div key={section.id} id={section.id} className="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
+            <div key={section.id} id={section.id} className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 md:p-8">
               <div className="flex items-center mb-6">
                 <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 mr-4">
                   {section.icon}
                 </div>
                 <div>
-                  <h2 className="text-2xl font-semibold text-gray-800">{section.title}</h2>
+                  <h2 className="text-lg md:text-2xl font-semibold text-gray-800">{section.title}</h2>
                   <div className="flex items-center text-sm text-gray-500 mt-1">
                     <span className="w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-xs mr-2">
                       {index + 1}
@@ -128,13 +128,13 @@ const TermsOfUse = () => {
         </div>
 
         {/* Additional Information */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8 mt-8">
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 md:p-8 mt-8">
           <div className="flex items-center mb-6">
             <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center text-green-600 mr-4">
               <FaCheckCircle className="w-6 h-6" />
             </div>
             <div>
-              <h2 className="text-2xl font-semibold text-gray-800">Güncelleme Politikası</h2>
+              <h2 className="text-lg md:text-2xl font-semibold text-gray-800">Güncelleme Politikası</h2>
               <div className="flex items-center text-sm text-gray-500 mt-1">
                 <span className="w-6 h-6 bg-green-600 text-white rounded-full flex items-center justify-center text-xs mr-2">
                   7

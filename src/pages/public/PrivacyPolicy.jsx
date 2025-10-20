@@ -104,10 +104,10 @@ const PrivacyPolicy = () => {
           <div className={`inline-flex items-center justify-center w-20 h-20 bg-white/20 rounded-full mb-8 ${isVisible ? 'animate-bounce' : 'opacity-0'}`}>
             <FaShieldAlt className="text-3xl" />
           </div>
-          <h1 className={`text-4xl md:text-6xl font-bold mb-6 ${isVisible ? 'animate-fade-in-up' : 'opacity-0'}`}>
+          <h1 className={`text-3xl md:text-6xl font-bold mb-6 ${isVisible ? 'animate-fade-in-up' : 'opacity-0'}`}>
             Gizlilik Politikası
           </h1>
-          <p className={`text-xl md:text-2xl opacity-90 max-w-3xl mx-auto leading-relaxed ${isVisible ? 'animate-fade-in-up' : 'opacity-0'}`} style={{ animationDelay: '200ms' }}>
+          <p className={`text-lg md:text-2xl opacity-90 max-w-3xl mx-auto leading-relaxed ${isVisible ? 'animate-fade-in-up' : 'opacity-0'}`} style={{ animationDelay: '200ms' }}>
             Kişisel bilgilerinizin güvenliği bizim için çok önemli. Bu sayfada verilerinizi nasıl koruduğumuzu öğrenebilirsiniz.
           </p>
           <div className={`mt-6 text-sm opacity-75 ${isVisible ? 'animate-fade-in-up' : 'opacity-0'}`} style={{ animationDelay: '400ms' }}>
@@ -117,9 +117,9 @@ const PrivacyPolicy = () => {
       </div>
 
       {/* İçerik */}
-      <div className="relative max-w-6xl mx-auto px-6 py-16">
+      <div className="relative max-w-6xl mx-auto px-3 md:px-6 py-16">
         {/* Giriş */}
-        <div className={`bg-white rounded-2xl p-8 shadow-lg mb-12 border border-gray-100 ${isVisible ? 'animate-fade-in-up' : 'opacity-0'}`} style={{ animationDelay: '300ms' }}>
+        <div className={`bg-white rounded-2xl p-4 md:p-8 shadow-lg mb-12 border border-gray-100 ${isVisible ? 'animate-fade-in-up' : 'opacity-0'}`} style={{ animationDelay: '300ms' }}>
           <h2 className="text-2xl font-bold text-gray-800 mb-6 flex items-center">
             <FaCheckCircle className="text-green-500 mr-3" />
             Gizlilik Politikamız
@@ -152,7 +152,7 @@ const PrivacyPolicy = () => {
               >
                 <button
                   onClick={() => toggleSection(section.id)}
-                  className="w-full p-8 flex items-center justify-between text-left hover:bg-gray-50 transition-colors duration-200"
+                  className="w-full p-4 md:p-8 flex items-center justify-between text-left hover:bg-gray-50 transition-colors duration-200"
                 >
                   <div className="flex items-center">
                     <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-500 rounded-xl flex items-center justify-center mr-4 transform hover:scale-110 transition-transform duration-200">
@@ -168,7 +168,7 @@ const PrivacyPolicy = () => {
                 </button>
                 
                 <div className={`overflow-hidden transition-all duration-300 ${isActive ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'}`}>
-                  <div className="px-8 pb-8">
+                  <div className=" px-6 md:px-8 pb-8">
                     <ul className="space-y-3">
                       {section.content.map((item, itemIndex) => (
                         <li key={itemIndex} className="flex items-start">
@@ -185,7 +185,7 @@ const PrivacyPolicy = () => {
         </div>
 
         {/* Çerezler */}
-        <div className={`bg-gradient-to-r from-orange-50 to-pink-50 rounded-2xl p-8 mt-12 border border-orange-200 ${isVisible ? 'animate-fade-in-up' : 'opacity-0'}`} style={{ animationDelay: '1000ms' }}>
+        <div className={`bg-gradient-to-r from-orange-50 to-pink-50 rounded-2xl p-4 md:p-8 mt-12 border border-orange-200 ${isVisible ? 'animate-fade-in-up' : 'opacity-0'}`} style={{ animationDelay: '1000ms' }}>
           <h3 className="text-2xl font-bold text-gray-800 mb-6 flex items-center">
             <div className="w-8 h-8 bg-orange-500 rounded-lg flex items-center justify-center mr-3">
               <span className="text-white text-sm">🍪</span>
@@ -198,11 +198,11 @@ const PrivacyPolicy = () => {
               Çerezler, tarayıcınız tarafından bilgisayarınızda saklanan küçük metin dosyalarıdır.
             </p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-              <div className="bg-white rounded-xl p-6 shadow-sm">
+              <div className="bg-white rounded-xl p-3 md:p-6 shadow-sm">
                 <h4 className="font-semibold text-gray-800 mb-3">Zorunlu Çerezler</h4>
                 <p className="text-sm text-gray-600">Uygulama işlevselliği için gerekli olan temel çerezler</p>
               </div>
-              <div className="bg-white rounded-xl p-6 shadow-sm">
+              <div className="bg-white rounded-xl p-3 md:p-6 shadow-sm">
                 <h4 className="font-semibold text-gray-800 mb-3">Analitik Çerezler</h4>
                 <p className="text-sm text-gray-600">Uygulama performansını iyileştirmek için kullanılan çerezler</p>
               </div>
@@ -211,7 +211,7 @@ const PrivacyPolicy = () => {
         </div>
 
         {/* İletişim */}
-        <div className={`bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-8 mt-12 border border-blue-200 ${isVisible ? 'animate-fade-in-up' : 'opacity-0'}`} style={{ animationDelay: '1200ms' }}>
+        <div className={`bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-4 md:p-8 mt-12 border border-blue-200 ${isVisible ? 'animate-fade-in-up' : 'opacity-0'}`} style={{ animationDelay: '1200ms' }}>
           <h3 className="text-2xl font-bold text-gray-800 mb-6 flex items-center">
             <FaPhone className="text-blue-600 mr-3" />
             Bizimle İletişime Geçin
@@ -243,7 +243,7 @@ const PrivacyPolicy = () => {
         </div>
 
         {/* Son Notlar */}
-        <div className={`bg-gray-50 rounded-2xl p-8 mt-12 ${isVisible ? 'animate-fade-in-up' : 'opacity-0'}`} style={{ animationDelay: '1400ms' }}>
+        <div className={`bg-gray-50 rounded-2xl p-4 md:p-8 mt-12 ${isVisible ? 'animate-fade-in-up' : 'opacity-0'}`} style={{ animationDelay: '1400ms' }}>
           <h3 className="text-xl font-bold text-gray-800 mb-4">Önemli Notlar</h3>
           <ul className="space-y-3 text-gray-700">
             <li className="flex items-start">

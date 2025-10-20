@@ -180,13 +180,13 @@ const MembershipAgreement = () => {
 
     return (
         <div className="min-h-screen bg-gray-50 py-8">
-            <div className="max-w-4xl mx-auto px-6">
+            <div className="max-w-4xl mx-auto px-3 md:px-6">
 
                 <div className="relative bg-orange-50 border-b-4 border-orange-600 shadow-lg p-10 mb-8 rounded-2xl text-gray-800">
                     <div className="relative z-10 text-center pt-6">
                         {/* Ana Başlık */}
                         <h1 className="text-xl md:text-4xl font-bold text-gray-900 mb-3 tracking-tight">
-                             ÜYELİK SÖZLEŞMESİ
+                            ÜYELİK SÖZLEŞMESİ
                         </h1>
 
                         {/* Yürürlük Tarihi */}
@@ -235,25 +235,25 @@ const MembershipAgreement = () => {
                                 </div>
                             </div>
 
-                            <div className="prose max-w-none text-gray-700 leading-relaxed text-justify">
+                            <div className=" text-gray-700 leading-relaxed text-start">
                                 {section.content}
                             </div>
                         </div>
                     ))}
                 </div>
 
-               <div className="bg-blue-50 border-l-4 border-blue-500 p-8 mt-12 rounded-lg shadow-lg">
-    <div className="flex items-start">
-        <FaCheckCircle className="w-7 h-7 text-blue-600 mr-4 mt-1 flex-shrink-0" />
-        <div>
-            <h3 className="text-xl font-bold text-blue-800 mb-3">Sözleşme Onayı ve Yürürlük Bilgisi</h3>
-            <p className="text-blue-700 leading-relaxed">
-                Platform'da gerçekleştireceğiniz üyelik işlemi, bu belgenin tüm maddelerini, hak ve yükümlülüklerini okuduğunuzu ve onayladığınızı beyan ve taahhüt etmeniz demektir. Onayınız ile birlikte sözleşme yürürlüğe girer ve Taraflar için hukuki sonuçlar doğurur.
-            </p>
-          
-        </div>
-    </div>
-</div>
+                <div className="bg-blue-50 border-l-4 border-blue-500 p-4 md:p-8 mt-12 rounded-lg shadow-lg">
+                    <div className="flex items-start">
+                        <FaCheckCircle className="w-7 h-7 text-blue-600 mr-4 flex-shrink-0" />
+                        <div>
+                            <h3 className="text-xl font-bold text-blue-800 mb-3">Sözleşme Onayı ve Yürürlük Bilgisi</h3>
+                            <p className="text-blue-700 leading-relaxed">
+                                Platform'da gerçekleştireceğiniz üyelik işlemi, bu belgenin tüm maddelerini, hak ve yükümlülüklerini okuduğunuzu ve onayladığınızı beyan ve taahhüt etmeniz demektir. Onayınız ile birlikte sözleşme yürürlüğe girer ve Taraflar için hukuki sonuçlar doğurur.
+                            </p>
+
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     );

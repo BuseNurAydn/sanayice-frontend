@@ -57,7 +57,7 @@ const AboutUs = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white">
-      {/* Animated Background Elements */}
+      
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute -top-40 -right-40 w-80 h-80 bg-orange-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-pulse"></div>
         <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-blue-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-pulse" style={{ animationDelay: '2s' }}></div>
@@ -70,7 +70,7 @@ const AboutUs = () => {
         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-10 transform -skew-y-6"></div>
         
         <div className="relative max-w-7xl mx-auto px-6 text-center">
-          <h1 className={`text-5xl md:text-7xl font-black mb-8 bg-clip-text text-transparent bg-gradient-to-r from-white to-orange-100 ${isVisible ? 'animate-fade-in-up' : 'opacity-0'}`}>
+          <h1 className={`text-3xl md:text-7xl font-black mb-8 bg-clip-text text-transparent bg-gradient-to-r from-white to-orange-100 ${isVisible ? 'animate-fade-in-up' : 'opacity-0'}`}>
             Hakkımızda
           </h1>
           <p className={`text-xl md:text-2xl opacity-95 max-w-4xl mx-auto leading-relaxed font-light ${isVisible ? 'animate-fade-in-up' : 'opacity-0'}`} style={{ animationDelay: '200ms' }}>
@@ -84,13 +84,13 @@ const AboutUs = () => {
       </div>
 
       {/* Hikayemiz */}
-      <div className="relative max-w-7xl mx-auto px-6 py-20">
+      <div className="relative max-w-7xl mx-auto px-3 md:px-6 py-20">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
           <div className={`${isVisible ? 'animate-fade-in-left' : 'opacity-0'}`}>
             <div className="inline-block px-4 py-2 bg-orange-100 text-orange-800 rounded-full text-sm font-semibold mb-6">
               Hikayemiz
             </div>
-            <h2 className="text-4xl md:text-5xl font-bold text-gray-800 mb-8 leading-tight">
+            <h2 className="text-xl md:text-5xl font-bold text-gray-800 mb-8 leading-tight">
               Bir <span className="text-orange-600">Rüya</span> ile Başladı
             </h2>
             <div className="space-y-6">
@@ -148,9 +148,9 @@ const AboutUs = () => {
       {/* Vizyon ve Misyon */}
       <div className="relative py-20 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-gray-50 to-blue-50"></div>
-        <div className="relative max-w-7xl mx-auto px-6">
+        <div className="relative max-w-7xl mx-auto px-3 md:px-6">
           <div className="text-center mb-16">
-            <h2 className={`text-4xl md:text-5xl font-bold text-gray-800 mb-4 ${isVisible ? 'animate-fade-in-up' : 'opacity-0'}`}>
+            <h2 className={`text-2xl md:text-5xl font-bold text-gray-800 mb-4 ${isVisible ? 'animate-fade-in-up' : 'opacity-0'}`}>
               Vizyon & <span className="text-orange-600">Misyon</span>
             </h2>
             <div className="w-24 h-1 bg-gradient-to-r from-orange-400 to-pink-400 mx-auto rounded-full"></div>
@@ -158,12 +158,12 @@ const AboutUs = () => {
           
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
             {/* Misyon */}
-            <div className={`bg-gradient-to-br from-orange-100 via-orange-50 to-pink-100 rounded-3xl p-10 shadow-xl border border-orange-200 transform hover:scale-105 transition-all duration-500 ${isVisible ? 'animate-fade-in-left' : 'opacity-0'}`} style={{ animationDelay: '200ms' }}>
+            <div className={`bg-gradient-to-br from-orange-100 via-orange-50 to-pink-100 rounded-3xl p-5 md:p-10 shadow-xl border border-orange-200 transform hover:scale-105 transition-all duration-500 ${isVisible ? 'animate-fade-in-left' : 'opacity-0'}`} style={{ animationDelay: '200ms' }}>
               <div className="flex items-center mb-8">
                 <div className="w-16 h-16 bg-gradient-to-r from-orange-500 to-pink-500 rounded-2xl flex items-center justify-center mr-6 transform hover:rotate-12 transition-transform duration-300">
                   <FaRocket className="text-2xl text-white" />
                 </div>
-                <h3 className="text-3xl font-bold text-gray-800">Misyonumuz</h3>
+                <h3 className="text-xl md:text-3xl font-bold text-gray-800">Misyonumuz</h3>
               </div>
               <p className="text-gray-700 text-lg leading-relaxed">
                 Sanayice olarak misyonumuz, kullanıcılarımızın ihtiyaç duyduğu 
@@ -175,12 +175,12 @@ const AboutUs = () => {
             </div>
 
             {/* Vizyon */}
-            <div className={`bg-gradient-to-br from-blue-100 via-blue-50 to-purple-100 rounded-3xl p-10 shadow-xl border border-blue-200 transform hover:scale-105 transition-all duration-500 ${isVisible ? 'animate-fade-in-right' : 'opacity-0'}`} style={{ animationDelay: '400ms' }}>
+            <div className={`bg-gradient-to-br from-blue-100 via-blue-50 to-purple-100 rounded-3xl p-5 md:p-10 shadow-xl border border-blue-200 transform hover:scale-105 transition-all duration-500 ${isVisible ? 'animate-fade-in-right' : 'opacity-0'}`} style={{ animationDelay: '400ms' }}>
               <div className="flex items-center mb-8">
                 <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-500 rounded-2xl flex items-center justify-center mr-6 transform hover:rotate-12 transition-transform duration-300">
                   <FaEye className="text-2xl text-white" />
                 </div>
-                <h3 className="text-3xl font-bold text-gray-800">Vizyonumuz</h3>
+                <h3 className="text-xl md:text-3xl font-bold text-gray-800">Vizyonumuz</h3>
               </div>
               <p className="text-gray-700 text-lg leading-relaxed">
                 Türkiye'nin 
@@ -197,12 +197,12 @@ const AboutUs = () => {
 
       {/* Değerlerimiz */}
       <div className="py-20 relative">
-        <div className="max-w-7xl mx-auto px-6">
+        <div className="max-w-7xl mx-auto px-3 md:px-6">
           <div className="text-center mb-16">
-            <h2 className={`text-4xl md:text-5xl font-bold text-gray-800 mb-4 ${isVisible ? 'animate-fade-in-up' : 'opacity-0'}`}>
+            <h2 className={`text-2xl md:text-5xl font-bold text-gray-800 mb-4 ${isVisible ? 'animate-fade-in-up' : 'opacity-0'}`}>
               Değerlerimiz
             </h2>
-            <p className={`text-xl text-gray-600 max-w-2xl mx-auto ${isVisible ? 'animate-fade-in-up' : 'opacity-0'}`} style={{ animationDelay: '200ms' }}>
+            <p className={`text-lg md:text-xl text-gray-600 max-w-2xl mx-auto ${isVisible ? 'animate-fade-in-up' : 'opacity-0'}`} style={{ animationDelay: '200ms' }}>
               Bizi biz yapan ve her kararımızda rehber olan temel değerlerimiz
             </p>
             <div className="w-24 h-1 bg-gradient-to-r from-orange-400 to-pink-400 mx-auto mt-6 rounded-full"></div>
@@ -235,11 +235,11 @@ const AboutUs = () => {
       </div>
 
       {/* CEO Bölümü */}
-<div className="relative py-20 overflow-hidden">
+<div className="relative py-10 md:py-20 overflow-hidden">
   <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-gray-800 to-black"></div>
   <div className="absolute inset-0 bg-gradient-to-r from-orange-500/10 to-pink-500/10"></div>
   
-  <div className="relative max-w-7xl mx-auto px-6">
+  <div className="relative max-w-7xl mx-auto px-3 md:px-6">
     <div className={`bg-gradient-to-r from-gray-800/50 to-gray-900/50 backdrop-blur-lg rounded-3xl p-12 border border-gray-700/50 shadow-2xl ${isVisible ? 'animate-fade-in-up' : 'opacity-0'}`} style={{ animationDelay: '300ms' }}>
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 items-center">
         <div className="lg:col-span-1 text-center">
@@ -263,7 +263,7 @@ const AboutUs = () => {
         </div>
         
         <div className="lg:col-span-2">
-          <FaQuoteLeft className="text-4xl text-orange-400 mb-6 opacity-50" />
+          <FaQuoteLeft className=" text-xl md:text-4xl text-orange-400 mb-6 opacity-50" />
           <blockquote className="text-lg md:text-xl leading-relaxed text-gray-100 mb-8">
             "Sanayice'i kurma amacımız, e-ticaret sektöründe müşteri deneyimini 
             yeniden tanımlamaktı. Teknolojinin gücünü kullanarak, insanların 
@@ -290,11 +290,11 @@ const AboutUs = () => {
         <div className="absolute inset-0 bg-black opacity-20"></div>
         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-10 transform skew-y-3"></div>
         
-        <div className="relative max-w-4xl mx-auto px-6 text-center text-white">
-          <h2 className={`text-4xl md:text-5xl font-bold mb-8 ${isVisible ? 'animate-fade-in-up' : 'opacity-0'}`}>
+        <div className="relative max-w-4xl mx-auto px-3 md:px-6 text-center text-white">
+          <h2 className={`text-2xl md:text-5xl font-bold mb-8 ${isVisible ? 'animate-fade-in-up' : 'opacity-0'}`}>
             Bizimle <span className="text-yellow-200">Alışverişe</span> Başlayın
           </h2>
-          <p className={`text-xl mb-10 opacity-95 leading-relaxed max-w-2xl mx-auto ${isVisible ? 'animate-fade-in-up' : 'opacity-0'}`} style={{ animationDelay: '200ms' }}>
+          <p className={`text-base md:text-xl mb-10 opacity-95 leading-relaxed max-w-2xl mx-auto ${isVisible ? 'animate-fade-in-up' : 'opacity-0'}`} style={{ animationDelay: '200ms' }}>
             Kaliteli ürünler, uygun fiyatlar ve mükemmel hizmet için Sanayice'i tercih edin. 
             Siz de bu büyüleyici deneyimin bir parçası olun!
           </p>
