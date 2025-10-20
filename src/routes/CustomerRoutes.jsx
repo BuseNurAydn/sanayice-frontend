@@ -19,6 +19,7 @@ import CargoTracking from '../pages/customer/AccountPage/CargoTracking';
 import NotFoundPage from '../pages/NotFoundPage';
 import DiscoverPage from '../pages/customer/DiscoverPage';
 import BannerPage from '../pages/customer/BannerPage';
+import MembershipAgreement from '../pages/public/MembershipAgreement';
 
 
 const CustomerRoutes = () => {
@@ -48,6 +49,7 @@ const CustomerRoutes = () => {
                 <Route path="gizlilik-politikasi" element={<PrivacyPolicy />} />
                 <Route path="iptal-iade" element={<ReturnPolicy />} />
                 <Route path="kullanim-sozlesmesi" element={<TermsOfUse />} />
+                <Route path='uyelik-sozlesmesi' element={<MembershipAgreement />} />
                 <Route path="/kategori/banner/:slug" element={<BannerPage />}  />
 
                 {accountRoutes}

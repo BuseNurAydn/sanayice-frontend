@@ -68,7 +68,7 @@ const Footer = () => {
           <ul className="space-y-4 text-sm">
             <li><Link to="/gizlilik-politikasi">Gizlilik Politikası</Link></li>
             <li><Link to="/kullanim-sozlesmesi">Kullanım Koşulları</Link></li>
-            <li><Link to="/iptal-iade">İptal ve İade Koşulları</Link></li>
+            <li><Link to="/iptal-iade">Mesafeli Satış Sözleşmesi</Link></li>
           </ul>
         </div>
 

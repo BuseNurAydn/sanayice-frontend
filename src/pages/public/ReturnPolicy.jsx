@@ -13,10 +13,10 @@ const ReturnPolicy = () => {
               <FaShieldAlt className="w-8 h-8 text-orange-200 mr-3" />
               <span className="text-orange-100 font-medium">Güvenli Alışveriş</span>
             </div>
-            <h1 className="text-4xl font-bold mb-4">İptal ve İade Koşulları</h1>
+            <h1 className="text-4xl font-bold mb-4">Mesafeli Satış Sözleşmesi</h1>
             <div className="flex items-center justify-center text-orange-100">
               <FaCalendarAlt className="w-4 h-4 mr-2" />
-              <span>Son güncelleme: 14 Temmuz 2025</span>
+              <span>Son güncelleme: 20 Ekim 2025</span>
             </div>
           </div>
           <div className="absolute right-0 top-0 w-32 h-32 bg-orange-400 rounded-full opacity-20 transform translate-x-16 -translate-y-8"></div>
@@ -59,91 +59,59 @@ const ReturnPolicy = () => {
             </h2>
             <div className="space-y-4 text-gray-700">
               <div className="bg-gray-50 p-4 rounded-lg">
-                <p><strong>Geçerlilik:</strong> Bu iptal ve iade koşulları, Sanayice platformu üzerinden yapılan tüm alışverişlerde geçerlidir. Sanayice, alıcı ve satıcı arasında yalnızca bir aracı platformdur ve doğrudan ürün tedarik etmez.</p>
+                <p><strong>Geçerlilik:</strong> Bu iptal ve iade koşulları, Sanayice  platformu üzerinden yapılan tüm alışverişlerde geçerlidir. Sanayice, alıcı ve satıcı arasında yalnızca bir aracı platformdur ve doğrudan ürün tedarik etmez.</p>
               </div>
               <p><strong>İletişim:</strong> Tüm iptal ve iade talepleri, Sanayice platformu üzerinden yapılmalıdır.</p>
-              <p><strong>Yasal Dayanak:</strong> Bu koşullar, 6502 sayılı Tüketicinin Korunması Hakkında Kanun ve Mesafeli Sözleşmeler Yönetmeliği kapsamında hazırlanmıştır.</p>
             </div>
           </section>
 
           {/* Section 2 */}
           <section className="mb-8">
             <h2 className="text-2xl font-semibold text-gray-900 mb-4">2. İptal Koşulları</h2>
-            <div className="space-y-4 text-gray-700">
-              <div>
+            <ul className="space-y-4 text-gray-700 list-disc ml-8">
+              <li>
                 <h3 className="text-lg font-medium text-gray-900 mb-2">Alıcı Tarafından İptal:</h3>
-                <ul className="list-disc ml-6 space-y-2">
-                  <li><strong>Ürün Kargolanmadan Önce:</strong> Alıcı, ürün kargoya verilmeden önce siparişini iptal etme hakkına sahiptir. Bu işlemi siparişler sayfası üzerinden gerçekleştirebilir.</li>
-                  <li><strong>Ödeme İadesi:</strong> İptal edilen siparişlerde, ödemenin iadesi alıcının kullandığı ödeme yöntemiyle 3-7 iş günü içinde yapılır.</li>
-                  <li><strong>Özel Siparişler:</strong> Kişiye özel veya özel üretim yapılan ürünlerde sipariş iptali, üretim başladıktan sonra yapılamaz.</li>
+                <ul className="space-y-4">
+                  <li><span className='font-medium text-gray-700'>Ürün Kargolanmadan Önce:</span> Alıcı, ürün kargoya verilmeden önce siparişini iptal etme hakkına sahiptir. Bu işlemi siparişler sayfası üzerinden gerçekleştirebilir.</li>
+                  <li><span className='font-medium text-gray-700'>Ödeme İadesi:</span> İptal edilen siparişlerde, ödemenin iadesi alıcının kullandığı ödeme yöntemiyle 3-7 iş günü içinde yapılır.</li>
                 </ul>
-              </div>
-              <div>
+              </li>
+              <li>
+                <h3 className="text-lg font-medium text-gray-900 mb-2">Özel Siparişler:</h3>
+                <p>Kişiye özel veya özel üretim yapılan ürünlerde sipariş iptali, üretim başladıktan sonra yapılamaz</p>
+              </li>
+              <li>
                 <h3 className="text-lg font-medium text-gray-900 mb-2">Satıcı Tarafından İptal:</h3>
                 <p>Satıcı, ürün tedarik sorunları, teknik sorunlar, veya stok yetersizliği gibi nedenlerle siparişi iptal edebilir. Bu durumda alıcıya bilgi verilir ve ödemenin tamamı iade edilir.</p>
-              </div>
-            </div>
+              </li>
+            </ul>
           </section>
 
           {/* Section 3 */}
           <section className="mb-8">
             <h2 className="text-2xl font-semibold text-gray-900 mb-4">3. İade Koşulları</h2>
-            <div className="space-y-4 text-gray-700">
-              <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+            <ul className="space-y-4 text-gray-700">
+              <li className="bg-blue-50 p-4 rounded-lg border border-blue-200">
                 <p><strong>Koşulsuz İade Hakkı:</strong> Alıcı, ürün teslim alındıktan sonraki 14 gün içinde sebep belirtmeksizin iade talebinde bulunabilir. İade süreci, Sanayice platformu üzerinden başlatılmalıdır.</p>
-              </div>
-              <div>
-                <h3 className="text-lg font-medium text-gray-900 mb-2">İade Şartları:</h3>
-                <ul className="list-disc ml-6 space-y-2">
-                  <li>Ürün, kullanılmamış, hasarsız, orijinal ambalajında ve faturasıyla birlikte geri gönderilmelidir.</li>
-                  <li>İade edilecek ürünler, satıcının belirttiği kargo firması aracılığıyla gönderilmelidir.</li>
-                  <li>Ürün etiketleri ve orijinal ambalajında herhangi bir zarar olmamalıdır.</li>
-                  <li>Ürünün deneme amaçlı kullanımı doğaldır, ancak normal deneme kullanımını aşan hasarlar kabul edilmez.</li>
-                </ul>
-              </div>
-            </div>
+              </li>
+              <li className="bg-orange-50 p-4 rounded-lg border border-orange-200">
+                <p><strong>İade Şartları:</strong> Ürün kullanılmamış, hasarsız, orijinal ambalajında ve faturasıyla birlikte geri gönderilmelidir. İade edilecek ürünler, satıcının belirttiği kargo firması aracılığıyla gönderilmelidir.</p>
+              </li>
+              <li className="bg-slate-100 p-4 rounded-lg border border-slate-300">
+                <p><strong>İade Edilemeyen Ürünler:</strong> Kullanılmış ambalajı bozulmuş, kişiye özel üretilen ürünler iade edilemez. </p>
+              </li>  
+            </ul>
           </section>
 
-          {/* Section 4 */}
-          <section className="mb-8">
-            <h2 className="text-2xl font-semibold text-gray-900 mb-4">4. İade Edilemeyen Ürünler</h2>
-            <div className="bg-red-50 p-4 rounded-lg border border-red-200">
-              <ul className="list-disc ml-6 space-y-2 text-red-800">
-                <li>Kişisel hijyen ürünleri</li>
-                <li>Açılmış kozmetik ürünleri</li>
-                <li>Hızlı bozulan gıda maddeleri</li>
-                <li>Kişiye özel üretilen ürünler</li>
-                <li>Açılmış yazılım, oyun ve müzik CD'leri</li>
-                <li>Tek kullanımlık ürünler</li>
-                <li>İç giyim ürünleri (hijyen nedeniyle)</li>
-              </ul>
-            </div>
-          </section>
 
           {/* Section 5 */}
           <section className="mb-8">
             <h2 className="text-2xl font-semibold text-gray-900 mb-4">5. İade Kargo Ücretleri</h2>
             <div className="space-y-4 text-gray-700">
-              <div className="grid md:grid-cols-2 gap-4">
-                <div className="bg-green-50 p-4 rounded-lg border border-green-200">
-                  <h3 className="font-semibold text-green-900 mb-2">Satıcı Karşılar</h3>
-                  <ul className="text-sm text-green-700 space-y-1">
-                    <li>• Hatalı ürün</li>
-                    <li>• Kusurlu ürün</li>
-                    <li>• Yanlış ürün</li>
-                    <li>• Hasarlı ürün</li>
-                  </ul>
+                <div className="bg-green-50 p-4 rounded-lg border border-green-200 flex flex-row gap-1">
+                  <h3 className="font-semibold text-green-900 mb-2">Kargo Ücreti:</h3>
+                  <span> Hatalı veya kusurlu ürünlerde kargo ücreti satıcı tarafından karşılanır.</span>
                 </div>
-                <div className="bg-orange-50 p-4 rounded-lg border border-orange-200">
-                  <h3 className="font-semibold text-orange-900 mb-2">Alıcı Karşılar</h3>
-                  <ul className="text-sm text-orange-700 space-y-1">
-                    <li>• Cayma hakkı kullanımı</li>
-                    <li>• Beğenmeme</li>
-                    <li>• Boyut/renk problemi</li>
-                    <li>• Fikrini değiştirme</li>
-                  </ul>
-                </div>
-              </div>
             </div>
           </section>
 
@@ -151,18 +119,8 @@ const ReturnPolicy = () => {
           <section className="mb-8">
             <h2 className="text-2xl font-semibold text-gray-900 mb-4">6. İade Süreci</h2>
             <div className="space-y-4 text-gray-700">
-              <div className="bg-gray-50 p-4 rounded-lg">
-                <p><strong>İnceleme Süreci:</strong> İade edilen ürün, satıcıya ulaştıktan sonra incelenir. Ürünün iade koşullarına uygun olması durumunda, ödeme iadesi 7 iş günü içinde gerçekleştirilir.</p>
-              </div>
-              <div>
-                <h3 className="text-lg font-medium text-gray-900 mb-2">İade Adımları:</h3>
-                <ol className="list-decimal ml-6 space-y-2">
-                  <li>Sanayice platformu üzerinden iade talebi oluşturun</li>
-                  <li>İade nedeni ve detayları belirtin</li>
-                  <li>Ürünü orijinal ambalajında hazırlayın</li>
-                  <li>Kargo gönderi kodunu sisteme girin</li>
-                  <li>Ürün incelendikten sonra iade işlemi tamamlanır</li>
-                </ol>
+              <div className="bg-gray-50 border border-gray-300 p-4 rounded-lg">
+                <p>İade edilen ürün, satıcıya ulaştıktan sonra incelenir. Ürünün iade koşullarına uygun olması durumunda, ödeme iadesi 7 iş günü içinde gerçekleştirilir.</p>
               </div>
             </div>
           </section>
@@ -172,9 +130,6 @@ const ReturnPolicy = () => {
             <h2 className="text-2xl font-semibold text-gray-900 mb-4">7. Hatalı ve Eksik Ürünler</h2>
             <div className="bg-yellow-50 p-4 rounded-lg border border-yellow-200">
               <p className="text-yellow-800">Alıcı, teslim aldığı üründe hata veya eksiklik tespit ederse, ürün teslim alındıktan sonraki <strong>3 iş günü</strong> içinde Sanayice platformu üzerinden durumu bildirmelidir.</p>
-            </div>
-            <div className="mt-4 text-gray-700">
-              <p>Hatalı veya eksik ürünlerde, ücretsiz değişim veya tam iade seçeneği sunulur. Kargo ücreti satıcı tarafından karşılanır.</p>
             </div>
           </section>
 
@@ -248,7 +203,7 @@ const ReturnPolicy = () => {
 
         {/* Footer Info */}
         <div className="mt-8 text-center text-gray-500 text-sm">
-          <p>Bu sayfa son olarak 14 Temmuz 2025 tarihinde güncellenmiştir.</p>
+          <p>Bu sayfa son olarak 20 Ekim 2025 tarihinde güncellenmiştir.</p>
           <p className="mt-2">© 2025 Sanayice. Tüm hakları saklıdır.</p>
         </div>
       </div>

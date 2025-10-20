@@ -120,8 +120,6 @@ const CheckoutPage = () => {
   });
 
   const applyDiscountCode = async () => {
-   
-
     try {
       const response = await fetch(
         `${API_BASE}/public/coupons/by-code/${formData.couponCode}`
@@ -215,10 +213,9 @@ const CheckoutPage = () => {
         couponCode: appliedCoupon ? appliedCoupon.code : null,
       };
 
-       // BURAYA EKLEYİN: Sunucuya Gidecek Son Veriyi Konsola Yazdırma
+       // Sunucuya Gidecek Son Veriyi Konsola Yazdırma
     console.log("Sunucuya Gönderilen Sipariş İsteği (orderRequest):", orderRequest);
     console.log("JSON.stringify Gövdesi:", JSON.stringify(orderRequest, null, 2)); 
-    // ^ Bu satır, veriyi daha okunaklı (pretty-printed) gösterir.
     
       const token = localStorage.getItem('token'); //  token
       const response = await fetch(CHECKOUT_API, {
