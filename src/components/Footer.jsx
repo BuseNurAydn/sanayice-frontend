@@ -1,18 +1,18 @@
 import { Link } from "react-router-dom";
-import PlayStore from "../../assets/png/PlayStore.png";
-import AppStore from "../../assets/png/AppStore.png";
+import PlayStore from "../assets/png/PlayStore.png";
+import AppStore from "../assets/png/AppStore.png";
 import { FaFacebook, FaWhatsapp } from "react-icons/fa";
 import { AiFillInstagram } from "react-icons/ai";
 import { IoLogoYoutube } from "react-icons/io";
 import { FaLinkedin, FaXTwitter } from "react-icons/fa6";
-import visaMastercard from "../../assets/png/visa_mastercard.png";
+import visaMastercard from "../assets/png/visa_mastercard.png";
 
 const Footer = () => {
   const bgColor = "var(--color-gray)";
   const textColor = "var(--color-dark)";
 
   return (
-    <footer style={{ backgroundColor: bgColor }} className="pt-10 text-sm custom-font text-gray-700 mt-4">
+    <footer style={{ backgroundColor: bgColor }} className="pt-10 text-sm custom-font text-gray-700">
       {/* Bölüm 1: Ana Linkler ve Sosyal Medya */}
       <div className="max-w-7xl mx-auto px-5 grid grid-cols-2 md:grid-cols-7 gap-y-8 pb-10">
         <div className="col-span-1">

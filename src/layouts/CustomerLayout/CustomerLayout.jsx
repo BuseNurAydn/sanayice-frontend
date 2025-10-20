@@ -1,8 +1,9 @@
 import Header from '../../components/Header';
-import Footer from '../../layouts/CustomerLayout/Footer';
+import Footer from '../../components/Footer';
 import { Outlet } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { fetchCategories } from '../../services/categoryService';
+import ScrollToTop from '../../components/ScrollToTop';
 
 const CustomerLayout = () => {
   const [categories, setCategories] = useState([]);
@@ -12,7 +13,8 @@ const CustomerLayout = () => {
   }, []);
 
   return (
-     <div className="flex min-h-screen flex-col scrollbar-custom overflow-y-auto h-[400px]">
+     <div className="flex min-h-screen flex-col scrollbar-custom">
+       <ScrollToTop />
        <Header categories={categories} />
       <div className="flex flex-1">
         <main className="flex-1 overflow-x-hidden">
@@ -23,6 +25,5 @@ const CustomerLayout = () => {
     </div>
   );
 };
-
 export default CustomerLayout;
 
