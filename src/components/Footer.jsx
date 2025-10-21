@@ -28,8 +28,8 @@ const Footer = () => {
           <ul className="space-y-3">
             <li><Link to="/gizlilik-politikasi" className="hover:text-[var(--color-dark-orange)] transition-colors"> Gizlilik Politikası</Link></li>
             <li><Link to="/kullanim-sozlesmesi" className="hover:text-[var(--color-dark-orange)] transition-colors">Kullanım Koşulları </Link></li>
-            <li><Link to="/uyelik-sozlesmesi" className="hover:text-[var(--color-dark-orange)] transition-colors">Üyelik Sözleşmesi</Link></li>
-            <li><Link to="/iptal-iade" className="hover:text-[var(--color-dark-orange)] transition-colors"> Mesafeli Satış Sözleşmesi</Link></li>
+            <li><Link to="/iptal-iade" className="hover:text-[var(--color-dark-orange)] transition-colors"> İptal ve İade Koşulları</Link></li>
+            <li><Link to="/mesafeli-satis-sozlesmesi" className="hover:text-[var(--color-dark-orange)] transition-colors">Mesafeli Satış Sözleşmesi</Link></li>
           </ul>
         </div>
 

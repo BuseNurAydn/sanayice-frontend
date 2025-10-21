@@ -49,7 +49,7 @@ const CustomerRoutes = () => {
                 <Route path="gizlilik-politikasi" element={<PrivacyPolicy />} />
                 <Route path="iptal-iade" element={<ReturnPolicy />} />
                 <Route path="kullanim-sozlesmesi" element={<TermsOfUse />} />
-                <Route path='uyelik-sozlesmesi' element={<MembershipAgreement />} />
+                <Route path='mesafeli-satis-sozlesmesi' element={<MembershipAgreement />} />
                 <Route path="/kategori/banner/:slug" element={<BannerPage />}  />
 
                 {accountRoutes}

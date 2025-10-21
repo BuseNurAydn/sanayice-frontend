@@ -13,7 +13,7 @@ const ReturnPolicy = () => {
               <FaShieldAlt className="w-8 h-8 text-orange-200 mr-3" />
               <span className="text-orange-100 font-medium">Güvenli Alışveriş</span>
             </div>
-            <h1 className="text-2xl md:text-4xl font-bold mb-4">Mesafeli Satış Sözleşmesi</h1>
+            <h1 className="text-2xl md:text-4xl font-bold mb-4">İptal ve İade Koşulları</h1>
             <div className="flex items-center justify-center text-orange-100">
               <FaCalendarAlt className="w-4 h-4 mr-2" />
               <span>Son güncelleme: 20 Ekim 2025</span>

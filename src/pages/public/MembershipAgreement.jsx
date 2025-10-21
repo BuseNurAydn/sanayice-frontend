@@ -1,5 +1,6 @@
 import React from 'react';
 import { FaCalendarAlt, FaUsers, FaListOl, FaInfoCircle, FaCheckCircle, FaExclamationTriangle, FaShieldAlt, FaListUl } from 'react-icons/fa';
+import { FiAlertTriangle } from "react-icons/fi";
 import { SlPeople } from "react-icons/sl";
 
 const MembershipAgreement = () => {
@@ -186,7 +187,7 @@ const MembershipAgreement = () => {
                     <div className="relative z-10 text-center pt-6">
                         {/* Ana Başlık */}
                         <h1 className="text-xl md:text-4xl font-bold text-gray-900 mb-3 tracking-tight">
-                            ÜYELİK SÖZLEŞMESİ
+                            Mesafeli Satış Sözleşmesi
                         </h1>
 
                         {/* Yürürlük Tarihi */}
@@ -219,6 +220,15 @@ const MembershipAgreement = () => {
                                 <span className="text-gray-700 group-hover:text-orange-600 font-medium text-sm md:text-base">{section.title}</span>
                             </a>
                         ))}
+                    </div>
+                </div>
+                <div className='bg-red-100 p-6 mb-8 rounded-lg border border-red-400'>
+                    <div className='flex items-start'>
+                    <FiAlertTriangle className="w-7 h-7 text-red-600 mr-4 flex-shrink-0" />
+                    <div>
+                        <h3 className='font-semibold'>Cayma Hakkı</h3>
+                        <span className='text-gray-700'>Alıcı, mesafeli satış sözleşmesine uygun olarak, ürün teslim alındıktan sonraki 14 gün içinde cayma hakkını kullanabilir. Cayma hakkı kapsamında yapılan iadelerde, ürün orijinal ambalajında ve kullanılmamış olmalıdır.</span>
+                    </div>
                     </div>
                 </div>
 
