@@ -97,7 +97,7 @@ const handleClick = () => {
     >
       {/* Favori ikonu */}
       <button
-        className="bg-gray-50 p-2 rounded-full z-10 absolute top-2 right-2 text-gray-400 hover:text-orange-500"
+        className="bg-gray-50 p-2 rounded-full z-10 absolute top-2 right-2 cursor-pointer text-gray-400 hover:text-orange-500"
         onClick={handleFavoriteClick}
       >
         {isFavorite ? (

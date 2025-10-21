@@ -4,6 +4,7 @@ import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
+import { TfiAngleRight } from "react-icons/tfi";
 import ProductCard from "../../components/ProductCard";
 import { getProducts, getProductsByCategoryId, getFeaturedProducts, getNewArrivals, getDiscountedProducts} from "../../services/productsService";
 import { fetchActiveBrands } from "../../services/brandservice";
@@ -324,7 +325,10 @@ const HomePage = () => {
         <section className="mb-12">
           <div className="flex items-center justify-between mb-6">
             <h2 className="font-bold text-lg md:text-2xl text-gray-900">Öne Çıkan Ürünler</h2>
-            <button onClick={() => navigate("/discover/favoriler")} className="text-[var(--color-dark-orange)] font-semibold cursor-pointer hover:bg-orange-50 p-2 rounded-lg">Tümünü Gör →</button>
+            <button onClick={() => navigate("/discover/favoriler")} className="text-[var(--color-dark-orange)] font-bold cursor-pointer hover:bg-orange-50 p-2 rounded-lg flex items-center gap-1 justify-center">
+              Tümünü Gör
+              <TfiAngleRight className="text-base md:text-lg font-bold stroke-[1.5]"/>
+            </button>
           </div>
           <ScrollSection scrollRef={featuredScrollRef}>
             {featuredProducts.map(product => (
@@ -345,7 +349,10 @@ const HomePage = () => {
               <h2 className="font-bold text-lg md:text-2xl text-gray-900">🔥 Süper İndirimler</h2>
               <p className="text-gray-600 text-sm">Sınırlı süre için özel fiyatlar</p>
             </div>
-          <button onClick={() => navigate("/discover/fiyati-dusenler")} className="text-[var(--color-dark-orange)] font-semibold cursor-pointer hover:bg-orange-50 p-2 rounded-lg">Tümünü Gör →</button>
+          <button onClick={() => navigate("/discover/fiyati-dusenler")} className="text-[var(--color-dark-orange)] font-bold cursor-pointer hover:bg-orange-50 p-2 rounded-lg flex items-center gap-1 justify-center">
+              Tümünü Gör
+              <TfiAngleRight className="text-base md:text-lg font-bold stroke-[1.5]"/>
+            </button>
           </div>
           <ScrollSection scrollRef={discountedScrollRef}>
             {discountedProducts.map(product => (
@@ -366,7 +373,10 @@ const HomePage = () => {
               <h2 className="font-bold text-lg md:text-2xl text-gray-900">✨ Yeni Gelenler</h2>
               <p className="text-gray-600 text-sm">En son çıkan ürünler</p>
             </div>
-            <button onClick={() => navigate("/discover/yeni-gelenler")} className="text-[var(--color-dark-orange)] font-semibold cursor-pointer hover:bg-orange-50 p-2 rounded-lg">Tümünü Gör →</button>
+            <button onClick={() => navigate("/discover/yeni-gelenler")} className="text-[var(--color-dark-orange)] font-bold cursor-pointer hover:bg-orange-50 p-2 rounded-lg flex justify-center items-center gap-1">
+              Tümünü Gör
+              <TfiAngleRight className="text-base md:text-lg font-bold stroke-[1.5]"/>
+            </button>
           </div>
           <ScrollSection scrollRef={newProductsScrollRef}>
             {newProducts.map(product => (

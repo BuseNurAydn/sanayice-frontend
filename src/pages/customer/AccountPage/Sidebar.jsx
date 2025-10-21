@@ -3,8 +3,13 @@ import { useSelector, useDispatch } from "react-redux";
 import { logout } from '../../../store/authSlice';
 import {clear} from '../../../store/cartSlice';
 import { clearFavorites } from '../../../store/favoritesSlice';
-import {FaShoppingBag,FaMapMarkerAlt,FaStar,FaUserCircle,FaSignOutAlt,FaUser} from "react-icons/fa";
-import { FaMessage } from "react-icons/fa6";
+import { FaUserCircle,FaSignOutAlt} from "react-icons/fa";
+import { FiStar } from "react-icons/fi";
+import { FaRegUser } from "react-icons/fa6";
+import { LuCircleUserRound } from "react-icons/lu";
+import { BsChatSquareDots } from "react-icons/bs";
+import { TfiPackage } from "react-icons/tfi";
+import { SlLocationPin } from "react-icons/sl";
 
 const Sidebar = () => {
   const user = useSelector((state) => state.auth.user);
@@ -12,12 +17,12 @@ const Sidebar = () => {
   const navigate = useNavigate();
 
   const menuItems = [
-    { to: "profilim", label: "Profil Bilgilerim", icon: <FaUser /> },
-    { to: "siparislerim", label: "Siparişlerim", icon: <FaShoppingBag /> },
-    { to: "adreslerim", label: "Adres Bilgilerim", icon: <FaMapMarkerAlt /> },
-    { to: "degerlendirmelerim", label: "Değerlendirmelerim", icon: <FaStar /> },
-    { to: "takip-edilenler", label: "Takip Ettiklerim", icon: <FaUserCircle /> },
-    { to: "destek-sikayet", label: "Destek ve Şikayet", icon: <FaMessage /> },
+    { to: "profilim", label: "Profil Bilgilerim", icon: <FaRegUser /> },
+    { to: "siparislerim", label: "Siparişlerim", icon: <TfiPackage /> },
+    { to: "adreslerim", label: "Adres Bilgilerim", icon: <SlLocationPin /> },
+    { to: "degerlendirmelerim", label: "Değerlendirmelerim", icon: <FiStar /> },
+    { to: "takip-edilenler", label: "Takip Ettiklerim", icon: <LuCircleUserRound /> },
+    { to: "destek-sikayet", label: "Destek ve Şikayet", icon: <BsChatSquareDots /> },
   ];
 
  const handleLogout = () => {
