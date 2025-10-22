@@ -22,47 +22,49 @@ const statusIcon = {
 
 // Sipariş Ürünü Bileşeni
 const OrderItem = ({ item, statusDisplayName }) => (
-  <div className="flex items-center justify-between gap-4 border border-gray-100 p-4 rounded-md">
-    <div className="flex items-center gap-2 w-1/4">
-      {statusIcon[statusDisplayName]}
-      <span className={`font-semibold ${statusColor[statusDisplayName]}`}>
-        {statusDisplayName}
-      </span>
-    </div>
+  <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 md:gap-4 border border-gray-100 p-3 md:p-4 rounded-md">
+    
+    {/* Durum Bilgisi (Mobilde Üstte, Masaüstünde Solda) */}
+    <div className="flex items-center gap-2 w-full md:w-1/4 pb-2 md:pb-0">
+      {statusIcon[statusDisplayName]}
+      <span className={`font-semibold text-sm ${statusColor[statusDisplayName]}`}>
+        {statusDisplayName}
+      </span>
+    </div>
 
-    <div className="flex items-center gap-4 w-1/2">
-      <img
-        src={item.imageUrls[0]}
-        alt={item.productName}
-        className="w-20 h-20 object-cover rounded border border-gray-200"
-      />
-      <div>
-        <p className="font-medium text-sm">{item.productName}</p>
-        <p className="text-xs text-gray-600">{item.productBrand}</p>
-        <p className="text-xs text-gray-600">
-          Adet: {item.quantity} | Birim Fiyat:{" "}
-          {item.unitPrice.toLocaleString("tr-TR", {
-            style: "currency",
-            currency: "TRY",
-          })}
-        </p>
-        <p className="text-xs text-gray-600 font-semibold">
-          Toplam: {item.totalPrice.toLocaleString("tr-TR", {
-            style: "currency",
-            currency: "TRY",
-          })}
-        </p>
-      </div>
-    </div>
+    {/* Ürün Detayları (Mobilde Altında, Masaüstünde Ortada) */}
+    <div className="flex items-start gap-3 md:gap-4 w-full md:w-1/2">
+      <img
+        src={item.imageUrls[0]}
+        alt={item.productName}
+        className="w-16 h-16 md:w-20 md:h-20 object-cover rounded border border-gray-200 flex-shrink-0"
+      />
+      <div className="flex-1 min-w-0"> {/* Metin taşmasını engellemek için */}
+        <p className="font-medium text-sm truncate">{item.productName}</p>
+        <p className="text-xs text-gray-600">{item.productBrand}</p>
+        <p className="text-xs text-gray-600">
+          Adet: {item.quantity} | Birim Fiyat:{" "}
+          {item.unitPrice.toLocaleString("tr-TR", {
+            style: "currency",
+            currency: "TRY",
+          })}
+        </p>
+        <p className="text-sm text-gray-800 font-semibold mt-1">
+          Toplam: {item.totalPrice.toLocaleString("tr-TR", {
+            style: "currency",
+            currency: "TRY",
+          })}
+        </p>
+      </div>
+    </div>
 
-    <div className="w-1/4"></div>
-  </div>
+    <div className="hidden md:block md:w-1/4"></div> 
+  </div>
 );
 
 // Sipariş Kartı Bileşeni
 const OrderCard = ({ order, navigate }) => (
   <div className="border border-gray-200 rounded-lg shadow-sm">
-    {/* Özet */}
     <div className="bg-neutral-100 p-4 grid grid-cols-2 md:grid-cols-5 gap-4 rounded-t-lg">
       <div className="flex flex-col">
         <span className="text-sm text-gray-500">Sipariş Tarihi:</span>
@@ -170,5 +172,4 @@ const Orders = () => {
     </div>
   );
 };
-
 export default Orders;

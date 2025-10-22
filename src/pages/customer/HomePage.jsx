@@ -327,7 +327,7 @@ const HomePage = () => {
             <h2 className="font-bold text-lg md:text-2xl text-gray-900">Öne Çıkan Ürünler</h2>
             <button onClick={() => navigate("/discover/favoriler")} className="text-[var(--color-dark-orange)] font-bold cursor-pointer hover:bg-orange-50 p-2 rounded-lg flex items-center gap-1 justify-center">
               Tümünü Gör
-              <TfiAngleRight className="text-base md:text-lg font-bold stroke-[1.5]"/>
+              <TfiAngleRight className="text-sm font-semibold stroke-[1.5]"/>
             </button>
           </div>
           <ScrollSection scrollRef={featuredScrollRef}>
@@ -351,7 +351,7 @@ const HomePage = () => {
             </div>
           <button onClick={() => navigate("/discover/fiyati-dusenler")} className="text-[var(--color-dark-orange)] font-bold cursor-pointer hover:bg-orange-50 p-2 rounded-lg flex items-center gap-1 justify-center">
               Tümünü Gör
-              <TfiAngleRight className="text-base md:text-lg font-bold stroke-[1.5]"/>
+              <TfiAngleRight className="text-sm font-semibold stroke-[1.5]"/>
             </button>
           </div>
           <ScrollSection scrollRef={discountedScrollRef}>
@@ -375,7 +375,7 @@ const HomePage = () => {
             </div>
             <button onClick={() => navigate("/discover/yeni-gelenler")} className="text-[var(--color-dark-orange)] font-bold cursor-pointer hover:bg-orange-50 p-2 rounded-lg flex justify-center items-center gap-1">
               Tümünü Gör
-              <TfiAngleRight className="text-base md:text-lg font-bold stroke-[1.5]"/>
+              <TfiAngleRight className="text-sm font-semibold stroke-[1.5]"/>
             </button>
           </div>
           <ScrollSection scrollRef={newProductsScrollRef}>

@@ -4,7 +4,7 @@ import { logout } from "../../../store/authSlice";
 import { clear } from "../../../store/cartSlice";
 import { clearFavorites } from "../../../store/favoritesSlice";
 import { Link, useNavigate } from "react-router-dom";
-import {FaUser,FaRegUser} from "react-icons/fa";
+import {FaRegUser, FaUser} from "react-icons/fa";
 import { BsChatSquareDots } from "react-icons/bs";
 import { TfiPackage } from "react-icons/tfi";
 import { FiStar } from "react-icons/fi";
@@ -43,10 +43,10 @@ const AccountMenu = () => {
   if (!user) {
     return (
       <button
-        className="md:bg-black md:hover:bg-gray-800 text-white md:px-4 md:py-2 rounded-xl font-semibold transition-all duration-200 transform hover:scale-105 flex items-center gap-x-2"
+        className="md:bg-black md:hover:bg-gray-800 text-white md:px-4 md:py-2 rounded-md font-semibold transition-all duration-200 transform hover:scale-105 flex items-center gap-x-2"
         onClick={() => navigate("/giris-kaydol/giris-yap")}
       >
-        <FaUser className="text-lg text-orange-600 md:text-white w-4 h-4" />
+        <FaRegUser className="stroke-[1.5] text-black md:text-white w-5 h-5" />
         <span className="hidden md:inline">Giriş / Kayıt Ol</span>
       </button>
     );
@@ -62,9 +62,9 @@ const AccountMenu = () => {
       <Link
         to="/hesabim"
         onClick={toggleMenu}
-        className="md:bg-[var(--color-dark-blue)] rounded-lg md:px-4 md:py-2 text-white transition-transform duration-200 hover:scale-105 flex items-center gap-x-2"
+        className="md:bg-[var(--color-dark-blue)] rounded-md md:px-4 md:py-2 text-white transition-transform duration-200 hover:scale-105 flex items-center gap-x-2"
       >
-        <FaUser className="text-lg text-orange-600 md:text-white w-4 h-4" />
+        <FaRegUser className="text-lg text-gray-800 md:text-white w-5 h-5" />
         <span className="hidden md:inline-block">Hesabım</span>
       </Link>
 

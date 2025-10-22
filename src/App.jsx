@@ -10,7 +10,7 @@ import { useEffect ,useState} from 'react';
 import { useDispatch,useSelector } from 'react-redux';
 import { setCredentials, logout } from './store/authSlice'; 
 import ScrollToTop from "./components/ScrollToTop";
-
+import ScrollToTopButton from "./components/ScrollToTopButton";
 function App() {
   const dispatch = useDispatch();
   const [loading, setLoading] = useState(true);
@@ -43,6 +43,8 @@ function App() {
         <Route path="/giris-kaydol/*" element={<AuthRoutes />} />
         
       </Routes>
+
+      <ScrollToTopButton />
     </Router>
   );
 }

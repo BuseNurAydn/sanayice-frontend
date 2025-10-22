@@ -33,6 +33,14 @@ const Footer = () => {
           </ul>
         </div>
 
+        <div className="col-span-1">
+          <h3 style={{ color: textColor }} className="font-bold mb-4 text-base"> Önemli Linkler </h3>
+          <ul className="space-y-3">
+            <li><Link to="/giris-kaydol/satici/uye-ol" className=" hover:text-[var(--color-dark-orange)] transition-colors">Satıcı Olmak İstiyorum</Link>
+            </li>
+          </ul>
+        </div>
+
         <div className="col-span-2">
           <h3 style={{ color: textColor }} className="font-bold mb-4 text-base">Bizi Takip Edin</h3>
           <div className="grid grid-cols-2 gap-y-3 gap-x-4 text-sm">
@@ -53,14 +61,7 @@ const Footer = () => {
           </div>
         </div>
 
-        <div className="col-span-1">
-          <h3 style={{ color: textColor }} className="font-bold mb-4 text-base"> Önemli Linkler </h3>
-          <ul className="space-y-3">
-            <li><Link to="/giris-kaydol/satici/uye-ol" className=" hover:text-[var(--color-dark-orange)] transition-colors">Satıcı Olmak İstiyorum</Link>
-            </li>
-          </ul>
-        </div>
-
+       
         <div className="col-span-2 space-y-3">
           <h3 style={{ color: textColor }} className="font-bold mb-4 text-base">Destek Hattı</h3>
           <div className="border border-gray-400 rounded-lg p-2 text-center text-xs cursor-pointer transition-colors hover:bg-gray-50">
