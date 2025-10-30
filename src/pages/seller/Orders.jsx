@@ -2,6 +2,7 @@ import AdminText from "../../shared/Text/AdminText";
 import { useState, useEffect } from "react";
 import { toast } from "react-toastify";
 import { updateOrderStatus, fetchSellerOrders } from "../../services/sellerOrdersService";
+import { createShipmentLabel } from "../../services/cargoService"
 import { useSelector } from "react-redux";
 
 const Orders = () => {
@@ -25,6 +26,7 @@ const Orders = () => {
       try {
         const data = await fetchSellerOrders();
         setOrders(data);
+        console.log(data)
       } catch (err) {
         setError(err.message);
       }
@@ -73,35 +75,55 @@ const Orders = () => {
     ? orders
     : orders.filter(order => order.overallStatus?.toUpperCase() === selectedStatus?.toUpperCase());
 
-  const handleOrderUpdate = async (orderId, action) => {
-    const newStatusMap = {
-      confirm: "CONFIRMED",
-      cancel: "CANCELED",
-      ship: "SHIPPED",
-      deliver: "DELIVERED",
-    };
+const handleOrderUpdate = async (orderId, action) => {
+  const newStatusMap = {
+    confirm: "confirm",
+    cancel: "cancel",
+    ship: "ship",
+    deliver: "deliver",
+  };
 
-    const newStatus = newStatusMap[action];
+  const newStatus = newStatusMap[action];
 
-    try {
-      await updateOrderStatus(orderId, action);
-      toast.success("Durum güncellendi!");
+  try {
+    if (action === "ship") {
+      try {
 
-      // Güncel siparişleri yeniden çek
-      // Sipariş listesini güncelle
-      const updatedOrders = await fetchSellerOrders();
-      setOrders(updatedOrders);
+         console.log("Kargoya gönderilen istek içeriği:", { orderId });
+        // Sadece orderId gönderiyoruz
+        const barkodLink = await createShipmentLabel({ orderId });
 
-      // Seçili sipariş detay sayfası açık ise güncelle
-      const newStatus = newStatusMap[action];
-      if (selectedOrder?.id === orderId && newStatus) {
-        setSelectedOrder(prev => ({ ...prev, overallStatus: newStatus }));
+        if (barkodLink) {
+          window.open(barkodLink, "_blank");
+          toast.success("Kargo etiketi oluşturuldu!");
+        } else {
+          toast.error("Kargo etiketi oluşturulamadı.");
+        }
+
+        await updateOrderStatus(orderId, "ship");
+        toast.success("Sipariş kargoya verildi!");
+
+        const updatedOrders = await fetchSellerOrders();
+        setOrders(updatedOrders);
+      } catch (error) {
+        console.error("PTT API Hatası:", error);
+        toast.error("Kargo oluşturulurken hata oluştu!");
       }
 
-    } catch (err) {
-      toast.error("Sipariş durumu güncellenemedi.");
+      return;
     }
-  };
+
+    // Diğer durumlar (confirm, cancel, deliver)
+    await updateOrderStatus(orderId, newStatus);
+    toast.success("Sipariş durumu güncellendi!");
+
+    const updatedOrders = await fetchSellerOrders();
+    setOrders(updatedOrders);
+  } catch (error) {
+    console.error("Sipariş Güncelleme Hatası:", error);
+    toast.error("Sipariş güncellenirken hata oluştu!");
+  }
+};
 
   const stats = {
     total: orders.length,
