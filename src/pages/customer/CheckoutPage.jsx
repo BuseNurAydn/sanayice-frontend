@@ -175,9 +175,21 @@ const CheckoutPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+ 
+  const addressPayload = {
+    addressTitle: formData.addressTitle,
+    recipientName: formData.recipientName,
+    phoneNumber: formData.phoneNumber,
+    country: formData.country,
+    city: formData.city,
+    district: formData.district,
+    postalCode: formData.postalCode,
+    fullAddress: formData.fullAddress,
+    isDefault: formData.isDefault
+  };
 
     try {
-      await createAddress(formData);
+      await createAddress(addressPayload);
       toast.success("Adres başarıyla kaydedildi");
 
       // Formu temizle
@@ -192,52 +204,76 @@ const CheckoutPage = () => {
         fullAddress: "",
         isDefault: false
       });
-      const updated = await fetchAddresses(); // <-- adresleri al
+      const updated = await fetchAddresses(); // adresleri al
       setAddresses(updated); 
     } catch (error) {
       toast.error(error.message);
     }
   };
   ///////////////////////777
+ 
   // Siparişi tamamla
-  const handleConfirmOrder = async () => {
-    try {
-      const orderRequest = {
-        selectedAddressId: formData.selectedAddressId,
-        billingAddress: formData.billingAddress || formData.fullAddress,
-        customerNotes: formData.customerNotes,
-        shippingMethod: formData.shippingMethod,
-        shippingCost: getSelectedShippingPrice(), 
-        paymentMethod: formData.paymentMethod,
-        paymentToken: formData.paymentMethod === 'credit-card' ? formData.paymentToken : undefined,
-        couponCode: appliedCoupon ? appliedCoupon.code : null,
-      };
+const handleConfirmOrder = async () => {
+  try {
+    // Backend'in beklediği adres yapısına göre payload
+    const addressPayload = {
+      firstName: formData.recipientName?.split(" ")[0] || formData.recipientName || "",
+      lastName: formData.recipientName?.split(" ")[1] || "",
+      shippingAddress: {
+        addressLine: formData.fullAddress,
+        city: formData.city,
+        district: formData.district,
+        postalCode: formData.postalCode,
+        phone: formData.phoneNumber
+      },
+      billingAddress: {
+        addressLine: formData.billingAddress || formData.fullAddress,
+        city: formData.city,
+        district: formData.district,
+        postalCode: formData.postalCode
+      },
+      saveAddress: formData.saveAddress || true,
+      customerNotes: formData.customerNotes,
+      shippingMethod: formData.shippingMethod || "STANDARD",
+      shippingCost: getSelectedShippingPrice(),
+      paymentMethod: formData.paymentMethod,
+      paymentToken:
+        formData.paymentMethod === "credit-card"
+          ? formData.paymentToken
+          : undefined,
+      couponCode: appliedCoupon ? appliedCoupon.code : null
+    };
 
-       // Sunucuya Gidecek Son Veriyi Konsola Yazdırma
-    console.log("Sunucuya Gönderilen Sipariş İsteği (orderRequest):", orderRequest);
-    console.log("JSON.stringify Gövdesi:", JSON.stringify(orderRequest, null, 2)); 
-    
-      const token = localStorage.getItem('token'); //  token
-      const response = await fetch(CHECKOUT_API, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
-        },
-        body: JSON.stringify(orderRequest)
-      });
+    // Konsola gönderilen JSON
+    //console.log("Gönderilen Adres:", addressPayload);
+   //console.log("JSON.stringify Gövdesi:", JSON.stringify(addressPayload, null, 2));
 
-      if (!response.ok) throw new Error('Sipariş tamamlanamadı.');
-      // Sepeti temizle
-      dispatch(clearCart());
-      navigate('/');
+    const token = localStorage.getItem("token");
+    const response = await fetch(CHECKOUT_API, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`
+      },
+      body: JSON.stringify(addressPayload)
+    });
 
-      const result = await response.json();
-      toast.success("Sipariş başarıyla tamamlandı!");
-    } catch (error) {
-      toast.error(error.message);
-    }
-  };
+    if (!response.ok) throw new Error("Sipariş tamamlanamadı.");
+
+    const result = await response.json();
+    console.log("Sipariş sonucu:", result);
+
+    // Sepeti temizle ve yönlendirme
+    dispatch(clearCart());
+    toast.success("Sipariş başarıyla tamamlandı!");
+    navigate("/");
+
+  } catch (error) {
+    console.error("Sipariş gönderme hatası:", error);
+    toast.error(error.message);
+  }
+};
+
 
   ////////////////////////////////////////
   const [currentStep, setCurrentStep] = useState(1); // 1: Adres, 2: Kargo, 3: Ödeme, 4: Onay

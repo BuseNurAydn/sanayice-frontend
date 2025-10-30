@@ -3,16 +3,18 @@ import { useNavigate } from "react-router-dom";
 import Timeline from "../../../components/Timeline";
 import ReviewModal from "../../../components/ReviewModal";
 import SellerReviewModal from "../../../components/SellerReviewModal";
-import { FaCheckCircle, FaBox, FaTimesCircle, FaUndo } from "react-icons/fa";
+import { FaCheckCircle, FaBox, FaTimesCircle, FaUndo, FaRegClock } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { API_BASE } from "../../../config";
 import { rateSeller } from "../../../services/authService";
+import { fetchCargoTrackingDetailed } from "../../../services/cargoService";
 
 
 const STATUS_ICON = {
   "Teslim Edildi": <FaCheckCircle className="text-green-500 w-4 h-4" />,
   "Kargoya Verildi": <FaBox className="text-purple-500 w-4 h-4" />,
-  "Sipariş Onaylandı": <FaCheckCircle className="text-blue-500 w-4 h-4" />,
+  "Onaylandı": <FaCheckCircle className="text-blue-500 w-4 h-4" />,
+  "Beklemede": <FaRegClock className="text-yellow-600 w-4 h-4" />,
   "İptal Edildi": <FaTimesCircle className="text-red-500 w-4 h-4" />,
   "İade Edildi": <FaUndo className="text-purple-500 w-4 h-4" />,
 };
@@ -20,13 +22,14 @@ const STATUS_ICON = {
 const STATUS_COLOR = {
   "Teslim Edildi": "text-green-600",
   "Kargoya Verildi": "text-purple-600",
-  "Sipariş Onaylandı": "text-blue-600",
+  "Onaylandı": "text-blue-600",
+  "Beklemede": "text-yellow-600",
   "İptal Edildi": "text-red-600",
   "İade Edildi": "text-purple-600",
 };
 
 // Ürün Kartı
-const OrderItemCard = ({item,orderStatus,deliveredAt,openReviewModal,openSellerModal,navigate}) => (
+const OrderItemCard = ({ item, orderStatus, deliveredAt, openReviewModal, openSellerModal, navigate }) => (
   <div className="border border-gray-200 rounded-lg shadow-sm p-4 flex flex-col gap-4 bg-white">
 
     {/* Timeline */}
@@ -56,8 +59,19 @@ const OrderItemCard = ({item,orderStatus,deliveredAt,openReviewModal,openSellerM
     {orderStatus === "Kargoya Verildi" && (
       <div className="flex justify-between items-center md:w-1/2 bg-gray-100 p-2 md:p-4 rounded">
         <p className="text-sm text-gray-700 font-semibold">Takip Numarası: Bilinmiyor</p>
-        <button 
-          onClick={() => navigate("/kargo-takip")}
+        <button
+          onClick={async () => {
+            try {
+              const data = await fetchCargoTrackingDetailed(item.trackingNumber);
+              console.log("Kargo durumu:", data);
+              toast.info(`Kargo durumu: ${data.status || "Bilinmiyor"}`);
+            } catch (err) {
+              toast.error("Kargo takibi başarısız oldu!");
+              console.error(err);
+            }
+          }}
+
+          //onClick={() => navigate("/kargo-takip")}
           className="bg-orange-500 p-1 md:py-1 md:px-2 text-white text-sm rounded hover:bg-orange-600 cursor-pointer"
         >
           Kargom Nerede?
@@ -212,7 +226,7 @@ const OrderDetail = ({ order, sellerId }) => {
       setSelectedProduct(null);
       setRating(0);
       setComment("");
-    } catch    (error) {
+    } catch (error) {
       console.error(error);
       toast.error(error.message || "Yorum eklenirken bir hata oluştu.");
     }

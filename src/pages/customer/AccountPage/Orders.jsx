@@ -1,13 +1,14 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { getOrders } from "../../../services/ordersService";
-import { FaCheckCircle, FaBox, FaTimesCircle, FaUndo } from "react-icons/fa";
+import { FaCheckCircle, FaBox, FaTimesCircle, FaUndo, FaRegClock } from "react-icons/fa";
 
 // Status utils
 const statusColor = {
   "Teslim Edildi": "text-green-600",
   "Kargoya Verildi": "text-purple-600",
-  "Sipariş Onaylandı": "text-blue-600",
+  "Beklemede": "text-yellow-600",  
+  "Onaylandı": "text-blue-600",
   "İptal Edildi": "text-red-600",
   "İade Edildi": "text-purple-600",
 };
@@ -15,51 +16,52 @@ const statusColor = {
 const statusIcon = {
   "Teslim Edildi": <FaCheckCircle className="text-green-500 w-4 h-4" />,
   "Kargoya Verildi": <FaBox className="text-purple-500 w-4 h-4" />,
-  "Sipariş Onaylandı": <FaCheckCircle className="text-blue-500 w-4 h-4" />,
+  "Beklemede": <FaRegClock className="text-yellow-600 w-4 h-4" />,
+  "Onaylandı": <FaCheckCircle className="text-blue-500 w-4 h-4" />,
   "İptal Edildi": <FaTimesCircle className="text-red-500 w-4 h-4" />,
   "İade Edildi": <FaUndo className="text-purple-500 w-4 h-4" />,
 };
 
 // Sipariş Ürünü Bileşeni
 const OrderItem = ({ item, statusDisplayName }) => (
-  <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 md:gap-4 border border-gray-100 p-3 md:p-4 rounded-md">
-    
-    {/* Durum Bilgisi (Mobilde Üstte, Masaüstünde Solda) */}
-    <div className="flex items-center gap-2 w-full md:w-1/4 pb-2 md:pb-0">
-      {statusIcon[statusDisplayName]}
-      <span className={`font-semibold text-sm ${statusColor[statusDisplayName]}`}>
-        {statusDisplayName}
-      </span>
-    </div>
+  <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 md:gap-4 border border-gray-100 p-3 md:p-4 rounded-md">
 
-    {/* Ürün Detayları (Mobilde Altında, Masaüstünde Ortada) */}
-    <div className="flex items-start gap-3 md:gap-4 w-full md:w-1/2">
-      <img
-        src={item.imageUrls[0]}
-        alt={item.productName}
-        className="w-16 h-16 md:w-20 md:h-20 object-cover rounded border border-gray-200 flex-shrink-0"
-      />
-      <div className="flex-1 min-w-0"> {/* Metin taşmasını engellemek için */}
-        <p className="font-medium text-sm truncate">{item.productName}</p>
-        <p className="text-xs text-gray-600">{item.productBrand}</p>
-        <p className="text-xs text-gray-600">
-          Adet: {item.quantity} | Birim Fiyat:{" "}
-          {item.unitPrice.toLocaleString("tr-TR", {
-            style: "currency",
-            currency: "TRY",
-          })}
-        </p>
-        <p className="text-sm text-gray-800 font-semibold mt-1">
-          Toplam: {item.totalPrice.toLocaleString("tr-TR", {
-            style: "currency",
-            currency: "TRY",
-          })}
-        </p>
-      </div>
-    </div>
+    {/* Durum Bilgisi (Mobilde Üstte, Masaüstünde Solda) */}
+    <div className="flex items-center gap-2 w-full md:w-1/4 pb-2 md:pb-0">
+      {statusIcon[statusDisplayName]}
+      <span className={`font-semibold text-sm ${statusColor[statusDisplayName]}`}>
+        {statusDisplayName}
+      </span>
+    </div>
 
-    <div className="hidden md:block md:w-1/4"></div> 
-  </div>
+    {/* Ürün Detayları (Mobilde Altında, Masaüstünde Ortada) */}
+    <div className="flex items-start gap-3 md:gap-4 w-full md:w-1/2">
+      <img
+        src={item.imageUrls[0]}
+        alt={item.productName}
+        className="w-16 h-16 md:w-20 md:h-20 object-cover rounded border border-gray-200 flex-shrink-0"
+      />
+      <div className="flex-1 min-w-0"> {/* Metin taşmasını engellemek için */}
+        <p className="font-medium text-sm truncate">{item.productName}</p>
+        <p className="text-xs text-gray-600">{item.productBrand}</p>
+        <p className="text-xs text-gray-600">
+          Adet: {item.quantity} | Birim Fiyat:{" "}
+          {item.unitPrice.toLocaleString("tr-TR", {
+            style: "currency",
+            currency: "TRY",
+          })}
+        </p>
+        <p className="text-sm text-gray-800 font-semibold mt-1">
+          Toplam: {item.totalPrice.toLocaleString("tr-TR", {
+            style: "currency",
+            currency: "TRY",
+          })}
+        </p>
+      </div>
+    </div>
+
+    <div className="hidden md:block md:w-1/4"></div>
+  </div>
 );
 
 // Sipariş Kartı Bileşeni
@@ -146,11 +148,10 @@ const Orders = () => {
           <button
             key={tab.key}
             onClick={() => setActiveTab(tab.key)}
-            className={`pb-2 text-sm font-semibold transition-colors duration-200 cursor-pointer ${
-              activeTab === tab.key
+            className={`pb-2 text-sm font-semibold transition-colors duration-200 cursor-pointer ${activeTab === tab.key
                 ? "text-orange-600 border-b-2 border-orange-600"
                 : "text-gray-500 hover:text-orange-600"
-            }`}
+              }`}
           >
             {tab.label}
           </button>

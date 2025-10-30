@@ -41,11 +41,11 @@ const Discover = () => {
                   href={cat.link}
                   className="flex flex-col items-center group"
                 >
-                  <div className="w-15 h-15 rounded-full overflow-hidden flex items-center justify-center group-hover:shadow-lg group-hover:border-orange-600 transition">
+                  <div className="w-[60px] h-[60px] bg-white rounded-full overflow-hidden flex items-center justify-center group-hover:shadow-lg group-hover:border-orange-600 transition">
                     <img
                       src={cat.imageUrl}
                       alt={cat.name}
-                      className="w-full h-full object-contain"
+                      className="w-full h-full object-cover"
                     
                     />
                   </div>

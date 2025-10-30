@@ -1,7 +1,7 @@
 
 const steps = [
-  { key: "Sipariş Alındı", label: "Sipariş Alındı" },
-  { key: "Sipariş Onaylandı", label: "Sipariş Onaylandı" },
+  { key: "Beklemede", label: "Sipariş Alındı" },
+  { key: "Onaylandı", label: "Sipariş Onaylandı" },
   { key: "Kargoya Verildi", label: "Kargoya Verildi" },
   { key: "Teslim Edildi", label: "Teslim Edildi" },
 ];
