@@ -1,39 +1,39 @@
-import AdminText from "../../shared/Text/AdminText";
-import { useState, useEffect } from "react";
-import { toast } from "react-toastify";
-import { updateOrderStatus, fetchSellerOrders } from "../../services/sellerOrdersService";
-import { createShipmentLabel, fetchCargoTrackingByOrderId } from "../../services/cargoService"
-import { useSelector } from "react-redux";
+import AdminText from '../../shared/Text/AdminText'
+import { useState, useEffect } from 'react'
+import { toast } from 'react-toastify'
+import { updateOrderStatus, fetchSellerOrders } from '../../services/sellerOrdersService'
+import { createShipmentLabel, fetchCargoTrackingByOrderId } from '../../services/cargoService'
+import { useSelector } from 'react-redux'
 
 const Orders = () => {
-  const [orders, setOrders] = useState([]);
-  const [selectedStatus, setSelectedStatus] = useState("all");
-  const [selectedOrder, setSelectedOrder] = useState(null);
-  const { user } = useSelector((state) => state.auth);
+  const [orders, setOrders] = useState([])
+  const [selectedStatus, setSelectedStatus] = useState('all')
+  const [selectedOrder, setSelectedOrder] = useState(null)
+  const [trackingData, setTrackingData] = useState(null) // Yeni state
+  const { user } = useSelector((state) => state.auth)
 
-  const boxStyle = 'border border-gray-200 p-6 rounded-lg shadow bg-white cursor-pointer hover:bg-orange-50';
-  const buttonStyle = "bg-[var(--color-orange)] text-white px-4 py-2 rounded-lg font-semibold hover:opacity-90 transition-opacity";
-  const inputStyle = 'border-gray-200 outline-none border px-3 py-2 rounded-lg bg-gray-50';
+  const boxStyle = 'border border-gray-200 p-6 rounded-lg shadow bg-white cursor-pointer hover:bg-orange-50'
+  const buttonStyle = 'bg-[var(--color-orange)] text-white px-4 py-2 rounded-lg font-semibold hover:opacity-90 transition-opacity'
+  const inputStyle = 'border-gray-200 outline-none border px-3 py-2 rounded-lg bg-gray-50'
 
   const [userInfo, setUserInfo] = useState({
-    name: "",
-    email: "",
-    phone: ""
-  });
+    name: '',
+    email: '',
+    phone: '',
+  })
 
   useEffect(() => {
     const getOrders = async () => {
       try {
-        const data = await fetchSellerOrders();
-        setOrders(data);
+        const data = await fetchSellerOrders()
+        setOrders(data)
         console.log(data)
       } catch (err) {
-        setError(err.message);
+        setError(err.message)
       }
-    };
-    getOrders();
+    }
+    getOrders()
   }, [])
-
 
   useEffect(() => {
     if (user) {
@@ -42,230 +42,237 @@ const Orders = () => {
         name: user.name,
         email: user.email,
         phone: user.phone,
-      }));
+      }))
     }
-  }, [user]);
+  }, [user])
 
   // Durum renkleri
   const getStatusColor = (overallStatus) => {
     const colors = {
-      PENDING: "bg-yellow-100 text-yellow-800",
-      CONFIRMED: "bg-blue-100 text-blue-800",
-      SHIPPED: "bg-purple-100 text-purple-800",
-      DELIVERED: "bg-green-100 text-green-800",
-      CANCELED: "bg-red-100 text-red-800"
-    };
-    return colors[overallStatus] || "bg-gray-100 text-gray-800";
-  };
+      PENDING: 'bg-yellow-100 text-yellow-800',
+      CONFIRMED: 'bg-blue-100 text-blue-800',
+      SHIPPED: 'bg-purple-100 text-purple-800',
+      DELIVERED: 'bg-green-100 text-green-800',
+      CANCELED: 'bg-red-100 text-red-800',
+    }
+    return colors[overallStatus] || 'bg-gray-100 text-gray-800'
+  }
 
   // Durum çevirisi
   const getStatusText = (overallStatus) => {
     const statusTexts = {
-      PENDING: "Beklemede",
-      CONFIRMED: "Onaylandı",
-      SHIPPED: "Kargoya Verildi",
-      DELIVERED: "Teslim Edildi",
-      CANCELED: "İptal Edildi"
-    };
-    return statusTexts[overallStatus] || "Bilinmeyen Durum";
-  };
+      PENDING: 'Beklemede',
+      CONFIRMED: 'Onaylandı',
+      SHIPPED: 'Kargoya Verildi',
+      DELIVERED: 'Teslim Edildi',
+      CANCELED: 'İptal Edildi',
+    }
+    return statusTexts[overallStatus] || 'Bilinmeyen Durum'
+  }
+
+  // İşlem adı çevirisi
+  const getIslemText = (islem) => {
+    return islem || 'Bilinmeyen İşlem'
+  }
 
   // Filtrelenmiş siparişler
-  const filteredOrders = selectedStatus === "all"
-    ? orders
-    : orders.filter(order => order.overallStatus?.toUpperCase() === selectedStatus?.toUpperCase());
+  const filteredOrders = selectedStatus === 'all' ? orders : orders.filter((order) => order.overallStatus?.toUpperCase() === selectedStatus?.toUpperCase())
+
+  const handleShowTracking = async (orderId) => {
+    try {
+      const data = await fetchCargoTrackingByOrderId(orderId)
+      console.log('Takip Verisi:', data)
+
+      // API'den hata durumu kontrolü
+      if (data.sonucKodu === -1) {
+        toast.warning('Kargo henüz şubeye teslim edilmedi. Lütfen kargoya verdikten sonra tekrar deneyin.')
+        return
+      }
+
+      if (data.sonucKodu !== 10) {
+        toast.error('Kargo takip bilgisi bulunamadı.')
+        return
+      }
+
+      setTrackingData(data)
+    } catch (error) {
+      console.error('Kargo takip hatası:', error)
+      toast.error('Bağlantı hatası.')
+    }
+  }
 
   const handleOrderUpdate = async (orderId, action) => {
     const newStatusMap = {
-      confirm: "confirm",
-      cancel: "cancel",
-      ship: "ship",
-      deliver: "deliver",
-    };
+      confirm: 'confirm',
+      cancel: 'cancel',
+      ship: 'ship',
+      deliver: 'deliver',
+    }
 
-    const newStatus = newStatusMap[action];
+    const newStatus = newStatusMap[action]
 
     try {
-      if (action === "ship") {
+      if (action === 'ship') {
         try {
-
-          console.log("Kargoya gönderilen istek içeriği:", { orderId });
-          // Sadece orderId gönderiyoruz
-          const barkodLink = await createShipmentLabel({ orderId });
+          console.log('Kargoya gönderilen istek içeriği:', { orderId })
+          const barkodLink = await createShipmentLabel({ orderId })
 
           if (barkodLink) {
-            window.open(barkodLink, "_blank");
-            toast.success("Kargo etiketi oluşturuldu!");
+            window.open(barkodLink, '_blank')
+            toast.success('Kargo etiketi oluşturuldu!')
           } else {
-            toast.error("Kargo etiketi oluşturulamadı.");
+            toast.error('Kargo etiketi oluşturulamadı.')
           }
 
-          await updateOrderStatus(orderId, "ship");
-          toast.success("Sipariş kargoya verildi!");
+          await updateOrderStatus(orderId, 'ship')
+          toast.success('Sipariş kargoya verildi!')
 
-          const updatedOrders = await fetchSellerOrders();
-          setOrders(updatedOrders);
+          const updatedOrders = await fetchSellerOrders()
+          setOrders(updatedOrders)
         } catch (error) {
-          console.error("PTT API Hatası:", error);
-          toast.error("Kargo oluşturulurken hata oluştu!");
+          console.error('PTT API Hatası:', error)
+          toast.error('Kargo oluşturulurken hata oluştu!')
         }
 
-        return;
+        return
       }
 
-      // Diğer durumlar (confirm, cancel, deliver)
-      await updateOrderStatus(orderId, newStatus);
-      toast.success("Sipariş durumu güncellendi!");
+      await updateOrderStatus(orderId, newStatus)
+      toast.success('Sipariş durumu güncellendi!')
 
-      const updatedOrders = await fetchSellerOrders();
-      setOrders(updatedOrders);
+      const updatedOrders = await fetchSellerOrders()
+      setOrders(updatedOrders)
     } catch (error) {
-      console.error("Sipariş Güncelleme Hatası:", error);
-      toast.error("Sipariş güncellenirken hata oluştu!");
+      console.error('Sipariş Güncelleme Hatası:', error)
+      toast.error('Sipariş güncellenirken hata oluştu!')
     }
-  };
+  }
 
   const stats = {
     total: orders.length,
-    pending: orders.filter(o => o.overallStatus === 'PENDING').length,
-    confirmed: orders.filter(o => o.overallStatus === 'CONFIRMED').length,
-    shipped: orders.filter(o => o.overallStatus === 'SHIPPED').length,
-    delivered: orders.filter(o => o.overallStatus === 'DELIVERED').length,
+    pending: orders.filter((o) => o.overallStatus === 'PENDING').length,
+    confirmed: orders.filter((o) => o.overallStatus === 'CONFIRMED').length,
+    shipped: orders.filter((o) => o.overallStatus === 'SHIPPED').length,
+    delivered: orders.filter((o) => o.overallStatus === 'DELIVERED').length,
     totalRevenue: orders
-      .filter(o => o.overallStatus === 'DELIVERED')
+      .filter((o) => o.overallStatus === 'DELIVERED')
       .reduce((sum, order) => {
-        const orderTotal = order.orderItems?.reduce(
-          (orderSum, item) => orderSum + item.unitPrice * item.quantity,
-          0
-        );
-        return sum + orderTotal;
+        const orderTotal = order.orderItems?.reduce((orderSum, item) => orderSum + item.unitPrice * item.quantity, 0)
+        return sum + orderTotal
       }, 0),
-
-  };
+  }
 
   return (
-    <div className="min-h-screen py-6 px-3 md:p-6 bg-gray-50">
+    <div className='min-h-screen py-6 px-3 md:p-6 bg-gray-50'>
       <div>
         <AdminText>Siparişler</AdminText>
 
         {/* İstatistik Kartları */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4 mt-6">
-          <div className={boxStyle + " text-center"}
-            onClick={() => setSelectedStatus("all")}
-          >
-            <div className="text-2xl font-bold text-[var(--color-orange)]">{stats.total}</div>
-            <div className="text-sm text-gray-600">Toplam Sipariş</div>
+        <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4 mt-6'>
+          <div className={boxStyle + ' text-center'} onClick={() => setSelectedStatus('all')}>
+            <div className='text-2xl font-bold text-[var(--color-orange)]'>{stats.total}</div>
+            <div className='text-sm text-gray-600'>Toplam Sipariş</div>
           </div>
-          <div className={boxStyle + " text-center"}
-            onClick={() => setSelectedStatus("PENDING")}
-          >
-            <div className="text-2xl font-bold text-yellow-600">{stats.pending}</div>
-            <div className="text-sm text-gray-600">Beklemede</div>
+          <div className={boxStyle + ' text-center'} onClick={() => setSelectedStatus('PENDING')}>
+            <div className='text-2xl font-bold text-yellow-600'>{stats.pending}</div>
+            <div className='text-sm text-gray-600'>Beklemede</div>
           </div>
-          <div className={boxStyle + " text-center"}
-            onClick={() => setSelectedStatus("CONFIRMED")}
-          >
-            <div className="text-2xl font-bold text-blue-600">{stats.confirmed}</div>
-            <div className="text-sm text-gray-600">Onaylı</div>
+          <div className={boxStyle + ' text-center'} onClick={() => setSelectedStatus('CONFIRMED')}>
+            <div className='text-2xl font-bold text-blue-600'>{stats.confirmed}</div>
+            <div className='text-sm text-gray-600'>Onaylı</div>
           </div>
-          <div className={boxStyle + " text-center"}
-            onClick={() => setSelectedStatus("SHIPPED")}
-          >
-            <div className="text-2xl font-bold text-purple-600">{stats.shipped}</div>
-            <div className="text-sm text-gray-600">Kargoda</div>
+          <div className={boxStyle + ' text-center'} onClick={() => setSelectedStatus('SHIPPED')}>
+            <div className='text-2xl font-bold text-purple-600'>{stats.shipped}</div>
+            <div className='text-sm text-gray-600'>Kargoda</div>
           </div>
-          <div className={boxStyle + " text-center"}
-            onClick={() => setSelectedStatus("DELIVERED")}
-          >
-            <div className="text-2xl font-bold text-green-600">{stats.delivered}</div>
-            <div className="text-sm text-gray-600">Teslim Edildi</div>
+          <div className={boxStyle + ' text-center'} onClick={() => setSelectedStatus('DELIVERED')}>
+            <div className='text-2xl font-bold text-green-600'>{stats.delivered}</div>
+            <div className='text-sm text-gray-600'>Teslim Edildi</div>
           </div>
-          <div className={boxStyle + " text-center"}>
-            <div className="text-xl font-bold text-[var(--color-orange)]">{stats.totalRevenue.toLocaleString()} TL</div>
-            <div className="text-sm text-gray-600">Toplam Gelir</div>
+          <div className={boxStyle + ' text-center'}>
+            <div className='text-xl font-bold text-[var(--color-orange)]'>{stats.totalRevenue.toLocaleString()} TL</div>
+            <div className='text-sm text-gray-600'>Toplam Gelir</div>
           </div>
         </div>
 
         {/* Filtreler */}
-        <div className="border border-gray-200 md:p-6 p-3 rounded-lg shadow bg-white mt-6">
-          <div className="flex flex-wrap gap-4 items-center">
-            <span className="font-medium text-gray-700">Durum Filtresi:</span>
-            <select
-              className={inputStyle}
-              value={selectedStatus}
-              onChange={(e) => setSelectedStatus(e.target.value)}
-            >
-              <option value="all">Tüm Siparişler</option>
-              <option value="PENDING">Beklemede</option>
-              <option value="CONFIRMED">Onaylı</option>
-              <option value="SHIPPED">Kargoda</option>
-              <option value="DELIVERED">Teslim Edildi</option>
-              <option value="CANCELED">İptal Edildi</option>
+        <div className='border border-gray-200 md:p-6 p-3 rounded-lg shadow bg-white mt-6'>
+          <div className='flex flex-wrap gap-4 items-center'>
+            <span className='font-medium text-gray-700'>Durum Filtresi:</span>
+            <select className={inputStyle} value={selectedStatus} onChange={(e) => setSelectedStatus(e.target.value)}>
+              <option value='all'>Tüm Siparişler</option>
+              <option value='PENDING'>Beklemede</option>
+              <option value='CONFIRMED'>Onaylı</option>
+              <option value='SHIPPED'>Kargoda</option>
+              <option value='DELIVERED'>Teslim Edildi</option>
+              <option value='CANCELED'>İptal Edildi</option>
             </select>
-            <div className="text-sm text-gray-600">
-              {filteredOrders.length} sipariş gösteriliyor
-            </div>
+            <div className='text-sm text-gray-600'>{filteredOrders.length} sipariş gösteriliyor</div>
           </div>
         </div>
 
         {/* Siparişler Listesi */}
-        <div className="mt-6 space-y-4">
+        <div className='mt-6 space-y-4'>
           {filteredOrders.map((order, index) => (
-            <div key={order.id || index} className="border border-gray-200 md:p-6 p-3 rounded-lg shadow bg-white">
-              <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+            <div key={order.id || index} className='border border-gray-200 md:p-6 p-3 rounded-lg shadow bg-white'>
+              <div className='flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4'>
                 {/* Sol taraf - Sipariş bilgileri */}
-                <div className="flex-1">
-                  <div className="flex items-center gap-4 mb-3">
-                    <h3 className="text-lg font-semibold text-gray-900">#{order.orderNumber}</h3>
-                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(order.overallStatus)}`}
-                    >
-                      {order.overallStatus}
-                    </span>
+                <div className='flex-1'>
+                  <div className='flex items-center gap-4 mb-3'>
+                    <h3 className='text-lg font-semibold text-gray-900'>#{order.orderNumber}</h3>
+                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(order.overallStatus)}`}>{order.overallStatus}</span>
                   </div>
 
-                  <div className="grid md:grid-cols-2 gap-4 text-sm">
+                  <div className='grid md:grid-cols-2 gap-4 text-sm'>
                     <div>
-                      <p className="text-gray-600">Müşteri: <span className="text-gray-900 font-medium">{order.customerName}</span></p>
-                      <p className="text-gray-600">Email: <span className="text-gray-900">{order.customerEmail}</span></p>
-                      <p className="text-gray-600">Telefon: <span className="text-gray-900">{order.customerPhone}</span></p>
+                      <p className='text-gray-600'>
+                        Müşteri: <span className='text-gray-900 font-medium'>{order.customerName}</span>
+                      </p>
+                      <p className='text-gray-600'>
+                        Email: <span className='text-gray-900'>{order.customerEmail}</span>
+                      </p>
+                      <p className='text-gray-600'>
+                        Telefon: <span className='text-gray-900'>{order.customerPhone}</span>
+                      </p>
                     </div>
                     <div>
-                      <p className="text-gray-600">Tarih: <span className="text-gray-900">{new Date(order.orderDate).toLocaleDateString()}</span></p>
-                      <p className="text-gray-600">Teslimat: <span className="text-gray-900">{order.shippingAddress}</span></p>
-                      <p className="text-gray-600">Ödeme: <span className="text-gray-900">{order?.paymentMethod}</span></p>
+                      <p className='text-gray-600'>
+                        Tarih: <span className='text-gray-900'>{new Date(order.orderDate).toLocaleDateString()}</span>
+                      </p>
+                      <p className='text-gray-600'>
+                        Teslimat: <span className='text-gray-900'>{order.shippingAddress}</span>
+                      </p>
+                      <p className='text-gray-600'>
+                        Ödeme: <span className='text-gray-900'>{order?.paymentMethod}</span>
+                      </p>
                     </div>
                   </div>
 
                   {/* Ürünler */}
-                  <div className="mt-3">
-                    <p className="text-sm font-medium text-gray-700 mb-2">Ürünler:</p>
-                    <div className="space-y-1">
+                  <div className='mt-3'>
+                    <p className='text-sm font-medium text-gray-700 mb-2'>Ürünler:</p>
+                    <div className='space-y-1'>
                       {order.orderItems.map((product, index) => (
-                        <div key={index} className="flex justify-between text-sm">
-                          <span>{product.productName} x {product.quantity}</span>
-                          <span className="font-medium">
-                            {Number(product.totalPrice || 0).toLocaleString("tr-TR")} TL
+                        <div key={index} className='flex justify-between text-sm'>
+                          <span>
+                            {product.productName} x {product.quantity}
                           </span>
+                          <span className='font-medium'>{Number(product.totalPrice || 0).toLocaleString('tr-TR')} TL</span>
                         </div>
                       ))}
                     </div>
-                    <div className="border-t pt-2 mt-2">
-                      <div className="flex justify-between font-semibold">
+                    <div className='border-t pt-2 mt-2'>
+                      <div className='flex justify-between font-semibold'>
                         <span>Toplam:</span>
-                        <span className="text-[var(--color-orange)]">
-                          {order.orderItems.reduce((acc, p) => acc + p.unitPrice * p.quantity, 0).toLocaleString()} TL
-                        </span>
+                        <span className='text-[var(--color-orange)]'>{order.orderItems.reduce((acc, p) => acc + p.unitPrice * p.quantity, 0).toLocaleString()} TL</span>
                       </div>
                     </div>
                   </div>
                 </div>
 
                 {/* Sağ taraf - Aksiyonlar */}
-                <div className="flex flex-col gap-2 lg:min-w-[200px]">
-                  <button
-                    className={buttonStyle}
-                    onClick={() => setSelectedOrder(order)}
-                  >
+                <div className='flex flex-col gap-2 lg:min-w-[200px]'>
+                  <button className={buttonStyle} onClick={() => setSelectedOrder(order)}>
                     Detay Görüntüle
                   </button>
 
@@ -274,8 +281,8 @@ const Orders = () => {
                       <button
                         className={`${buttonStyle} bg-green-600 hover:bg-green-700`}
                         onClick={(e) => {
-                          e.stopPropagation();
-                          handleOrderUpdate(order.orderId, 'confirm');
+                          e.stopPropagation()
+                          handleOrderUpdate(order.orderId, 'confirm')
                         }}
                       >
                         Siparişi Onayla
@@ -283,8 +290,8 @@ const Orders = () => {
                       <button
                         className={`${buttonStyle} bg-red-600 hover:bg-red-700`}
                         onClick={(e) => {
-                          e.stopPropagation();
-                          handleOrderUpdate(order.orderId, 'cancel');
+                          e.stopPropagation()
+                          handleOrderUpdate(order.orderId, 'cancel')
                         }}
                       >
                         İptal Et
@@ -297,8 +304,8 @@ const Orders = () => {
                       <button
                         className={`${buttonStyle} bg-purple-600 hover:bg-purple-700`}
                         onClick={(e) => {
-                          e.stopPropagation();
-                          handleOrderUpdate(order.orderId, 'ship');
+                          e.stopPropagation()
+                          handleOrderUpdate(order.orderId, 'ship')
                         }}
                       >
                         Kargoya Ver
@@ -306,8 +313,8 @@ const Orders = () => {
                       <button
                         className={`${buttonStyle} bg-red-600 hover:bg-red-700`}
                         onClick={(e) => {
-                          e.stopPropagation();
-                          handleOrderUpdate(order.orderId, 'cancel');
+                          e.stopPropagation()
+                          handleOrderUpdate(order.orderId, 'cancel')
                         }}
                       >
                         İptal Et
@@ -317,26 +324,11 @@ const Orders = () => {
 
                   {order.overallStatus === 'SHIPPED' && (
                     <>
-                      <button
-                        className={`${buttonStyle} bg-green-600 hover:bg-green-700`}
-                        onClick={() => handleOrderUpdate(order.orderId, 'deliver')}
-                      >
+                      <button className={`${buttonStyle} bg-green-600 hover:bg-green-700`} onClick={() => handleOrderUpdate(order.orderId, 'deliver')}>
                         Teslim Edildi İşaretle
                       </button>
 
-                      <button
-                        className={`${buttonStyle} bg-blue-500 hover:bg-blue-700`}
-                        onClick={async () => {
-                          try {
-                            toast.info("Kargo takip bilgileri getiriliyor...");
-                            const trackingData = await fetchCargoTrackingByOrderId(order.orderId);
-                            console.log("Takip Verisi:", trackingData);
-                          } catch (error) {
-                            toast.error("Kargo takibi yapılamadı!");
-                            console.error("Kargo takip hatası:", error);
-                          }
-                        }}
-                      >
+                      <button className={`${buttonStyle} bg-blue-500 hover:bg-blue-700`} onClick={() => handleShowTracking(order.orderId)}>
                         Kargoyu Takip Et
                       </button>
                     </>
@@ -348,150 +340,224 @@ const Orders = () => {
         </div>
 
         {filteredOrders.length === 0 && (
-          <div className={boxStyle + " mt-6 text-center py-12"}>
-            <div className="text-gray-500 text-lg">Bu filtre için sipariş bulunamadı.</div>
+          <div className={boxStyle + ' mt-6 text-center py-12'}>
+            <div className='text-gray-500 text-lg'>Bu filtre için sipariş bulunamadı.</div>
           </div>
         )}
       </div>
 
       {/* Sipariş Detay Modal */}
       {selectedOrder && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex  items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6">
-              <div className="flex justify-between items-center mb-6">
-                <h2 className="text-xl font-semibold">Sipariş Detayları</h2>
-                <button
-                  onClick={() => setSelectedOrder(null)}
-                  className="text-gray-500 hover:text-gray-700 text-2xl"
-                >
+        <div className='fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50'>
+          <div className='bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto'>
+            <div className='p-6'>
+              <div className='flex justify-between items-center mb-6'>
+                <h2 className='text-xl font-semibold'>Sipariş Detayları</h2>
+                <button onClick={() => setSelectedOrder(null)} className='text-gray-500 hover:text-gray-700 text-2xl'>
                   ×
                 </button>
               </div>
 
-              <div className="space-y-4">
-                <div className="grid md:grid-cols-2 gap-4">
+              <div className='space-y-4'>
+                <div className='grid md:grid-cols-2 gap-4'>
                   <div>
-                    <h3 className="font-medium text-gray-900 mb-2">Sipariş Bilgileri</h3>
-                    <p className="text-sm text-gray-600">Sipariş No: <span className="text-gray-900">{selectedOrder.orderNumber}</span></p>
-                    <p className="text-sm text-gray-600">Tarih: <span className="text-gray-900">{new Date(selectedOrder.orderDate).toLocaleDateString()}</span></p>
-                    <p className="text-sm text-gray-600">Durum:
-                      <span className={`ml-2 px-2 py-1 rounded text-xs ${getStatusColor(selectedOrder.overallStatus)}`}>
-                        {getStatusText(selectedOrder.overallStatus)}
-                      </span>
+                    <h3 className='font-medium text-gray-900 mb-2'>Sipariş Bilgileri</h3>
+                    <p className='text-sm text-gray-600'>
+                      Sipariş No: <span className='text-gray-900'>{selectedOrder.orderNumber}</span>
+                    </p>
+                    <p className='text-sm text-gray-600'>
+                      Tarih: <span className='text-gray-900'>{new Date(selectedOrder.orderDate).toLocaleDateString()}</span>
+                    </p>
+                    <p className='text-sm text-gray-600'>
+                      Durum:
+                      <span className={`ml-2 px-2 py-1 rounded text-xs ${getStatusColor(selectedOrder.overallStatus)}`}>{getStatusText(selectedOrder.overallStatus)}</span>
                     </p>
                   </div>
                   <div>
-                    <h3 className="font-medium text-gray-900 mb-2">Müşteri Bilgileri</h3>
-                    <p className="text-sm text-gray-600">Ad Soyad: <span className="text-gray-900">{selectedOrder.customerName}</span></p>
-                    <p className="text-sm text-gray-600">E-posta: <span className="text-gray-900">{selectedOrder.customerEmail}</span></p>
-                    <p className="text-sm text-gray-600">Telefon: <span className="text-gray-900">{selectedOrder.customerPhone}</span></p>
+                    <h3 className='font-medium text-gray-900 mb-2'>Müşteri Bilgileri</h3>
+                    <p className='text-sm text-gray-600'>
+                      Ad Soyad: <span className='text-gray-900'>{selectedOrder.customerName}</span>
+                    </p>
+                    <p className='text-sm text-gray-600'>
+                      E-posta: <span className='text-gray-900'>{selectedOrder.customerEmail}</span>
+                    </p>
+                    <p className='text-sm text-gray-600'>
+                      Telefon: <span className='text-gray-900'>{selectedOrder.customerPhone}</span>
+                    </p>
                   </div>
                 </div>
 
                 <div>
-                  <h3 className="font-medium text-gray-900 mb-2">Teslimat Bilgileri</h3>
-                  <p className="text-sm text-gray-600">Adres: <span className="text-gray-900">{selectedOrder.shippingAddress}</span></p>
-                  <p className="text-sm text-gray-600">Ödeme Yöntemi: <span className="text-gray-900">{selectedOrder.paymentMethod}</span></p>
+                  <h3 className='font-medium text-gray-900 mb-2'>Teslimat Bilgileri</h3>
+                  <p className='text-sm text-gray-600'>
+                    Adres: <span className='text-gray-900'>{selectedOrder.shippingAddress}</span>
+                  </p>
+                  <p className='text-sm text-gray-600'>
+                    Ödeme Yöntemi: <span className='text-gray-900'>{selectedOrder.paymentMethod}</span>
+                  </p>
                 </div>
 
                 <div>
-                  <h3 className="font-medium text-gray-900 mb-2">Ürün Detayları</h3>
-                  <div className="border rounded-lg">
+                  <h3 className='font-medium text-gray-900 mb-2'>Ürün Detayları</h3>
+                  <div className='border rounded-lg overflow-hidden'>
                     {selectedOrder.orderItems?.map((product, index) => (
-                      <div key={index} className="flex justify-between items-center p-3 border-b last:border-b-0">
+                      <div key={index} className='flex justify-between items-center p-3 border-b last:border-b-0'>
                         <div>
-                          <p className="font-medium">{product.productName}</p>
-                          <p className="text-sm text-gray-600">Adet: {product.quantity}</p>
+                          <p className='font-medium'>{product.productName}</p>
+                          <p className='text-sm text-gray-600'>Adet: {product.quantity}</p>
                         </div>
-                        <div className="text-right">
-                          <p className="font-medium">{product.totalPrice.toLocaleString()} TL</p>
+                        <div className='text-right'>
+                          <p className='font-medium'>{product.totalPrice.toLocaleString()} TL</p>
                         </div>
                       </div>
                     ))}
-                    <div className="p-3 bg-gray-50 font-semibold flex justify-between">
+                    <div className='p-3 bg-gray-50 font-semibold flex justify-between'>
                       <span>Toplam Tutar:</span>
-                      <span className="text-[var(--color-orange)]"> {selectedOrder.orderItems?.reduce((acc, p) => acc + p.unitPrice * p.quantity, 0).toLocaleString()} TL</span>
+                      <span className='text-[var(--color-orange)]'> {selectedOrder.orderItems?.reduce((acc, p) => acc + p.unitPrice * p.quantity, 0).toLocaleString()} TL</span>
                     </div>
                   </div>
                 </div>
               </div>
 
-              <div className="flex gap-3 mt-6">
+              <div className='flex gap-3 mt-6'>
                 {selectedOrder.overallStatus === 'PENDING' && (
                   <>
-                    <button
-                      className={buttonStyle + " bg-green-600 hover:bg-green-700"}
-                      onClick={() => handleOrderUpdate(selectedOrder.orderId, 'confirm')}
-                    >
+                    <button className={buttonStyle + ' bg-green-600 hover:bg-green-700'} onClick={() => handleOrderUpdate(selectedOrder.orderId, 'confirm')}>
                       Siparişi Onayla
                     </button>
-                    <button
-                      className={buttonStyle + " bg-red-600 hover:bg-red-700"}
-                      onClick={() => handleOrderUpdate(selectedOrder.orderId, 'cancel')}
-                    >
+                    <button className={buttonStyle + ' bg-red-600 hover:bg-red-700'} onClick={() => handleOrderUpdate(selectedOrder.orderId, 'cancel')}>
                       İptal Et
                     </button>
                   </>
                 )}
                 {selectedOrder.overallStatus === 'CONFIRMED' && (
                   <>
-                    <button
-                      className={buttonStyle + " bg-purple-600 hover:bg-purple-700"}
-                      onClick={() => handleOrderUpdate(selectedOrder.orderId, 'ship')}
-                    >
+                    <button className={buttonStyle + ' bg-purple-600 hover:bg-purple-700'} onClick={() => handleOrderUpdate(selectedOrder.orderId, 'ship')}>
                       Kargoya Ver
                     </button>
-                    <button
-                      className={buttonStyle + " bg-red-600 hover:bg-red-700"}
-                      onClick={() => handleOrderUpdate(selectedOrder.orderId, 'cancel')}
-                    >
+                    <button className={buttonStyle + ' bg-red-600 hover:bg-red-700'} onClick={() => handleOrderUpdate(selectedOrder.orderId, 'cancel')}>
                       İptal Et
                     </button>
                   </>
                 )}
                 {selectedOrder.overallStatus === 'SHIPPED' && (
                   <>
-                    <button
-                      className={buttonStyle + " bg-green-600 hover:bg-green-700"}
-                      onClick={() => handleOrderUpdate(selectedOrder.orderId, 'deliver')}
-                    >
+                    <button className={buttonStyle + ' bg-green-600 hover:bg-green-700'} onClick={() => handleOrderUpdate(selectedOrder.orderId, 'deliver')}>
                       Teslim Edildi İşaretle
                     </button>
                     <button
                       className={`${buttonStyle} bg-blue-600 hover:bg-blue-700`}
-                      onClick={async () => {
-                        try {
-                          toast.info("Kargo takip bilgileri getiriliyor...");
-                          const trackingInfo = await fetchCargoTrackingDetailed(order.orderId);
-
-                          if (trackingInfo?.url) {
-                            window.open(trackingInfo.url, "_blank");
-                          } else {
-                            toast.info("Kargo takip ekranı açılıyor...");
-                            // alternatif: kendi takip ekranına yönlendirme
-                            // navigate(`/cargo-tracking/${order.orderId}`)
-                          }
-                        } catch (error) {
-                          toast.error("Kargo takibi yapılamadı!");
-                          console.error("Kargo takip hatası:", error);
-                        }
+                      onClick={() => {
+                        handleShowTracking(selectedOrder.orderId)
                       }}
                     >
                       Kargoyu Takip Et
                     </button>
-                    <button
-                      className={buttonStyle + " bg-red-600 hover:bg-red-700"}
-                      onClick={() => handleOrderUpdate(selectedOrder.orderId, 'cancel')}
-                    >
+                    <button className={buttonStyle + ' bg-red-600 hover:bg-red-700'} onClick={() => handleOrderUpdate(selectedOrder.orderId, 'cancel')}>
                       İptal Et
                     </button>
                   </>
                 )}
-                <button
-                  onClick={() => setSelectedOrder(null)}
-                  className={buttonStyle + " bg-gray-500 hover:bg-gray-600"}
-                >
+                <button onClick={() => setSelectedOrder(null)} className={buttonStyle + ' bg-gray-500 hover:bg-gray-600'}>
+                  Kapat
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Kargo Takip Modal */}
+      {trackingData && (
+        <div className='fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50'>
+          <div className='bg-white rounded-lg max-w-3xl w-full max-h-[90vh] overflow-y-auto'>
+            <div className='p-6'>
+              <div className='flex justify-between items-center mb-6'>
+                <h2 className='text-xl font-semibold'>Kargo Takip Bilgileri</h2>
+                <button onClick={() => setTrackingData(null)} className='text-gray-500 hover:text-gray-700 text-2xl'>
+                  ×
+                </button>
+              </div>
+
+              <div className='space-y-4'>
+                {/* Genel Bilgiler */}
+                <div className='bg-orange-50 border border-orange-200 rounded-lg p-4'>
+                  <div className='grid md:grid-cols-2 gap-4'>
+                    <div>
+                      <p className='text-sm text-gray-600'>
+                        Barkod No: <span className='text-gray-900 font-medium'>{trackingData.barkod}</span>
+                      </p>
+                      <p className='text-sm text-gray-600'>
+                        Alıcı: <span className='text-gray-900 font-medium'>{trackingData.alici}</span>
+                      </p>
+                      <p className='text-sm text-gray-600'>
+                        Gönderen: <span className='text-gray-900 font-medium'>{trackingData.gonderen}</span>
+                      </p>
+                    </div>
+                    <div>
+                      <p className='text-sm text-gray-600'>
+                        Varma Merkezi: <span className='text-gray-900'>{trackingData.varmaMerkezi}</span>
+                      </p>
+                      <p className='text-sm text-gray-600'>
+                        Ağırlık: <span className='text-gray-900'>{trackingData.agirlik}</span>
+                      </p>
+                      <p className='text-sm text-gray-600'>
+                        Ücret: <span className='text-gray-900 font-medium'>{trackingData.gonderiUcreti}</span>
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Kargo Hareketleri */}
+                <div>
+                  <h3 className='font-medium text-gray-900 mb-3 flex items-center gap-2'>
+                    <span className='w-2 h-2 bg-[var(--color-orange)] rounded-full'></span>
+                    Kargo Hareketleri
+                  </h3>
+                  <div className='space-y-3'>
+                    {trackingData.dongu && trackingData.dongu.length > 0 ? (
+                      trackingData.dongu.map((item, index) => (
+                        <div key={index} className='relative pl-6 pb-4 border-l-2 border-gray-200 last:border-l-0 last:pb-0'>
+                          <div className='absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-[var(--color-orange)] border-4 border-white'></div>
+                          <div className='bg-gray-50 rounded-lg p-4'>
+                            <div className='flex justify-between items-start mb-2'>
+                              <span className='font-medium text-gray-900'>{getIslemText(item.islem)}</span>
+                              <span className='text-xs bg-[var(--color-orange)] text-white px-2 py-1 rounded'>#{item.siraNo}</span>
+                            </div>
+                            <p className='text-sm text-gray-600 mb-1'>
+                              <span className='font-medium'>Merkez:</span> {item.islemMerkezi}
+                            </p>
+                            <div className='flex gap-4 text-xs text-gray-500'>
+                              <span>📅 {item.islemTarihi}</span>
+                              <span>🕐 {item.islemSaati}</span>
+                            </div>
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <div className='text-center py-8 text-gray-500'>Henüz kargo hareketi bulunmamaktadır.</div>
+                    )}
+                  </div>
+                </div>
+
+                {/* PTT Takip Linki */}
+                {trackingData.sonucAciklama && (
+                  <div className='bg-blue-50 border border-blue-200 rounded-lg p-4'>
+                    <p className='text-sm text-gray-700 mb-2'>Detaylı takip için PTT web sitesini ziyaret edebilirsiniz:</p>
+                    <a href={trackingData.sonucAciklama} target='_blank' rel='noopener noreferrer' className='text-blue-600 hover:text-blue-800 text-sm underline break-all'>
+                      {trackingData.sonucAciklama}
+                    </a>
+                  </div>
+                )}
+              </div>
+
+              <div className='flex gap-3 mt-6'>
+                {trackingData.sonucAciklama && (
+                  <button className={buttonStyle + ' bg-[var(--color-orange)] hover:bg-[var(--color-light-orange)]'} onClick={() => window.open(trackingData.sonucAciklama, '_blank')}>
+                    PTT Sitesinde Aç
+                  </button>
+                )}
+                <button onClick={() => setTrackingData(null)} className={buttonStyle + ' bg-gray-500 hover:bg-gray-600'}>
                   Kapat
                 </button>
               </div>
@@ -500,7 +566,7 @@ const Orders = () => {
         </div>
       )}
     </div>
-  );
-};
+  )
+}
 
-export default Orders;
+export default Orders
