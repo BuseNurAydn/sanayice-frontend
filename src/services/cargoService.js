@@ -48,3 +48,26 @@ export const fetchCargoTrackingDetailed = async (barcode) => {
   }
   return await response.json();
 };
+
+//orderId ye göre takip sorgulama
+export const fetchCargoTrackingByOrderId = async (orderId) => {
+  try {
+    const token = localStorage.getItem("token");
+    const response = await fetch(`${CARGO_API}/tracking/${orderId}`, {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error("Kargo takibi yapılamadı");
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("Kargo Takip Hatası:", error);
+    throw error;
+  }
+};

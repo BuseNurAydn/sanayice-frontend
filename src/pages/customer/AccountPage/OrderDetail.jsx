@@ -70,8 +70,6 @@ const OrderItemCard = ({ item, orderStatus, deliveredAt, openReviewModal, openSe
               console.error(err);
             }
           }}
-
-          //onClick={() => navigate("/kargo-takip")}
           className="bg-orange-500 p-1 md:py-1 md:px-2 text-white text-sm rounded hover:bg-orange-600 cursor-pointer"
         >
           Kargom Nerede?

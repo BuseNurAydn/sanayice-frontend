@@ -2,7 +2,7 @@ import AdminText from "../../shared/Text/AdminText";
 import { useState, useEffect } from "react";
 import { toast } from "react-toastify";
 import { updateOrderStatus, fetchSellerOrders } from "../../services/sellerOrdersService";
-import { createShipmentLabel } from "../../services/cargoService"
+import { createShipmentLabel, fetchCargoTrackingByOrderId } from "../../services/cargoService"
 import { useSelector } from "react-redux";
 
 const Orders = () => {
@@ -75,55 +75,55 @@ const Orders = () => {
     ? orders
     : orders.filter(order => order.overallStatus?.toUpperCase() === selectedStatus?.toUpperCase());
 
-const handleOrderUpdate = async (orderId, action) => {
-  const newStatusMap = {
-    confirm: "confirm",
-    cancel: "cancel",
-    ship: "ship",
-    deliver: "deliver",
-  };
+  const handleOrderUpdate = async (orderId, action) => {
+    const newStatusMap = {
+      confirm: "confirm",
+      cancel: "cancel",
+      ship: "ship",
+      deliver: "deliver",
+    };
 
-  const newStatus = newStatusMap[action];
+    const newStatus = newStatusMap[action];
 
-  try {
-    if (action === "ship") {
-      try {
+    try {
+      if (action === "ship") {
+        try {
 
-         console.log("Kargoya gönderilen istek içeriği:", { orderId });
-        // Sadece orderId gönderiyoruz
-        const barkodLink = await createShipmentLabel({ orderId });
+          console.log("Kargoya gönderilen istek içeriği:", { orderId });
+          // Sadece orderId gönderiyoruz
+          const barkodLink = await createShipmentLabel({ orderId });
 
-        if (barkodLink) {
-          window.open(barkodLink, "_blank");
-          toast.success("Kargo etiketi oluşturuldu!");
-        } else {
-          toast.error("Kargo etiketi oluşturulamadı.");
+          if (barkodLink) {
+            window.open(barkodLink, "_blank");
+            toast.success("Kargo etiketi oluşturuldu!");
+          } else {
+            toast.error("Kargo etiketi oluşturulamadı.");
+          }
+
+          await updateOrderStatus(orderId, "ship");
+          toast.success("Sipariş kargoya verildi!");
+
+          const updatedOrders = await fetchSellerOrders();
+          setOrders(updatedOrders);
+        } catch (error) {
+          console.error("PTT API Hatası:", error);
+          toast.error("Kargo oluşturulurken hata oluştu!");
         }
 
-        await updateOrderStatus(orderId, "ship");
-        toast.success("Sipariş kargoya verildi!");
-
-        const updatedOrders = await fetchSellerOrders();
-        setOrders(updatedOrders);
-      } catch (error) {
-        console.error("PTT API Hatası:", error);
-        toast.error("Kargo oluşturulurken hata oluştu!");
+        return;
       }
 
-      return;
+      // Diğer durumlar (confirm, cancel, deliver)
+      await updateOrderStatus(orderId, newStatus);
+      toast.success("Sipariş durumu güncellendi!");
+
+      const updatedOrders = await fetchSellerOrders();
+      setOrders(updatedOrders);
+    } catch (error) {
+      console.error("Sipariş Güncelleme Hatası:", error);
+      toast.error("Sipariş güncellenirken hata oluştu!");
     }
-
-    // Diğer durumlar (confirm, cancel, deliver)
-    await updateOrderStatus(orderId, newStatus);
-    toast.success("Sipariş durumu güncellendi!");
-
-    const updatedOrders = await fetchSellerOrders();
-    setOrders(updatedOrders);
-  } catch (error) {
-    console.error("Sipariş Güncelleme Hatası:", error);
-    toast.error("Sipariş güncellenirken hata oluştu!");
-  }
-};
+  };
 
   const stats = {
     total: orders.length,
@@ -316,12 +316,30 @@ const handleOrderUpdate = async (orderId, action) => {
                   )}
 
                   {order.overallStatus === 'SHIPPED' && (
-                    <button
-                      className={`${buttonStyle} bg-green-600 hover:bg-green-700`}
-                      onClick={() => handleOrderUpdate(order.orderId, 'deliver')}
-                    >
-                      Teslim Edildi İşaretle
-                    </button>
+                    <>
+                      <button
+                        className={`${buttonStyle} bg-green-600 hover:bg-green-700`}
+                        onClick={() => handleOrderUpdate(order.orderId, 'deliver')}
+                      >
+                        Teslim Edildi İşaretle
+                      </button>
+
+                      <button
+                        className={`${buttonStyle} bg-blue-500 hover:bg-blue-700`}
+                        onClick={async () => {
+                          try {
+                            toast.info("Kargo takip bilgileri getiriliyor...");
+                            const trackingData = await fetchCargoTrackingByOrderId(order.orderId);
+                            console.log("Takip Verisi:", trackingData);
+                          } catch (error) {
+                            toast.error("Kargo takibi yapılamadı!");
+                            console.error("Kargo takip hatası:", error);
+                          }
+                        }}
+                      >
+                        Kargoyu Takip Et
+                      </button>
+                    </>
                   )}
                 </div>
               </div>
@@ -439,6 +457,28 @@ const handleOrderUpdate = async (orderId, action) => {
                       onClick={() => handleOrderUpdate(selectedOrder.orderId, 'deliver')}
                     >
                       Teslim Edildi İşaretle
+                    </button>
+                    <button
+                      className={`${buttonStyle} bg-blue-600 hover:bg-blue-700`}
+                      onClick={async () => {
+                        try {
+                          toast.info("Kargo takip bilgileri getiriliyor...");
+                          const trackingInfo = await fetchCargoTrackingDetailed(order.orderId);
+
+                          if (trackingInfo?.url) {
+                            window.open(trackingInfo.url, "_blank");
+                          } else {
+                            toast.info("Kargo takip ekranı açılıyor...");
+                            // alternatif: kendi takip ekranına yönlendirme
+                            // navigate(`/cargo-tracking/${order.orderId}`)
+                          }
+                        } catch (error) {
+                          toast.error("Kargo takibi yapılamadı!");
+                          console.error("Kargo takip hatası:", error);
+                        }
+                      }}
+                    >
+                      Kargoyu Takip Et
                     </button>
                     <button
                       className={buttonStyle + " bg-red-600 hover:bg-red-700"}
