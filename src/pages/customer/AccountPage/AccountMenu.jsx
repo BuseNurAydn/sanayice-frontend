@@ -12,7 +12,7 @@ import { LuCircleUserRound, LuLogOut } from "react-icons/lu";
 import { SlLocationPin } from "react-icons/sl";
 
 const menuItems = [
-  { path: "/hesabim/profilim", label: "Profil Bilgilerim", icon: <FaRegUser /> },
+  { path: "/hesabim/profilim", label: "Hesap Bilgilerim", icon: <FaRegUser /> },
   { path: "/hesabim/siparislerim", label: "Tüm Siparişlerim", icon: <TfiPackage /> },
   { path: "/hesabim/adreslerim", label: "Adres Bilgilerim", icon: <SlLocationPin /> },
   { path: "/hesabim/degerlendirmelerim", label: "Değerlendirmelerim", icon: <FiStar /> },

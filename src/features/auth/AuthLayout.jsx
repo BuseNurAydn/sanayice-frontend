@@ -14,7 +14,7 @@ const AuthLayout = ({ children }) => {
     <div className="min-h-screen flex items-center flex-col scrollbar-custom overflow-y-auto">
       <img src={sanayice} alt="Logo" className="w-1/2 md:w-1/6 pt-4" />
 
-      <div className="bg-[var(--color-white)] rounded-lg shadow-lg border border-gray-50 custom-font w-[1091px] max-w-sm md:max-w-md mt-8 z-10 relative items-center">
+      <div className="bg-[var(--color-white)] rounded-lg shadow-lg border border-gray-50 custom-font w-full max-w-sm md:max-w-md mt-8 z-10 relative items-center ">
         {!hideTabs && (
           isSellerRoute ? <SellerAuthTabs /> : <AuthTabs />
         )}

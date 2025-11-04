@@ -17,7 +17,7 @@ const Sidebar = () => {
   const navigate = useNavigate();
 
   const menuItems = [
-    { to: "profilim", label: "Profil Bilgilerim", icon: <FaRegUser /> },
+    { to: "profilim", label: "Hesap Bilgilerim", icon: <FaRegUser /> },
     { to: "siparislerim", label: "Siparişlerim", icon: <TfiPackage /> },
     { to: "adreslerim", label: "Adres Bilgilerim", icon: <SlLocationPin /> },
     { to: "degerlendirmelerim", label: "Değerlendirmelerim", icon: <FiStar /> },
