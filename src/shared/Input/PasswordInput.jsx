@@ -13,7 +13,7 @@ const PasswordInput = ({ name, placeholder, value, onChange, className = "" }) =
         placeholder={placeholder}
         value={value}
         onChange={onChange}
-        className={`${className} pr-39 md:pr-47`}
+        className={`${className} w-full pr-[48px]`}
       />
       <span
         className="absolute right-4 top-1/2 -translate-y-1/2 cursor-pointer text-gray-400"
