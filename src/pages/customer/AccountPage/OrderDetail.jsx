@@ -58,16 +58,16 @@ const OrderItemCard = ({ item, orderStatus, deliveredAt, openReviewModal, openSe
     {/* Kargo Takip */}
     {orderStatus === "Kargoya Verildi" && (
       <div className="flex justify-between items-center md:w-1/2 bg-gray-100 p-2 md:p-4 rounded">
-        <p className="text-sm text-gray-700 font-semibold">Takip Numarası: Bilinmiyor</p>
+        <p className="text-sm text-gray-700 font-semibold">
+          Takip Numarası: {item.barkod || "Bilinmiyor"}
+        </p>
         <button
-          onClick={async () => {
-            try {
-              const data = await fetchCargoTrackingDetailed(item.trackingNumber);
-              console.log("Kargo durumu:", data);
-              toast.info(`Kargo durumu: ${data.status || "Bilinmiyor"}`);
-            } catch (err) {
-              toast.error("Kargo takibi başarısız oldu!");
-              console.error(err);
+          onClick={() => {
+            if (item.barkod) {
+              const pttUrl = `https://gonderitakip.ptt.gov.tr/Track/Verify?q=${item.barkod}`;
+              window.open(pttUrl, "_blank");
+            } else {
+              toast.error("Takip bilgisi mevcut değil!");
             }
           }}
           className="bg-orange-500 p-1 md:py-1 md:px-2 text-white text-sm rounded hover:bg-orange-600 cursor-pointer"
