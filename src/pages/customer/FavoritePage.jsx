@@ -176,16 +176,16 @@ const FavoritePage = () => {
       <main className="flex-1 container mx-auto px-4 sm:px-6 py-12">
 
         {/* Başlık Bölümü */}
-        <div className="text-center mb-10">
-          <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-2"> Favorilerim</h1>
+        <div className=" mb-10">
+          <h1 className="text-xl md:text-2xl font-bold text-gray-800 mb-2"> Favorilerim</h1>
           <p className="text-gray-600 text-base">
             Kaydettiğiniz {items.length} ürüne buradan kolayca erişebilirsiniz.
           </p>
-          <div className="w-32 h-1 bg-gradient-to-r from-red-400 to-orange-400 mx-auto mt-4 rounded-full"></div>
+        {/** <div className="w-32 h-1 bg-gradient-to-r from-red-400 to-orange-400  mt-4 rounded-full"></div>*/}
         </div>
 
         {/* Arama ve Sıralama Alanı */}
-        <div className="mb-8 p-4 bg-white rounded-xl shadow-sm border border-gray-100 max-w-6xl mx-auto">
+        <div className="mb-8 p-4 bg-white rounded-xl shadow-sm border border-gray-100 max-w-6xl">
           <div className="flex flex-col sm:flex-row gap-4 justify-between items-center">
 
             {/* Arama Çubuğu */}
@@ -235,7 +235,7 @@ const FavoritePage = () => {
             <p className="text-gray-500 text-sm">Lütfen arama teriminizi veya filtrelerinizi değiştirin.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 md:gap-6 max-w-6xl mx-auto">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 md:gap-6 max-w-6xl ">
             {filteredAndSortedItems.map((item) => (
               <FavoriteProductCard
                 key={item.id}

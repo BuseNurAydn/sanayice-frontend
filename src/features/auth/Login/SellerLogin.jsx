@@ -115,6 +115,7 @@ const SellerLogin = () => {
           type="email"
           placeholder="Satıcı e-posta adresi"
           name="email"
+          id="email"
           value={loginData.email}
           onChange={handleChange}
         />
@@ -125,6 +126,7 @@ const SellerLogin = () => {
         {/* Şifre */}
         <PasswordInput
           name="password"
+          id="password"
           placeholder="Şifre"
           value={loginData.password}
           onChange={handleChange}

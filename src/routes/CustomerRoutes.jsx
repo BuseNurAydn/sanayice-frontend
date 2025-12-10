@@ -40,7 +40,7 @@ const CustomerRoutes = () => {
 
                 {/* Diğer tüm statik yollar buraya ait (sepet, iletişim, vs.) */}
                 <Route path="sepetim" element={<CartPage />} />
-                <Route path="siparis-tamamla" element={<CheckoutPage />}></Route>
+                <Route path="odeme" element={<CheckoutPage />}></Route>
                 <Route path="profilim" element={<Profile />} />
                 <Route path="kategoriler" element={<CategoriesPage />} />
                 <Route path="kargo-takip" element={<CargoTracking />} />

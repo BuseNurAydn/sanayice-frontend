@@ -58,10 +58,10 @@ const CartItemCard = ({ item, dispatch }) => {
           {/* Silme Butonu */}
           <button
             onClick={handleRemove}
-            className="text-gray-400 hover:text-red-500 p-1 transition-colors flex-shrink-0"
+            className="text-gray-400 hover:text-red-500 p-1 transition-colors flex-shrink-0 flex gap-x-2"
             title="Sepetten Sil"
           >
-            <FaRegTrashCan className="w-5 h-5" />
+            <FaRegTrashCan className="w-5 h-5" /> Sil
           </button>
         </div>
 
@@ -89,7 +89,7 @@ const CartItemCard = ({ item, dispatch }) => {
           </div>
 
           {/* Toplam Fiyat */}
-          <p className="text-xl font-bold text-orange-600">
+          <p className="text-base font-semibold text-orange-600">
             {(item.unitPrice * item.quantity).toLocaleString()} TL
           </p>
         </div>
@@ -109,7 +109,7 @@ const SummaryCard = ({ cartItems, getTotal, handleCheckout, dispatch }) => {
 
   return (
     <div className="bg-white p-6 rounded-lg shadow-xl sticky top-4 border border-gray-100">
-      <h3 className="text-xl font-bold text-gray-800 mb-4 border-b border-gray-300 pb-3">Sipariş Özeti</h3>
+      <h3 className="text-xl font-bold text-gray-800 mb-4 border-b border-gray-300 pb-3">Sepet Özeti</h3>
 
       <div className="space-y-3 text-sm">
         <div className="flex justify-between">
@@ -121,8 +121,8 @@ const SummaryCard = ({ cartItems, getTotal, handleCheckout, dispatch }) => {
           <span className="text-green-600 font-bold">Ücretsiz</span> {/* Varsayım */}
         </div>
         <div className="flex justify-between pt-3 border-t border-dashed border-gray-300 mt-4">
-          <span className="text-lg font-bold text-gray-800">Toplam Tutar</span>
-          <span className="text-xl font-extrabold text-orange-600">{total.toLocaleString()} TL</span>
+          <span className="text-lg font-semibold text-gray-800">Toplam</span>
+          <span className="text-lg font-semibold text-orange-600">{total.toLocaleString()} TL</span>
         </div>
       </div>
 
@@ -158,7 +158,7 @@ const CartPage = () => {
     cartItems.reduce((acc, item) => acc + item.unitPrice * item.quantity, 0);
 
   const handleCheckout = () => {
-    navigate("/siparis-tamamla");
+    navigate("/odeme");
   };
 
   const scroll = (ref, direction) => {
@@ -211,10 +211,10 @@ const CartPage = () => {
         
         {/* Başlık Bölümü */}
         <div className="mb-8">
-          <h1 className="text-2xl md:text-3xl font-bold text-gray-800 text-center">
+          <h1 className="text-xl md:text-2xl font-bold text-gray-800 ">
             Sepetim ({cartItems.length} ürün)
           </h1>
-          <div className="w-32 h-1 bg-gradient-to-r from-red-400 to-orange-400 mx-auto mt-4 rounded-full"></div>
+       {/*   <div className="w-32 h-1 bg-gradient-to-r from-red-400 to-orange-400 mt-4 rounded-full"></div>*/}
         </div>
 
         {cartItems.length === 0 ? (

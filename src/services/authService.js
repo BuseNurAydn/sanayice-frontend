@@ -1,7 +1,9 @@
 import { API_BASE } from "../config";
 
 const AUTH_API = `${API_BASE}/auth`;
+const OTP_API = `${API_BASE}/otp`;
 
+// Eski: verifyEmail (E-posta doğrulama)
 export const verifyEmail = async (verificationData) => {
   try {
     const response = await fetch(`${AUTH_API}/verify-email`, {
@@ -17,13 +19,14 @@ export const verifyEmail = async (verificationData) => {
       throw new Error(errorData.message || 'Email doğrulama başarısız');
     }
 
-    const data = await response.text(); // Backend string döndürüyor
+    const data = await response.text();
     return data;
   } catch (error) {
     throw error;
   }
 };
 
+//  email resendVerificationCode - 
 // Doğrulama kodu tekrar gönderme fonksiyonu
 export const resendVerificationCode = async (resendData) => {
   try {
@@ -40,7 +43,7 @@ export const resendVerificationCode = async (resendData) => {
       throw new Error(errorData.message || 'Kod gönderme başarısız');
     }
 
-    const data = await response.text(); // Backend string döndürüyor
+    const data = await response.text();
     return data;
   } catch (error) {
     throw error;
@@ -88,21 +91,21 @@ export const registerCustomer = async (payload) => {
 
 export const registerSeller = async (payload) => {
 
-    const response = await fetch(`${AUTH_API}/register`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(payload),
-    });
+  const response = await fetch(`${AUTH_API}/register`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(payload),
+  });
 
-    const result = await response.json();
+  const result = await response.json();
 
-    if (!response.ok) {
-        throw new Error(result.message || 'Kayıt sırasında hata oluştu.');
-    }
+  if (!response.ok) {
+    throw new Error(result.message || 'Kayıt sırasında hata oluştu.');
+  }
 
-    return result;
+  return result;
 };
 
 //GET PROFİLE
@@ -162,8 +165,6 @@ export const updateMyProfile = async (profileData) => {
 };
 
 
-// API servislerinize eklenecek fonksiyonlar
-
 // Şifre sıfırlama talebi
 export const forgotPassword = async (resetData) => {
   try {
@@ -180,7 +181,7 @@ export const forgotPassword = async (resetData) => {
       throw new Error(errorData.message || 'Şifre sıfırlama talebi başarısız');
     }
 
-    const data = await response.text(); // Backend string döndürüyor
+    const data = await response.text();
     return data;
   } catch (error) {
     throw error;
@@ -203,7 +204,7 @@ export const verifyResetCode = async (verificationData) => {
       throw new Error(errorData.message || 'Kod doğrulama başarısız');
     }
 
-    const data = await response.text(); // Backend string döndürüyor
+    const data = await response.text();
     return data;
   } catch (error) {
     throw error;
@@ -226,7 +227,7 @@ export const resetPassword = async (resetData) => {
       throw new Error(errorData.message || 'Şifre sıfırlama başarısız');
     }
 
-    const data = await response.text(); // Backend string döndürüyor
+    const data = await response.text();
     return data;
   } catch (error) {
     throw error;
@@ -247,7 +248,7 @@ export const isFollowingSeller = async (sellerId) => {
     throw new Error("Takip durumu alınamadı");
   }
 
-  return await res.json(); // true / false
+  return await res.json();
 };
 
 //GET FOLLOWİNG
@@ -287,7 +288,7 @@ export const followSeller = async (sellerId) => {
     try {
       data = JSON.parse(text);
     } catch {
-      data = { message: text }; // string message
+      data = { message: text };
     }
 
     if (!response.ok) {
@@ -348,7 +349,7 @@ export const rateSeller = async ({ sellerId, rating, comment }) => {
       }),
     });
 
-    const data = await response.text(); // JSON yerine text
+    const data = await response.text();
 
     if (!response.ok) {
       console.error("Rate Seller Error:", data);
@@ -378,6 +379,89 @@ export const getSellerRatings = async (sellerId) => {
     }
 
     const data = await response.json();
+    return data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+
+// OTP Servis Fonksiyonları
+// POST /api/otp/generate
+export const generateOtp = async (payload) => {
+  // Payload: { "gsm": "905301111111" }
+  try {
+    const response = await fetch(`${OTP_API}/generate`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
+    });
+
+    const text = await response.text();
+
+    if (!response.ok) {
+      let errorData = {};
+      try {
+        errorData = JSON.parse(text);
+      } catch { }
+      throw new Error(errorData.message || text || 'OTP kodu gönderilemedi.');
+    }
+
+    return { message: text };
+  } catch (error) {
+    throw error;
+  }
+};
+
+// POST /api/otp/confirm
+export const confirmOtp = async (payload) => {
+  // Payload: { "gsm":"905301111111", "otp":"765897" }
+  try {
+    const response = await fetch(`${OTP_API}/confirm`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
+    });
+
+    const text = await response.text();
+
+    if (!response.ok) {
+      let errorData = {};
+      try {
+        errorData = JSON.parse(text);
+      } catch { }
+      throw new Error(errorData.message || text || 'OTP doğrulama başarısız.');
+    }
+
+    return { message: text };
+  } catch (error) {
+    throw error;
+  }
+};
+
+// POST (Opsiyonel)
+export const getPhoneVerificationStatus = async (payload) => {
+  // Payload: { "gsm":"905301111111" }
+  try {
+    const response = await fetch(`${OTP_API}/phoneVerificationStatus`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || 'Telefon doğrulama durumu alınamadı.');
+    }
+
+    // Backend'in boolean veya detaylı durum döndürdüğü varsayılır
     return data;
   } catch (error) {
     throw error;

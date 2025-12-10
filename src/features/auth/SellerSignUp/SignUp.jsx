@@ -4,19 +4,21 @@ import { useNavigate } from 'react-router-dom';
 import Input from '../../../shared/Input/Input';
 import OrangeButton from '../../../shared/Button/OrangeButton';
 import { BsExclamationLg } from "react-icons/bs";
-import { MdEmail, MdAccessTime, MdOutlineSmartphone } from "react-icons/md";
+import { MdAccessTime, MdOutlineSmartphone } from "react-icons/md";
 import { IoWarningOutline } from "react-icons/io5";
 import { useDispatch } from 'react-redux';
 import PasswordInput from "../../../shared/Input/PasswordInput";
-import { registerSeller, verifyEmail, resendVerificationCode } from '../../../services/authService';
+import {
+    registerSeller,
+    generateOtp,      // POST /api/otp/generate
+    confirmOtp,       // POST /api/otp/confirm
+} from '../../../services/authService';
 
 const SignUp = () => {
     const navigate = useNavigate();
-    const dispatch = useDispatch();
 
     const info = 'text-center font-medium custom-font text-[10px] text-black bg-[var(--color-orange)] opacity-80 rounded-lg flex items-center px-1';
 
-    // Form state
     const [formData, setFormData] = useState({
         name: '',
         lastname: '',
@@ -27,27 +29,19 @@ const SignUp = () => {
         role: 'ROLE_SELLER',
         companyName: '',
         taxId: '',
-        shippingAddress: '',
-        billingAddress: '',
-        acceptTerms: false,
+        acceptTerms: false,  
         allowMarketing: false,
     });
 
-    // Email doğrulama state'leri
-    const [isRegistered, setIsRegistered] = useState(false);
+    // SMS Doğrulama state'leri
+    const [isRegistered, setIsRegistered] = useState(false); // Kayıt başarılı, kod girme ekranını göster
     const [verificationCode, setVerificationCode] = useState('');
     const [isVerifying, setIsVerifying] = useState(false);
     const [isResending, setIsResending] = useState(false);
     const [countdown, setCountdown] = useState(0);
     const [showPendingVerification, setShowPendingVerification] = useState(false);
 
-    const [verificationMethod, setVerificationMethod] = useState(null); // 'email' veya 'sms'
-    const [showMethodSelection, setShowMethodSelection] = useState(false); // Yöntem seçme ekranını göstermek için
-
-
-    // Üyelik sözleşmesi modal state
     const [isModalOpen, setIsModalOpen] = useState(false);
-
     const [message, setMessage] = useState("");
     const [messageType, setMessageType] = useState("info");
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -55,13 +49,43 @@ const SignUp = () => {
     const openModal = () => setIsModalOpen(true);
     const closeModal = () => setIsModalOpen(false);
 
-    // Component mount olduğunda bekleyen satıcı doğrulaması var mı kontrol et
+    // Backend'e gönderilecek GSM formatını üretir (örnek: "905301111111")
+    const getGsmForBackend = (phone) => {
+        let cleaned = phone.replace(/\D/g, '');
+        if (cleaned.startsWith('0')) {
+            cleaned = cleaned.substring(1);
+        }
+        if (cleaned.startsWith('90')) {
+            return cleaned;
+        }
+        return '90' + cleaned;
+    };
+
+    // Kayıt payload'ı için +90'lı telefon formatını üretir (ör: "+905301111111")
+    const formatPhoneNumberForPayload = (phone) => {
+        let cleaned = phone.replace(/\D/g, '');
+        if (cleaned.startsWith('0')) {
+            cleaned = cleaned.substring(1);
+        }
+        if (cleaned.startsWith('90')) {
+            return '+' + cleaned;
+        }
+        return '+90' + cleaned;
+    };
+
+    // E-posta doğrulama fonksiyonu Form validasyonu için
+    const validateEmail = (email) => {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return emailRegex.test(email);
+    };
+
+    // Component mount olduğunda bekleyen doğrulama var mı kontrol et
     useEffect(() => {
-        const pendingVerification = localStorage.getItem('pendingSellerEmailVerification');
+        // LocalStorage anahtarını sadece SMS odaklı tutuyoruz
+        const pendingVerification = localStorage.getItem('pendingSellerSmsVerification');
         if (pendingVerification) {
             const verificationData = JSON.parse(pendingVerification);
 
-            // Eğer verificationData varsa ve 24 saat geçmemişse
             const now = new Date().getTime();
             const verificationTime = new Date(verificationData.timestamp).getTime();
             const hoursPassed = (now - verificationTime) / (1000 * 60 * 60);
@@ -69,27 +93,21 @@ const SignUp = () => {
             if (hoursPassed < 24) {
                 setFormData(prev => ({
                     ...prev,
-                    email: verificationData.email,
+                    email: verificationData.email || '', 
                     name: verificationData.name || '',
                     lastname: verificationData.lastname || '',
                     companyName: verificationData.companyName || '',
                     taxId: verificationData.taxId || '',
-                    // LocalStorage'dan gelen numarayı temizle ve sadece son 10 haneyi al
-                    phoneNumber: verificationData.phoneNumber 
-                      ? verificationData.phoneNumber.replace(/\D/g, '').slice(-10) 
-                      : prev.phoneNumber
+                    // LocalStorage'dan gelen numarayı temizle ve sadece son 10 haneyi al (UI için)
+                    phoneNumber: verificationData.phoneNumber
+                        ? verificationData.phoneNumber.replace(/\D/g, '').slice(-10)
+                        : prev.phoneNumber
                 }));
-                if (verificationData.verificationMethod) {
-                    setVerificationMethod(verificationData.verificationMethod);
-                } else {
-                    setVerificationMethod(null);
-                }
                 setShowPendingVerification(true);
                 setMessage('Bekleyen bir hesap aktifleştirme işleminiz bulunmaktadır.');
                 setMessageType('info');
             } else {
-                // 24 saat geçmişse temizle
-                localStorage.removeItem('pendingSellerEmailVerification');
+                localStorage.removeItem('pendingSellerSmsVerification');
             }
         }
     }, []);
@@ -100,19 +118,6 @@ const SignUp = () => {
             ...prev,
             [name]: type === 'checkbox' ? checked : value,
         }));
-    };
-
-    const formatPhoneNumber = (phone) => {
-        let cleaned = phone.replace(/\D/g, '');
-        if (cleaned.startsWith('0')) {
-            cleaned = cleaned.substring(1);
-        }
-        return '+90' + cleaned;
-    };
-
-    const validateEmail = (email) => {
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        return emailRegex.test(email);
     };
 
     const startCountdown = () => {
@@ -128,18 +133,17 @@ const SignUp = () => {
         }, 1000);
     };
 
-    const savePendingVerification = (email, name, lastname, companyName, taxId, phoneNumber, method = null) => {
+    const savePendingVerification = (email, name, lastname, companyName, taxId, phoneNumber) => {
         const verificationData = {
-            email: email,
+            email: email,  // Email'i kaydet
             name: name,
             lastname: lastname,
             companyName: companyName,
             taxId: taxId,
             phoneNumber: phoneNumber,
             timestamp: new Date().toISOString(),
-            verificationMethod: method //Yöntemi kaydetmek için
         };
-        localStorage.setItem('pendingSellerEmailVerification', JSON.stringify(verificationData));
+        localStorage.setItem('pendingSellerSmsVerification', JSON.stringify(verificationData));
     };
 
     const handleSubmit = async (e) => {
@@ -147,7 +151,7 @@ const SignUp = () => {
         setMessage('');
         setMessageType('info');
 
-        // Zorunlu alan kontrolü
+        // Zorunlu alan kontrolü 
         if (
             !formData.name ||
             !formData.lastname ||
@@ -170,7 +174,7 @@ const SignUp = () => {
             return;
         }
 
-        // E-posta doğrulama
+        // E-posta doğrulama (Kayıt zorunluluğu nedeniyle)
         if (!validateEmail(formData.email)) {
             setMessage("Geçerli bir e-posta adresi girin.");
             setMessageType("error");
@@ -178,8 +182,10 @@ const SignUp = () => {
         }
 
         // Telefon numarası uzunluğu kontrolü
-        const formattedPhone = formatPhoneNumber(formData.phoneNumber);
-        if (formattedPhone.length !== 13) {
+        const formattedPhoneForPayload = formatPhoneNumberForPayload(formData.phoneNumber); // +90'lı format
+        const gsmForBackend = getGsmForBackend(formData.phoneNumber); // 90530'lu format
+
+        if (formattedPhoneForPayload.length !== 13) {
             setMessage("Geçerli bir telefon numarası girin.");
             setMessageType("error");
             return;
@@ -201,19 +207,23 @@ const SignUp = () => {
 
         const payload = {
             name: formData.name,
-            lastname: formData.lastname,
-            email: formData.email,
-            phoneNumber: formatPhoneNumber(formData.phoneNumber),
-            password: formData.password,
-            role: "ROLE_SELLER",
-            companyName: formData.companyName,
-            taxId: formData.taxId,
-            shippingAddress: "",
-            billingAddress: "",
+            lastname: formData.lastname,
+            email: formData.email,
+            phoneNumber: formattedPhoneForPayload,
+            password: formData.password,
+            role: "ROLE_SELLER",
+            companyName: formData.companyName,
+            taxId: formData.taxId,
+
         };
 
         try {
-            const data = await registerSeller(payload);
+            // 1. Satıcıyı kaydet (Email zorunlu tutuluyor)
+            await registerSeller(payload);
+            console.log(payload)
+
+            // 2. E-posta doğrulama adımı atlanıyor, direkt SMS kodu gönderiliyor
+            await generateOtp({ gsm: gsmForBackend });
 
             // Bekleyen doğrulama bilgisini kaydet
             savePendingVerification(
@@ -222,63 +232,24 @@ const SignUp = () => {
                 formData.lastname,
                 formData.companyName,
                 formData.taxId,
-                formattedPhone,
-                verificationMethod
+                formattedPhoneForPayload
             );
 
-            setMessage('Satıcı başvurunuz alındı! Lütfen hesabınızı aktifleştirmek için bir doğrulama yöntemi seçin.');
+            setMessage(`Satıcı başvurunuz alındı! Lütfen ${formattedPhoneForPayload} numarasına gönderilen SMS kodunu girin.`);
             setMessageType('success');
-            setShowMethodSelection(true);
+            setIsRegistered(true); // Direkt kod giriş ekranına geç
             setShowPendingVerification(false);
             startCountdown();
 
         } catch (error) {
-            setMessage(error.message || 'İstek gönderilirken bir hata oluştu.');
+            setMessage(error.message || 'Kayıt sırasında bir hata oluştu.');
             setMessageType('error');
         } finally {
             setIsSubmitting(false);
         }
     };
 
-    const handleVerifyEmail = async (e) => {
-        e.preventDefault();
-        setMessage('');
-        setMessageType('info');
-
-        if (!verificationCode || verificationCode.length !== 6) {
-            setMessage("Lütfen 6 haneli doğrulama kodunu girin.");
-            setMessageType("error");
-            return;
-        }
-
-        setIsVerifying(true);
-
-        try {
-            const verificationData = {
-                email: formData.email,
-                verificationCode: verificationCode
-            };
-
-            await verifyEmail(verificationData);
-
-            // Başarılı doğrulama sonrası bekleyen doğrulama bilgisini temizle
-            localStorage.removeItem('pendingSellerEmailVerification');
-
-            setMessage('E-posta başarıyla doğrulandı! Satıcı başvurunuz değerlendirmeye alınacak. Giriş sayfasına yönlendiriliyorsunuz...');
-            setMessageType('success');
-
-            setTimeout(() => {
-                navigate('/giris-kaydol/giris-yap');
-            }, 2000);
-
-        } catch (error) {
-            setMessage(error.message || 'Doğrulama kodu geçersiz.');
-            setMessageType('error');
-        } finally {
-            setIsVerifying(false);
-        }
-    };
-
+    // SADECE SMS Doğrulama Fonksiyonu
     const handleVerifySms = async (e) => {
         e.preventDefault();
         setMessage('');
@@ -293,22 +264,22 @@ const SignUp = () => {
         setIsVerifying(true);
 
         try {
+            const gsmForBackend = getGsmForBackend(formData.phoneNumber);
+
             const verificationData = {
-                phoneNumber: formatPhoneNumber(formData.phoneNumber),
-                verificationCode: verificationCode
+                gsm: gsmForBackend,
+                otp: verificationCode
             };
 
-            // özel bir backend servisi çağrılmalıdır. Örn: verifySmsCode(verificationData);
-            // Şimdilik e-posta servisini kullanmaya devam ediyoruz, ancak payload'u SMS için hazırladık.
-            await verifyEmail(verificationData);
+            await confirmOtp(verificationData);
 
-            localStorage.removeItem('pendingSellerEmailVerification');
+            localStorage.removeItem('pendingSellerSmsVerification');
 
             setMessage('Hesabınız başarıyla doğrulandı! Giriş sayfasına yönlendiriliyorsunuz...');
             setMessageType('success');
 
             setTimeout(() => {
-                navigate('/giris-kaydol/giris-yap');
+                navigate('/giris-kaydol/satici/giris-yap');
             }, 2000);
 
         } catch (error) {
@@ -319,6 +290,7 @@ const SignUp = () => {
         }
     };
 
+    // Kod tekrar gönderme
     const handleResendCode = async () => {
         if (countdown > 0) return;
 
@@ -326,11 +298,13 @@ const SignUp = () => {
         setMessage('');
 
         try {
+            const gsmForBackend = getGsmForBackend(formData.phoneNumber);
+
             const resendData = {
-                email: formData.email
+                gsm: gsmForBackend
             };
 
-            await resendVerificationCode(resendData);
+            await generateOtp(resendData);
 
             setMessage('Doğrulama kodu tekrar gönderildi.');
             setMessageType('success');
@@ -344,91 +318,32 @@ const SignUp = () => {
         }
     };
 
-
     const handlePendingVerification = () => {
         setShowPendingVerification(false);
-
-        // Yöntem daha önce seçildi mi?
-        if (verificationMethod) {
-            // Yöntem seçilmiş! Direkt Kod Giriş ekranına git.
-            setIsRegistered(true);
-
-            const isEmail = verificationMethod === 'email';
-            const targetLabel = isEmail ? 'e-posta' : 'SMS';
-
-            setMessage(`Bekleyen ${targetLabel} doğrulama işlemine devam ediliyor. Lütfen kodu girin.`);
-            setMessageType('info');
-            startCountdown();
-
-        } else {
-            // Yöntem seçilmemiş! Yöntem Seçim ekranına git.
-            setShowMethodSelection(true);
-            setMessage('Lütfen bekleyen doğrulama işlemini tamamlamak için bir yöntem seçin.');
-            setMessageType('info');
-        }
+        //setIsRegistered(true);
+        handleResendCode();
+        setMessage(`Bekleyen SMS doğrulama işlemine devam ediliyor. Lütfen kodu girin.`);
+        setMessageType('info');
     };
 
     const handleCancelPendingVerification = () => {
-        localStorage.removeItem('pendingSellerEmailVerification');
+        localStorage.removeItem('pendingSellerSmsVerification');
         setShowPendingVerification(false);
         setFormData({
             name: '',
             lastname: '',
-            email: '',
+            email: '',  // Sıfırlandı
             phoneNumber: '',
             password: '',
             confirmPassword: '',
             role: 'ROLE_SELLER',
             companyName: '',
             taxId: '',
-            shippingAddress: '',
-            billingAddress: '',
             acceptTerms: false,
-            allowMarketing: false,
         });
         setMessage('');
     };
-// startEmailVerification
-const startEmailVerification = () => {
-    setVerificationMethod('email');
-    setShowMethodSelection(false);
-    setIsRegistered(true);
-    setMessage(`Doğrulama kodu ${formData.email} adresine gönderildi.`);
-    setMessageType('info');
-    startCountdown();
 
-    // Mevcut formData'daki en güncel veriyi kaydet.
-    savePendingVerification(
-        formData.email,
-        formData.name,
-        formData.lastname,
-        formData.companyName,
-        formData.taxId,
-        formatPhoneNumber(formData.phoneNumber), // formatPhoneNumber kullanın
-        'email' // Yöntem
-    );
-};
-
-// startSmsVerification
-const startSmsVerification = () => {
-    setVerificationMethod('sms');
-    setShowMethodSelection(false);
-    setIsRegistered(true);
-    setMessage(`Doğrulama kodu ${formData.phoneNumber} numarasına gönderildi.`);
-    setMessageType('info');
-    startCountdown();
-
-    // Mevcut formData'daki en güncel veriyi kaydet.
-    savePendingVerification(
-        formData.email,
-        formData.name,
-        formData.lastname,
-        formData.companyName,
-        formData.taxId,
-        formatPhoneNumber(formData.phoneNumber), // formatPhoneNumber kullanın
-        'sms' // Yöntem
-    );
-};
     const messageStyles = {
         success: "text-green-800",
         error: "text-red-800",
@@ -437,22 +352,19 @@ const startSmsVerification = () => {
 
     // Bekleyen doğrulama uyarısı
     if (showPendingVerification) {
-        const isEmail = verificationMethod === 'email';
-        const title = isEmail ? 'Bekleyen Satıcı E-posta Doğrulaması' : 'Bekleyen Satıcı SMS Doğrulaması';
-        const target = isEmail ? formData.email : formData.phoneNumber;
-        const targetType = isEmail ? 'adresine' : 'numarasına';
-        const buttonIcon = isEmail ? <MdEmail className="w-5 h-5 mr-2" /> : <MdOutlineSmartphone className="w-5 h-5 mr-2" />;
+        const title = 'Bekleyen Satıcı SMS Doğrulaması';
+        const target = formatPhoneNumberForPayload(formData.phoneNumber);
+        const targetType = 'numarasına';
+        const buttonIcon = <MdOutlineSmartphone className="w-5 h-5 mr-2" />;
 
         return (
             <AuthLayout>
                 <div className="space-y-6 flex flex-col p-6">
-                    {/* Bekleyen doğrulama uyarı kutusu */}
                     <div className="bg-gradient-to-r from-orange-100 to-yellow-100 border border-orange-300 rounded-xl p-4 space-y-3">
                         <div className="flex items-center gap-3 text-orange-800">
                             <MdAccessTime className="w-6 h-6" />
                             <div className="font-semibold">{title}</div>
                         </div>
-
                         <div className="text-sm text-orange-700">
                             <p className="mb-2">
                                 <strong>{target}</strong> {targetType} gönderilen doğrulama kodunu henüz onaylamadınız.
@@ -465,15 +377,11 @@ const startSmsVerification = () => {
                             </p>
                         </div>
                     </div>
-
-                    {/* Mesaj kutusu */}
                     {message && (
                         <div className={`text-sm mb-2 ${messageStyles[messageType]}`}>
                             {message}
                         </div>
                     )}
-
-                    {/* Aksiyon butonları */}
                     <div className="space-y-3">
                         <OrangeButton
                             onClick={handlePendingVerification}
@@ -482,7 +390,6 @@ const startSmsVerification = () => {
                             {buttonIcon}
                             Doğrulama Kodunu Gir
                         </OrangeButton>
-
                         <button
                             onClick={handleCancelPendingVerification}
                             className="w-full px-4 py-3 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors text-sm"
@@ -490,65 +397,23 @@ const startSmsVerification = () => {
                             Yeni Satıcı Başvurusu Yap
                         </button>
                     </div>
-
-                    {/* Yardımcı bilgi */}
                     <div className="text-center text-xs text-gray-500 bg-gray-50 rounded-lg p-3">
                         <IoWarningOutline className="w-4 h-4 mx-auto mb-1" />
                         <p>Doğrulama kodu 24 saat geçerlidir. Kod gelmedi mi?</p>
-                        <p>Spam klasörünüzü kontrol edin.</p>
+                        <p>Lütfen telefon numaranızı kontrol edin.</p>
                     </div>
                 </div>
             </AuthLayout>
         );
     }
 
-    // Doğrulama Yöntemi Seçim Ekranı
-    if (showMethodSelection) {
-        return (
-            <AuthLayout>
-                <div className="space-y-6 flex flex-col p-6">
-                    <h2 className="text-xl font-semibold text-center">Doğrulama Yöntemini Seçin</h2>
-
-                    {/* Mesaj kutusu */}
-                    {message && (
-                        <div className={`text-xs mb-2 text-center ${messageStyles[messageType]}`}>
-                            {message}
-                        </div>
-                    )}
-
-                    {/* Seçenekler */}
-                    <div className="space-y-4">
-                        <OrangeButton onClick={startEmailVerification}>
-                            <MdEmail className="w-6 h-6 mr-3" /> E-posta ile Doğrula
-                        </OrangeButton>
-
-                        <OrangeButton onClick={startSmsVerification}>
-                            <MdOutlineSmartphone className="w-6 h-6 mr-3" /> SMS ile Doğrula
-                        </OrangeButton>
-                    </div>
-
-                    {/* Not */}
-                    <div className="text-center text-xs text-gray-500 bg-gray-50 rounded-lg p-3">
-                        <IoWarningOutline className="w-4 h-4 mx-auto mb-1" />
-                        <p>Seçtiğiniz yönteme doğrulama kodu gönderilecektir.</p>
-                    </div>
-                </div>
-            </AuthLayout>
-        );
-    }
-
-    // Email/SMS doğrulama ekranı
+    // Kod Doğrulama ekranı
     if (isRegistered) {
-        const isEmail = verificationMethod === 'email';
-        const target = isEmail ? formData.email : formData.phoneNumber;
-        const targetLabel = isEmail ? 'E-posta adresinize' : 'Telefon numaranıza';
-        const targetIcon = isEmail ? <MdEmail className="w-6 h-6 flex-shrink-0" /> : '📱';
-
-        // SMS için resend kodu farklı olabilir, ancak aynı countdown mekanizması kullanılacak.
-        const handleResend = isEmail ? handleResendCode : handleResendCode; // SMS için farklı bir fonksiyon gerekebilir, şimdilik aynı kalabilir.
-
-        // Form submit fonksiyonunu seçilen yönteme göre belirle
-        const handleFormSubmit = isEmail ? handleVerifyEmail : handleVerifySms;
+        const target = formatPhoneNumberForPayload(formData.phoneNumber);
+        const targetLabel = 'Telefon numaranıza';
+        const targetIcon = '📱';
+        const handleResend = handleResendCode;
+        const handleFormSubmit = handleVerifySms;
 
         return (
             <AuthLayout>
@@ -560,9 +425,9 @@ const startSmsVerification = () => {
                         </div>
                     )}
 
-                    {/* Email doğrulama bilgi kutusu */}
+                    {/* SMS doğrulama bilgi kutusu */}
                     <div className={`${info} gap-4 py-3`}>
-                        {targetIcon}
+                        <span className="text-lg">{targetIcon}</span>
                         <div className="text-center min-w-0 flex-1">
                             <div className="mb-1">{targetLabel} satıcı başvuru doğrulama kodu gönderildi</div>
                             <div className="font-bold text-xs break-all">{target}</div>
@@ -611,23 +476,6 @@ const startSmsVerification = () => {
                             }
                         </button>
                     </div>
-
-                    <div className="text-center">
-                        <button
-                            type="button"
-                            onClick={() => {
-                                setIsRegistered(false);
-                                setVerificationCode('');
-                                setMessage('');
-                                setVerificationMethod(null); // Yöntemi sıfırla
-                                setShowMethodSelection(true); // Yöntem seçimine geri dön
-                            }}
-                            className="text-sm text-gray-700 hover:text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-100 transition-colors"
-                        >
-                            ← Yöntem Seçimine Geri Dön
-                        </button>
-
-                    </div>
                 </div>
             </AuthLayout>
         );
@@ -645,25 +493,36 @@ const startSmsVerification = () => {
                 )}
 
                 <div className="flex space-x-4">
-                    <Input type="text" name="name" placeholder="Ad" value={formData.name} onChange={handleChange} className="w-1/2" />
-                    <Input type="text" name="lastname" placeholder="Soyad" value={formData.lastname} onChange={handleChange} className="w-1/2" />
+                    <Input type="text" id="name" name="name" placeholder="Ad" value={formData.name} onChange={handleChange} className="w-1/2" />
+                    <Input type="text" id="lastname" name="lastname" placeholder="Soyad" value={formData.lastname} onChange={handleChange} className="w-1/2" />
                 </div>
 
-                <Input type="email" name="email" placeholder="E-posta adresi" value={formData.email} onChange={handleChange} />
+                {/* E-posta alanı geri geldi */}
+                <Input type="email" id="email" name="email" placeholder="E-posta adresi" value={formData.email} onChange={handleChange} />
 
                 <div className="flex gap-4">
                     <Input type="text" value="TR (+90)" disabled className="w-1/3" />
-                    <Input type="tel" name="phoneNumber" placeholder="Telefon Numarası" value={formData.phoneNumber} onChange={handleChange} className="w-2/3" />
+                    <Input
+                        type="tel"
+                        id="phoneNumber"
+                        name="phoneNumber"
+                        placeholder="5XX XXX XX XX"
+                        value={formData.phoneNumber}
+                        onChange={handleChange}
+                        className="w-2/3"
+                        maxLength={10}
+                    />
                 </div>
 
                 <div className={`${info} gap-8`}>
                     <BsExclamationLg className="w-6 h-6" />
-                    E-posta adresinizi doğrulaman için size kod göndereceğiz.
+                    Başvurunuzu telefon numaranıza göndereceğimiz **SMS kodu** ile doğrulayacağız.
                 </div>
 
                 {/* Şifre */}
                 <PasswordInput
                     name="password"
+                    id="password"
                     placeholder="Şifre"
                     value={formData.password}
                     onChange={handleChange}
@@ -672,14 +531,15 @@ const startSmsVerification = () => {
                 {/* Şifre Tekrar */}
                 <PasswordInput
                     name="confirmPassword"
+                    id="confirmPassword"
                     placeholder="Şifreyi Tekrar Girin"
                     value={formData.confirmPassword}
                     onChange={handleChange}
                 />
 
                 <div className="flex space-x-4">
-                    <Input type="text" name="companyName" placeholder="Firma Adı" value={formData.companyName} onChange={handleChange} className="w-1/2" />
-                    <Input type="text" name="taxId" placeholder="Vergi Numarası" value={formData.taxId} onChange={handleChange} className="w-1/2" />
+                    <Input type="text" id="companyName" name="companyName" placeholder="Firma Adı" value={formData.companyName} onChange={handleChange} className="w-1/2" />
+                    <Input type="text" id="taxId" name="taxId" placeholder="Vergi Numarası" value={formData.taxId} onChange={handleChange} className="w-1/2" />
                 </div>
 
                 {/* Üyelik Sözleşmesi Checkbox */}
@@ -703,11 +563,9 @@ const startSmsVerification = () => {
                 </div>
 
                 <OrangeButton type="submit" className="w-3/4 mx-auto" disabled={isSubmitting}>
-                    {isSubmitting ? 'Gönderiliyor...' : 'Satıcı olmak için başvur'}
+                    {isSubmitting ? 'Başvuruluyor...' : 'Satıcı olmak için başvur'}
                 </OrangeButton>
             </form>
-
-
 
             {/* Satıcı Sözleşmesi Modal */}
             {isModalOpen && (

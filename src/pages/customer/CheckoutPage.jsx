@@ -1,985 +1,572 @@
-import { useState, useEffect } from "react";
-import { FaCreditCard, FaMapMarkerAlt, FaCheckCircle, FaPlus, FaTruck, FaClock, FaShieldAlt } from "react-icons/fa";
+import { useState, useEffect } from 'react';
 import { HiOutlineReply } from "react-icons/hi";
 import { useNavigate } from "react-router-dom";
+import { fetchAddresses } from "../../services/addressService"; // API'den adresleri çeken servis
+import { fetchCart } from "../../services/cartService"; // API'den sepeti çeken servis
 import { toast } from "react-toastify";
-import { createAddress, fetchAddresses } from "../../services/addressService";
-import { fetchCart, clearCart } from "../../services/cartService";
 import { useDispatch, useSelector } from 'react-redux';
-import { API_BASE } from "../../config";
+import { MdSmartphone } from "react-icons/md";
+import { makePayment } from '../../services/paymentService';
 
-const CheckoutPage = () => {
-  const dispatch = useDispatch();
-  const cartItems = useSelector(state => state.cart.items);
-  const buyNow = useSelector(state => state.buyNow);
-  const navigate = useNavigate();
-  const CHECKOUT_API = `${API_BASE}/orders/confirm`;
-  const [discountAmount, setDiscountAmount] = useState(0); // toplam indirim
-  const [appliedCoupon, setAppliedCoupon] = useState(null); // geçerli kupon veya kampanya bilgisi
-
-
-  useEffect(() => {
-    dispatch(fetchCart());
-  }, [dispatch]);
-
-  const hasBuyNowItem = buyNow && buyNow.product;
-
-  const displayItems = hasBuyNowItem
-    ? [{
-      id: buyNow.product.id,
-      productName: buyNow.product.name,
-      quantity: buyNow.quantity,
-      unitPrice: buyNow.product.price
-    }]
-    : cartItems.map(item => ({
-      id: item.productId,
-      productName: item.productName,
-      quantity: item.quantity,
-      unitPrice: item.unitPrice
-    }));
-
-  // Mock kargo firmaları ve fiyatları
-  const [shippingOptions, setShippingOptions] = useState([
-    {
-      id: 'aras',
-      name: 'Aras Kargo',
-      price: 29.90,
-      estimatedDays: '1-2',
-      description: 'Hızlı ve güvenli teslimat',
-      icon: '🚚',
-      features: ['Kapıda ödeme', 'SMS bilgilendirme', 'Online takip']
-    },
-    {
-      id: 'mng',
-      name: 'MNG Kargo',
-      price: 27.50,
-      estimatedDays: '1-3',
-      description: 'Ekonomik teslimat seçeneği',
-      icon: '📦',
-      features: ['Kapıda ödeme', 'Online takip']
-    },
-    {
-      id: 'yurtici',
-      name: 'Yurtiçi Kargo',
-      price: 32.00,
-      estimatedDays: '1-2',
-      description: 'Güvenilir teslimat',
-      icon: '🚛',
-      features: ['Kapıda ödeme', 'SMS bilgilendirme', 'Online takip', 'Sigortası']
-    },
-    {
-      id: 'ptt',
-      name: 'PTT Kargo',
-      price: 25.00,
-      estimatedDays: '2-4',
-      description: 'Devlet güvencesi',
-      icon: '📮',
-      features: ['Kapıda ödeme', 'Online takip']
-    },
-    {
-      id: 'surat',
-      name: 'Sürat Kargo',
-      price: 31.20,
-      estimatedDays: '1-2',
-      description: 'Hızlı teslimat garantisi',
-      icon: '⚡',
-      features: ['Kapıda ödeme', 'SMS bilgilendirme', 'Online takip']
-    }
-  ]);
-  const [formData, setFormData] = useState({
-    // Adres bilgileri
-    addressTitle: "",
-    recipientName: "",
-    phoneNumber: "",
-    country: "Türkiye",
-    city: "",
-    district: "",
-    postalCode: "",
-    fullAddress: "",
-    isDefault: false,
-
-    // Kart bilgileri
-    cardNumber: "",
-    cardHolder: "",
-    expiryDate: "",
-    cvv: "",
-    paymentToken: "",
-    // Diğer
-    paymentMethod: "credit-card",
-    saveAddress: false,
-
-    // Seçimler
-    selectedAddressId: null,
-    billingAddress: "",
-    customerNotes: "",
-    shippingMethod: "STANDARD",
-    shippingCost: 0,
-    selectedShipping: "",
-    couponCode: "",
-
-  });
-
-  const applyDiscountCode = async () => {
-    try {
-      const response = await fetch(
-        `${API_BASE}/public/coupons/by-code/${formData.couponCode}`
-      );
-
-      if (!response.ok) throw new Error("Kod geçersiz veya bulunamadı.");
-
-      const data = await response.json();
-
-      const total = getTotal() + getSelectedShippingPrice();
-      const discount = data.type === "percent"
-        ? total * (data.value / 100)
-        : data.value;
-
-      setDiscountAmount(discount);
-      setAppliedCoupon(data);
-
-      toast.success(`${data.code} uygulandı! İndirim: ₺${discount.toFixed(2)}`);
-    } catch (err) {
-      setDiscountAmount(0);
-      setAppliedCoupon(null);
-      toast.error(err.message);
-    }
-  };
-
-
-  const [addresses, setAddresses] = useState([]);
-
-  //GET ADRESSES
-  useEffect(() => {
-    const getAddresses = async () => {
-      try {
-        const data = await fetchAddresses();
-        setAddresses(data);
-      } catch (error) {
-        toast.error(error.message);
-      }
-    };
-
-    getAddresses();
-  }, []);
-
-  ///////////////////777
-  //POST ADRESS
-  //address formu input değişikliği
-  const handleInputChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: type === 'checkbox' ? checked : value
-    }));
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
- 
-  const addressPayload = {
-    addressTitle: formData.addressTitle,
-    recipientName: formData.recipientName,
-    phoneNumber: formData.phoneNumber,
-    country: formData.country,
-    city: formData.city,
-    district: formData.district,
-    postalCode: formData.postalCode,
-    fullAddress: formData.fullAddress,
-    isDefault: formData.isDefault
-  };
-
-    try {
-      await createAddress(addressPayload);
-      toast.success("Adres başarıyla kaydedildi");
-
-      // Formu temizle
-      setFormData({
-        addressTitle: "",
-        recipientName: "",
-        phoneNumber: "",
-        country: "",
-        city: "",
-        district: "",
-        postalCode: "",
-        fullAddress: "",
-        isDefault: false
-      });
-      const updated = await fetchAddresses(); // adresleri al
-      setAddresses(updated); 
-    } catch (error) {
-      toast.error(error.message);
-    }
-  };
-  ///////////////////////777
- 
-  // Siparişi tamamla
-const handleConfirmOrder = async () => {
-  try {
-    // Backend'in beklediği adres yapısına göre payload
-    const addressPayload = {
-      firstName: formData.recipientName?.split(" ")[0] || formData.recipientName || "",
-      lastName: formData.recipientName?.split(" ")[1] || "",
-      shippingAddress: {
-        addressLine: formData.fullAddress,
-        city: formData.city,
-        district: formData.district,
-        postalCode: formData.postalCode,
-        phone: formData.phoneNumber
-      },
-      billingAddress: {
-        addressLine: formData.billingAddress || formData.fullAddress,
-        city: formData.city,
-        district: formData.district,
-        postalCode: formData.postalCode
-      },
-      saveAddress: formData.saveAddress || true,
-      customerNotes: formData.customerNotes,
-      shippingMethod: formData.shippingMethod || "STANDARD",
-      shippingCost: getSelectedShippingPrice(),
-      paymentMethod: formData.paymentMethod,
-      paymentToken:
-        formData.paymentMethod === "credit-card"
-          ? formData.paymentToken
-          : undefined,
-      couponCode: appliedCoupon ? appliedCoupon.code : null
-    };
-
-    // Konsola gönderilen JSON
-    //console.log("Gönderilen Adres:", addressPayload);
-   //console.log("JSON.stringify Gövdesi:", JSON.stringify(addressPayload, null, 2));
-
-    const token = localStorage.getItem("token");
-    const response = await fetch(CHECKOUT_API, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`
-      },
-      body: JSON.stringify(addressPayload)
-    });
-
-    if (!response.ok) throw new Error("Sipariş tamamlanamadı.");
-
-    const result = await response.json();
-    console.log("Sipariş sonucu:", result);
-
-    // Sepeti temizle ve yönlendirme
-    dispatch(clearCart());
-    toast.success("Sipariş başarıyla tamamlandı!");
-    navigate("/");
-
-  } catch (error) {
-    console.error("Sipariş gönderme hatası:", error);
-    toast.error(error.message);
-  }
+// Fiyat formatlama fonksiyonu
+const formatPrice = (price) => {
+  if (typeof price !== 'number' || isNaN(price)) return '0.00';
+  return price.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 };
 
+// --- MODAL: Adres Seçim ---
+const AddressModal = ({ type, currentAddressId, addresses, onClose, onSelectAddress }) => {
 
-  ////////////////////////////////////////
-  const [currentStep, setCurrentStep] = useState(1); // 1: Adres, 2: Kargo, 3: Ödeme, 4: Onay
-  const [showAddressForm, setShowAddressForm] = useState(false);
-  const [selectedAddressId, setSelectedAddressId] = useState(addresses.find(addr => addr.isDefault)?.id || null);
-  const [shippingCalculating, setShippingCalculating] = useState(false);
+  const addressLabel = (addr) => `${addr.addressTitle} (${addr.district} / ${addr.city} / ${addr.country})`;
 
+  return (
+    <div className="fixed inset-0 bg-black/50 bg-opacity-50 flex items-center justify-center p-4 z-50">
+      <div className="bg-white rounded-lg shadow-2xl p-6 w-full max-w-lg">
+        <h3 className="text-xl font-semibold mb-4 border-b border-gray-300 pb-2">
+          {type === 'shipping' ? 'Teslimat Adresi Seçimi' : 'Fatura Adresi Seçimi'}
+        </h3>
 
-  const getTotal = () =>
-    // cartItems.reduce((acc, item) => acc + item.unitPrice * item.quantity, 0);
-    displayItems.reduce((total, item) => total + item.unitPrice * item.quantity, 0);
+        <div className="space-y-3 max-h-80 overflow-y-auto pr-2">
+          {addresses.length === 0 ? (
+            <p className="text-gray-500">Kayıtlı adresiniz bulunmamaktadır. Lütfen yeni bir adres ekleyin.</p>
+          ) : (
+            addresses.map((addr) => (
+              <div
+                key={addr.id}
+                className={`p-3 border rounded-lg cursor-pointer transition 
+                                ${addr.id === currentAddressId ? 'border-orange-500 bg-orange-50' : 'border-gray-200 hover:bg-gray-50'}`}
+                onClick={() => { onSelectAddress(addr.id); onClose(); }} // ID üzerinden seçim yapıldı
+              >
+                <p className="font-medium text-gray-800">{addressLabel(addr)}</p>
+                <div className='flex items-center text-sm text-gray-600'>
+                  <p>{addr.recipientName} </p>
+                  <p className='px-2 items-center flex'><MdSmartphone /> {addr.phoneNumber}</p>
+                </div>
+                <p className="text-base text-gray-800 mt-1">{addr.fullAddress}</p>
+              </div>
+            ))
+          )}
+        </div>
+        <button
+          className="w-full py-2 bg-gray-200 text-gray-800 font-semibold rounded-lg mt-4 hover:bg-gray-300 transition"
+          onClick={onClose}
+        > Kapat
+        </button>
+      </div>
+    </div>
+  );
+};
+// --- ANA COMPONENT ---
+const CheckoutPage = () => {
 
+  // Redux'tan sepet ve kupon verilerini çekme
+  const { items: cartItems, subtotal: cartSubtotal, totalDiscount, loading: cartLoading, error: cartError } = useSelector(state => state.cart || {});
+  // İlk adresi varsayılan olarak ayarlamak için adres listesini çekme
+  const [addresses, setAddresses] = useState([]);
 
-  const getSelectedShippingPrice = () => {
-    const selected = shippingOptions.find(option => option.id === formData.selectedShipping);
-    return selected ? selected.price : 0;
+  // İlk Adresin ID'sini veya null'u varsayılan olarak ayarlamak için useEffect kullanıldı.
+  const initialShippingAddressId = addresses.length > 0 ? addresses[0].id : null;
+
+  // --- STATE YÖNETİMİ ---
+  const [formData, setFormData] = useState({
+    // Adres ve Kargo
+    selectedAddressId: initialShippingAddressId,
+    selectedBillingAddressId: initialShippingAddressId, // Fatura adresi
+    isSameAddress: true, // Faturam aynı adrese gönder tiki
+    selectedShipping: 'yurtiçi',
+    // Ödeme ve Kupon
+    isCardSelected: true,
+    selectedInstallment: 1,
+    cardHolderName: "",
+    cardNumber: "",
+    expireMonth: "",
+    expireYear: "",
+    cvc: "",
+    is3DSecureChecked: false,
+    couponCode: '',
+  });
+
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalType, setModalType] = useState('shipping'); // 'shipping' veya 'billing'
+
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+
+  const shippingOptions = [
+    { id: 'yurtiçi', name: 'Yurtiçi Kargo', price: 44.99 },
+    { id: 'ptt', name: 'PTT Kargo', price: 34.99 },
+  ];
+
+  // --- HESAPLAMALAR ---
+  const subtotal = cartItems.reduce((acc, item) => acc + (item.unitPrice * item.quantity), 0) || 0; // Gerçek sepet toplamı
+  const discountAmount = totalDiscount || 0; // Redux'tan gelen toplam indirim
+  const selectedShippingOption = shippingOptions.find(o => o.id === formData.selectedShipping);
+  const shippingPrice = selectedShippingOption?.price || 0;
+  const finalTotal = subtotal + shippingPrice - discountAmount;
+
+  // --- ADRES VERİSİ YÖNETİMİ (AddressModal için) ---
+  const selectedShippingAddress = addresses.find(addr => addr.id === formData.selectedAddressId) || null;
+  const selectedBillingAddress = formData.isSameAddress
+    ? selectedShippingAddress
+    : (addresses.find(addr => addr.id === formData.selectedBillingAddressId) || null);
+
+  const addressLabel = (addr) => addr ? `${addr.addressTitle} (${addr.district} / ${addr.city} / ${addr.country})` : "Adres Seçiniz";
+
+  // --- MODAL FONKSİYONLARI ---
+  const handleOpenModal = (type) => {
+    setModalType(type);
+    setModalOpen(true);
   };
 
-  //const getFinalTotal = () => getTotal() + getSelectedShippingPrice();
-  const getFinalTotal = () => {
-    const total = getTotal() + getSelectedShippingPrice();
-    const discountedTotal = total - discountAmount;
-    return discountedTotal > 0 ? discountedTotal : 0;
-  };
-
-
-  // Kargo fiyatlarını hesapla (API simülasyonu)
-  const calculateShippingRates = async (address) => {
-    setShippingCalculating(true);
-
-    // Simulated API delay
-    await new Promise(resolve => setTimeout(resolve, 1500));
-
-    // Şehir bazlı fiyat hesaplama simülasyonu
-    const cityMultiplier = address.city === 'İstanbul' ? 1 : 1.2;
-    const totalWeight = cartItems.reduce((acc, item) => acc + (item.weight || 0.5) * item.quantity, 0);
-    const weightMultiplier = totalWeight > 2 ? 1.3 : 1;
-
-    const updatedOptions = shippingOptions.map(option => ({
-      ...option,
-      price: Math.round(option.price * cityMultiplier * weightMultiplier * 100) / 100,
-      estimatedDays: address.city === 'İstanbul' ? option.estimatedDays :
-        option.estimatedDays.split('-').map(d => parseInt(d) + 1).join('-')
-    }));
-
-    setShippingOptions(updatedOptions);
-    setShippingCalculating(false);
-  };
-
-  const handleCardNumberChange = (e) => {
-    let value = e.target.value.replace(/\s/g, '').replace(/\D/g, '');
-    value = value.substring(0, 16);
-    value = value.replace(/(.{4})/g, '$1 ').trim();
-    setFormData(prev => ({ ...prev, cardNumber: value }));
-  };
-
-  const handleExpiryChange = (e) => {
-    let value = e.target.value.replace(/\D/g, '');
-    if (value.length >= 2) {
-      value = value.substring(0, 2) + '/' + value.substring(2, 4);
-    }
-    setFormData(prev => ({ ...prev, expiryDate: value }));
-  };
-
-  //Teslimat adresi seçimi
-  const handleAddressSelect = (addressId) => {
-    setSelectedAddressId(addressId); //saklıyoruz
-    setShowAddressForm(false);
-    const selectedAddress = addresses.find(addr => addr.id === addressId);
-
-    if (selectedAddress) {
-      setFormData(prev => ({
-        ...prev,
-        selectedAddressId: addressId, //Formdata nın içinde tuttuk
-        addressTitle: selectedAddress.addressTitle,
-        recipientName: selectedAddress.recipientName,
-        phoneNumber: selectedAddress.phoneNumber,
-        country: selectedAddress.country,
-        city: selectedAddress.city,
-        district: selectedAddress.district,
-        postalCode: selectedAddress.postalCode,
-        fullAddress: selectedAddress.fullAddress,
-        isDefault: selectedAddress.isDefault,
-      }));
-      // Kargo fiyatlarını yeniden hesapla
-      calculateShippingRates(selectedAddress);
-    }
-  };
-
-  const handleNewAddress = () => {
-    setSelectedAddressId(null);
-    setShowAddressForm(true);
-    setFormData(prev => ({
-      ...prev,
-      addressTitle: "",
-      recipientName: "",
-      fullAddress: "",
-      country: "",
-      city: "",
-      district: "",
-      postalCode: "",
-      phoneNumber: "",
-      isDefault: ""
-    }));
-  };
-
-  const validateStep = (step) => {
-    if (step === 1) {
-      if (!showAddressForm && selectedAddressId) {
-        return true;
-      }
-      const required = ['addressTitle', 'recipientName', 'fullAddress', 'country', 'city', 'district', 'postalCode', 'phoneNumber', 'isDefault'];
-      return required.every(field => formData[field].trim() !== '');
-    }
-    if (step === 2) {
-      return formData.selectedShipping !== '';
-    }
-    if (step === 3) {
-      if (formData.paymentMethod === 'credit-card') {
-        return formData.cardNumber.replace(/\s/g, '').length === 16 &&
-          formData.cardHolder.trim() !== '' &&
-          formData.expiryDate.length === 5 &&
-          formData.cvv.length === 3;
-      }
-      return true;
-    }
-    return true;
-  };
-
-  const handleNextStep = () => {
-    if (validateStep(currentStep)) {
-      if (currentStep === 1 && showAddressForm) {
-        // Yeni adres girildi, kargo fiyatlarını hesapla
-        const newAddress = {
-          city: formData.city,
-          district: formData.district
-        };
-        calculateShippingRates(newAddress);
-      }
-      setCurrentStep(prev => prev + 1);
+  // ID bazında adres seçimi
+  const handleSelectAddress = (newAddressId) => {
+    if (modalType === 'shipping') {
+      setFormData(prev => ({ ...prev, selectedAddressId: newAddressId }));
     } else {
-      alert("Lütfen tüm gerekli alanları doldurun");
+      setFormData(prev => ({ ...prev, selectedBillingAddressId: newAddressId }));
     }
-  };
-
-  const handleCompleteOrder = () => {
-    alert("Siparişiniz başarıyla alındı!");
   };
 
   const handleBackToCart = () => {
     navigate('/sepetim')
   };
 
-  const renderStepIndicator = () => (
-    <div className="flex items-center justify-center mb-8">
-      {[1, 2, 3, 4].map((step) => (
-        <div key={step} className="flex items-center">
-          <div className={`w-10 h-10 rounded-full flex items-center justify-center ${currentStep >= step ? 'bg-orange-500 text-white' : 'bg-gray-200 text-gray-600'
-            }`}>
-            {step}
-          </div>
-          {step < 4 && (
-            <div className={`w-20 h-1 ${currentStep > step ? 'bg-orange-500' : 'bg-gray-200'
-              }`}></div>
-          )}
-        </div>
-      ))}
-    </div>
-  );
+  // --- API/REDUX VERİ ÇEKME USEFFECTS ---
+  {/** 
+  // 1. Sepet verilerini çekme
+  useEffect(() => {
+    dispatch(fetchCart());
+  }, [dispatch]);*/}
 
-  const renderSavedAddresses = () => (
-    <div className="space-y-3 mb-4">
-      {addresses.map((address) => (
-        <div
-          key={address.id}
-          className={`border rounded-lg p-4 cursor-pointer transition-colors ${selectedAddressId === address.id
-            ? 'border-orange-500 bg-orange-50'
-            : 'border-gray-300 hover:border-orange-300'
-            }`}
-          onClick={() => handleAddressSelect(address.id)}
-        >
-          <div className="flex items-center justify-between">
-            <div className="flex items-center">
-              <input
-                type="radio"
-                name="selectedAddress"
-                checked={selectedAddressId === address.id}
-                onChange={() => handleAddressSelect(address.id)}
-                className="mr-3"
-              />
-              <div>
-                <div className="flex items-center">
-                  <h4 className="font-semibold text-gray-800">{address.addressTitle}</h4>
-                  {address.isDefault && (
-                    <span className="ml-2 px-2 py-1 text-xs bg-green-100 text-green-800 rounded">Varsayılan</span>
-                  )}
-                </div>
-                <p className="text-gray-600 text-sm mt-1"> {address.recipientName}</p>
-                <p className="text-gray-600 text-sm">{address.fullAddress}</p>
-                <p className="text-gray-600 text-sm">{address.district}, {address.city}, {address.postalCode}</p>
-                <p className="text-gray-600 text-sm">{address.phoneNumber}</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      ))}
-    </div>
-  );
+  // 1. Sepet verilerini çekme
+  useEffect(() => {
+    console.log(" Sepet verileri çekme işlemi başlatılıyor.");
 
-  //YENİ ADRESS EKLEME FORMU
-  const renderAddressForm = () => (
-    <form onSubmit={handleSubmit} className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-      <h4 className="font-semibold mb-3">Yeni Adres Ekle</h4>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <input
-          type="text"
-          name="addressTitle"
-          placeholder="Adres Başlığı"
-          value={formData.addressTitle}
-          onChange={handleInputChange}
-          className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-orange-500"
-          required
-        />
-        <input
-          type="text"
-          name="recipientName"
-          placeholder="Ad Soyad"
-          value={formData.recipientName}
-          onChange={handleInputChange}
-          className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-orange-500"
-          required
-        />
-        <input
-          type="tel"
-          name="phoneNumber"
-          placeholder="Telefon"
-          value={formData.phoneNumber}
-          onChange={handleInputChange}
-          className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-orange-500"
-          required
-        />
-        <input
-          type="text"
-          name="postalCode"
-          placeholder="Posta Kodu"
-          value={formData.postalCode}
-          onChange={handleInputChange}
-          className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-orange-500"
-        />
-        <input
-          type="text"
-          name="country"
-          placeholder="Ülke"
-          value={formData.country}
-          onChange={handleInputChange}
-          className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-orange-500"
-          required
-        />
-        <input
-          type="text"
-          name="city"
-          placeholder="Şehir"
-          value={formData.city}
-          onChange={handleInputChange}
-          className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-orange-500"
-          required
-        />
-        <input
-          type="text"
-          name="district"
-          placeholder="İlçe"
-          value={formData.district}
-          onChange={handleInputChange}
-          className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-orange-500"
-          required
-        />
-        <textarea
-          name="fullAddress"
-          placeholder="Adres"
-          value={formData.fullAddress}
-          onChange={handleInputChange}
-          className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-orange-500 md:col-span-2"
-          rows="3"
-          required
-        />
-      </div>
+    dispatch(fetchCart())
+      .unwrap() // createAsyncThunk sonucu ile çalışıyorsanız
+      .then((result) => {
+        // Başarıyla tamamlandığında
+        console.log("Sepet verileri başarıyla çekildi.");
+        console.log("Gelen veri:", result); // API'den dönen veri
+      })
+      .catch((error) => {
+        // Hata oluştuğunda
+        console.error("Sepet verileri çekilirken HATA oluştu:", error);
+      });
 
-      <label className="flex items-center mt-4">
-        <input
-          type="checkbox"
-          name="isDefault"
-          checked={formData.isDefault}
-          onChange={handleInputChange}
-          className="mr-2"
-        />
-        <span className="text-sm text-gray-600">Varsayılan adres</span>
-      </label>
-      <button type="submit" className="my-2 text-orange-500">Kaydet</button>
-    </form>
-  );
+  }, [dispatch]);
+  // 2. Adres verilerini çekme ve ilk adresi varsayılan olarak ayarlama
+  useEffect(() => {
+    const getAddresses = async () => {
+      try {
+        const data = await fetchAddresses();
+        setAddresses(data);
 
-  const renderAddressStep = () => (
-    <div className="bg-white rounded-lg border border-gray-300 p-6 mb-6">
-      <div className="flex items-center mb-6">
-        <FaMapMarkerAlt className="text-orange-500 mr-2" />
-        <h2 className="text-xl font-semibold">Teslimat Adresi</h2>
-      </div>
-
-      {addresses.length > 0 && !showAddressForm && (
-        <div>
-          <h3 className="font-semibold mb-3">Kayıtlı Adreslerim</h3>
-          {renderSavedAddresses()}
-
-          <button
-            onClick={handleNewAddress}
-            className="flex items-center text-orange-500 hover:text-orange-700 font-medium"
-          >
-            <FaPlus className="mr-2" />
-            Yeni Adres Ekle
-          </button>
-        </div>
-      )}
-
-      {(showAddressForm || addresses.length === 0) && renderAddressForm()}
-
-      {showAddressForm && addresses.length > 0 && (
-        <button
-          onClick={() => setShowAddressForm(false)}
-          className="mt-3 text-gray-500 hover:text-gray-700"
-        >
-          Kayıtlı adreslerimi göster
-        </button>
-      )}
-    </div>
-  );
-
-  const renderShippingStep = () => (
-    <div className="bg-white rounded-lg border border-gray-300 p-6 mb-6">
-      <div className="flex items-center mb-6">
-        <FaTruck className="text-orange-500 mr-2" />
-        <h2 className="text-xl font-semibold">Kargo Seçimi</h2>
-      </div>
-
-      {shippingCalculating ? (
-        <div className="text-center py-8">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mx-auto mb-4"></div>
-          <p className="text-gray-600">Kargo fiyatları hesaplanıyor...</p>
-        </div>
-      ) : (
-        <div className="space-y-4">
-          {shippingOptions.map((option) => (
-            <div
-              key={option.id}
-              className={`border rounded-lg p-4 cursor-pointer transition-colors ${formData.selectedShipping === option.id
-                ? 'border-orange-500 bg-orange-50'
-                : 'border-gray-300 hover:border-orange-300'
-                }`}
-              onClick={() => setFormData(prev => ({ ...prev, selectedShipping: option.id }))} //seçilen kargo bilgisini saklama
-            >
-              <div className="flex items-center justify-between">
-                <div className="flex items-center">
-                  <input
-                    type="radio"
-                    name="selectedShipping"
-                    value={option.id}
-                    checked={formData.selectedShipping === option.id}
-                    onChange={handleInputChange}
-                    className="mr-3"
-                  />
-                  <div className="flex items-center">
-                    <span className="text-2xl mr-3">{option.icon}</span>
-                    <div>
-                      <h4 className="font-semibold text-gray-800">{option.name}</h4>
-                      <p className="text-sm text-gray-600">{option.description}</p>
-                      <div className="flex items-center mt-1 space-x-4">
-                        <span className="flex items-center text-sm text-gray-500">
-                          <FaClock className="mr-1" />
-                          {option.estimatedDays} iş günü
-                        </span>
-                        <span className="text-lg font-bold text-orange-600">
-                          ₺{option.price.toFixed(2)}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="mt-3 ml-8">
-                <div className="flex flex-wrap gap-2">
-                  {option.features.map((feature, index) => (
-                    <span
-                      key={index}
-                      className="px-2 py-1 text-xs bg-gray-100 text-gray-700 rounded-full"
-                    >
-                      {feature}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            </div>
-          ))}
-
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-4">
-            <div className="flex items-center">
-              <FaShieldAlt className="text-blue-500 mr-2" />
-              <div>
-                <h4 className="font-semibold text-blue-800">Kargo Güvencesi</h4>
-                <p className="text-sm text-blue-700">
-                  Tüm kargo gönderileriniz takip numarasıyla güvence altındadır.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-
-  const renderPaymentStep = () => (
-    <div className="bg-white rounded-lg border border-gray-300 p-6 mb-6">
-      <div className="flex items-center mb-4">
-        <FaCreditCard className="text-orange-500 mr-2" />
-        <h2 className="text-xl font-semibold">Ödeme Bilgileri</h2>
-      </div>
-
-      <div className="mb-4">
-        <label className="flex items-center mb-2">
-          <input
-            type="radio"
-            name="paymentMethod"
-            value="credit-card"
-            checked={formData.paymentMethod === 'credit-card'}
-            onChange={handleInputChange}
-            className="mr-2"
-          />
-          <span>Kredi/Banka Kartı</span>
-        </label>
-        <label className="flex items-center mb-2">
-          <input
-            type="radio"
-            name="paymentMethod"
-            value="bank-transfer"
-            checked={formData.paymentMethod === 'bank-transfer'}
-            onChange={handleInputChange}
-            className="mr-2"
-          />
-          <span>Havale/EFT</span>
-        </label>
-        <label className="flex items-center">
-          <input
-            type="radio"
-            name="paymentMethod"
-            value="cash-on-delivery"
-            checked={formData.paymentMethod === 'cash-on-delivery'}
-            onChange={handleInputChange}
-            className="mr-2"
-          />
-          <span>Kapıda Ödeme</span>
-        </label>
-      </div>
-
-      {formData.paymentMethod === 'credit-card' && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <input
-            type="text"
-            name="cardHolder"
-            placeholder="Kart Üzerindeki İsim"
-            value={formData.cardHolder}
-            onChange={handleInputChange}
-            className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-orange-500 md:col-span-2"
-          />
-          <input
-            type="text"
-            name="cardNumber"
-            placeholder="Kart Numarası"
-            value={formData.cardNumber}
-            onChange={handleCardNumberChange}
-            className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-orange-500 md:col-span-2"
-            maxLength="19"
-          />
-          <input
-            type="text"
-            name="expiryDate"
-            placeholder="MM/YY"
-            value={formData.expiryDate}
-            onChange={handleExpiryChange}
-            className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-orange-500"
-            maxLength="5"
-          />
-          <input
-            type="text"
-            name="cvv"
-            placeholder="CVV"
-            value={formData.cvv}
-            onChange={(e) => setFormData(prev => ({ ...prev, cvv: e.target.value.replace(/\D/g, '').substring(0, 3) }))}
-            className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-orange-500"
-            maxLength="3"
-          />
-        </div>
-      )}
-    </div>
-  );
-
-  const renderConfirmationStep = () => {
-    const selectedAddress = selectedAddressId
-      ? addresses.find(addr => addr.id === selectedAddressId)
-      : null;
-
-    const addressInfo = selectedAddress || {
-      recipientName: formData.recipientName,
-      fullAddress: formData.fullAddress,
-      district: formData.district,
-      city: formData.city,
-      phoneNumber: formData.phoneNumber
+        // Eğer adresler varsa ve henüz bir adres seçilmemişse ilk adresi varsayılan yap.
+        if (data.length > 0 && formData.selectedAddressId === null) {
+          setFormData(prev => ({
+            ...prev,
+            selectedAddressId: data[0].id,
+            selectedBillingAddressId: data[0].id,
+          }));
+        }
+      } catch (error) {
+        toast.error("Adresler yüklenemedi: " + error.message);
+      }
     };
 
+    getAddresses();
+  }, [formData.selectedAddressId]); // İlk yüklemede ve adresler değiştiğinde çalışır
 
-    const selectedShipping = shippingOptions.find(option => option.id === formData.selectedShipping);
+  //Ödeme
+  const handlePayment = async () => {
+    try {
+      if (!formData.cardNumber || !formData.expireMonth || !formData.expireYear || !formData.cvc) {
+        toast.error("Lütfen kart bilgilerini doldurun.");
+        return;
+      }
 
-    return (
-      <div className="bg-white rounded-lg border border-gray-300 p-6 mb-6">
-        <div className="flex items-center mb-4">
-          <FaCheckCircle className="text-orange-500 mr-2" />
-          <h2 className="text-xl font-semibold">Sipariş Özeti</h2>
-        </div>
+      if (!selectedShippingAddress) {
+        toast.error("Teslimat adresi seçmediniz.");
+        return;
+      }
 
-        <div className="mb-4">
-          <h3 className="font-semibold mb-2">Teslimat Adresi:</h3>
-          <div className="bg-gray-50 p-3 rounded">
-            {selectedAddress && (
-              <p className="text-sm text-orange-600 font-medium mb-1">
-                {selectedAddress.addressTitle}
-              </p>
-            )}
-            {/* DOĞRU */}
-            <div>
-              {addressInfo.recipientName}<br />
-              {addressInfo.fullAddress}<br />
-              {addressInfo.district}, {addressInfo.city}<br />
-              {addressInfo.phoneNumber}
-            </div>
+      const paymentPayload = {
+        price: finalTotal.toFixed(2),
+        paidPrice: finalTotal.toFixed(2),
+        // installment: formData.selectedInstallment,
+        currency: "TRY",
+        paymentGroup: "PRODUCT",
+        paymentChannel: "WEB",
+        customerId: cart.userId?.toString(),   // userId'den geliyor
+        basketId: cart.id?.toString(),
 
+        paymentCard: {
+          cardHolderName: formData.cardHolderName,
+          cardNumber: formData.cardNumber,
+          expireMonth: formData.expireMonth,
+          expireYear: formData.expireYear,
+          cvc: formData.cvc,
+          registerCard: 0,
+        },
+        buyer: {
+          id: selectedShippingAddress.id,
+          name: selectedShippingAddress.recipientName,
+          surname: "",
+          gsmNumber: selectedShippingAddress.phoneNumber,
+          email: "example@mail.com",
+          identityNumber: "11111111111",
+          registrationAddress: selectedShippingAddress.fullAddress,
+          city: selectedShippingAddress.city,
+          country: selectedShippingAddress.country,
+          ip: "85.34.78.112"
+        },
+        shippingAddress: {
+          address: selectedShippingAddress.fullAddress,
+          contactName: selectedShippingAddress.recipientName,
+          city: selectedShippingAddress.city,
+          country: selectedShippingAddress.country,
+          zipCode: selectedShippingAddress.postalCode
+        },
+        billingAddress: {
+          address: selectedBillingAddress.fullAddress,
+          contactName: selectedBillingAddress.recipientName,
+          city: selectedBillingAddress.city,
+          country: selectedBillingAddress.country,
+          zipCode: selectedBillingAddress.postalCode
+        },
+        basketItems: cart.items.map((item) => ({
+          id: item.productId.toString(),
+          name: item.productName,
+          //  category1: item.productBrand || "Genel",
+          //  itemType: "PHYSICAL",
+          price: item.totalPrice.toFixed(2)
+        }))
+      };
 
-          </div>
-        </div>
+      const response = await makePayment(paymentPayload);
 
-        <div className="mb-4">
-          <h3 className="font-semibold mb-2">Kargo Seçimi:</h3>
-          <div className="bg-gray-50 p-3 rounded">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center">
-                <span className="text-xl mr-2">{selectedShipping?.icon}</span>
-                <div>
-                  <p className="font-medium">{selectedShipping?.name}</p>
-                  <p className="text-sm text-gray-600">
-                    {selectedShipping?.estimatedDays} iş günü
-                  </p>
-                </div>
-              </div>
-              <span className="font-bold text-orange-600">
-                {selectedShipping?.price.toFixed(2)} TL
-              </span>
-            </div>
-          </div>
-        </div>
+      if (response?.status === "success") {
+        // 3D Secure ise HTML page gelecek
+        if (response?.threeDSHtml) {
+          const newWindow = window.open("", "_self");
+          newWindow.document.write(response.threeDSHtml);
+        } else {
+          toast.success("Ödeme başarılı!");
+          navigate("/siparis-tamamlandi");
+        }
+      } else {
+        toast.error("Ödeme başarısız: " + response?.errorMessage);
+      }
 
-        <div className="mb-4">
-          <h3 className="font-semibold mb-2">Ödeme Yöntemi:</h3>
-          <p className="text-gray-600">
-            {formData.paymentMethod === 'credit-card' && 'Kredi/Banka Kartı'}
-            {formData.paymentMethod === 'bank-transfer' && 'Havale/EFT'}
-            {formData.paymentMethod === 'cash-on-delivery' && 'Kapıda Ödeme'}
-          </p>
-        </div>
-
-
-
-      </div>
-    );
+    } catch (err) {
+      toast.error("Ödeme hatası: " + err.message);
+    }
   };
 
-  const renderOrderSummary = () => {
-    const selectedShipping = shippingOptions.find(option => option.id === formData.selectedShipping);
 
-    return (
-      <div>
-        <div className="bg-gray-50 rounded-lg p-4 sticky top-4">
-          <h3 className="text-lg font-semibold mb-4">Sipariş Özeti</h3>
+  // ## 1. TESLİMAT ADRESİ ADIMI
+  const renderAddressStep = () => (
+    <div className="bg-white rounded-lg shadow-md border border-gray-100 p-6 mb-6">
+      <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center">
+        {/* SVG Ikonu (Adres) */}
+        <span className="text-orange-500 mr-3">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" /></svg>
+        </span>
+        Teslimat Adresi
+      </h3>
 
-          <div className="space-y-2 mb-4">
-            {displayItems.map((item) => (
-              <div key={item.id} className="flex justify-between text-sm">
-                <span>{item.productName} x{item.quantity}</span>
-                <span>₺{(item.unitPrice * item.quantity).toLocaleString()}</span>
-              </div>
-            ))}
-          </div>
-
-          <div className="border-t pt-4 space-y-2">
-            <div className="flex justify-between">
-              <span>Ara Toplam:</span>
-              <span>{getTotal().toLocaleString()} TL</span>
+      <div className="flex flex-col lg:flex-row lg:space-x-4 mb-4">
+        {/* Teslimat Adresi Kutusu */}
+        <div className={`w-full ${formData.isSameAddress ? 'lg:w-full' : 'lg:w-1/2'} transition-all duration-300`}>
+          <h4 className="font-semibold text-sm text-gray-700 mb-2">Teslimat Adresi</h4>
+          <div className="border border-orange-500 p-3 rounded-lg bg-orange-50 flex justify-between items-center text-xs shadow-sm h-full">
+            <div className='flex flex-col'>
+              <p className="font-medium text-gray-800 line-clamp-2">{addressLabel(selectedShippingAddress)}</p>
+              {selectedShippingAddress && (
+                <p className='font-medium text-xs text-gray-600'>{selectedShippingAddress.fullAddress}</p>
+              )}
             </div>
-            <div className="flex justify-between">
-              <span>Kargo ({selectedShipping?.name || 'Seçilmedi'}):</span>
-              <span>{getSelectedShippingPrice().toFixed(2)} TL</span>
-            </div>
-            {discountAmount > 0 && (
-              <div className="flex justify-between text-green-600">
-                <span>İndirim:</span>
-                <span>- TL{discountAmount.toFixed(2)}</span>
-              </div>
-            )}
-            <div className="flex justify-between font-bold text-lg border-t pt-2">
-              <span>Toplam:</span>
-              <span className="text-orange-600">{getFinalTotal().toLocaleString()} TL</span>
-            </div>
-          </div>
-        </div>
-       
-        <div className="flex flex-col bg-gray-50 rounded-lg p-4 sticky top-4 mt-4">
-          <label>Kupon Kodu Giriniz:</label>
-          <div className="flex gap-2">
-            <input
-              type="text"
-              name="couponCode"
-              value={formData.couponCode}
-              onChange={handleInputChange}
-              placeholder="Kupon kodu girin"
-              className="flex-1 outline-none border border-gray-400 bg-gray-50 py-1 px-2 rounded-lg"
-            />
             <button
-              type="button"
-              onClick={applyDiscountCode}
-              className="bg-orange-400 hover:bg-orange-600 text-white px-4 py-1 rounded-lg cursor-pointer"
+              className="text-orange-500 text-xs font-semibold hover:text-orange-700 whitespace-nowrap ml-3 underline"
+              onClick={() => handleOpenModal('shipping')}
             >
-              Kullan
+              Adresi Değiştir
             </button>
+
           </div>
 
-          {discountAmount > 0 && (
-            <div className="text-green-600 mt-2">
-              İndirim: - TL{discountAmount.toFixed(2)}
+        </div>
+
+        {/* Fatura Adresi Kutusu */}
+        {!formData.isSameAddress && (
+          <div className="w-full lg:w-1/2 mt-8 lg:mt-0">
+            <h4 className="font-semibold text-sm text-gray-700 mb-2">Fatura Adresi</h4>
+            <div className="border border-orange-400 p-3 rounded-lg bg-white flex justify-between items-center text-xs shadow-sm h-full">
+              <div className='flex flex-col'>
+                <p className="font-medium text-gray-800 line-clamp-2">{addressLabel(selectedBillingAddress)}</p>
+                {selectedBillingAddress && (
+                  <p className='font-medium text-xs text-gray-600'>{selectedBillingAddress.fullAddress}</p>
+                )}
+              </div>
+              <button
+                className="underline text-orange-500 text-xs font-semibold hover:text-orange-700 whitespace-nowrap ml-3"
+                onClick={() => handleOpenModal('billing')}
+              >
+                Adresi Değiştir
+              </button>
             </div>
+          </div>
+        )}
+      </div>
+
+      {/* Fatura Adresi Checkbox */}
+      <div className="mt-8">
+        <label className="inline-flex items-center cursor-pointer">
+          <input
+            type="checkbox"
+            checked={formData.isSameAddress}
+            onChange={(e) => {
+              setFormData(prev => ({
+                ...prev,
+                isSameAddress: e.target.checked,
+                // Fatura adresini teslimat adresi ile otomatik eşitle
+                selectedBillingAddressId: e.target.checked ? prev.selectedAddressId : prev.selectedBillingAddressId
+              }));
+            }}
+            className="form-checkbox h-4 w-4 text-orange-500 border-gray-300 rounded"
+          />
+          <span className="ml-2 text-sm text-gray-700 font-semibold">Faturamı Aynı Adrese Gönder</span>
+        </label>
+      </div>
+    </div>
+  );
+  // ## 2. KARGO SEÇİM ADIMI
+  const renderShippingSelection = () => (
+    <div className="bg-white rounded-lg shadow-md border border-gray-100 p-6 mb-6">
+      {/* ... (Kargo Seçim Kodu) ... */}
+      <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center">Kargo Firması Seçimi</h3>
+      <div className="grid grid-cols-2 gap-4">
+        {shippingOptions.map((option) => (
+          <div
+            key={option.id}
+            className={`border rounded-lg p-4 cursor-pointer transition duration-150 
+                            ${formData.selectedShipping === option.id
+                ? 'border-orange-500 bg-orange-50 shadow-sm'
+                : 'border-gray-200 hover:border-gray-300'
+              }`}
+            onClick={() => setFormData(prev => ({ ...prev, selectedShipping: option.id }))}
+          >
+            <label className="flex items-center justify-between text-sm w-full cursor-pointer">
+              <div className="flex items-center">
+                <input
+                  type="radio"
+                  name="shipping"
+                  checked={formData.selectedShipping === option.id}
+                  readOnly
+                  className="form-radio h-4 w-4 text-orange-600 border-gray-300"
+                />
+                <span className="ml-2 font-semibold text-gray-700">{option.name}</span>
+              </div>
+              <span className="font-bold text-gray-900">{formatPrice(option.price)} TL</span>
+            </label>
+            <p className="text-xs text-gray-500 mt-1 pl-6">Tahmini teslimat: 3-5 iş günü</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+  // ## 3. ÖDEME SEÇENEKLERİ ADIMI
+  const renderPaymentStep = () => (
+    <div className="bg-white rounded-lg shadow-md border border-gray-100 p-6 mb-6">
+      {/* ... (Ödeme Seçenekleri Kodu) ... */}
+      <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center">
+        <span className="text-orange-500 mr-3">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" viewBox="0 0 20 20" fill="currentColor"><path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4z" /><path fillRule="evenodd" d="M18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM4 13a1 1 0 110-2 1 1 0 010 2z" clipRule="evenodd" /></svg>
+        </span>
+        Ödeme Seçenekleri
+      </h3>
+
+      <div className={`border p-4 rounded-lg text-sm transition ${formData.isCardSelected ? 'border-orange-500 bg-orange-50' : 'border-gray-300'}`}>
+        <p className="font-bold text-gray-800 flex items-center mb-1 cursor-pointer" onClick={() => setFormData(prev => ({ ...prev, isCardSelected: !prev.isCardSelected }))}>
+          <input type="radio" checked={formData.isCardSelected} readOnly className="form-radio h-4 w-4 text-orange-500 border-gray-300 mr-2" />
+          Kart İle Öde
+        </p>
+        <p className="text-xs text-gray-600 ml-6">Banka veya Kredi Kartı kullanarak ödemenizi güvenle yapabilirsiniz.</p>
+
+        {formData.isCardSelected && (
+          <div className="flex flex-col lg:flex-row space-y-4 lg:space-y-0 lg:space-x-6 mt-4 p-4 border border-gray-300 rounded-lg bg-white">
+            {/* Sol Taraf: Kart Bilgileri (Önceki gibi devam eder) */}
+            <div className="flex-1 max-w-md">
+              <h4 className="font-semibold text-sm text-gray-700 mb-3 border-b border-gray-100 pb-2">Kart Bilgileri</h4>
+
+              <div className="mb-3">
+                <label className="block text-xs font-medium text-gray-500 mb-1">Kart Sahibinin Adı</label>
+                <input
+                  type="text"
+                  placeholder=""
+                  maxLength={16}
+                  className={`w-full p-2 border rounded-lg text-gray-800 placeholder-gray-400 focus:outline-none 
+                                    ${formData.cardHolderName ? 'border-red-500' : 'border-gray-300 focus:border-gray-500'}`}
+                  value={formData.cardHolderName}
+                  onChange={(e) => setFormData({ ...formData, cardHolderName: e.target.value })}
+                />
+              </div>
+              {/* Kart Numarası */}
+              <div className="mb-3">
+                <label className="block text-xs font-medium text-gray-500 mb-1">Kart Numarası</label>
+                <input
+                  type="text"
+                  placeholder=""
+                  maxLength={16}
+                  className={`w-full p-2 border rounded-lg text-gray-800 placeholder-gray-400 focus:outline-none 
+                                    ${formData.cardNumber ? 'border-red-500' : 'border-gray-300 focus:border-gray-500'}`}
+                  value={formData.cardNumber}
+                  onChange={(e) => setFormData({ ...formData, cardNumber: e.target.value })}
+                />
+              </div>
+
+              {/* Son Kullanma Tarihi ve CVC */}
+              <div className="grid grid-cols-5 gap-2 items-end">
+                <div className="col-span-2">
+                  <label className="block text-xs font-medium text-gray-500 mb-1">Son Kullanma Tarihi</label>
+                  <div className="flex space-x-1">
+                    <select value={formData.expireMonth} onChange={(e) => setFormData(prev => ({ ...prev, expireMonth: e.target.value }))} className="w-1/2 p-2 border border-gray-300 rounded-lg text-sm appearance-none focus:outline-none  bg-white"><option value="">Ay</option>{[...Array(12).keys()].map(i => <option key={i + 1} value={String(i + 1).padStart(2, '0')}>{String(i + 1).padStart(2, '0')}</option>)}</select>
+                    <select value={formData.expireYear} onChange={(e) => setFormData(prev => ({ ...prev, expireYear: e.target.value }))} className="w-1/2 p-2 border border-gray-300 rounded-lg text-sm appearance-none focus:outline-none  bg-white"><option value="">Yıl</option>{[...Array(10).keys()].map(i => <option key={23 + i} value={String(23 + i)}>{String(23 + i)}</option>)}</select>
+                  </div>
+                </div>
+                <div className="col-span-1"></div>
+                <div className="col-span-2">
+                  <label className="block text-xs font-medium text-gray-500 mb-1 ">CVV</label>
+                  <input type="text" maxLength={3} className="w-full p-2 border border-gray-300 rounded-lg text-sm focus:outline-none " value={formData.cvc} onChange={(e) => setFormData(prev => ({ ...prev, cvc: e.target.value }))} />
+                </div>
+              </div>
+
+              {/* 3D Secure Onayı */}
+              <div className="mt-3">
+                <label className="inline-flex items-center cursor-pointer">
+                  <input type="checkbox" checked={formData.is3DSecureChecked} onChange={(e) => setFormData(prev => ({ ...prev, is3DSecureChecked: e.target.checked }))} className="form-checkbox h-4 w-4 text-orange-500 border-gray-300 rounded" />
+                  <span className="ml-2 text-sm text-gray-700">3D Secure ile ödeme yapmak istiyorum</span>
+                </label>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+  // ## 4. SİPARİŞ ÖZETİ ADIMI
+  const renderOrderSummary = () => (
+    <div className="w-full lg:sticky lg:top-8 bg-white rounded-lg shadow-md border border-gray-100">
+      <div className="p-6">
+        <h3 className="text-xl font-bold text-gray-800 mb-4 border-b border-gray-200 pb-2">Sipariş Özeti</h3>
+
+        {/* Ürün Listesi */}
+        <div className="max-h-40 overflow-y-auto mb-4 border-b border-gray-100 pb-2">
+          {cartItems.length > 0 ? cartItems.map((item, index) => (
+            <div key={index} className="flex justify-between text-xs text-gray-600 py-1">
+              <span>{item.quantity} x {item.productName}</span>
+              <span className="font-medium">{formatPrice(item.unitPrice * item.quantity)} TL</span>
+            </div>
+          )) : (
+            <p className="text-sm text-gray-500">Sepetinizde ürün bulunmamaktadır.</p>
           )}
         </div>
 
+        <div className="space-y-2 text-sm">
+          <div className="flex justify-between">
+            <span>Ara Toplam (Ürünler)</span>
+            <span className="font-medium">{formatPrice(subtotal)} TL</span> {/* Gerçek Sepet Toplamı */}
+          </div>
+          <div className="flex justify-between">
+            <span>Kargo Toplam</span>
+            <span className="font-medium">{formatPrice(shippingPrice)} TL</span>
+          </div>
+        </div>
+
+        {/* İndirim */}
+        <div className="bg-green-100 p-3 rounded-lg flex justify-between font-bold text-green-700 mt-3">
+          <span>İndirim</span>
+          <span className="text-lg font-extrabold">- {formatPrice(discountAmount)} TL</span>
+        </div>
+
+        {/* Genel Toplam */}
+        <div className="mt-4 pt-4 border-t border-gray-200 flex justify-between items-center">
+          <span className="text-lg font-semibold">Toplam</span>
+          <span className="text-lg font-semibold text-orange-600">{formatPrice(finalTotal)} TL</span>
+        </div>
 
       </div>
-    );
-  };
+      <div className="p-6 pt-2 mt-4 border-t border-gray-100">
+        <h4 className="text-sm font-bold text-gray-800 mb-2">Kupon Kodu</h4>
+        <div className="flex gap-2">
+          <input
+            type="text"
+            name="couponCode"
+            value={formData.couponCode}
+            onChange={(e) => setFormData(prev => ({ ...prev, couponCode: e.target.value }))}
+            placeholder="Kupon kodu girin"
+            className="flex-1 p-2 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500 transition text-sm"
+          />
+          <button
+            type="button"
+            onClick={() => console.log("Kupon kodu uygulandı")}
+            className="bg-orange-500 hover:bg-orange-600 text-white font-semibold px-4 py-2 rounded-lg transition duration-150 text-sm"
+          >
+            Kullan
+          </button>
+        </div>
+      </div>
 
+      {/* Ödeme Yap Butonu ve Yasal Metinler */}
+      <div className="p-6 pt-0">
+        <button
+          onClick={handlePayment}
+          className="w-full py-3 bg-gray-500 hover:bg-gray-600 text-white font-bold rounded-lg transition duration-150"
+        >
+          Ödeme Yap
+        </button>
+        <p className="text-xs text-gray-500 mt-3 text-center">
+          Ön Bilgilendirme Koşulları'nı okudum ve Mesafeli Satış Sözleşmesi'ni onaylıyorum.
+        </p>
+      </div>
+    </div>
+  );
+  // ## ANA SAYFA RENDER
   return (
-    <div className="p-6 max-w-7xl mx-auto">
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold">Sipariş Tamamla</h1>
+    <div className="min-h-screen bg-gray-50 p-4 lg:p-10">
+      <div className="flex items-center justify-end mb-6">
         <button
           onClick={handleBackToCart}
-          className="text-orange-500 hover:text-orange-600 border border-orange-600 py-1 px-2 rounded-l-lg hover:bg-orange-100 cursor-pointer flex"
+          className="text-orange-500 hover:text-orange-600 border border-orange-600 py-1 px-2 hover:bg-orange-100 cursor-pointer flex"
         >
           <HiOutlineReply className="w-5 h-5 mr-2" />
           Sepete Dön
         </button>
       </div>
+      <div className="max-w-7xl mx-auto flex flex-col lg:flex-row lg:space-x-8">
 
-      {renderStepIndicator()}
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2">
-          {currentStep === 1 && renderAddressStep()}
-          {currentStep === 2 && renderShippingStep()}
-          {currentStep === 3 && renderPaymentStep()}
-          {currentStep === 4 && renderConfirmationStep()}
-
-          <div className="flex justify-between">
-            {currentStep > 1 && (
-              <button
-                onClick={() => setCurrentStep(prev => prev - 1)}
-                className="px-6 py-2 border border-gray-400 rounded hover:bg-gray-100"
-              >
-                Geri
-              </button>
-            )}
-
-            {currentStep < 4 ? (
-              <button
-                onClick={handleNextStep}
-                className="px-6 py-2 bg-orange-500 text-white rounded hover:bg-orange-600 ml-auto"
-                disabled={shippingCalculating}
-              >
-                {shippingCalculating ? 'Hesaplanıyor...' : 'Devam Et'}
-              </button>
-            ) : (
-              <button onClick={handleConfirmOrder} className="px-6 py-2 bg-green-500 text-white rounded hover:bg-green-600 ml-auto"
-              >
-                Siparişi Tamamla
-              </button>
-            )}
-          </div>
+        {/* Sol Taraf: Adımlar */}
+        <div className="lg:w-2/3">
+          {renderAddressStep()}
+          {renderShippingSelection()}
+          {renderPaymentStep()}
         </div>
 
-        <div className="lg:col-span-1">
+        {/* Sağ Taraf: Sipariş Özeti */}
+        <div className="lg:w-1/3 mt-8 lg:mt-0">
           {renderOrderSummary()}
         </div>
       </div>
+
+      {/* Adres Seçim Modalı */}
+      {modalOpen && <AddressModal
+        type={modalType}
+        currentAddressId={modalType === 'shipping' ? formData.selectedAddressId : formData.selectedBillingAddressId}
+        addresses={addresses} // Gerçek adresler listesi gönderiliyor
+        onClose={() => setModalOpen(false)}
+        onSelectAddress={handleSelectAddress}
+      />}
     </div>
   );
 };

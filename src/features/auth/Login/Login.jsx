@@ -105,6 +105,7 @@ const Login = () => {
                 <Input
                     type="email"
                     placeholder="E-posta adresi"
+                    id="email"
                     name="email"
                     value={loginData.email}
                     onChange={handleChange}
@@ -114,6 +115,7 @@ const Login = () => {
                 {/* Şifre */}
                 <PasswordInput
                     name="password"
+                    id="password"
                     placeholder="Şifre"
                     value={loginData.password}
                     onChange={handleChange}
