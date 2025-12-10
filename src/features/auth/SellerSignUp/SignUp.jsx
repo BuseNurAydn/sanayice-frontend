@@ -29,7 +29,7 @@ const SignUp = () => {
         role: 'ROLE_SELLER',
         companyName: '',
         taxId: '',
-        acceptTerms: false,  
+        acceptTerms: false,
         allowMarketing: false,
     });
 
@@ -93,7 +93,7 @@ const SignUp = () => {
             if (hoursPassed < 24) {
                 setFormData(prev => ({
                     ...prev,
-                    email: verificationData.email || '', 
+                    email: verificationData.email || '',
                     name: verificationData.name || '',
                     lastname: verificationData.lastname || '',
                     companyName: verificationData.companyName || '',
@@ -207,13 +207,13 @@ const SignUp = () => {
 
         const payload = {
             name: formData.name,
-            lastname: formData.lastname,
-            email: formData.email,
-            phoneNumber: formattedPhoneForPayload,
-            password: formData.password,
-            role: "ROLE_SELLER",
-            companyName: formData.companyName,
-            taxId: formData.taxId,
+            lastname: formData.lastname,
+            email: formData.email,
+            phoneNumber: formattedPhoneForPayload,
+            password: formData.password,
+            role: "ROLE_SELLER",
+            companyName: formData.companyName,
+            taxId: formData.taxId,
 
         };
 
@@ -318,12 +318,31 @@ const SignUp = () => {
         }
     };
 
-    const handlePendingVerification = () => {
-        setShowPendingVerification(false);
-        //setIsRegistered(true);
-        handleResendCode();
-        setMessage(`Bekleyen SMS doğrulama işlemine devam ediliyor. Lütfen kodu girin.`);
-        setMessageType('info');
+    // Bekleyen doğrulamaya devam et
+    const handlePendingVerification = async () => {
+        setShowPendingVerification(false); // Bekleyen uyarı ekranını kapattık
+
+        const gsmForOtp = getGsmForBackend(formData.phoneNumber);
+
+        try {
+            // API Çağrısı (Kod gönderme)
+            await generateOtp({ gsm: gsmForOtp });
+
+            // API başarılıysa, kod girme ekranına geç
+            setIsRegistered(true);
+
+            setMessage(`Bekleyen SMS doğrulama işlemine devam ediliyor. Telefon numaranıza yeni bir kod gönderildi, lütfen kodu girin.`);
+            setMessageType('info');
+            startCountdown();
+
+        } catch (error) {
+            // Hata oluşursa isRegistered'ı geri FALSE yap.
+            setIsRegistered(false);
+            setShowPendingVerification(true);
+
+            setMessage(error.message || 'Kodu tekrar gönderirken bir hata oluştu.');
+            setMessageType('error');
+        }
     };
 
     const handleCancelPendingVerification = () => {

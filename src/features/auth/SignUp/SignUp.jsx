@@ -103,36 +103,36 @@ const SignUp = () => {
     }));
   };
 
-const formatPhoneNumber = (phone) => {
-  let cleaned = phone.replace(/\D/g, '');
+  const formatPhoneNumber = (phone) => {
+    let cleaned = phone.replace(/\D/g, '');
 
-  // Eğer zaten 90 ile başlıyorsa olduğu gibi dön
-  if (cleaned.startsWith('90') && cleaned.length === 12) {
-    return '+'+cleaned;
-  }
+    // Eğer zaten 90 ile başlıyorsa olduğu gibi dön
+    if (cleaned.startsWith('90') && cleaned.length === 12) {
+      return '+' + cleaned;
+    }
 
-  // Eğer 0 ile başlıyorsa 0’ı çöpe at
-  if (cleaned.startsWith('0')) {
-    cleaned = cleaned.substring(1);
-  }
+    // Eğer 0 ile başlıyorsa 0’ı çöpe at
+    if (cleaned.startsWith('0')) {
+      cleaned = cleaned.substring(1);
+    }
 
-  // Eğer tam 10 hane ise 90 ekle
-  if (cleaned.length === 10) {
-    return '+90' + cleaned;
-  }
+    // Eğer tam 10 hane ise 90 ekle
+    if (cleaned.length === 10) {
+      return '+90' + cleaned;
+    }
 
-  return '+'+cleaned; // fallback
-};
+    return '+' + cleaned; // fallback
+  };
 
-const getGsmForBackend = () => {
-  let cleaned = formData.phoneNumber.replace(/\D/g, '');
+  const getGsmForBackend = () => {
+    let cleaned = formData.phoneNumber.replace(/\D/g, '');
 
-  if (cleaned.startsWith('0')) cleaned = cleaned.substring(1);
-  if (cleaned.startsWith('90')) return cleaned;
-  if (cleaned.length === 10) return '90' + cleaned;
+    if (cleaned.startsWith('0')) cleaned = cleaned.substring(1);
+    if (cleaned.startsWith('90')) return cleaned;
+    if (cleaned.length === 10) return '90' + cleaned;
 
-  return cleaned;
-};
+    return cleaned;
+  };
 
   const validateEmail = (email) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -163,7 +163,7 @@ const getGsmForBackend = () => {
     localStorage.setItem('pendingSmsVerification', JSON.stringify(verificationData)); // Key güncellendi
   };
 
-  
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setMessage('');
@@ -217,14 +217,14 @@ const getGsmForBackend = () => {
       phoneNumber: formattedPhone,
       password: formData.password,
       role: "ROLE_CUSTOMER",
-     shippingAddress: { 
+      shippingAddress: {
         ...formData.shippingAddress,
-        phone: formData.shippingAddress.phone || formattedPhone, 
-    },
-    billingAddress: {
+        phone: formData.shippingAddress.phone || formattedPhone,
+      },
+      billingAddress: {
         ...formData.billingAddress,
         phone: formData.billingAddress.phone || formattedPhone,
-    },
+      },
     };
 
     try {
@@ -233,11 +233,11 @@ const getGsmForBackend = () => {
       console.log("Kayıt Başarılı:", registrationPayload);
 
       // 2. Yeni: Kayıt başarılıysa, hemen OTP Kodu GÖNDERMEK için generateOtp çağırdım
-      // Backend'in beklediği 905xx... formatını alıyoruz
-      const gsmForOtp = getGsmForBackend();
-      console.log("OTP gönderilecek GSM:", gsmForOtp);
+      // Backend'in beklediği 905xx... formatını alıyoruz
+      const gsmForOtp = getGsmForBackend();
+      console.log("OTP gönderilecek GSM:", gsmForOtp);
 
-      await generateOtp({ gsm: gsmForOtp }); 
+      await generateOtp({ gsm: gsmForOtp });
 
       // Bekleyen doğrulama bilgisini kaydet
       savePendingVerification(formData.email, formData.name, formData.lastname, gsmForOtp);
@@ -247,7 +247,7 @@ const getGsmForBackend = () => {
       setMessageType('success');
       setShowPendingVerification(false);
       setIsSmsVerification(true)
-     // setIsRegistered(true);
+      // setIsRegistered(true);
       startCountdown();
 
     } catch (error) {
@@ -259,30 +259,30 @@ const getGsmForBackend = () => {
     }
   };
 
-// OTP oluşturma ve yeniden gönderme fonksiyonu
-const handleGenerateOtp = async (gsm) => {
-  try {
-    setMessage('');
-    setMessageType('info');
-    setIsResending(true);
+  // OTP oluşturma ve yeniden gönderme fonksiyonu
+  const handleGenerateOtp = async (gsm) => {
+    try {
+      setMessage('');
+      setMessageType('info');
+      setIsResending(true);
 
-   const gsmForOtp = getGsmForBackend();
-   await generateOtp({ gsm: gsmForOtp });
+      const gsmForOtp = getGsmForBackend();
+      await generateOtp({ gsm: gsmForOtp });
 
-   console.log(gsmForOtp)
-    setMessage('Doğrulama kodu gönderildi.');
-    setMessageType('success');
+      console.log(gsmForOtp)
+      setMessage('Doğrulama kodu gönderildi.');
+      setMessageType('success');
 
-    setIsSmsVerification(true);
-    startCountdown();
-  } catch (err) {
-    setMessage(err?.message || 'Kod gönderilemedi.');
-    setMessageType('error');
-    throw err;
-  } finally {
-    setIsResending(false);
-  }
-};
+      setIsSmsVerification(true);
+      startCountdown();
+    } catch (err) {
+      setMessage(err?.message || 'Kod gönderilemedi.');
+      setMessageType('error');
+      throw err;
+    } finally {
+      setIsResending(false);
+    }
+  };
 
 
   // --- 4. SMS Doğrulama İşlemi ---
@@ -301,7 +301,7 @@ const handleGenerateOtp = async (gsm) => {
 
     try {
       const gsmForOtp = getGsmForBackend();
-     
+
       const verificationData = {
         gsm: gsmForOtp,
         otp: verificationCode
@@ -331,11 +331,11 @@ const handleGenerateOtp = async (gsm) => {
   const handleResendSmsCode = async () => {
     if (countdown > 0) return;
 
-    setIsResending(true);
+    //setIsResending(true);
     setMessage('');
 
     try {
-     const gsmForOtp = getGsmForBackend();
+      const gsmForOtp = getGsmForBackend();
 
       const resendData = {
         gsm: gsmForOtp
@@ -357,24 +357,26 @@ const handleGenerateOtp = async (gsm) => {
 
   // Bekleyen doğrulamaya devam et
   const handlePendingVerification = async () => {
-    setShowPendingVerification(false);
-   // setIsRegistered(true);
+    setShowPendingVerification(false); // uyarıyı kapat
 
-     const gsmForOtp = getGsmForBackend();
+    const gsmForOtp = getGsmForBackend();
 
     try {
+      // 1. Yeni kod gönderme işlemini
       await handleGenerateOtp(gsmForOtp);
+
+      // 2. Başarılıysa, SMS doğrulama ekranına geç
+      setIsSmsVerification(true); // Kodu girme ekranını
 
       setMessage(`Bekleyen SMS doğrulama işlemine devam ediliyor. Telefon numaranıza yeni bir kod gönderildi, lütfen kodu girin.`);
       setMessageType('info');
-      startCountdown();
 
     } catch (error) {
+      setShowPendingVerification(true); // Uyarı ekranını geri göster
       setMessage(error.message || 'Kodu tekrar gönderirken bir hata oluştu.');
       setMessageType('error');
     }
   };
-
   const handleCancelPendingVerification = () => {
     localStorage.removeItem('pendingSmsVerification');
     setShowPendingVerification(false);
