@@ -76,7 +76,7 @@ const CheckoutPage = () => {
     selectedShipping: 'yurtiçi',
     // Ödeme ve Kupon
     isCardSelected: true,
-    selectedInstallment: 1,
+    //selectedInstallment: 1,
     cardHolderName: "",
     cardNumber: "",
     expireMonth: "",
@@ -92,17 +92,12 @@ const CheckoutPage = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  const shippingOptions = [
-    { id: 'yurtiçi', name: 'Yurtiçi Kargo', price: 44.99 },
-    { id: 'ptt', name: 'PTT Kargo', price: 34.99 },
-  ];
-
   // --- HESAPLAMALAR ---
   const subtotal = cartItems.reduce((acc, item) => acc + (item.unitPrice * item.quantity), 0) || 0; // Gerçek sepet toplamı
   const discountAmount = totalDiscount || 0; // Redux'tan gelen toplam indirim
-  const selectedShippingOption = shippingOptions.find(o => o.id === formData.selectedShipping);
-  const shippingPrice = selectedShippingOption?.price || 0;
-  const finalTotal = subtotal + shippingPrice - discountAmount;
+//  const selectedShippingOption = shippingOptions.find(o => o.id === formData.selectedShipping);
+ // const shippingPrice = selectedShippingOption?.price || 0;
+  const finalTotal = subtotal - discountAmount;
 
   // --- ADRES VERİSİ YÖNETİMİ (AddressModal için) ---
   const selectedShippingAddress = addresses.find(addr => addr.id === formData.selectedAddressId) || null;
@@ -194,7 +189,6 @@ const CheckoutPage = () => {
       const paymentPayload = {
         price: finalTotal.toFixed(2),
         paidPrice: finalTotal.toFixed(2),
-        // installment: formData.selectedInstallment,
         currency: "TRY",
         paymentGroup: "PRODUCT",
         paymentChannel: "WEB",
@@ -212,7 +206,7 @@ const CheckoutPage = () => {
         buyer: {
           id: selectedShippingAddress.id,
           name: selectedShippingAddress.recipientName,
-          surname: "",
+          surname: selectedShippingAddress.recipientName,
           gsmNumber: selectedShippingAddress.phoneNumber,
           email: "example@mail.com",
           identityNumber: "11111111111",
@@ -238,8 +232,8 @@ const CheckoutPage = () => {
         basketItems: cart.items.map((item) => ({
           id: item.productId.toString(),
           name: item.productName,
-          //  category1: item.productBrand || "Genel",
-          //  itemType: "PHYSICAL",
+          //  category1: item.productBrand",
+          itemType: "PHYSICAL",
           price: item.totalPrice.toFixed(2)
         }))
       };
@@ -341,42 +335,8 @@ const CheckoutPage = () => {
       </div>
     </div>
   );
-  // ## 2. KARGO SEÇİM ADIMI
-  const renderShippingSelection = () => (
-    <div className="bg-white rounded-lg shadow-md border border-gray-100 p-6 mb-6">
-      {/* ... (Kargo Seçim Kodu) ... */}
-      <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center">Kargo Firması Seçimi</h3>
-      <div className="grid grid-cols-2 gap-4">
-        {shippingOptions.map((option) => (
-          <div
-            key={option.id}
-            className={`border rounded-lg p-4 cursor-pointer transition duration-150 
-                            ${formData.selectedShipping === option.id
-                ? 'border-orange-500 bg-orange-50 shadow-sm'
-                : 'border-gray-200 hover:border-gray-300'
-              }`}
-            onClick={() => setFormData(prev => ({ ...prev, selectedShipping: option.id }))}
-          >
-            <label className="flex items-center justify-between text-sm w-full cursor-pointer">
-              <div className="flex items-center">
-                <input
-                  type="radio"
-                  name="shipping"
-                  checked={formData.selectedShipping === option.id}
-                  readOnly
-                  className="form-radio h-4 w-4 text-orange-600 border-gray-300"
-                />
-                <span className="ml-2 font-semibold text-gray-700">{option.name}</span>
-              </div>
-              <span className="font-bold text-gray-900">{formatPrice(option.price)} TL</span>
-            </label>
-            <p className="text-xs text-gray-500 mt-1 pl-6">Tahmini teslimat: 3-5 iş günü</p>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-  // ## 3. ÖDEME SEÇENEKLERİ ADIMI
+
+  // ## 2. ÖDEME SEÇENEKLERİ ADIMI
   const renderPaymentStep = () => (
     <div className="bg-white rounded-lg shadow-md border border-gray-100 p-6 mb-6">
       {/* ... (Ödeme Seçenekleri Kodu) ... */}
@@ -396,7 +356,7 @@ const CheckoutPage = () => {
 
         {formData.isCardSelected && (
           <div className="flex flex-col lg:flex-row space-y-4 lg:space-y-0 lg:space-x-6 mt-4 p-4 border border-gray-300 rounded-lg bg-white">
-            {/* Sol Taraf: Kart Bilgileri (Önceki gibi devam eder) */}
+            {/* Sol Taraf: Kart Bilgileri */}
             <div className="flex-1 max-w-md">
               <h4 className="font-semibold text-sm text-gray-700 mb-3 border-b border-gray-100 pb-2">Kart Bilgileri</h4>
 
@@ -478,10 +438,11 @@ const CheckoutPage = () => {
             <span>Ara Toplam (Ürünler)</span>
             <span className="font-medium">{formatPrice(subtotal)} TL</span> {/* Gerçek Sepet Toplamı */}
           </div>
+          {/** 
           <div className="flex justify-between">
             <span>Kargo Toplam</span>
             <span className="font-medium">{formatPrice(shippingPrice)} TL</span>
-          </div>
+          </div>*/}
         </div>
 
         {/* İndirim */}
@@ -549,7 +510,6 @@ const CheckoutPage = () => {
         {/* Sol Taraf: Adımlar */}
         <div className="lg:w-2/3">
           {renderAddressStep()}
-          {renderShippingSelection()}
           {renderPaymentStep()}
         </div>
 

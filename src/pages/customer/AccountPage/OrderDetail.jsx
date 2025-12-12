@@ -109,12 +109,16 @@ const OrderItemCard = ({ item, orderStatus, deliveredAt, openReviewModal, openSe
 const ProductReviewSection = ({ orderStatus, item, openReviewModal, navigate }) => (
   <div className="flex flex-col md:flex-row md:items-center gap-2">
     {orderStatus === "Teslim Edildi" && (
+      <>
       <button
         onClick={() => openReviewModal(item)}
         className="text-xs md:text-sm font-semibold border border-orange-600 py-1 px-2 md:py-2 md:px-4 text-orange-600 cursor-pointer hover:bg-orange-100"
       >
         Ürünü Değerlendir
       </button>
+
+      <button>İade Et</button>
+      </>
     )}
     <button
       onClick={() => navigate("/sepetim")}
