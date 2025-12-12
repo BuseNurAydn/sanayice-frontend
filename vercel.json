@@ -1,5 +1,5 @@
 {
   "rewrites": [
-    { "source": "/(.*)", "destination": "http://ec2-3-70-45-250.eu-central-1.compute.amazonaws.com:8080/$1" }
+    { "source": "/(.*)", "destination": "./index.html" }
   ]
 }
